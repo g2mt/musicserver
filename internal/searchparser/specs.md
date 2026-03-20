@@ -11,7 +11,8 @@ param ::= [ whitespace+ | begin of query ] [ negated | quoted | operator | word]
 whitespace ::= (any whitespace defined by Unicode's White Space property)
 
 operator ::= operatorKey ':' operatorValue
-operatorKey ::= word
+operatorKey ::= operatorKeyChar
+operatorKeyChar ::= (any wordChar character not ':')
 operatorValue ::= [ word | quoted ]
 
 word ::= wordStart wordChar*
