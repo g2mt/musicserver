@@ -15,8 +15,8 @@ operatorKey ::= word
 operatorValue ::= [ word | quoted ]
 
 word ::= wordStart wordChar*
-wordStart ::= (any character not a whitespace)
-wordChar ::= (any wordStart character, or the '-' character)
+wordStart ::= (any character not a whitespace, and not '-')
+wordChar ::= (any character not a whitespace)
 
 negated ::= '-' wordChar+
 
