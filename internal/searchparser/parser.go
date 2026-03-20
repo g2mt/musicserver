@@ -35,34 +35,18 @@ func Parse(query string) Result {
 		}
 
 		// Try negated first
-		if i+1 < len(query) && query[i] == '-' && isWordChar(query[i+1]) {
-			start := i + 1
-			i++
-			for i < len(query) && isWordChar(query[i]) {
-				i++
-			}
-			result.Negated = append(result.Negated, query[start:i])
+		negated, consumed := parseNegated(query[i:])
+		if consumed > 0 {
+			result.Negated = append(result.Negated, negated)
+			i += consumed
 			continue
 		}
 
 		// Try quoted
-		if query[i] == '"' {
-			i++
-			var sb strings.Builder
-			for i < len(query) {
-				if query[i] == '\\' && i+1 < len(query) {
-					i++
-					sb.WriteByte(query[i])
-					i++
-				} else if query[i] == '"' {
-					i++
-					result.Words = append(result.Words, sb.String())
-					break
-				} else {
-					sb.WriteByte(query[i])
-					i++
-				}
-			}
+		quoted, consumed := parseQuoted(query[i:])
+		if consumed > 0 {
+			result.Words = append(result.Words, quoted)
+			i += consumed
 			continue
 		}
 
@@ -75,16 +59,66 @@ func Parse(query string) Result {
 		}
 
 		// Parse as word
-		start := i
-		for i < len(query) && isWordChar(query[i]) {
-			i++
-		}
-		if i > start {
-			result.Words = append(result.Words, query[start:i])
+		word, consumed := parseWord(query[i:])
+		if consumed > 0 {
+			result.Words = append(result.Words, word)
+			i += consumed
 		}
 	}
 
 	return result
+}
+
+func parseNegated(s string) (string, int) {
+	if len(s) < 2 || s[0] != '-' || !isWordChar(s[1]) {
+		return "", 0
+	}
+
+	start := 1
+	i := 1
+	for i < len(s) && isWordChar(s[i]) {
+		i++
+	}
+	return s[start:i], i
+}
+
+func parseQuoted(s string) (string, int) {
+	if len(s) == 0 || s[0] != '"' {
+		return "", 0
+	}
+
+	i := 1
+	var sb strings.Builder
+	for i < len(s) {
+		if s[i] == '\\' && i+1 < len(s) {
+			i++
+			sb.WriteByte(s[i])
+			i++
+		} else if s[i] == '"' {
+			i++
+			return sb.String(), i
+		} else {
+			sb.WriteByte(s[i])
+			i++
+		}
+	}
+	return "", 0
+}
+
+func parseWord(s string) (string, int) {
+	if len(s) == 0 || !isWordChar(s[0]) {
+		return "", 0
+	}
+
+	start := 0
+	i := 0
+	for i < len(s) && isWordChar(s[i]) {
+		i++
+	}
+	if i > start {
+		return s[start:i], i
+	}
+	return "", 0
 }
 
 func isWordChar(c byte) bool {
