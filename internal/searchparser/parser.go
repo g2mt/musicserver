@@ -47,7 +47,6 @@ func Parse(query string) Result {
 
 		// Try quoted
 		if query[i] == '"' {
-			start := i + 1
 			i++
 			var sb strings.Builder
 			for i < len(query) {
@@ -111,7 +110,7 @@ func tryParseOperator(s string) (key, value string, consumed int) {
 						}
 					}
 					if found {
-						return key, value[1:end-1], i + end
+						return key, value[1 : end-1], i + end
 					}
 				} else if isWordChar(value[0]) {
 					// Parse word value
