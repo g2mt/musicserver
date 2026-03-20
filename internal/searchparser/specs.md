@@ -7,7 +7,7 @@ This document describes a search query language similar to those used by popular
 ```
 root ::= param*
 
-param ::= whitespace+ [ operator | word | negated | quoted ]
+param ::= [ whitespace+ | begin of query ] [ negated | quoted | operator | word]
 whitespace ::= (any whitespace defined by Unicode's White Space property)
 
 operator ::= operatorKey ':' operatorValue
@@ -16,7 +16,7 @@ operatorValue ::= [ word | quoted ]
 
 word ::= wordStart wordChar*
 wordStart ::= (any character not a whitespace)
-wordChar ::= (any character not a wordStart, or the '-' character)
+wordChar ::= (any wordStart character, or the '-' character)
 
 negated ::= '-' wordChar+
 
@@ -26,6 +26,8 @@ quotedChar ::=
   | (any char not '"', or '\')
 quotedEscapeChar ::= '\' (any char)
 ```
+
+When parsing the `param` rule, try to parse the text after the whitespace as a `negated` first. If that fails, try doing the `quoted` rule, then the `operator` rule then the `word` rule.
 
 ## Query result
 
@@ -58,8 +60,8 @@ Query result should be a struct with the following fields:
 xyz -abc def asdf:qwerty
 ```
 
-  - **Words**: `a`, `bc`
-  - **Negated**: `x`
+  - **Words**: `xyz`, `def`
+  - **Negated**: `abc`
   - **Operators**: `asdf`: `qwerty`
 
 ---
@@ -84,4 +86,4 @@ asdf:
 -asdf:asdf
 ```
 
-  - **Negated**: `-asdf:asdf`
+  - **Negated**: `asdf:asdf`
