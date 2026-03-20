@@ -66,14 +66,12 @@ func Parse(query string) Result {
 			continue
 		}
 
-		// Try operator - only if starting with a word character (not '-')
-		if isWordStart(query[i]) {
-			opKey, opValue, consumed := tryParseOperator(query[i:])
-			if consumed > 0 {
-				result.Operators = append(result.Operators, Operator{Key: opKey, Value: opValue})
-				i += consumed
-				continue
-			}
+		// Try operator
+		opKey, opValue, consumed := tryParseOperator(query[i:])
+		if consumed > 0 {
+			result.Operators = append(result.Operators, Operator{Key: opKey, Value: opValue})
+			i += consumed
+			continue
 		}
 
 		// Parse as word
@@ -91,10 +89,6 @@ func Parse(query string) Result {
 
 func isWordChar(c byte) bool {
 	return !unicode.IsSpace(rune(c))
-}
-
-func isWordStart(c byte) bool {
-	return !unicode.IsSpace(rune(c)) && c != '-'
 }
 
 func tryParseOperator(s string) (key, value string, consumed int) {
