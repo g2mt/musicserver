@@ -35,4 +35,53 @@ Query result should be a struct with the following fields:
   * `negated`: array of strings, contains all `negated` parsed, excluding the starting '-' character
   * `operators`: array of (operatorKey, operatorValue) tuples
 
+## Examples
 
+```
+ a bc
+```
+
+  - **Words**: `a`, `bc`
+
+---
+
+```
+  a  -x bc
+```
+
+  - **Words**: `a`, `bc`
+  - **Negated**: `x`
+
+---
+
+```
+xyz -abc def asdf:qwerty
+```
+
+  - **Words**: `a`, `bc`
+  - **Negated**: `x`
+  - **Operators**: `asdf`: `qwerty`
+
+---
+
+```
+-
+```
+
+  - **Words**: `-`
+
+---
+
+```
+asdf:
+```
+
+  - **Words**: `asdf:`
+
+---
+
+```
+-asdf:asdf
+```
+
+  - **Negated**: `-asdf:asdf`
