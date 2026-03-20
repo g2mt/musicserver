@@ -110,6 +110,49 @@ func parseQuoted(s string) (string, int) {
 }
 
 func parseOperator(s string) (op Operator, consumed int) {
+	// Try to parse operator key (must be a word)
+	key, keyConsumed := parseWord(s)
+	if keyConsumed == 0 {
+		return Operator{}, 0
+	}
+
+	// Check for colon after the key
+	if keyConsumed >= len(s) || s[keyConsumed] != ':' {
+		return Operator{}, 0
+	}
+
+	// Skip the colon
+	valueStart := keyConsumed + 1
+	if valueStart >= len(s) {
+		return Operator{}, 0
+	}
+
+	// Try to parse operator value as either a word or quoted
+	var value string
+	var valueConsumed int
+
+	// Try quoted first (as per the order in Parse function)
+	quotedValue, quotedConsumed := parseQuoted(s[valueStart:])
+	if quotedConsumed > 0 {
+		value = quotedValue
+		valueConsumed = quotedConsumed
+	} else {
+		// Try word
+		wordValue, wordConsumed := parseWord(s[valueStart:])
+		if wordConsumed > 0 {
+			value = wordValue
+			valueConsumed = wordConsumed
+		} else {
+			// No valid value found
+			return Operator{}, 0
+		}
+	}
+
+	// Success
+	op.Key = key
+	op.Value = value
+	consumed = valueStart + valueConsumed
+	return op, consumed
 }
 
 func parseWord(s string) (string, int) {
