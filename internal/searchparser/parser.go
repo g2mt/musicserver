@@ -51,9 +51,9 @@ func Parse(query string) Result {
 		}
 
 		// Try operator
-		opKey, opValue, consumed := tryParseOperator(query[i:])
+		op, consumed := parseOperator(query[i:])
 		if consumed > 0 {
-			result.Operators = append(result.Operators, Operator{Key: opKey, Value: opValue})
+			result.Operators = append(result.Operators, op)
 			i += consumed
 			continue
 		}
@@ -67,6 +67,10 @@ func Parse(query string) Result {
 	}
 
 	return result
+}
+
+func isWordChar(c byte) bool {
+	return !unicode.IsSpace(rune(c))
 }
 
 func parseNegated(s string) (string, int) {
@@ -105,6 +109,9 @@ func parseQuoted(s string) (string, int) {
 	return "", 0
 }
 
+func parseOperator(s string) (op Operator, consumed int) {
+}
+
 func parseWord(s string) (string, int) {
 	if len(s) == 0 || !isWordChar(s[0]) {
 		return "", 0
@@ -119,43 +126,4 @@ func parseWord(s string) (string, int) {
 		return s[start:i], i
 	}
 	return "", 0
-}
-
-func isWordChar(c byte) bool {
-	return !unicode.IsSpace(rune(c))
-}
-
-func tryParseOperator(s string) (key, value string, consumed int) {
-	for i := 0; i < len(s); i++ {
-		if s[i] == ':' && i > 0 {
-			key := s[:i]
-			value := s[i+1:]
-			// Check if value is a valid word or quoted
-			if len(value) > 0 {
-				if value[0] == '"' {
-					// Try to parse quoted value
-					end := len(value)
-					found := false
-					for j := 1; j < len(value); j++ {
-						if value[j] == '"' && (j == 1 || value[j-1] != '\\') {
-							end = j + 1
-							found = true
-							break
-						}
-					}
-					if found {
-						return key, value[1 : end-1], i + end
-					}
-				} else if isWordChar(value[0]) {
-					// Parse word value
-					j := 1
-					for j < len(value) && isWordChar(value[j]) {
-						j++
-					}
-					return key, value[:j], i + j
-				}
-			}
-		}
-	}
-	return "", "", 0
 }
