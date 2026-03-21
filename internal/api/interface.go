@@ -16,6 +16,8 @@ type Interface struct {
 	config *schema.Config // readonly
 }
 
+const MaxIdLength = 64
+
 func NewInterface(db *sql.DB, config *schema.Config) *Interface {
 	return &Interface{db: db, config: config}
 }
@@ -59,7 +61,7 @@ func (i *Interface) GetTracks() (map[string]string, error) {
 }
 
 func (i *Interface) resolveTrackShortId(id string) (string, error) {
-	if len(id) == 64 {
+	if len(id) == MaxIdLength {
 		return id, nil
 	}
 
@@ -139,8 +141,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 
 		// Determine new length for old mapping
 		newLen := len(oldShortID) + 1
-		if newLen > 64 {
-			newLen = 64
+		if newLen > MaxIdLength {
+			newLen = MaxIdLength
 		}
 		// Ensure we don't exceed the length of the long ID
 		if newLen > len(oldLongID) {
