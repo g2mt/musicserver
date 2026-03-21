@@ -48,7 +48,7 @@ func main() {
 	defer db.Close()
 
 	// Create API interface and initialize database
-	iface := api.NewInterface(db)
+	iface := api.NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		fmt.Printf("Error initializing database: %v\n", err)
 		os.Exit(1)
