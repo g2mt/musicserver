@@ -1,5 +1,13 @@
 package schema
 
+import (
+	"fmt"
+	"os"
+	"os/user"
+
+	"github.com/goccy/go-yaml"
+)
+
 type Config struct {
 	// binds the HTTP API backend to this path
 	HTTPBind string `yaml:"http_bind"`
@@ -13,4 +21,36 @@ type Config struct {
 
 const SQL_DB_PATH = "./config.db"
 
-func LoadConfig(path string) (*Config, error) {}
+func LoadConfig(path string) (*Config, error) {
+	configData, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("error reading config file: %w", err)
+	}
+
+	var config Config
+	err = yaml.Unmarshal(configData, &config)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing config file: %w", err)
+	}
+
+	// Set default values if not provided
+	if config.UnixBind == "" {
+		config.UnixBind = "/run/musicserver/socket"
+	}
+
+	if config.DbPath == "" {
+		currentUser, err := user.Current()
+		if err != nil {
+			return nil, fmt.Errorf("error getting current user: %w", err)
+		}
+
+		if currentUser.Uid == "0" {
+			config.DbPath = "/var/lib/musicserver"
+		} else {
+			homeDir := currentUser.HomeDir
+			config.DbPath = homeDir + "/.var/lib/musicserver"
+		}
+	}
+
+	return &config, nil
+}

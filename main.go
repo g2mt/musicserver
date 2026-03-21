@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/goccy/go-yaml"
 	"musicserver/internal/schema"
 )
 
@@ -19,17 +18,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	configData, err := os.ReadFile(*configPath)
+	config, err := schema.LoadConfig(*configPath)
 	if err != nil {
-		fmt.Printf("Error reading config file: %v\n", err)
+		fmt.Printf("Error loading config: %v\n", err)
 		os.Exit(1)
 	}
 
-	var config schema.Config
-	err = yaml.Unmarshal(configData, &config)
-	if err != nil {
-		fmt.Printf("Error parsing config file: %v\n", err)
-		os.Exit(1)
-	}
-
+	_ = config // Use config as needed
 }
