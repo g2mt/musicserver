@@ -77,7 +77,6 @@ A track has the following fields:
   * `name`: the human readable name of the track
   * `path`: the path of the file relative to the data directory of the server
   * `album`: the name of the album
-  * `has_cover`: whether the track contains cover art or not
 
 ### GET `/track`
 
