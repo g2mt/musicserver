@@ -167,7 +167,7 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
         if (!f.isValid()) return 1;
         auto* tag = f.tag();
         if (tag && tag->contains("covr")) {
-            auto& list = tag->item("covr").toCoverArtList();
+            auto list = tag->item("covr").toCoverArtList();
             if (!list.isEmpty()) {
                 const auto& art = list.front();
                 if (art.data().size() > 0) {
