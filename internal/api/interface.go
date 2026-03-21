@@ -7,20 +7,9 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+
+	"musicserver/internal/schema"
 )
-
-type Track struct {
-	ID      string `json:"id"`
-	ShortID string `json:"short_id"`
-	Name    string `json:"name"`
-	Path    string `json:"path"`
-	Album   string `json:"album"`
-}
-
-type Album struct {
-	Name   string   `json:"name"`
-	Tracks []string `json:"tracks"`
-}
 
 type Interface struct {
 	db *sql.DB
@@ -81,17 +70,17 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 	return longID, nil
 }
 
-func (i *Interface) GetTrackById(id string) (Track, error) {
+func (i *Interface) GetTrackById(id string) (schema.Track, error) {
 	longID, err := i.resolveTrackShortId(id)
 	if err != nil {
-		return Track{}, err
+		return schema.Track{}, err
 	}
 
-	var track Track
+	var track schema.Track
 	err = i.db.QueryRow("SELECT id, short_id, name, path, album FROM tracks WHERE id = ?", longID).
 		Scan(&track.ID, &track.ShortID, &track.Name, &track.Path, &track.Album)
 	if err != nil {
-		return Track{}, err
+		return schema.Track{}, err
 	}
 	return track, nil
 }
@@ -111,7 +100,7 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 	return []byte(path), nil
 }
 
-func (i *Interface) AddTrack(track *Track) (string, error) {
+func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	// Calculate long ID as hex representation of sha256sum(name+'\0'+album)
 	// We'll use crypto/sha256
 	hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
@@ -236,23 +225,23 @@ func (i *Interface) GetAlbums() ([]string, error) {
 	return albums, nil
 }
 
-func (i *Interface) GetAlbumByName(name string) (Album, error) {
-	var album Album
+func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
+	var album schema.Album
 	err := i.db.QueryRow("SELECT name FROM albums WHERE name = ?", name).Scan(&album.Name)
 	if err != nil {
-		return Album{}, err
+		return schema.Album{}, err
 	}
 
 	rows, err := i.db.Query("SELECT id FROM tracks WHERE album = ?", name)
 	if err != nil {
-		return Album{}, err
+		return schema.Album{}, err
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
-			return Album{}, err
+			return schema.Album{}, err
 		}
 		album.Tracks = append(album.Tracks, id)
 	}
