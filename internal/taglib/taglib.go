@@ -11,24 +11,18 @@ import (
 
 // taglibError represents an error from the taglib library
 type taglibError struct {
-	code int
+	msg string
 }
 
-func newTaglibError(code C.int) error {
-	return &taglibError{code: int(code)}
+func newTaglibError(errMsg *C.char) error {
+	if errMsg == nil {
+		return nil
+	}
+	return &taglibError{msg: C.GoString(errMsg)}
 }
 
 func (e *taglibError) Error() string {
-	switch e.code {
-	case 1:
-		return "taglib: file not found"
-	case 2:
-		return "taglib: unable to read file"
-	case 3:
-		return "taglib: unsupported file format"
-	default:
-		return "taglib: unknown error"
-	}
+	return "taglib: " + e.msg
 }
 
 // ExtractCoverArt extracts embedded cover art from the audio file at path.
@@ -41,8 +35,8 @@ func ExtractCoverArt(path string) ([]byte, string, error) {
 	result := C.extract_cover_art(cPath, &cArt)
 	defer C.free_cover_art(&cArt)
 
-	if result != 0 {
-		return nil, "", newTaglibError(result)
+	if err := newTaglibError(result.err); err != nil {
+		return nil, "", err
 	}
 
 	if cArt.data == nil || cArt.data_length == 0 {
@@ -64,9 +58,9 @@ func LoadTrack(path string) (schema.Track, error) {
 	result := C.load_track_metadata(cPath, &cTrack)
 	defer C.free_track_metadata(&cTrack)
 
-	if result != 0 {
+	if err := newTaglibError(result.err); err != nil {
 		// Return empty track and error
-		return schema.Track{}, newTaglibError(result)
+		return schema.Track{}, err
 	}
 
 	// Convert C struct to Go struct

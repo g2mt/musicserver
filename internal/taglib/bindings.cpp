@@ -25,9 +25,17 @@
 
 extern "C" {
 
-int load_track_metadata(const char* filepath, TrackMetadata* metadata) {
+static const char* FILE_NOT_FOUND_MSG = "file not found";
+static const char* UNABLE_TO_READ_MSG = "unable to read file";
+static const char* UNSUPPORTED_FORMAT_MSG = "unsupported file format";
+static const char* MEMORY_ERROR_MSG = "memory allocation error";
+
+BindingResult load_track_metadata(const char* filepath, TrackMetadata* metadata) {
+    BindingResult result = {nullptr};
+    
     if (!filepath || !metadata) {
-        return 2; // unable to read file
+        result.err = UNABLE_TO_READ_MSG;
+        return result;
     }
 
     // Initialize metadata
@@ -38,11 +46,13 @@ int load_track_metadata(const char* filepath, TrackMetadata* metadata) {
     TagLib::FileRef file(filepath);
 
     if (file.isNull()) {
-        return 1; // file not found
+        result.err = FILE_NOT_FOUND_MSG;
+        return result;
     }
 
     if (!file.tag()) {
-        return 2; // unable to read file
+        result.err = UNABLE_TO_READ_MSG;
+        return result;
     }
 
     TagLib::Tag* tag = file.tag();
@@ -81,10 +91,11 @@ int load_track_metadata(const char* filepath, TrackMetadata* metadata) {
     if ((!metadata->title && tag->title().isEmpty()) ||
         (!metadata->album && tag->album().isEmpty())) {
         free_track_metadata(metadata);
-        return 2; // memory allocation error
+        result.err = MEMORY_ERROR_MSG;
+        return result;
     }
 
-    return 0; // success
+    return result; // success, err = nullptr
 }
 
 void free_track_metadata(TrackMetadata* metadata) {
@@ -125,8 +136,13 @@ static const char* mp4_cover_mime(TagLib::MP4::CoverArt::Format fmt) {
     }
 }
 
-int extract_cover_art(const char* filepath, CoverArt* cover_art) {
-    if (!filepath || !cover_art) return 2;
+BindingResult extract_cover_art(const char* filepath, CoverArt* cover_art) {
+    BindingResult result = {nullptr};
+    
+    if (!filepath || !cover_art) {
+        result.err = UNABLE_TO_READ_MSG;
+        return result;
+    }
 
     cover_art->data = nullptr;
     cover_art->data_length = 0;
@@ -143,7 +159,10 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
     // MP3 / ID3v2
     if (ext == "mp3") {
         TagLib::MPEG::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.ID3v2Tag();
         if (tag) {
             auto frames = tag->frameListMap()["APIC"];
@@ -153,18 +172,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = frame->mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(frame->picture().data()),
-                            frame->picture().size(), mime.c_str())) return 2;
-                    return 0;
+                            frame->picture().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // MP4 / AAC / M4A / M4B
     if (ext == "mp4" || ext == "m4a" || ext == "m4b" || ext == "m4r" || ext == "aac") {
         TagLib::MP4::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.tag();
         if (tag && tag->contains("covr")) {
             auto list = tag->item("covr").toCoverArtList();
@@ -173,18 +198,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                 if (art.data().size() > 0) {
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(art.data().data()),
-                            art.data().size(), mp4_cover_mime(art.format()))) return 2;
-                    return 0;
+                            art.data().size(), mp4_cover_mime(art.format()))) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // FLAC
     if (ext == "flac") {
         TagLib::FLAC::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         const auto& pics = f.pictureList();
         if (!pics.isEmpty()) {
             const auto* pic = pics.front();
@@ -192,17 +223,23 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                 std::string mime = pic->mimeType().toCString(true);
                 if (!fill_cover_art(cover_art,
                         reinterpret_cast<const unsigned char*>(pic->data().data()),
-                        pic->data().size(), mime.c_str())) return 2;
-                return 0;
+                        pic->data().size(), mime.c_str())) {
+                    result.err = MEMORY_ERROR_MSG;
+                    return result;
+                }
+                return result; // success
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // Ogg Vorbis
     if (ext == "ogg" || ext == "oga") {
         TagLib::Ogg::Vorbis::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.tag();
         if (tag) {
             const auto& pics = tag->pictureList();
@@ -212,18 +249,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = pic->mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(pic->data().data()),
-                            pic->data().size(), mime.c_str())) return 2;
-                    return 0;
+                            pic->data().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // Opus
     if (ext == "opus") {
         TagLib::Ogg::Opus::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.tag();
         if (tag) {
             const auto& pics = tag->pictureList();
@@ -233,18 +276,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = pic->mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(pic->data().data()),
-                            pic->data().size(), mime.c_str())) return 2;
-                    return 0;
+                            pic->data().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // Speex
     if (ext == "spx") {
         TagLib::Ogg::Speex::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.tag();
         if (tag) {
             const auto& pics = tag->pictureList();
@@ -254,18 +303,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = pic->mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(pic->data().data()),
-                            pic->data().size(), mime.c_str())) return 2;
-                    return 0;
+                            pic->data().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // ASF / WMA / WMV
     if (ext == "wma" || ext == "wmv" || ext == "asf") {
         TagLib::ASF::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.tag();
         if (tag && tag->attributeListMap().contains("WM/Picture")) {
             const auto& attrs = tag->attributeListMap()["WM/Picture"];
@@ -275,18 +330,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = pic.mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(pic.picture().data()),
-                            pic.picture().size(), mime.c_str())) return 2;
-                    return 0;
+                            pic.picture().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // AIFF
     if (ext == "aiff" || ext == "aif") {
         TagLib::RIFF::AIFF::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.tag();
         if (tag) {
             auto frames = tag->frameListMap()["APIC"];
@@ -296,18 +357,24 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = frame->mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(frame->picture().data()),
-                            frame->picture().size(), mime.c_str())) return 2;
-                    return 0;
+                            frame->picture().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // WAV
     if (ext == "wav") {
         TagLib::RIFF::WAV::File f(filepath);
-        if (!f.isValid()) return 1;
+        if (!f.isValid()) {
+            result.err = FILE_NOT_FOUND_MSG;
+            return result;
+        }
         auto* tag = f.ID3v2Tag();
         if (tag) {
             auto frames = tag->frameListMap()["APIC"];
@@ -317,19 +384,25 @@ int extract_cover_art(const char* filepath, CoverArt* cover_art) {
                     std::string mime = frame->mimeType().toCString(true);
                     if (!fill_cover_art(cover_art,
                             reinterpret_cast<const unsigned char*>(frame->picture().data()),
-                            frame->picture().size(), mime.c_str())) return 2;
-                    return 0;
+                            frame->picture().size(), mime.c_str())) {
+                        result.err = MEMORY_ERROR_MSG;
+                        return result;
+                    }
+                    return result; // success
                 }
             }
         }
-        return 0;
+        return result; // no cover art found, not an error
     }
 
     // Fallback: try generic FileRef (won't yield cover art but at least validates the file)
     TagLib::FileRef f(filepath);
-    if (f.isNull()) return 1;
+    if (f.isNull()) {
+        result.err = FILE_NOT_FOUND_MSG;
+        return result;
+    }
 
-    return 0; // no cover art found, not an error
+    return result; // no cover art found, not an error
 }
 
 void free_cover_art(CoverArt* cover_art) {
