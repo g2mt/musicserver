@@ -11,7 +11,9 @@ import (
 type Config struct {
 	// binds the HTTP API backend to this path
 	HTTPBind string `yaml:"http_bind"`
-	// binds the Unix socket API backend to this path. By default, binds to /run/musicserver/socket
+	// If explicitly set, then enable or disable the local unix socket. Otherwise, defaults to true
+	UnixBindEnabled *bool
+	// binds the Unix socket API backend to this path. By default, binds to /run/musicserver/socket for root, ~/.musicserver/socket for non-root
 	UnixBind string `yaml:"unix_bind"`
 	// path where music data is stored
 	DataPath string `yaml:"data_path"`
