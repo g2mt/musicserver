@@ -30,24 +30,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Open sql database in db_path/${SQL_DB_PATH}
-	dbDir := filepath.Join(config.DbDir, schema.SqlDbPath)
-
-	// Ensure the directory exists
-	if err := os.MkdirAll(config.DbDir, 0755); err != nil {
-		slog.Error("Error creating database directory", "err", err)
-		os.Exit(1)
-	}
-
-	db, err := sql.Open("sqlite3", dbDir)
-	if err != nil {
-		slog.Error("Error opening database", "err", err)
-		os.Exit(1)
-	}
-	defer db.Close()
-
 	// Create API interface and initialize database
-	iface := api.NewInterface(db, config)
+	iface, err := api.NewInterface(config)
+	if err != nil {
+		slog.Error("Error open database", "err", err)
+		os.Exit(1)
+	}
+	defer iface.Close()
+
 	if err := iface.InitDb(); err != nil {
 		slog.Error("Error initializing database", "err", err)
 		os.Exit(1)

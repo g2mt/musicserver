@@ -23,8 +23,23 @@ type Interface struct {
 
 const MaxIdLength = 64
 const MinShortIdLength = 6
+const MaxPageCount = 50
 
-func NewInterface(db *sql.DB, config *schema.Config) *Interface {
+func NewInterface(config *schema.Config) (*Interface, error) {
+	// Open sql database in db_path/${SQL_DB_PATH}
+	dbDir := filepath.Join(config.DbDir, schema.SqlDbPath)
+
+	// Ensure the directory exists
+	if err := os.MkdirAll(config.DbDir, 0755); err != nil {
+		return nil, err
+	}
+
+	db, err := sql.Open("sqlite3", dbDir)
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
 	return &Interface{
 		db:     db,
 		config: config,
@@ -32,7 +47,7 @@ func NewInterface(db *sql.DB, config *schema.Config) *Interface {
 			hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
 			return hex.EncodeToString(hash[:])
 		},
-	}
+	}, nil
 }
 
 func (i *Interface) InitDb() error {
@@ -53,6 +68,10 @@ func (i *Interface) InitDb() error {
 		);
 	`)
 	return err
+}
+
+func (i *Interface) Close() error {
+	return i.db.Close()
 }
 
 func (i *Interface) GetTracks() (map[string]string, error) {
