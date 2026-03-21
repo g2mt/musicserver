@@ -128,7 +128,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 		Album: "Album One",
 	}
 
-	_, err := iface.AddTrack(track1)
+	shortID1, err := iface.AddTrack(track1)
 	if err != nil {
 		t.Fatalf("First AddTrack failed: %v", err)
 	}
@@ -140,12 +140,35 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 		Album: "Album Two",
 	}
 
-	_, err = iface.AddTrack(track2)
+	shortID2, err := iface.AddTrack(track2)
 	if err != nil {
 		t.Fatalf("Second AddTrack failed: %v", err)
 	}
 
-	// TODO: retrieve track1 again using the API, then assert received-track1.shortid == "one1234" and track2.id == "one1235"
+	// Retrieve track1 again using the API
+	fetchedTrack1, err := iface.GetTrackById(shortID1)
+	if err != nil {
+		t.Fatalf("GetTrackById for track1 failed: %v", err)
+	}
+	// Assert received-track1.shortid == "one1234"
+	expectedShort1 := "one1234"
+	if fetchedTrack1.ShortID != expectedShort1 {
+		t.Errorf("track1.ShortID: expected %q, got %q", expectedShort1, fetchedTrack1.ShortID)
+	}
+	// track2.id (long ID) should be "one1235567891234", but we need to check its short ID
+	// According to conflict resolution, the second track's short ID should be "one1235"
+	expectedShort2 := "one1235"
+	if shortID2 != expectedShort2 {
+		t.Errorf("track2.ShortID: expected %q, got %q", expectedShort2, shortID2)
+	}
+	// Also verify via GetTrackById
+	fetchedTrack2, err := iface.GetTrackById(shortID2)
+	if err != nil {
+		t.Fatalf("GetTrackById for track2 failed: %v", err)
+	}
+	if fetchedTrack2.ShortID != expectedShort2 {
+		t.Errorf("fetchedTrack2.ShortID: expected %q, got %q", expectedShort2, fetchedTrack2.ShortID)
+	}
 }
 
 func TestInterface_GetTracks(t *testing.T) {
