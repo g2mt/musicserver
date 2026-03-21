@@ -6,10 +6,11 @@ import (
 )
 
 type Track struct {
-	ID    string `json:"id"`
-	Name  string `json:"name"`
-	Path  string `json:"path"`
-	Album string `json:"album"`
+	ID      string `json:"id"`
+	ShortID string `json:"short_id"`
+	Name    string `json:"name"`
+	Path    string `json:"path"`
+	Album   string `json:"album"`
 }
 
 type Album struct {
@@ -29,6 +30,7 @@ func (i *Interface) InitDb() error {
 	_, err := i.db.Exec(`
 		CREATE TABLE IF NOT EXISTS tracks (
 			id TEXT PRIMARY KEY,
+			short_id TEXT NOT NULL,
 			name TEXT NOT NULL,
 			path TEXT NOT NULL,
 			album TEXT NOT NULL
@@ -46,7 +48,7 @@ func (i *Interface) InitDb() error {
 }
 
 func (i *Interface) getTracks() (map[string]string, error) {
-	rows, err := i.db.Query("SELECT id, name FROM tracks")
+	rows, err := i.db.Query("SELECT short_id, name FROM tracks")
 	if err != nil {
 		return nil, err
 	}
@@ -54,11 +56,10 @@ func (i *Interface) getTracks() (map[string]string, error) {
 
 	result := make(map[string]string)
 	for rows.Next() {
-		var id, name string
-		if err := rows.Scan(&id, &name); err != nil {
+		var shortID, name string
+		if err := rows.Scan(&shortID, &name); err != nil {
 			return nil, err
 		}
-		shortID := getShortID(id)
 		result[shortID] = name
 	}
 	return result, nil
@@ -71,8 +72,8 @@ func (i *Interface) getTrackById(id string) (Track, error) {
 	}
 
 	var track Track
-	err = i.db.QueryRow("SELECT id, name, path, album FROM tracks WHERE id = ?", longID).
-		Scan(&track.ID, &track.Name, &track.Path, &track.Album)
+	err = i.db.QueryRow("SELECT id, short_id, name, path, album FROM tracks WHERE id = ?", longID).
+		Scan(&track.ID, &track.ShortID, &track.Name, &track.Path, &track.Album)
 	if err != nil {
 		return Track{}, err
 	}
@@ -123,13 +124,6 @@ func (i *Interface) getAlbumByName(name string) (Album, error) {
 	// Parse tracks JSON string into []string
 	album.Tracks = []string{tracksJSON}
 	return album, nil
-}
-
-func getShortID(longID string) string {
-	if len(longID) >= 6 {
-		return longID[:6]
-	}
-	return longID
 }
 
 func (i *Interface) resolveShortID(id string) (string, error) {
