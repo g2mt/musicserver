@@ -73,8 +73,28 @@ func (i *Interface) Close() error {
 	return i.db.Close()
 }
 
-func (i *Interface) GetTracks() (map[string]string, error) {
-	rows, err := i.db.Query("SELECT short_id, name FROM tracks")
+func (i *Interface) GetTracks(afterId string) (map[string]string, error) {
+	query := "SELECT short_id, name FROM tracks"
+	args := []interface{}{}
+
+	if afterId != "" {
+		// First, get the long ID for the afterId (which could be short or long)
+		longAfterId, err := i.resolveTrackShortId(afterId)
+		if err != nil {
+			// If not found, treat as no afterId
+			longAfterId = ""
+		}
+		if longAfterId != "" {
+			query += " WHERE id > ?"
+			args = append(args, longAfterId)
+		}
+	}
+
+	// Order by id (which is the long ID) to ensure consistent sorting
+	query += " ORDER BY id LIMIT ?"
+	args = append(args, MaxPageCount)
+
+	rows, err := i.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -315,7 +335,11 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
-			response, err = i.GetTracks()
+			afterId := ""
+			if afterParam, ok := params["after"]; ok {
+				afterId = afterParam
+			}
+			response, err = i.GetTracks(afterId)
 		} else if method == "POST" {
 			response, err = i.ScanTracks()
 		} else {
