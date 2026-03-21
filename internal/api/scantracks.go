@@ -8,6 +8,8 @@ import (
 )
 
 func (i *Interface) ScanTracks() (map[string]string, error) {
+	added := make(map[string]string)
+
 	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return nil
@@ -22,11 +24,13 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 		}
 
 		// Add track to database (ignore duplicate errors)
-		_, err = i.AddTrack(&track)
+		shortID, err := i.AddTrack(&track)
 		if err != nil {
 			return nil
 		}
 
+		// Successfully added, record in result map
+		added[shortID] = track.Name
 		return nil
 	})
 
@@ -34,5 +38,5 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 		return nil, err
 	}
 
-	return i.GetTracks()
+	return added, nil
 }
