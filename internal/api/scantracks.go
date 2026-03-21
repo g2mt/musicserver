@@ -12,10 +12,15 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 
 	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
-			return nil
+			return err
 		}
 		if d.IsDir() {
 			return nil
+		}
+
+		path, err = filepath.Abs(path)
+		if err != nil {
+			return err
 		}
 
 		track, err := taglib.LoadTrack(path)
