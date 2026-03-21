@@ -83,14 +83,14 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 	}
 
 	var req struct {
-		Method string `json:"method"`
 		Path   string `json:"path"`
+		Method string `json:"method"`
 	}
 	if err := json.Unmarshal(buf[:n], &req); err != nil {
 		return
 	}
 
-	response, _, err := s.iface.handleRequest(req.Path)
+	response, _, err := s.iface.handleRequest(req.Path, req.Method)
 	if err != nil {
 		response, _ = json.Marshal(struct {
 			Error string `json:"error"`
