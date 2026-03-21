@@ -1,11 +1,12 @@
 package taglib
 
 // #cgo pkg-config: taglib
-// #include "taglib.h"
+// #include "bindings.h"
+// #include <stdlib.h>
 import "C"
 import (
-	"unsafe"
 	"musicserver/internal/schema"
+	"unsafe"
 )
 
 // LoadTrack loads track metadata from the given file path using taglib.
@@ -13,16 +14,16 @@ import (
 func LoadTrack(path string) (schema.Track, error) {
 	cPath := C.CString(path)
 	defer C.free(unsafe.Pointer(cPath))
-	
+
 	var cTrack C.TrackMetadata
 	result := C.load_track_metadata(cPath, &cTrack)
 	defer C.free_track_metadata(&cTrack)
-	
+
 	if result != 0 {
 		// Return empty track and error
 		return schema.Track{}, newTaglibError(result)
 	}
-	
+
 	// Convert C struct to Go struct
 	track := schema.Track{
 		ID:      "",
@@ -31,7 +32,7 @@ func LoadTrack(path string) (schema.Track, error) {
 		Path:    path,
 		Album:   C.GoString(cTrack.album),
 	}
-	
+
 	return track, nil
 }
 
