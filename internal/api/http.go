@@ -37,7 +37,7 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *HTTPRouter) handleGetTracks(w http.ResponseWriter, req *http.Request) {
-	tracks, err := r.iface.getTracks()
+	tracks, err := r.iface.GetTracks()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -47,7 +47,7 @@ func (r *HTTPRouter) handleGetTracks(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *HTTPRouter) handleGetTrackById(w http.ResponseWriter, req *http.Request, id string) {
-	track, err := r.iface.getTrackById(id)
+	track, err := r.iface.GetTrackById(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -57,7 +57,7 @@ func (r *HTTPRouter) handleGetTrackById(w http.ResponseWriter, req *http.Request
 }
 
 func (r *HTTPRouter) handleGetTrackData(w http.ResponseWriter, req *http.Request, id string) {
-	data, err := r.iface.getTrackData(id)
+	data, err := r.iface.GetTrackData(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -67,7 +67,7 @@ func (r *HTTPRouter) handleGetTrackData(w http.ResponseWriter, req *http.Request
 }
 
 func (r *HTTPRouter) handleGetAlbums(w http.ResponseWriter, req *http.Request) {
-	albums, err := r.iface.getAlbums()
+	albums, err := r.iface.GetAlbums()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -77,7 +77,7 @@ func (r *HTTPRouter) handleGetAlbums(w http.ResponseWriter, req *http.Request) {
 }
 
 func (r *HTTPRouter) handleGetAlbum(w http.ResponseWriter, req *http.Request, name string) {
-	album, err := r.iface.getAlbumByName(name)
+	album, err := r.iface.GetAlbumByName(name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

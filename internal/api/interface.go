@@ -46,7 +46,7 @@ func (i *Interface) InitDb() error {
 	return err
 }
 
-func (i *Interface) getTracks() (map[string]string, error) {
+func (i *Interface) GetTracks() (map[string]string, error) {
 	rows, err := i.db.Query("SELECT short_id, name FROM tracks")
 	if err != nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (i *Interface) getTracks() (map[string]string, error) {
 	return result, nil
 }
 
-func (i *Interface) getTrackById(id string) (Track, error) {
-	longID, err := i.resolveShortID(id)
+func (i *Interface) GetTrackById(id string) (Track, error) {
+	longID, err := i.ResolveShortID(id)
 	if err != nil {
 		return Track{}, err
 	}
@@ -79,8 +79,8 @@ func (i *Interface) getTrackById(id string) (Track, error) {
 	return track, nil
 }
 
-func (i *Interface) getTrackData(id string) ([]byte, error) {
-	longID, err := i.resolveShortID(id)
+func (i *Interface) GetTrackData(id string) ([]byte, error) {
+	longID, err := i.ResolveShortID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (i *Interface) getTrackData(id string) ([]byte, error) {
 	return []byte(path), nil
 }
 
-func (i *Interface) getAlbums() ([]string, error) {
+func (i *Interface) GetAlbums() ([]string, error) {
 	rows, err := i.db.Query("SELECT name FROM albums")
 	if err != nil {
 		return nil, err
@@ -112,7 +112,7 @@ func (i *Interface) getAlbums() ([]string, error) {
 	return albums, nil
 }
 
-func (i *Interface) getAlbumByName(name string) (Album, error) {
+func (i *Interface) GetAlbumByName(name string) (Album, error) {
 	var album Album
 	err := i.db.QueryRow("SELECT name FROM albums WHERE name = ?", name).Scan(&album.Name)
 	if err != nil {
@@ -135,7 +135,7 @@ func (i *Interface) getAlbumByName(name string) (Album, error) {
 	return album, nil
 }
 
-func (i *Interface) resolveShortID(id string) (string, error) {
+func (i *Interface) ResolveShortID(id string) (string, error) {
 	if len(id) == 64 {
 		return id, nil
 	}

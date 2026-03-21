@@ -93,9 +93,9 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 	var response interface{}
 	switch req.Path {
 	case "/track":
-		response, _ = s.iface.getTracks()
+		response, _ = s.iface.GetTracks()
 	case "/album":
-		response, _ = s.iface.getAlbums()
+		response, _ = s.iface.GetAlbums()
 	}
 
 	data, _ := json.Marshal(response)
