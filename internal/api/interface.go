@@ -299,6 +299,8 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 				return nil, "", err
 			}
 			return data, "application/octet-stream", nil
+		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
+			// TODO: return cover similar to /data
 		} else {
 			response, err = i.GetTrackById(id)
 		}
