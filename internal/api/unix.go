@@ -83,21 +83,21 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 	}
 
 	var req struct {
-		Method string            `json:"method"`
-		Path   string            `json:"path"`
+		Method string `json:"method"`
+		Path   string `json:"path"`
 	}
 	if err := json.Unmarshal(buf[:n], &req); err != nil {
 		return
 	}
 
-	var response interface{}
-	switch req.Path {
-	case "/track":
-		response, _ = s.iface.GetTracks()
-	case "/album":
-		response, _ = s.iface.GetAlbums()
+	response, _, err := s.iface.handleRequest(req.Path)
+	if err != nil {
+		response, _ = json.Marshal(struct {
+			Error string `json:"error"`
+		}{Error: err.Error()})
+		conn.Write(response)
+		return
 	}
 
-	data, _ := json.Marshal(response)
-	conn.Write(data)
+	conn.Write(response)
 }
