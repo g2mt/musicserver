@@ -109,6 +109,11 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 	return []byte(path), nil
 }
 
+func (i *Interface) AddTrack(track *Track) (string, error) {
+	// TODO: calculate the id & short_id for track first, then add it to the database
+	// this function returns the id
+}
+
 func (i *Interface) GetAlbums() ([]string, error) {
 	rows, err := i.db.Query("SELECT name FROM albums")
 	if err != nil {
