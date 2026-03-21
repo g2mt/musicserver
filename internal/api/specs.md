@@ -72,7 +72,7 @@ In order to index a track by a short ID, implementors should store a mapping fro
 <a id='track-fields'></a>
 A track has the following fields:
 
-  * `id`: long ID of the track
+  * `id`: long ID of the track. This is calculated by the hex representation of sha256sum(name+'\0'+album)
   * `short_id`: short ID of the track, updates when the short ID is updated
   * `name`: the human readable name of the track
   * `path`: the path of the file relative to the data directory of the server
