@@ -8,6 +8,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"musicserver/internal/schema"
@@ -404,14 +405,9 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
-		// Convert page number from string to int
-		page := 0
-		// Simple conversion, ignoring errors for now
-		for _, ch := range pageStr {
-			if ch < '0' || ch > '9' {
-				return nil, "", errors.New("invalid page number")
-			}
-			page = page*10 + int(ch-'0')
+		page, err := strconv.Atoi(pageStr)
+		if err != nil {
+			return nil, "", err
 		}
 		response, err = i.GetAlbumsByPage(page)
 	} else {
