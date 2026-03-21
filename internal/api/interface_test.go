@@ -47,7 +47,8 @@ func TestInterface_AddTrack(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -105,7 +106,8 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -158,7 +160,8 @@ func TestInterface_GetTracks(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -203,7 +206,8 @@ func TestInterface_GetTrackById(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -244,7 +248,8 @@ func TestInterface_GetTrackData(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -285,7 +290,8 @@ func TestInterface_GetAlbums(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -330,7 +336,8 @@ func TestInterface_GetAlbumByName(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -381,7 +388,8 @@ func TestInterface_GetAlbumByName_NotFound(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -396,7 +404,8 @@ func TestInterface_GetTrackById_NotFound(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -411,7 +420,8 @@ func TestInterface_GetTrackData_NotFound(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
