@@ -144,23 +144,24 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 		t.Fatalf("Second AddTrack failed: %v", err)
 	}
 
+	// Track 1
 	// Retrieve track1 again using the API
 	fetchedTrack1, err := iface.GetTrackById(shortID1)
 	if err != nil {
 		t.Fatalf("GetTrackById for track1 failed: %v", err)
 	}
-	// Assert received-track1.longid == "one1234567890123456789012345678901234567890123456789012345678901234"
+	// Assert received-track1.longid
 	expectedLong1 := "one1234" + strings.Repeat("a", MaxIdLength-len("one1234"))
 	if fetchedTrack1.LongID != expectedLong1 {
 		t.Errorf("track1.LongID: expected %q, got %q", expectedLong1, fetchedTrack1.LongID)
 	}
-	// track2.id (long ID) should be "one1235567891234", but we need to check its short ID
+
+	// Track 2
 	// According to conflict resolution, the second track's short ID should be "one1235"
 	expectedShort2 := "one1235"
 	if shortID2 != expectedShort2 {
 		t.Errorf("track2.ShortID: expected %q, got %q", expectedShort2, shortID2)
 	}
-
 	// Also verify via GetTrackById
 	fetchedTrack2, err := iface.GetTrackById(shortID2)
 	if err != nil {
@@ -170,6 +171,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 		t.Errorf("fetchedTrack2.ShortID: expected %q, got %q", expectedShort2, fetchedTrack2.ShortID)
 	}
 
+	// Track 1, old alias
 	// track1 can also be retrieved via one123
 	fetchedTrack1, err = iface.GetTrackById("one123")
 	if fetchedTrack1.LongID != track1.LongID {
