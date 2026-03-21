@@ -15,17 +15,18 @@ type Interface struct {
 	db     *sql.DB
 	config *schema.Config // readonly
 
-	LongIdGen func(identity []byte) string
+	LongIdGen func(track *schema.Track) string
 }
 
 const MaxIdLength = 64
+const MinShortIdLength = 6
 
 func NewInterface(db *sql.DB, config *schema.Config) *Interface {
 	return &Interface{
 		db:     db,
 		config: config,
-		LongIdGen: func(identity []byte) string {
-			hash := sha256.Sum256(identity)
+		LongIdGen: func(track *schema.Track) string {
+			hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
 			return hex.EncodeToString(hash[:])
 		},
 	}
@@ -115,7 +116,7 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	// Calculate long ID as hex representation of sha256sum(name+'\0'+album)
 	// We'll use crypto/sha256
-	longID := i.LongIdGen([]byte(track.Name + "\x00" + track.Album))
+	longID := i.LongIdGen(track)
 	if len(longID) != MaxIdLength {
 		panic("invalid long id")
 	}
@@ -123,7 +124,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 
 	// Determine short ID according to the conflict resolution algorithm
 	// Start with first 6 characters
-	shortID := longID[:6]
+	shortID := longID[:MinShortIdLength]
 
 	// We need to insert into short_ids mapping, handling conflicts
 	// Use a loop to resolve conflicts
