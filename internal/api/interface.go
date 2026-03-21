@@ -308,6 +308,8 @@ func (i *Interface) GetAlbums() ([]string, error) {
 	return albums, nil
 }
 
+func (i *Interface) GetAlbumsByPage(page int) ([]string, error) {}
+
 func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
 	var album schema.Album
 	err := i.db.QueryRow("SELECT name FROM albums WHERE name = ?", name).Scan(&album.Name)
@@ -380,6 +382,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		}
 
 		response, err = i.GetAlbumByName(name)
+	} else if page, ok := strings.CutPrefix(path, "/album/by-page/"); ok && len(page) > 0 {
 	} else {
 		return nil, "", errors.New("invalid api request")
 	}
