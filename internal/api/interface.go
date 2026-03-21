@@ -147,3 +147,7 @@ func (i *Interface) ResolveShortID(id string) (string, error) {
 	}
 	return longID, nil
 }
+
+func (i *Interface) handleRequest(path string) (out []byte, contentType string, err error) {
+	// TODO
+}
