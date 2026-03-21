@@ -24,5 +24,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	_ = config // Use config as needed
+	// TODO: open sql database in db_path/${SQL_DB_PATH}
+
+	// TODO: bind http server to http_bind
+
+	if *config.UnixBindEnabled {
+		// TODO: bind unix socket in another socket
+	}
 }
