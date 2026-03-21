@@ -9,6 +9,28 @@ import (
 	"unsafe"
 )
 
+// taglibError represents an error from the taglib library
+type taglibError struct {
+	code int
+}
+
+func newTaglibError(code C.int) error {
+	return &taglibError{code: int(code)}
+}
+
+func (e *taglibError) Error() string {
+	switch e.code {
+	case 1:
+		return "taglib: file not found"
+	case 2:
+		return "taglib: unable to read file"
+	case 3:
+		return "taglib: unsupported file format"
+	default:
+		return "taglib: unknown error"
+	}
+}
+
 // LoadTrack loads track metadata from the given file path using taglib.
 // Returns a Track struct with the extracted metadata.
 func LoadTrack(path string) (schema.Track, error) {
@@ -34,26 +56,4 @@ func LoadTrack(path string) (schema.Track, error) {
 	}
 
 	return track, nil
-}
-
-// taglibError represents an error from the taglib library
-type taglibError struct {
-	code int
-}
-
-func newTaglibError(code C.int) error {
-	return &taglibError{code: int(code)}
-}
-
-func (e *taglibError) Error() string {
-	switch e.code {
-	case 1:
-		return "taglib: file not found"
-	case 2:
-		return "taglib: unable to read file"
-	case 3:
-		return "taglib: unsupported file format"
-	default:
-		return "taglib: unknown error"
-	}
 }
