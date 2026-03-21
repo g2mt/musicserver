@@ -35,6 +35,11 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("error parsing config file: %w", err)
 	}
 
+	currentUser, err := user.Current()
+	if err != nil {
+		return nil, fmt.Errorf("error getting current user: %w", err)
+	}
+
 	// Set default values if not provided
 	if config.UnixBindEnabled == nil {
 		// Default to true if not explicitly set
@@ -44,11 +49,6 @@ func LoadConfig(path string) (*Config, error) {
 
 	// Only set default UnixBind if Unix socket is enabled
 	if *config.UnixBindEnabled && config.UnixBind == "" {
-		currentUser, err := user.Current()
-		if err != nil {
-			return nil, fmt.Errorf("error getting current user: %w", err)
-		}
-
 		if currentUser.Uid == "0" {
 			config.UnixBind = "/run/musicserver/socket"
 		} else {
@@ -58,11 +58,6 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	if config.DbPath == "" {
-		currentUser, err := user.Current()
-		if err != nil {
-			return nil, fmt.Errorf("error getting current user: %w", err)
-		}
-
 		if currentUser.Uid == "0" {
 			config.DbPath = "/var/lib/musicserver"
 		} else {
