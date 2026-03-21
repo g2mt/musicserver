@@ -12,11 +12,12 @@ import (
 )
 
 type Interface struct {
-	db *sql.DB
+	db     *sql.DB
+	config *schema.Config // readonly
 }
 
-func NewInterface(db *sql.DB) *Interface {
-	return &Interface{db: db}
+func NewInterface(db *sql.DB, config *schema.Config) *Interface {
+	return &Interface{db: db, config: config}
 }
 
 func (i *Interface) InitDb() error {
@@ -204,7 +205,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		return "", err
 	}
 
-	return track.ID, nil
+	return track.ShortID, nil
 }
 
 func (i *Interface) GetAlbums() ([]string, error) {
@@ -249,19 +250,12 @@ func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
 }
 
 func (i *Interface) handleRequest(path string, method string) (out []byte, contentType string, err error) {
+	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
-			tracks, err := i.GetTracks()
-			if err != nil {
-				return nil, "", err
-			}
-			data, err := json.Marshal(tracks)
-			if err != nil {
-				return nil, "", err
-			}
-			return data, "text/json", nil
+			response, err = i.GetTracks()
 		} else if method == "POST" {
-			return nil, "", errors.New("method not implemented")
+			response, err = i.ScanTracks()
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
@@ -270,15 +264,7 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 			return nil, "", errors.New("method not allowed")
 		}
 
-		albums, err := i.GetAlbums()
-		if err != nil {
-			return nil, "", err
-		}
-		data, err := json.Marshal(albums)
-		if err != nil {
-			return nil, "", err
-		}
-		return data, "text/json", nil
+		response, err = i.GetAlbums()
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -291,32 +277,25 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 			}
 			return data, "application/octet-stream", nil
 		} else {
-			// Regular track by ID
-			track, err := i.GetTrackById(id)
-			if err != nil {
-				return nil, "", err
-			}
-			data, err := json.Marshal(track)
-			if err != nil {
-				return nil, "", err
-			}
-			return data, "text/json", nil
+			response, err = i.GetTrackById(id)
 		}
 	} else if name, ok := strings.CutPrefix(path, "/album/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
 
-		album, err := i.GetAlbumByName(name)
-		if err != nil {
-			return nil, "", err
-		}
-		data, err := json.Marshal(album)
-		if err != nil {
-			return nil, "", err
-		}
-		return data, "text/json", nil
+		response, err = i.GetAlbumByName(name)
 	} else {
-		return nil, "", errors.New("invalid api")
+		return nil, "", errors.New("invalid api request")
 	}
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	data, err := json.Marshal(response)
+	if err != nil {
+		return nil, "", err
+	}
+	return data, "text/json", nil
 }

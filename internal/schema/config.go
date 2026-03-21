@@ -17,11 +17,11 @@ type Config struct {
 	UnixBind string `yaml:"unix_bind"`
 	// path where music data is stored
 	DataPath string `yaml:"data_path"`
-	// path where database and other info is stored. defaults to /var/lib/musicserver for root users, ~/.var/lib/musicserver if non-root
-	DbPath string `yaml:"db_path"`
+	// path where database and other info is stored. defaults to /var/lib/musicserver for root users, ~/.musicserver/db if non-root
+	DbDir string `yaml:"db_dir"`
 }
 
-const SQL_DB_PATH = "./config.db"
+const SQL_DB_PATH = "./info.db"
 
 func LoadConfig(path string) (*Config, error) {
 	configData, err := os.ReadFile(path)
@@ -61,12 +61,12 @@ func LoadConfig(path string) (*Config, error) {
 		}
 	}
 
-	if config.DbPath == "" {
+	if config.DbDir == "" {
 		if currentUser.Uid == "0" {
-			config.DbPath = "/var/lib/musicserver"
+			config.DbDir = "/var/lib/musicserver"
 		} else {
 			homeDir := currentUser.HomeDir
-			config.DbPath = homeDir + "/.var/lib/musicserver"
+			config.DbDir = homeDir + "/.musicserver/db"
 		}
 	}
 

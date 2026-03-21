@@ -32,15 +32,15 @@ func main() {
 	}
 
 	// Open sql database in db_path/${SQL_DB_PATH}
-	dbPath := filepath.Join(config.DbPath, schema.SQL_DB_PATH)
+	dbDir := filepath.Join(config.DbDir, schema.SQL_DB_PATH)
 
 	// Ensure the directory exists
-	if err := os.MkdirAll(config.DbPath, 0755); err != nil {
+	if err := os.MkdirAll(config.DbDir, 0755); err != nil {
 		log.Printf("Error creating database directory: %v\n", err)
 		os.Exit(1)
 	}
 
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", dbDir)
 	if err != nil {
 		fmt.Printf("Error opening database: %v\n", err)
 		os.Exit(1)
