@@ -31,7 +31,7 @@ func main() {
 	}
 
 	// Open sql database in db_path/${SQL_DB_PATH}
-	dbDir := filepath.Join(config.DbDir, schema.SQL_DB_PATH)
+	dbDir := filepath.Join(config.DbDir, schema.SqlDbPath)
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(config.DbDir, 0755); err != nil {

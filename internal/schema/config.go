@@ -21,7 +21,7 @@ type Config struct {
 	DbDir string `yaml:"db_dir"`
 }
 
-const SQL_DB_PATH = "./info.db"
+const SqlDbPath = "./info.db"
 
 func LoadConfig(path string) (*Config, error) {
 	configData, err := os.ReadFile(path)
