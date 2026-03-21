@@ -345,12 +345,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
-	} else if path == "/album" {
-		if method != "GET" {
-			return nil, "", errors.New("method not allowed")
-		}
-
-		response, err = i.GetAlbums()
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -374,6 +368,12 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		} else {
 			response, err = i.GetTrackById(id)
 		}
+	} else if path == "/album" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
+		response, err = i.GetAlbums()
 	} else if name, ok := strings.CutPrefix(path, "/album/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
