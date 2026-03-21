@@ -151,8 +151,7 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 }
 
 func (i *Interface) handleRequest(path string) (out []byte, contentType string, err error) {
-	switch {
-	case path == "/track":
+	if path == "/track" {
 		tracks, err := i.GetTracks()
 		if err != nil {
 			return nil, "", err
@@ -162,7 +161,7 @@ func (i *Interface) handleRequest(path string) (out []byte, contentType string, 
 			return nil, "", err
 		}
 		return data, "text/json", nil
-	case path == "/album":
+	} else if path == "/album" {
 		albums, err := i.GetAlbums()
 		if err != nil {
 			return nil, "", err
@@ -172,13 +171,8 @@ func (i *Interface) handleRequest(path string) (out []byte, contentType string, 
 			return nil, "", err
 		}
 		return data, "text/json", nil
-	case strings.HasPrefix(path, "/track/"):
-		// Remove "/track/" prefix
-		idPart := path[7:]
-
-		// Check if it's a data request
-		if strings.HasSuffix(idPart, "/data") {
-			id := idPart[:len(idPart)-5] // Remove "/data" suffix
+	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
+		if id, ok = strings.CutSuffix(id, "/data"); ok {
 			data, err := i.GetTrackData(id)
 			if err != nil {
 				return nil, "", err
@@ -186,7 +180,7 @@ func (i *Interface) handleRequest(path string) (out []byte, contentType string, 
 			return data, "application/octet-stream", nil
 		} else {
 			// Regular track by ID
-			track, err := i.GetTrackById(idPart)
+			track, err := i.GetTrackById(id)
 			if err != nil {
 				return nil, "", err
 			}
@@ -196,9 +190,7 @@ func (i *Interface) handleRequest(path string) (out []byte, contentType string, 
 			}
 			return data, "text/json", nil
 		}
-	case strings.HasPrefix(path, "/album/"):
-		// Remove "/album/" prefix
-		name := path[7:]
+	} else if name, ok := strings.CutPrefix(path, "/album/"); ok {
 		album, err := i.GetAlbumByName(name)
 		if err != nil {
 			return nil, "", err
@@ -208,7 +200,7 @@ func (i *Interface) handleRequest(path string) (out []byte, contentType string, 
 			return nil, "", err
 		}
 		return data, "text/json", nil
-	default:
+	} else {
 		return nil, "", errors.New("not found")
 	}
 }
