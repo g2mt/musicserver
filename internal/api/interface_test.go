@@ -167,8 +167,9 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetTrackById for track2 failed: %v", err)
 	}
-	if fetchedTrack2.ShortID != expectedShort2 {
-		t.Errorf("fetchedTrack2.ShortID: expected %q, got %q", expectedShort2, fetchedTrack2.ShortID)
+	expectedLong2 := "one1235" + strings.Repeat("a", MaxIdLength-len("one1234"))
+	if fetchedTrack2.LongID != expectedLong2 {
+		t.Errorf("fetchedTrack2.LongID: expected %q, got %q", expectedLong2, fetchedTrack2.LongID)
 	}
 
 	// Track 1, old alias
