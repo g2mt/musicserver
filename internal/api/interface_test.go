@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"musicserver/internal/schema"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -21,7 +22,8 @@ func TestInterface_InitDb(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	iface := NewInterface(db)
+	config := &schema.Config{}
+	iface := NewInterface(db, config)
 	err := iface.InitDb()
 	if err != nil {
 		t.Fatalf("InitDb failed: %v", err)
