@@ -108,20 +108,27 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 
 	config := &schema.Config{}
 	iface := NewInterface(db, config)
+	iface.LongIdGen = func(track *schema.Track) string {
+		if track.Name == "Track One" {
+			return "one1234567891234"
+		} else if track.Name == "Track Two" {
+			return "one1235567891234"
+		} else {
+			panic("invalid name")
+		}
+	}
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
 
 	// Create two tracks with same first 6 characters of hash
-	// We need to carefully craft tracks that will have hash collisions
-	// For simplicity, we'll test the conflict resolution by adding the same track twice
 	track1 := &schema.Track{
 		Name:  "Track One",
 		Path:  "/music/one.mp3",
 		Album: "Album One",
 	}
 
-	id1, err := iface.AddTrack(track1)
+	_, err := iface.AddTrack(track1)
 	if err != nil {
 		t.Fatalf("First AddTrack failed: %v", err)
 	}
@@ -133,10 +140,12 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 		Album: "Album Two",
 	}
 
-	id2, err := iface.AddTrack(track2)
+	_, err = iface.AddTrack(track2)
 	if err != nil {
 		t.Fatalf("Second AddTrack failed: %v", err)
 	}
+
+	// TODO: retrieve track1 again using the API, then assert received-track1.shortid == "one1234" and track2.id == "one1235"
 }
 
 func TestInterface_GetTracks(t *testing.T) {
