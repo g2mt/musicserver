@@ -66,6 +66,19 @@ func (i *Interface) GetTracks() (map[string]string, error) {
 	return result, nil
 }
 
+func (i *Interface) resolveTrackShortId(id string) (string, error) {
+	if len(id) == 64 {
+		return id, nil
+	}
+
+	var longID string
+	err := i.db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", id).Scan(&longID)
+	if err != nil {
+		return "", errors.New("track not found")
+	}
+	return longID, nil
+}
+
 func (i *Interface) GetTrackById(id string) (Track, error) {
 	longID, err := i.resolveTrackShortId(id)
 	if err != nil {
@@ -135,19 +148,6 @@ func (i *Interface) GetAlbumByName(name string) (Album, error) {
 		album.Tracks = append(album.Tracks, id)
 	}
 	return album, nil
-}
-
-func (i *Interface) resolveTrackShortId(id string) (string, error) {
-	if len(id) == 64 {
-		return id, nil
-	}
-
-	var longID string
-	err := i.db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", id).Scan(&longID)
-	if err != nil {
-		return "", errors.New("track not found")
-	}
-	return longID, nil
 }
 
 func (i *Interface) handleRequest(path string, method string) (out []byte, contentType string, err error) {
