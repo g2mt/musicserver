@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    char* err; // static string error message, nullptr if no error
+    const char* err; // static string error message, nullptr if no error
 } BindingResult;
 
 typedef struct {
@@ -21,18 +21,12 @@ typedef struct {
 } CoverArt;
 
 // Load track metadata from file
-// Returns:
-//   err = nullptr on success
-//   err = static string error message on failure
 BindingResult load_track_metadata(const char* filepath, TrackMetadata* metadata);
 
 // Free memory allocated for track metadata
 void free_track_metadata(TrackMetadata* metadata);
 
 // Extract cover art from file
-// Returns:
-//   err = nullptr on success (art may still be empty if none found)
-//   err = static string error message on failure
 BindingResult extract_cover_art(const char* filepath, CoverArt* cover_art);
 
 // Free memory allocated for cover art
