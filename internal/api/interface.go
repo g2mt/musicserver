@@ -2,7 +2,9 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"strings"
 )
 
 type Track struct {
@@ -149,5 +151,64 @@ func (i *Interface) ResolveShortID(id string) (string, error) {
 }
 
 func (i *Interface) handleRequest(path string) (out []byte, contentType string, err error) {
-	// TODO
+	switch {
+	case path == "/track":
+		tracks, err := i.GetTracks()
+		if err != nil {
+			return nil, "", err
+		}
+		data, err := json.Marshal(tracks)
+		if err != nil {
+			return nil, "", err
+		}
+		return data, "text/json", nil
+	case path == "/album":
+		albums, err := i.GetAlbums()
+		if err != nil {
+			return nil, "", err
+		}
+		data, err := json.Marshal(albums)
+		if err != nil {
+			return nil, "", err
+		}
+		return data, "text/json", nil
+	case strings.HasPrefix(path, "/track/"):
+		// Remove "/track/" prefix
+		idPart := path[7:]
+		
+		// Check if it's a data request
+		if strings.HasSuffix(idPart, "/data") {
+			id := idPart[:len(idPart)-5] // Remove "/data" suffix
+			data, err := i.GetTrackData(id)
+			if err != nil {
+				return nil, "", err
+			}
+			return data, "application/octet-stream", nil
+		} else {
+			// Regular track by ID
+			track, err := i.GetTrackById(idPart)
+			if err != nil {
+				return nil, "", err
+			}
+			data, err := json.Marshal(track)
+			if err != nil {
+				return nil, "", err
+			}
+			return data, "text/json", nil
+		}
+	case strings.HasPrefix(path, "/album/"):
+		// Remove "/album/" prefix
+		name := path[7:]
+		album, err := i.GetAlbumByName(name)
+		if err != nil {
+			return nil, "", err
+		}
+		data, err := json.Marshal(album)
+		if err != nil {
+			return nil, "", err
+		}
+		return data, "text/json", nil
+	default:
+		return nil, "", errors.New("not found")
+	}
 }

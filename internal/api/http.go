@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 )
 
@@ -16,72 +15,23 @@ func NewHTTPRouter(iface Interface) *HTTPRouter {
 func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	path := req.URL.Path
 
-	switch {
-	case path == "/track":
-		r.handleGetTracks(w, req)
-	case path == "/album":
-		r.handleGetAlbums(w, req)
-	case len(path) > 7 && path[:7] == "/track/":
-		id := path[7:]
-		if len(id) > 5 && id[len(id)-5:] == "/data" {
-			r.handleGetTrackData(w, req, id[:len(id)-5])
+	response, contentType, err := r.iface.handleRequest(path)
+	if err != nil {
+		// Determine appropriate status code based on error
+		// For simplicity, we'll use 404 for "not found" errors
+		// and 500 for other errors
+		if err.Error() == "track not found" || err.Error() == "album not found" {
+			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
-			r.handleGetTrackById(w, req, id)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-	case len(path) > 7 && path[:7] == "/album/":
-		name := path[7:]
-		r.handleGetAlbum(w, req, name)
-	default:
-		http.NotFound(w, req)
-	}
-}
-
-func (r *HTTPRouter) handleGetTracks(w http.ResponseWriter, req *http.Request) {
-	tracks, err := r.iface.GetTracks()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "text/json")
-	json.NewEncoder(w).Encode(tracks)
-}
 
-func (r *HTTPRouter) handleGetTrackById(w http.ResponseWriter, req *http.Request, id string) {
-	track, err := r.iface.GetTrackById(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
+	w.Header().Set("Content-Type", contentType)
+	if contentType == "application/octet-stream" {
+		w.Write(response)
+	} else {
+		w.Write(response)
 	}
-	w.Header().Set("Content-Type", "text/json")
-	json.NewEncoder(w).Encode(track)
-}
-
-func (r *HTTPRouter) handleGetTrackData(w http.ResponseWriter, req *http.Request, id string) {
-	data, err := r.iface.GetTrackData(id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Write(data)
-}
-
-func (r *HTTPRouter) handleGetAlbums(w http.ResponseWriter, req *http.Request) {
-	albums, err := r.iface.GetAlbums()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "text/json")
-	json.NewEncoder(w).Encode(albums)
-}
-
-func (r *HTTPRouter) handleGetAlbum(w http.ResponseWriter, req *http.Request, name string) {
-	album, err := r.iface.GetAlbumByName(name)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-	w.Header().Set("Content-Type", "text/json")
-	json.NewEncoder(w).Encode(album)
 }
