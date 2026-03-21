@@ -152,19 +152,21 @@ func (i *Interface) GetAlbumByName(name string) (Album, error) {
 
 func (i *Interface) handleRequest(path string, method string) (out []byte, contentType string, err error) {
 	if path == "/track" {
-		if method != "GET" {
+		if method == "GET" {
+			tracks, err := i.GetTracks()
+			if err != nil {
+				return nil, "", err
+			}
+			data, err := json.Marshal(tracks)
+			if err != nil {
+				return nil, "", err
+			}
+			return data, "text/json", nil
+		} else if method == "POST" {
+			return nil, "", errors.New("method not implemented")
+		} else {
 			return nil, "", errors.New("method not allowed")
 		}
-
-		tracks, err := i.GetTracks()
-		if err != nil {
-			return nil, "", err
-		}
-		data, err := json.Marshal(tracks)
-		if err != nil {
-			return nil, "", err
-		}
-		return data, "text/json", nil
 	} else if path == "/album" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -217,6 +219,6 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 		}
 		return data, "text/json", nil
 	} else {
-		return nil, "", errors.New("not found")
+		return nil, "", errors.New("invalid api")
 	}
 }
