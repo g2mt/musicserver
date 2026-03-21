@@ -2,16 +2,15 @@ package api
 
 import (
 	"database/sql"
-	"os"
-	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func setupTestDB(t *testing.T) *sql.DB {
 	t.Helper()
-	dir := t.TempDir()
-	dbPath := filepath.Join(dir, "test.db")
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
@@ -224,20 +223,8 @@ func TestInterface_GetTrackById(t *testing.T) {
 		t.Fatalf("GetTrackById with long ID failed: %v", err)
 	}
 
-	if fetched.ID != id {
-		t.Errorf("Expected ID %s, got %s", id, fetched.ID)
-	}
-	if fetched.Name != track.Name {
-		t.Errorf("Expected name %s, got %s", track.Name, fetched.Name)
-	}
-	if fetched.Path != track.Path {
-		t.Errorf("Expected path %s, got %s", track.Path, fetched.Path)
-	}
-	if fetched.Album != track.Album {
-		t.Errorf("Expected album %s, got %s", track.Album, fetched.Album)
-	}
-	if fetched.ShortID != track.ShortID {
-		t.Errorf("Expected short ID %s, got %s", track.ShortID, fetched.ShortID)
+	if diff := cmp.Diff(fetched, *track); diff != "" {
+		t.Errorf("GetTrackById() mismatch (-want +got):\n%s", diff)
 	}
 
 	// Test with short ID
