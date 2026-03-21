@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"musicserver/internal/schema"
+	"musicserver/internal/taglib"
 )
 
 type Interface struct {
@@ -126,6 +127,27 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 		return nil, err
 	}
 	return bytes, nil
+}
+
+func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
+	longID, err := i.resolveTrackShortId(id)
+	if err != nil {
+		return nil, "", err
+	}
+
+	var path string
+	err = i.db.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Use taglib to extract cover art
+	// We need to import the taglib package
+	data, mimeType, err := taglib.ExtractCoverArt(path)
+	if err != nil {
+		return nil, "", err
+	}
+	return data, mimeType, nil
 }
 
 func (i *Interface) AddTrack(track *schema.Track) (string, error) {
@@ -300,7 +322,14 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 			}
 			return data, "application/octet-stream", nil
 		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
-			// TODO: return cover similar to /data
+			data, mimeType, err := i.GetTrackCover(id)
+			if err != nil {
+				return nil, "", err
+			}
+			if data == nil {
+				return nil, "", errors.New("cover not found")
+			}
+			return data, mimeType, nil
 		} else {
 			response, err = i.GetTrackById(id)
 		}
