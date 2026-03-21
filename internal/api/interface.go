@@ -272,6 +272,7 @@ func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
 }
 
 func (i *Interface) handleRequest(path string, method string) (out []byte, contentType string, err error) {
+	path = filepath.Clean(path)
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
