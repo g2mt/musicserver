@@ -36,8 +36,7 @@ func (i *Interface) InitDb() error {
 			album TEXT NOT NULL
 		);
 		CREATE TABLE IF NOT EXISTS albums (
-			name TEXT PRIMARY KEY,
-			tracks TEXT NOT NULL
+			name TEXT PRIMARY KEY
 		);
 		CREATE TABLE IF NOT EXISTS short_ids (
 			short_id TEXT PRIMARY KEY,
@@ -115,14 +114,24 @@ func (i *Interface) getAlbums() ([]string, error) {
 
 func (i *Interface) getAlbumByName(name string) (Album, error) {
 	var album Album
-	var tracksJSON string
-	err := i.db.QueryRow("SELECT name, tracks FROM albums WHERE name = ?", name).
-		Scan(&album.Name, &tracksJSON)
+	err := i.db.QueryRow("SELECT name FROM albums WHERE name = ?", name).Scan(&album.Name)
 	if err != nil {
 		return Album{}, err
 	}
-	// Parse tracks JSON string into []string
-	album.Tracks = []string{tracksJSON}
+
+	rows, err := i.db.Query("SELECT id FROM tracks WHERE album = ?", name)
+	if err != nil {
+		return Album{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return Album{}, err
+		}
+		album.Tracks = append(album.Tracks, id)
+	}
 	return album, nil
 }
 
