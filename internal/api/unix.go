@@ -1,11 +1,13 @@
 package api
 
 import (
+	"bufio"
 	"encoding/json"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 type UnixSocketServer struct {
@@ -76,28 +78,37 @@ func (s *UnixSocketServer) Stop() error {
 func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 	defer conn.Close()
 
-	buf := make([]byte, 4096)
-	n, err := conn.Read(buf)
-	if err != nil {
-		return
-	}
+	// Set a read timeout of 1 minute
+	conn.SetReadDeadline(time.Now().Add(time.Minute))
 
-	var req struct {
-		Path   string `json:"path"`
-		Method string `json:"method"`
-	}
-	if err := json.Unmarshal(buf[:n], &req); err != nil {
-		return
-	}
+	reader := bufio.NewReader(conn)
+	for {
+		// Read until newline
+		line, err := reader.ReadBytes('\n')
+		if err != nil {
+			// Timeout or other error, stop reading
+			return
+		}
 
-	response, _, err := s.iface.handleRequest(req.Path, req.Method)
-	if err != nil {
-		response, _ = json.Marshal(struct {
-			Error string `json:"error"`
-		}{Error: err.Error()})
+		var req struct {
+			Path   string `json:"path"`
+			Method string `json:"method"`
+		}
+		if err := json.Unmarshal(line, &req); err != nil {
+			// Invalid JSON, skip this line
+			continue
+		}
+
+		response, _, err := s.iface.handleRequest(req.Path, req.Method)
+		if err != nil {
+			response, _ = json.Marshal(struct {
+				Error string `json:"error"`
+			}{Error: err.Error()})
+			conn.Write(response)
+			// Continue to read next line
+			continue
+		}
+
 		conn.Write(response)
-		return
 	}
-
-	conn.Write(response)
 }
