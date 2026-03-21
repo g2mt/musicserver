@@ -67,7 +67,7 @@ func (i *Interface) GetTracks() (map[string]string, error) {
 }
 
 func (i *Interface) GetTrackById(id string) (Track, error) {
-	longID, err := i.ResolveShortID(id)
+	longID, err := i.resolveTrackShortId(id)
 	if err != nil {
 		return Track{}, err
 	}
@@ -82,7 +82,7 @@ func (i *Interface) GetTrackById(id string) (Track, error) {
 }
 
 func (i *Interface) GetTrackData(id string) ([]byte, error) {
-	longID, err := i.ResolveShortID(id)
+	longID, err := i.resolveTrackShortId(id)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (i *Interface) GetAlbumByName(name string) (Album, error) {
 	return album, nil
 }
 
-func (i *Interface) ResolveShortID(id string) (string, error) {
+func (i *Interface) resolveTrackShortId(id string) (string, error) {
 	if len(id) == 64 {
 		return id, nil
 	}
@@ -175,7 +175,7 @@ func (i *Interface) handleRequest(path string) (out []byte, contentType string, 
 	case strings.HasPrefix(path, "/track/"):
 		// Remove "/track/" prefix
 		idPart := path[7:]
-		
+
 		// Check if it's a data request
 		if strings.HasSuffix(idPart, "/data") {
 			id := idPart[:len(idPart)-5] // Remove "/data" suffix
