@@ -308,7 +308,25 @@ func (i *Interface) GetAlbums() ([]string, error) {
 	return albums, nil
 }
 
-func (i *Interface) GetAlbumsByPage(page int) ([]string, error) {}
+func (i *Interface) GetAlbumsByPage(page int) ([]string, error) {
+	// Calculate offset based on page number and MaxPageCount
+	offset := page * MaxPageCount
+	rows, err := i.db.Query("SELECT name FROM albums ORDER BY name LIMIT ? OFFSET ?", MaxPageCount, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var albums []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		albums = append(albums, name)
+	}
+	return albums, nil
+}
 
 func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
 	var album schema.Album
@@ -382,7 +400,20 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		}
 
 		response, err = i.GetAlbumByName(name)
-	} else if page, ok := strings.CutPrefix(path, "/album/by-page/"); ok && len(page) > 0 {
+	} else if pageStr, ok := strings.CutPrefix(path, "/album/by-page/"); ok && len(pageStr) > 0 {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		// Convert page number from string to int
+		page := 0
+		// Simple conversion, ignoring errors for now
+		for _, ch := range pageStr {
+			if ch < '0' || ch > '9' {
+				return nil, "", errors.New("invalid page number")
+			}
+			page = page*10 + int(ch-'0')
+		}
+		response, err = i.GetAlbumsByPage(page)
 	} else {
 		return nil, "", errors.New("invalid api request")
 	}
