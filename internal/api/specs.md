@@ -77,6 +77,7 @@ A track has the following fields:
   * `name`: the human readable name of the track
   * `path`: the path of the file relative to the data directory of the server
   * `album`: the name of the album
+  * `has_cover`: whether the track contains cover art or not
 
 ### GET `/track`
 
@@ -96,6 +97,10 @@ Returns the metadata of the track, encoded as JSON. Refer to the [track fields s
 ### GET `/track/[id]/data`
 
 Returns the audio of the track as a raw stream of bytes.
+
+### GET `/track/[id]/cover`
+
+Returns the cover art image of the track as a raw stream of bytes.
 
 ## Albums
 
