@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"log/slog"
 	"net/http"
@@ -28,6 +27,7 @@ func main() {
 	if err != nil {
 		slog.Error("Error loading config", "err", err)
 		os.Exit(1)
+
 	}
 
 	// Create API interface and initialize database
