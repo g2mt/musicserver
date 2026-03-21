@@ -13,8 +13,7 @@ For HTTP API responses, the content type of the response will be stored in the `
 HTTP API requests will follow the template:
 
 ```
-GET /track/123456
-X-API-OptionKey: option value
+GET /track/123456?OptionKey=option value
 ```
 
 In the HTTP API, option keys will always start with the "X-API-" prefix.
@@ -25,7 +24,9 @@ Alternatively, the API can be mounted as a UNIX endpoint for administrative purp
 {
   "method": "GET",
   "path": "/track/123456",
-  "OptionKey": "option value"
+  "params": {
+    "OptionKey": "option value"
+  }
 }
 ```
 
