@@ -175,7 +175,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	// track1 can also be retrieved via one123
 	fetchedTrack1, err = iface.GetTrackById("one123")
 	if fetchedTrack1.LongID != track1.LongID {
-		t.Errorf("fetchedTrack1 invalid ID")
+		t.Errorf("fetchedTrack1.LongID: expected %q, got %q", track1.LongID, fetchedTrack1.LongID)
 	}
 }
 
