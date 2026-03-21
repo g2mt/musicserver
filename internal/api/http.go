@@ -5,10 +5,10 @@ import (
 )
 
 type HTTPRouter struct {
-	iface Interface
+	iface *Interface
 }
 
-func NewHTTPRouter(iface Interface) *HTTPRouter {
+func NewHTTPRouter(iface *Interface) *HTTPRouter {
 	return &HTTPRouter{iface: iface}
 }
 

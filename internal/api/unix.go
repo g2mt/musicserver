@@ -11,12 +11,12 @@ import (
 )
 
 type UnixSocketServer struct {
-	iface  Interface
+	iface  *Interface
 	socket net.Listener
 	done   chan struct{}
 }
 
-func NewUnixSocketServer(iface Interface) *UnixSocketServer {
+func NewUnixSocketServer(iface *Interface) *UnixSocketServer {
 	return &UnixSocketServer{
 		iface: iface,
 		done:  make(chan struct{}),
