@@ -54,7 +54,7 @@ func LoadTrack(path string) (schema.Track, error) {
 
 // ExtractCoverArt extracts embedded cover art from the audio file at path.
 // Returns nil data (and no error) if the file has no cover art.
-func ExtractCoverArt(path string) ([]byte, string, error) {
+func ExtractCoverArt(path string) (data []byte, mimeType string, _ error) {
 	cPath := C.CString(path)
 	defer C.free(unsafe.Pointer(cPath))
 
@@ -70,7 +70,7 @@ func ExtractCoverArt(path string) ([]byte, string, error) {
 		return nil, "", nil
 	}
 
-	data := C.GoBytes(unsafe.Pointer(cArt.data), cArt.data_length)
-	mimeType := C.GoString(cArt.mime_type)
+	data = C.GoBytes(unsafe.Pointer(cArt.data), cArt.data_length)
+	mimeType = C.GoString(cArt.mime_type)
 	return data, mimeType, nil
 }
