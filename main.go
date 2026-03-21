@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/goccy/go-yaml"
@@ -23,7 +22,7 @@ func main() {
 	}
 
 	// Read config file
-	configData, err := ioutil.ReadFile(*configPath)
+	configData, err := os.ReadFile(*configPath)
 	if err != nil {
 		fmt.Printf("Error reading config file: %v\n", err)
 		os.Exit(1)
