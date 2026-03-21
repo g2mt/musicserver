@@ -81,7 +81,7 @@ A track has the following fields:
 
 ### GET `/track`
 
-Returns a mapping of short-id to the corresponding track's name:
+Returns a mapping of short-id to the corresponding track's name, with a maximum of 50 items per page:
 
 ```
 {
@@ -89,6 +89,8 @@ Returns a mapping of short-id to the corresponding track's name:
   "xyz123": "track name 2"
 }
 ```
+
+If the `after` parameter is provided, then only the tracks whose ID comes after the parameter lexicographically will be shown. Example: `/track?after=abcdef`
 
 ### GET `/track/[id]`
 
