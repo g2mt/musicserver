@@ -150,7 +150,11 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 	return longID, nil
 }
 
-func (i *Interface) handleRequest(path string) (out []byte, contentType string, err error) {
+func (i *Interface) handleRequest(path string, method string) (out []byte, contentType string, err error) {
+	if method != "GET" {
+		return nil, "", errors.New("method not allowed")
+	}
+
 	if path == "/track" {
 		tracks, err := i.GetTracks()
 		if err != nil {
