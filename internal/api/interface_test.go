@@ -149,10 +149,10 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetTrackById for track1 failed: %v", err)
 	}
-	// Assert received-track1.shortid == "one1234"
-	expectedShort1 := "one1234"
-	if fetchedTrack1.ShortID != expectedShort1 {
-		t.Errorf("track1.ShortID: expected %q, got %q", expectedShort1, fetchedTrack1.ShortID)
+	// Assert received-track1.longid == "one1234567890123456789012345678901234567890123456789012345678901234"
+	expectedLong1 := "one1234" + strings.Repeat("a", MaxIdLength-len("one1234"))
+	if fetchedTrack1.LongID != expectedLong1 {
+		t.Errorf("track1.LongID: expected %q, got %q", expectedLong1, fetchedTrack1.LongID)
 	}
 	// track2.id (long ID) should be "one1235567891234", but we need to check its short ID
 	// According to conflict resolution, the second track's short ID should be "one1235"
