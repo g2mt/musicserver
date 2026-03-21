@@ -148,19 +148,14 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		// Conflict: existingLongID is the ID already mapped to this shortID
 		// Expand both short IDs by one character
 		// First, expand the existing mapping's short ID
-		oldShortID := shortID
-		oldLongID := existingLongID
+		existingShortID := shortID
 
 		// Determine new length for old mapping
-		newLen := len(oldShortID) + 1
+		newLen := len(existingShortID) + 1
 		if newLen > MaxIdLength {
 			newLen = MaxIdLength
 		}
-		// Ensure we don't exceed the length of the long ID
-		if newLen > len(oldLongID) {
-			newLen = len(oldLongID)
-		}
-		newOldShortID := oldLongID[:newLen]
+		newOldShortID := existingLongID[:newLen]
 
 		// Update the existing mapping to use the expanded short ID
 		// We need to delete the old row and insert the new one (or update)
@@ -169,12 +164,12 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		_, err = tx.Exec("DELETE FROM short_ids WHERE short_id = ?", oldShortID)
+		_, err = tx.Exec("UPDATE tracks SET short_id = ? WHERE id = ?", newOldShortID, existingLongID)
 		if err != nil {
 			tx.Rollback()
 			return "", err
 		}
-		_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", newOldShortID, oldLongID)
+		_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", newOldShortID, existingLongID)
 		if err != nil {
 			tx.Rollback()
 			return "", err

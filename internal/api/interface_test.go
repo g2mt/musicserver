@@ -160,6 +160,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	if shortID2 != expectedShort2 {
 		t.Errorf("track2.ShortID: expected %q, got %q", expectedShort2, shortID2)
 	}
+
 	// Also verify via GetTrackById
 	fetchedTrack2, err := iface.GetTrackById(shortID2)
 	if err != nil {
@@ -167,6 +168,12 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	}
 	if fetchedTrack2.ShortID != expectedShort2 {
 		t.Errorf("fetchedTrack2.ShortID: expected %q, got %q", expectedShort2, fetchedTrack2.ShortID)
+	}
+
+	// track1 can also be retrieved via one123
+	fetchedTrack1, err = iface.GetTrackById("one123")
+	if fetchedTrack1.LongID != track1.LongID {
+		t.Errorf("fetchedTrack1 invalid ID")
 	}
 }
 
@@ -253,8 +260,8 @@ func TestInterface_GetTrackById(t *testing.T) {
 		t.Fatalf("GetTrackById with short ID failed: %v", err)
 	}
 
-	if fetched2.LongID != id {
-		t.Errorf("When using short ID: expected ID %s, got %s", id, fetched2.LongID)
+	if diff := cmp.Diff(fetched2, *track); diff != "" {
+		t.Errorf("GetTrackById() mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -365,11 +372,11 @@ func TestInterface_GetAlbumByName(t *testing.T) {
 
 	var trackIDs []string
 	for _, track := range tracks {
-		id, err := iface.AddTrack(track)
+		_, err := iface.AddTrack(track)
 		if err != nil {
 			t.Fatalf("AddTrack failed: %v", err)
 		}
-		trackIDs = append(trackIDs, id)
+		trackIDs = append(trackIDs, track.LongID)
 	}
 
 	album, err := iface.GetAlbumByName(albumName)

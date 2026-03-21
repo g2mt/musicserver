@@ -10,5 +10,5 @@ type Track struct {
 
 type Album struct {
 	Name   string   `json:"name"`
-	Tracks []string `json:"tracks"`
+	Tracks []string `json:"tracks"` // long IDs of all tracks
 }
