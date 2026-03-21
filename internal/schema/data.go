@@ -1,7 +1,7 @@
 package schema
 
 type Track struct {
-	ID      string `json:"id"`
+	LongID  string `json:"id"`
 	ShortID string `json:"short_id"`
 	Name    string `json:"name"`
 	Path    string `json:"path"`

@@ -26,7 +26,7 @@ func LoadTrack(path string) (schema.Track, error) {
 
 	// Convert C struct to Go struct
 	track := schema.Track{
-		ID:      "",
+		LongID:  "",
 		ShortID: "",
 		Name:    C.GoString(cTrack.title),
 		Path:    path,

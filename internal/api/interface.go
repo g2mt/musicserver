@@ -91,7 +91,7 @@ func (i *Interface) GetTrackById(id string) (schema.Track, error) {
 
 	var track schema.Track
 	err = i.db.QueryRow("SELECT id, short_id, name, path, album FROM tracks WHERE id = ?", longID).
-		Scan(&track.ID, &track.ShortID, &track.Name, &track.Path, &track.Album)
+		Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Album)
 	if err != nil {
 		return schema.Track{}, err
 	}
@@ -120,7 +120,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	if len(longID) != MaxIdLength {
 		panic("invalid long id")
 	}
-	track.ID = longID
+	track.LongID = longID
 
 	// Determine short ID according to the conflict resolution algorithm
 	// Start with first 6 characters
@@ -207,7 +207,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	// Insert track into tracks table
 	_, err := i.db.Exec(
 		"INSERT INTO tracks (id, short_id, name, path, album) VALUES (?, ?, ?, ?, ?)",
-		track.ID, track.ShortID, track.Name, track.Path, track.Album,
+		track.LongID, track.ShortID, track.Name, track.Path, track.Album,
 	)
 	if err != nil {
 		return "", err

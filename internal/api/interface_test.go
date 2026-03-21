@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"musicserver/internal/schema"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -64,17 +65,13 @@ func TestInterface_AddTrack(t *testing.T) {
 		t.Fatalf("AddTrack failed: %v", err)
 	}
 
-	if id != track.ID {
-		t.Errorf("Expected ID %s, got %s", track.ID, id)
-	}
-
-	if track.ShortID == "" {
-		t.Error("ShortID should be set")
+	if id != track.ShortID {
+		t.Errorf("Expected ID %s, got %s", track.LongID, id)
 	}
 
 	// Verify track was inserted
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM tracks WHERE id = ?", id).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM tracks WHERE short_id = ?", id).Scan(&count)
 	if err != nil {
 		t.Fatalf("Failed to query tracks: %v", err)
 	}
@@ -97,7 +94,7 @@ func TestInterface_AddTrack(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to query short_ids: %v", err)
 	}
-	if longID != id {
+	if longID != track.LongID {
 		t.Errorf("Short ID mapping incorrect: expected %s, got %s", id, longID)
 	}
 }
@@ -109,13 +106,15 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	config := &schema.Config{}
 	iface := NewInterface(db, config)
 	iface.LongIdGen = func(track *schema.Track) string {
+		p := ""
 		if track.Name == "Track One" {
-			return "one1234567891234"
+			p = "one1234"
 		} else if track.Name == "Track Two" {
-			return "one1235567891234"
+			p = "one1235"
 		} else {
 			panic("invalid name")
 		}
+		return p + strings.Repeat("a", MaxIdLength-len(p))
 	}
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
@@ -254,8 +253,8 @@ func TestInterface_GetTrackById(t *testing.T) {
 		t.Fatalf("GetTrackById with short ID failed: %v", err)
 	}
 
-	if fetched2.ID != id {
-		t.Errorf("When using short ID: expected ID %s, got %s", id, fetched2.ID)
+	if fetched2.LongID != id {
+		t.Errorf("When using short ID: expected ID %s, got %s", id, fetched2.LongID)
 	}
 }
 
