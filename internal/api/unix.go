@@ -93,7 +93,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 		var req struct {
 			Path   string            `json:"path"`
 			Method string            `json:"method"`
-			Params map[string]string `json:"params"`
+			Params map[string]string `json:"params,omitempty"`
 		}
 		if err := json.Unmarshal(line, &req); err != nil {
 			// Invalid JSON, skip this line
