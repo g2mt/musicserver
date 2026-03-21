@@ -13,9 +13,7 @@ func NewHTTPRouter(iface Interface) *HTTPRouter {
 }
 
 func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
-	path := req.URL.Path
-
-	response, contentType, err := r.iface.handleRequest(path, req.Method)
+	response, contentType, err := r.iface.handleRequest(req.URL.Path, req.Method)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

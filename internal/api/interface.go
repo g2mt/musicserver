@@ -151,11 +151,11 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 }
 
 func (i *Interface) handleRequest(path string, method string) (out []byte, contentType string, err error) {
-	if method != "GET" {
-		return nil, "", errors.New("method not allowed")
-	}
-
 	if path == "/track" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
 		tracks, err := i.GetTracks()
 		if err != nil {
 			return nil, "", err
@@ -166,6 +166,10 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 		}
 		return data, "text/json", nil
 	} else if path == "/album" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
 		albums, err := i.GetAlbums()
 		if err != nil {
 			return nil, "", err
@@ -176,6 +180,10 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 		}
 		return data, "text/json", nil
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
 		if id, ok = strings.CutSuffix(id, "/data"); ok {
 			data, err := i.GetTrackData(id)
 			if err != nil {
@@ -195,6 +203,10 @@ func (i *Interface) handleRequest(path string, method string) (out []byte, conte
 			return data, "text/json", nil
 		}
 	} else if name, ok := strings.CutPrefix(path, "/album/"); ok {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
 		album, err := i.GetAlbumByName(name)
 		if err != nil {
 			return nil, "", err
