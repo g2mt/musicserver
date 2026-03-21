@@ -3,8 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -20,14 +19,14 @@ func main() {
 	flag.Parse()
 
 	if *configPath == "" {
-		fmt.Println("Error: -config flag is required")
+		slog.Error("Error: -config flag is required")
 		flag.Usage()
 		os.Exit(1)
 	}
 
 	config, err := schema.LoadConfig(*configPath)
 	if err != nil {
-		fmt.Printf("Error loading config: %v\n", err)
+		slog.Error("Error loading config", "err", err)
 		os.Exit(1)
 	}
 
@@ -36,13 +35,13 @@ func main() {
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(config.DbDir, 0755); err != nil {
-		log.Printf("Error creating database directory: %v\n", err)
+		slog.Error("Error creating database directory", "err", err)
 		os.Exit(1)
 	}
 
 	db, err := sql.Open("sqlite3", dbDir)
 	if err != nil {
-		fmt.Printf("Error opening database: %v\n", err)
+		slog.Error("Error opening database", "err", err)
 		os.Exit(1)
 	}
 	defer db.Close()
@@ -50,7 +49,7 @@ func main() {
 	// Create API interface and initialize database
 	iface := api.NewInterface(db, config)
 	if err := iface.InitDb(); err != nil {
-		fmt.Printf("Error initializing database: %v\n", err)
+		slog.Error("Error initializing database", "err", err)
 		os.Exit(1)
 	}
 
@@ -59,9 +58,9 @@ func main() {
 	http.HandleFunc("/", httpRouter.Serve)
 
 	go func() {
-		log.Printf("Starting HTTP server on %s\n", config.HTTPBind)
+		slog.Info("Starting HTTP server", "bind", config.HTTPBind)
 		if err := http.ListenAndServe(config.HTTPBind, nil); err != nil {
-			log.Printf("HTTP server error: %v\n", err)
+			slog.Error("HTTP server error", "err", err)
 			os.Exit(1)
 		}
 	}()
@@ -73,13 +72,13 @@ func main() {
 		// Ensure the socket directory exists
 		socketDir := filepath.Dir(config.UnixBind)
 		if err := os.MkdirAll(socketDir, 0755); err != nil {
-			log.Printf("Error creating Unix socket directory: %v\n", err)
+			slog.Error("Error creating Unix socket directory", "err", err)
 			os.Exit(1)
 		}
 
-		log.Printf("Starting Unix socket server on %s\n", config.UnixBind)
+		slog.Info("Starting Unix socket server", "bind", config.UnixBind)
 		if err := unixServer.Start(config.UnixBind); err != nil {
-			log.Printf("Unix socket server error: %v\n", err)
+			slog.Error("Unix socket server error", "err", err)
 			os.Exit(1)
 		}
 	} else {
