@@ -12,7 +12,7 @@ type Config struct {
 	// binds the HTTP API backend to this path
 	HTTPBind string `yaml:"http_bind"`
 	// If explicitly set, then enable or disable the local unix socket. Otherwise, defaults to true
-	UnixBindEnabled *bool
+	UnixBindEnabled *bool `yaml:"unix_bind_enabled"`
 	// binds the Unix socket API backend to this path. By default, binds to /run/musicserver/socket for root, ~/.musicserver/socket for non-root
 	UnixBind string `yaml:"unix_bind"`
 	// path where music data is stored
@@ -36,8 +36,25 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	// Set default values if not provided
-	if config.UnixBind == "" {
-		config.UnixBind = "/run/musicserver/socket"
+	if config.UnixBindEnabled == nil {
+		// Default to true if not explicitly set
+		defaultEnabled := true
+		config.UnixBindEnabled = &defaultEnabled
+	}
+
+	// Only set default UnixBind if Unix socket is enabled
+	if *config.UnixBindEnabled && config.UnixBind == "" {
+		currentUser, err := user.Current()
+		if err != nil {
+			return nil, fmt.Errorf("error getting current user: %w", err)
+		}
+
+		if currentUser.Uid == "0" {
+			config.UnixBind = "/run/musicserver/socket"
+		} else {
+			homeDir := currentUser.HomeDir
+			config.UnixBind = homeDir + "/.musicserver/socket"
+		}
 	}
 
 	if config.DbPath == "" {
