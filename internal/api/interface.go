@@ -1,7 +1,9 @@
 package api
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"strings"
@@ -110,8 +112,110 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 }
 
 func (i *Interface) AddTrack(track *Track) (string, error) {
-	// TODO: calculate the id & short_id for track first, then add it to the database
-	// this function returns the id
+	// Calculate long ID as hex representation of sha256sum(name+'\0'+album)
+	// We'll use crypto/sha256
+	hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
+	longID := hex.EncodeToString(hash[:])
+	track.ID = longID
+
+	// Determine short ID according to the conflict resolution algorithm
+	// Start with first 6 characters
+	shortID := longID[:6]
+
+	// We need to insert into short_ids mapping, handling conflicts
+	// Use a loop to resolve conflicts
+	for {
+		// Try to insert the mapping shortID -> longID
+		// First, check if shortID already exists
+		var existingLongID string
+		err := i.db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", shortID).Scan(&existingLongID)
+		if err == sql.ErrNoRows {
+			// No conflict, insert and break
+			_, err = i.db.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", shortID, longID)
+			if err != nil {
+				return "", err
+			}
+			break
+		} else if err != nil {
+			// Some other database error
+			return "", err
+		}
+
+		// Conflict: existingLongID is the ID already mapped to this shortID
+		// Expand both short IDs by one character
+		// First, expand the existing mapping's short ID
+		oldShortID := shortID
+		oldLongID := existingLongID
+
+		// Determine new length for old mapping
+		newLen := len(oldShortID) + 1
+		if newLen > 64 {
+			newLen = 64
+		}
+		// Ensure we don't exceed the length of the long ID
+		if newLen > len(oldLongID) {
+			newLen = len(oldLongID)
+		}
+		newOldShortID := oldLongID[:newLen]
+
+		// Update the existing mapping to use the expanded short ID
+		// We need to delete the old row and insert the new one (or update)
+		// Use a transaction for consistency
+		tx, err := i.db.Begin()
+		if err != nil {
+			return "", err
+		}
+		_, err = tx.Exec("DELETE FROM short_ids WHERE short_id = ?", oldShortID)
+		if err != nil {
+			tx.Rollback()
+			return "", err
+		}
+		_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", newOldShortID, oldLongID)
+		if err != nil {
+			tx.Rollback()
+			return "", err
+		}
+
+		// Now expand the current track's short ID similarly
+		if newLen > len(longID) {
+			newLen = len(longID)
+		}
+		shortID = longID[:newLen]
+
+		// Try to insert the current mapping with the expanded shortID
+		// We'll continue the loop to check for conflicts again
+		_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", shortID, longID)
+		if err != nil {
+			tx.Rollback()
+			return "", err
+		}
+		err = tx.Commit()
+		if err != nil {
+			return "", err
+		}
+		// After successful insertion, break
+		break
+	}
+
+	// Set track's short_id field
+	track.ShortID = shortID
+
+	// Insert track into tracks table
+	_, err := i.db.Exec(
+		"INSERT INTO tracks (id, short_id, name, path, album) VALUES (?, ?, ?, ?, ?)",
+		track.ID, track.ShortID, track.Name, track.Path, track.Album,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	// Ensure album exists in albums table
+	_, err = i.db.Exec("INSERT OR IGNORE INTO albums (name) VALUES (?)", track.Album)
+	if err != nil {
+		return "", err
+	}
+
+	return track.ID, nil
 }
 
 func (i *Interface) GetAlbums() ([]string, error) {
