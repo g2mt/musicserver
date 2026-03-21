@@ -6,6 +6,10 @@ extern "C" {
 #endif
 
 typedef struct {
+    char* err; // static string error message, nullptr if no error
+} BindingResult;
+
+typedef struct {
     char* title;
     char* album;
 } TrackMetadata;
