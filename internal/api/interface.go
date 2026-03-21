@@ -38,7 +38,6 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
 
 	return &Interface{
 		db:     db,
