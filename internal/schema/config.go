@@ -9,7 +9,7 @@ import (
 )
 
 type Config struct {
-	// binds the HTTP API backend to this path
+	// binds the HTTP API backend to this path. defaults to localhost:8000
 	HTTPBind string `yaml:"http_bind"`
 	// If explicitly set, then enable or disable the local unix socket. Otherwise, defaults to true
 	UnixBindEnabled *bool `yaml:"unix_bind_enabled"`
@@ -41,6 +41,10 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	// Set default values if not provided
+	if config.HTTPBind == "" {
+		config.HTTPBind = "localhost:8000"
+	}
+
 	if config.UnixBindEnabled == nil {
 		// Default to true if not explicitly set
 		defaultEnabled := true
