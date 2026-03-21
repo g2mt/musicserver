@@ -129,8 +129,6 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 }
 
 func (i *Interface) AddTrack(track *schema.Track) (string, error) {
-	// Calculate long ID as hex representation of sha256sum(name+'\0'+album)
-	// We'll use crypto/sha256
 	longID := i.LongIdGen(track)
 	if len(longID) != MaxIdLength {
 		panic("invalid long id")
