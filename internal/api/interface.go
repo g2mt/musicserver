@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"musicserver/internal/schema"
@@ -110,7 +112,20 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	return []byte(path), nil
+	path = filepath.Clean(path)
+	relPath, err := filepath.Rel(i.config.DataPath, path)
+	if err != nil {
+		return nil, err
+	}
+	if strings.HasPrefix(relPath, "..") {
+		return nil, errors.New("unexpected path outside of data directory")
+	}
+
+	bytes, err := os.ReadFile(relPath)
+	if err != nil {
+		return nil, err
+	}
+	return bytes, nil
 }
 
 func (i *Interface) AddTrack(track *schema.Track) (string, error) {
