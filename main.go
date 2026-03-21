@@ -1,11 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
+	"path/filepath"
 
+	"musicserver/internal/api"
 	"musicserver/internal/schema"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
@@ -24,11 +30,59 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: open sql database in db_path/${SQL_DB_PATH}
+	// Open sql database in db_path/${SQL_DB_PATH}
+	dbPath := filepath.Join(config.DbPath, schema.SQL_DB_PATH)
+	
+	// Ensure the directory exists
+	if err := os.MkdirAll(config.DbPath, 0755); err != nil {
+		fmt.Printf("Error creating database directory: %v\n", err)
+		os.Exit(1)
+	}
 
-	// TODO: bind http server to http_bind
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		fmt.Printf("Error opening database: %v\n", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	// Create API interface and initialize database
+	iface := api.NewInterface(db)
+	if err := iface.InitDb(); err != nil {
+		fmt.Printf("Error initializing database: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Bind http server to http_bind
+	httpRouter := api.NewHTTPRouter(iface)
+	http.HandleFunc("/", httpRouter.Serve)
+	
+	go func() {
+		fmt.Printf("Starting HTTP server on %s\n", config.HTTPBind)
+		if err := http.ListenAndServe(config.HTTPBind, nil); err != nil {
+			fmt.Printf("HTTP server error: %v\n", err)
+			os.Exit(1)
+		}
+	}()
 
 	if *config.UnixBindEnabled {
-		// TODO: bind unix socket in another socket
+		// Bind unix socket in another socket
+		unixServer := api.NewUnixSocketServer(iface)
+		
+		// Ensure the socket directory exists
+		socketDir := filepath.Dir(config.UnixBind)
+		if err := os.MkdirAll(socketDir, 0755); err != nil {
+			fmt.Printf("Error creating Unix socket directory: %v\n", err)
+			os.Exit(1)
+		}
+		
+		fmt.Printf("Starting Unix socket server on %s\n", config.UnixBind)
+		if err := unixServer.Start(config.UnixBind); err != nil {
+			fmt.Printf("Unix socket server error: %v\n", err)
+			os.Exit(1)
+		}
+	} else {
+		// Wait indefinitely if only HTTP server is running
+		select {}
 	}
 }
