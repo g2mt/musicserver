@@ -124,7 +124,7 @@ eventLoop:
 		// Process deleted paths
 		for path := range deletedPaths {
 			slog.Debug("WatchDataDir processing deleted path", "path", path)
-			if err := i.removeTrackByPath(path); err != nil {
+			if err := i.ForgetTrackByPath(path); err != nil {
 				return err
 			}
 		}

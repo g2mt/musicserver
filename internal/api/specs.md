@@ -108,6 +108,12 @@ Returns the audio of the track as a raw stream of bytes.
 
 Returns the cover art image of the track as a raw stream of bytes.
 
+### DELETE `/track`
+
+Deletes (forgets) every track and album in the database. This does *NOT* remove the files corresponding to the tracks.
+
+Returns the JSON value `true`.
+
 ## Albums
 
 Albums are collections that contain tracks.

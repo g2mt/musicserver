@@ -332,7 +332,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	return track.ShortID, nil
 }
 
-func (i *Interface) removeTrackByPath(path string) error {
+func (i *Interface) ForgetTrackByPath(path string) error {
 	// First, get the absolute path to match with stored path
 	absPath, err := filepath.Abs(path)
 	if err != nil {
