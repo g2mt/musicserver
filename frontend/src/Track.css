@@ -1,0 +1,36 @@
+.track {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 6px;
+
+  &:hover {
+    background: #f0f0f0;
+  }
+}
+
+.track-cover {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.track-title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.track-album {
+  font-size: 0.85rem;
+  color: #888;
+}
