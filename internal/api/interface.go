@@ -103,7 +103,9 @@ func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[
 			orClauses = append(orClauses, "(name LIKE ?)")
 			args = append(args, "%"+word+"%")
 		}
-		whereClauses = append(whereClauses, strings.Join(orClauses, " OR "))
+		if len(orClauses) > 1 {
+			whereClauses = append(whereClauses, strings.Join(orClauses, " OR "))
+		}
 
 		// Apply negated word filters
 		for _, negated := range search.Negated {

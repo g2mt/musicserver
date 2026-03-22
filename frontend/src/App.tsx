@@ -25,6 +25,11 @@ function App() {
 
   // Search
   const [searchQuery, setSearchQuery] = useState('');
+  useEffect(() => {
+    fetch(`${HOST}/track?q=${encodeURIComponent(searchQuery)}`)
+      .then(res => res.json())
+      .then(data => setFullTracks(Object.values(data)));
+  }, [searchQuery]);
 
   // Track queue
   const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
