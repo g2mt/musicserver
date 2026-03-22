@@ -8,10 +8,6 @@
   padding: 0;
 }
 
-.search-bar-container {
-  /* keep at top */
-}
-
 .app-main {
   display: flex;
   flex-direction: row;
@@ -27,8 +23,4 @@
 .right-side {
   flex: 1;
   overflow-y: auto;
-}
-
-.music-player {
-  /* stays at bottom */
 }
