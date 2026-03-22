@@ -328,7 +328,69 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	return track.ShortID, nil
 }
 
-func (i *Interface) removeTrackByPath(path string) error {}
+func (i *Interface) removeTrackByPath(path string) error {
+	// First, get the absolute path to match with stored path
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return err
+	}
+
+	// Find the track by path
+	var longID, shortID string
+	err = i.db.QueryRow("SELECT id, short_id FROM tracks WHERE path = ?", absPath).Scan(&longID, &shortID)
+	if err == sql.ErrNoRows {
+		// Track not found, nothing to delete
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	// Begin a transaction to ensure consistency
+	tx, err := i.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Delete from tracks table
+	_, err = tx.Exec("DELETE FROM tracks WHERE id = ?", longID)
+	if err != nil {
+		return err
+	}
+
+	// Delete from short_ids table
+	_, err = tx.Exec("DELETE FROM short_ids WHERE short_id = ?", shortID)
+	if err != nil {
+		return err
+	}
+
+	// Check if the album still has any tracks; if not, delete from albums
+	var albumTrackCount int
+	err = tx.QueryRow("SELECT COUNT(*) FROM tracks WHERE album = (SELECT album FROM tracks WHERE id = ?)", longID).Scan(&albumTrackCount)
+	if err != nil {
+		return err
+	}
+	if albumTrackCount == 0 {
+		// No more tracks in this album, delete it
+		_, err = tx.Exec("DELETE FROM albums WHERE name = (SELECT album FROM tracks WHERE id = ?)", longID)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (i *Interface) GetAlbums() ([]string, error) {
 	rows, err := i.db.Query("SELECT name FROM albums")
