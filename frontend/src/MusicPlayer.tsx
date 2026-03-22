@@ -37,7 +37,7 @@ function useAudio(url: string | null) {
   return audio;
 }
 
-export function MusicPlayer({ children }: { children?: React.ReactNode }) {
+export function MusicPlayer() {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -85,7 +85,6 @@ export function MusicPlayer({ children }: { children?: React.ReactNode }) {
 
   return (
     <MusicPlayerContext.Provider value={{ currentTrack, play }}>
-      {children}
       <div className="music-player">
         <input
           className="scrubber-bar"

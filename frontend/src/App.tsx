@@ -3,9 +3,10 @@ import { MusicPlayer } from './MusicPlayer';
 
 function App() {
   return (
-    <MusicPlayer>
+    <>
+      <MusicPlayer />
       <TrackList />
-    </MusicPlayer>
+    </>
   );
 }
 
