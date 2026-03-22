@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 
 	"musicserver/internal/schema"
 	"musicserver/internal/searchparser"
@@ -21,6 +22,9 @@ type Interface struct {
 	config *schema.Config // readonly
 
 	LongIdGen func(track *schema.Track) string
+
+	// scanMu is held during a full ScanTracks call, causing WatchDataDir to pause.
+	scanMu sync.Mutex
 }
 
 const MaxIdLength = 64
