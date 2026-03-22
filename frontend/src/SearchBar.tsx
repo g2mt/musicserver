@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faForwardStep, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { MusicPlayerContext, useBackForward } from './MusicPlayer';
+
 import './SearchBar.css';
 
 interface SearchBarProps {
@@ -10,6 +12,8 @@ interface SearchBarProps {
 
 function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery);
+  const c = useContext(MusicPlayerContext)!;
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
 
   return (
     <form className="search-bar" onSubmit={e => {
@@ -27,6 +31,20 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       />
       <button type="submit" className="btn">
         <FontAwesomeIcon icon={faSearch} />
+      </button>
+      <button 
+        className="btn btn-prev-song" 
+        onClick={handleBack}
+        disabled={isBackDisabled}
+      >
+        <FontAwesomeIcon icon={faBackwardStep} />
+      </button>
+      <button 
+        className="btn btn-next-song" 
+        onClick={handleForward}
+        disabled={isForwardDisabled}
+      >
+        <FontAwesomeIcon icon={faForwardStep} />
       </button>
     </form>
   );

@@ -44,6 +44,37 @@ function useAudio(url: string | null) {
   return audio;
 }
 
+export function useBackForward(c: MusicPlayerState) {
+  const isBackDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
+    [c.enqueuedTrackIndex]);
+  const isForwardDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || 
+    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+    [c.enqueuedTrackIndex, c.enqueuedTracks]);
+
+  function handleBack() {
+    if (isBackDisabled) return;
+    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
+    c.setEnqueuedTrackIndex(prevIndex);
+    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+  }
+
+  function handleForward() {
+    if (isForwardDisabled) return;
+    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
+    c.setEnqueuedTrackIndex(nextIndex);
+    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+  }
+
+  return {
+    handleBack,
+    handleForward,
+    isBackDisabled,
+    isForwardDisabled
+  };
+}
+
 export function MusicPlayer() {
   const c = useContext(MusicPlayerContext)!;
   const audio = useAudio(c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null);
@@ -102,38 +133,7 @@ export function MusicPlayer() {
     c.setProgress(val);
   }
 
-  function useBackForward() {
-    const isBackDisabled = useMemo(
-      () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
-      [c.enqueuedTrackIndex]);
-    const isForwardDisabled = useMemo(
-      () => c.enqueuedTrackIndex === null || 
-      c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
-      [c.enqueuedTrackIndex, c.enqueuedTracks]);
-
-    function handleBack() {
-      if (isBackDisabled) return;
-      const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
-      c.setEnqueuedTrackIndex(prevIndex);
-      c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
-    }
-
-    function handleForward() {
-      if (isForwardDisabled) return;
-      const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
-      c.setEnqueuedTrackIndex(nextIndex);
-      c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
-    }
-
-    return {
-      handleBack,
-      handleForward,
-      isBackDisabled,
-      isForwardDisabled
-    };
-  }
-
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward();
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
 
   return (
     <div className="music-player">

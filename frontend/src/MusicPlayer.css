@@ -71,7 +71,7 @@
   .player-center {
     max-width: unset;
     .track-info > * {
-      width:250px;
+      width: calc(min(50vw, 500px));
     }
   }
   .player-right {
