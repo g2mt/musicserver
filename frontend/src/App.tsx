@@ -40,6 +40,7 @@ function App() {
 
       switch (e.key) {
         case ' ':
+        case 'k':
           e.preventDefault();
           setIsPlaying(prev => !prev);
           break;
@@ -51,7 +52,7 @@ function App() {
           e.preventDefault();
           setProgress(prev => Math.max(0, prev - 10));
           break;
-        case 'i':
+        case 'l':
           e.preventDefault();
           setProgress(prev => Math.min(duration, prev + 10));
           break;

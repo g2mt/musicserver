@@ -14,8 +14,8 @@ function TrackList({
     <div className="track-list">
       {tracks.map((track, index) => (
         <Track 
-          key={track.id} 
-          track={track} 
+          key={unqueueTrack ? `${index}-${track.id}` : track.id} /* queued items have order */
+          track={track}
           index={index}
           enqueueTrack={enqueueTrack}
           unqueueTrack={unqueueTrack}

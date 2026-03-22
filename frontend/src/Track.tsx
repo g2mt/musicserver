@@ -38,12 +38,12 @@ export function Track({
         <span className="album">{track.album}</span>
       </div>
       {enqueueTrack && (
-        <button className="btn enqueue-btn" onClick={() => enqueueTrack(track)}>
+        <button className="btn queue-btn" onClick={() => enqueueTrack(track)}>
           <FontAwesomeIcon icon={faPlus} />
         </button>
       )}
-      {unqueueTrack !== undefined && index !== undefined && (
-        <button className="btn unqueue-btn" onClick={() => unqueueTrack(index)}>
+      {unqueueTrack && index !== undefined && (
+        <button className="btn queue-btn" onClick={() => unqueueTrack(index)}>
           <FontAwesomeIcon icon={faMinus} />
         </button>
       )}
