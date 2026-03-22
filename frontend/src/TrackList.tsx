@@ -1,11 +1,11 @@
 import { Track, type TrackData } from './Track';
 import './TrackList.css';
 
-function TrackList({ tracks }: { tracks: Record<string, TrackData> }) {
+function TrackList({ tracks }: { tracks: TrackData[] }) {
   return (
     <div className="track-list">
-      {Object.entries(tracks).map(([shortId, track]) => (
-        <Track key={shortId} track={track} />
+      {tracks.map(track => (
+        <Track track={track} />
       ))}
     </div>
   );

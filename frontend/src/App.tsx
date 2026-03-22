@@ -7,17 +7,20 @@ import { HOST } from './apiserver';
 function App() {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
 
-  const [tracks, setTracks] = useState<Record<string, TrackData>>({});
+  const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
   useEffect(() => {
     fetch(`${HOST}/track`)
       .then(res => res.json())
-      .then(data => setTracks(data));
+      .then(data => setFullTracks(Object.values(data)));
   }, []);
+
+  const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
 
   return (
     <MusicPlayerContext value={{ currentTrack, setCurrentTrack }}>
       <MusicPlayer />
-      <TrackList tracks={tracks} />
+      <TrackList tracks={fullTracks} />
+      <TrackList tracks={enqueuedTracks} />
     </MusicPlayerContext>
   );
 }
