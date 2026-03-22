@@ -43,6 +43,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	go func() {
+		if err := iface.WatchDataDir(); err != nil {
+			slog.Error("WatchDataDir error", "err", err)
+		}
+	}()
+
 	// Bind http server to http_bind
 	httpRouter := api.NewHTTPRouter(iface)
 	http.HandleFunc("/", httpRouter.Serve)
