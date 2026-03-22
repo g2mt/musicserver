@@ -41,7 +41,7 @@ export function MusicPlayer({ children }: { children?: React.ReactNode }) {
     audio.src = `${HOST}/track/${currentTrack.short_id}/data`;
     audio.currentTime = 0;
     audio.play();
-  }, [currentTrack]);
+  }, [currentTrack?.id]);
 
   useEffect(() => {
     const audio = audioRef.current;
