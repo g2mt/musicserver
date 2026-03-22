@@ -426,7 +426,99 @@ func TestInterface_GetTrackData(t *testing.T) {
 }
 
 func TestInterface_ForgetTracks(t *testing.T) {
-	//TODO
+	iface := setupIface(t)
+	if err := iface.InitDb(); err != nil {
+		t.Fatalf("InitDb failed: %v", err)
+	}
+
+	// Add some tracks
+	tracks := []*schema.Track{
+		{Name: "Track 1", Path: "/music/1.mp3", Album: "Album A"},
+		{Name: "Track 2", Path: "/music/2.mp3", Album: "Album B"},
+		{Name: "Track 3", Path: "/music/3.mp3", Album: "Album C"},
+	}
+
+	for _, track := range tracks {
+		_, err := iface.AddTrack(track)
+		if err != nil {
+			t.Fatalf("AddTrack failed: %v", err)
+		}
+	}
+
+	// Verify that tracks exist before deletion
+	allTracks, err := iface.GetTracks("", nil)
+	if err != nil {
+		t.Fatalf("GetTracks before deletion failed: %v", err)
+	}
+	if len(allTracks) != len(tracks) {
+		t.Errorf("Expected %d tracks before deletion, got %d", len(tracks), len(allTracks))
+	}
+
+	// Verify that albums exist before deletion
+	albums, err := iface.GetAlbums()
+	if err != nil {
+		t.Fatalf("GetAlbums before deletion failed: %v", err)
+	}
+	if len(albums) != len(tracks) {
+		t.Errorf("Expected %d albums before deletion, got %d", len(tracks), len(albums))
+	}
+
+	// Call ForgetAllTracks
+	success, err := iface.ForgetAllTracks()
+	if err != nil {
+		t.Fatalf("ForgetAllTracks failed: %v", err)
+	}
+	if !success {
+		t.Error("ForgetAllTracks should return true on success")
+	}
+
+	// Verify that all tracks are gone
+	allTracksAfter, err := iface.GetTracks("", nil)
+	if err != nil {
+		t.Fatalf("GetTracks after deletion failed: %v", err)
+	}
+	if len(allTracksAfter) != 0 {
+		t.Errorf("Expected 0 tracks after deletion, got %d", len(allTracksAfter))
+	}
+
+	// Verify that all albums are gone
+	albumsAfter, err := iface.GetAlbums()
+	if err != nil {
+		t.Fatalf("GetAlbums after deletion failed: %v", err)
+	}
+	if len(albumsAfter) != 0 {
+		t.Errorf("Expected 0 albums after deletion, got %d", len(albumsAfter))
+	}
+
+	// Verify that short_ids table is empty
+	var shortIDCount int
+	err = iface.db.QueryRow("SELECT COUNT(*) FROM short_ids").Scan(&shortIDCount)
+	if err != nil {
+		t.Fatalf("Failed to count short_ids: %v", err)
+	}
+	if shortIDCount != 0 {
+		t.Errorf("Expected 0 rows in short_ids after deletion, got %d", shortIDCount)
+	}
+
+	// Verify that tracks table is empty
+	var tracksCount int
+	err = iface.db.QueryRow("SELECT COUNT(*) FROM tracks").Scan(&tracksCount)
+	if err != nil {
+		t.Fatalf("Failed to count tracks: %v", err)
+	}
+	if tracksCount != 0 {
+		t.Errorf("Expected 0 rows in tracks after deletion, got %d", tracksCount)
+	}
+
+	// Verify that albums table is empty
+	var albumsCount int
+	err = iface.db.QueryRow("SELECT COUNT(*) FROM albums").Scan(&albumsCount)
+	if err != nil {
+		t.Fatalf("Failed to count albums: %v", err)
+	}
+	if albumsCount != 0 {
+		t.Errorf("Expected 0 rows in albums after deletion, got %d", albumsCount)
+	}
 }
 
 func TestInterface_GetAlbums(t *testing.T) {

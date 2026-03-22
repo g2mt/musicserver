@@ -332,7 +332,44 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	return track.ShortID, nil
 }
 
-func (i *Interface) ForgetAllTracks() (bool, error) {}
+func (i *Interface) ForgetAllTracks() (bool, error) {
+	// Start a transaction to ensure atomic deletion
+	tx, err := i.db.Begin()
+	if err != nil {
+		return false, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Delete all rows from tracks table
+	_, err = tx.Exec("DELETE FROM tracks")
+	if err != nil {
+		return false, err
+	}
+
+	// Delete all rows from short_ids table
+	_, err = tx.Exec("DELETE FROM short_ids")
+	if err != nil {
+		return false, err
+	}
+
+	// Delete all rows from albums table
+	_, err = tx.Exec("DELETE FROM albums")
+	if err != nil {
+		return false, err
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
 
 func (i *Interface) ForgetTrackByPath(path string) error {
 	// First, get the absolute path to match with stored path
@@ -476,6 +513,12 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			}
 		} else if method == "POST" {
 			response, err = i.ScanTracks()
+		} else if method == "DELETE" {
+			success, err := i.ForgetAllTracks()
+			if err != nil {
+				return nil, "", err
+			}
+			response = success
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
