@@ -34,7 +34,7 @@ function App() {
       setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
     } else if (index === enqueuedTrackIndex) {
       // If we remove the currently highlighted track, reset index
-      setEnqueuedTrackIndex(-1);
+      setEnqueuedTrackIndex(null);
     }
   }
 

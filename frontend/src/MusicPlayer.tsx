@@ -104,9 +104,13 @@ export function MusicPlayer() {
   }
 
   // Calculate if back/forward buttons should be disabled
-  const isBackDisabled = c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0;
-  const isForwardDisabled = c.enqueuedTrackIndex === null || 
-    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length;
+  const isBackDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
+    [c.enqueuedTrackIndex]);
+  const isForwardDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || 
+    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+    [c.enqueuedTrackIndex, c.enqueuedTracks]);
 
   function handleBack() {
     if (isBackDisabled) return;
