@@ -25,7 +25,7 @@ export function Track({
   enqueueTrack?: (_: TrackData) => void,
   unqueueTrack?: (_: number) => void 
 }) {
-  const { setCurrentTrack, enqueuedTrackIndex } = useContext(MusicPlayerContext)!;
+  const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } = useContext(MusicPlayerContext)!;
   const isHighlighted = index !== undefined && index === enqueuedTrackIndex;
   return (
     <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
@@ -35,7 +35,12 @@ export function Track({
         alt={track.name}
       />
       <div className="info">
-        <a className="title" href="#" onClick={e => { e.preventDefault(); setCurrentTrack(track); }}>{track.name}</a>
+        <a className="title" href="#" onClick={e => {
+          e.preventDefault();
+          if (index !== undefined)
+            setEnqueuedTrackIndex(index);
+          setCurrentTrack(track);
+        }}>{track.name}</a>
         <span className="album">{track.album}</span>
       </div>
       {enqueueTrack && (
