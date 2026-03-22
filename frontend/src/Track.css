@@ -11,6 +11,10 @@
   }
 }
 
+.track.highlighted {
+  background: #f0f0f0;
+}
+
 .cover {
   width: 56px;
   height: 56px;

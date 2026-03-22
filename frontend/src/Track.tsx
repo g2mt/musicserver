@@ -25,9 +25,10 @@ export function Track({
   enqueueTrack?: (_: TrackData) => void,
   unqueueTrack?: (_: number) => void 
 }) {
-  const { setCurrentTrack } = useContext(MusicPlayerContext)!;
+  const { setCurrentTrack, enqueuedTrackIndex } = useContext(MusicPlayerContext)!;
+  const isHighlighted = index !== undefined && index === enqueuedTrackIndex;
   return (
-    <div className="track">
+    <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
       <img
         className="cover"
         src={`${HOST}/track/${track.short_id}/cover`}
