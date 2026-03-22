@@ -20,6 +20,10 @@ function App() {
     setEnqueuedTracks([...enqueuedTracks, track]);
   }
 
+  function unqueueTrack(index: number) {
+    setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
+  }
+
   return (
     <MusicPlayerContext value={{ currentTrack, setCurrentTrack }}>
       <div className="app-layout">
@@ -27,7 +31,7 @@ function App() {
           <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
         </div>
         <div className="enqueued-tracks">
-          <TrackList tracks={enqueuedTracks} />
+          <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />
         </div>
         <div className="music-player">
           <MusicPlayer />

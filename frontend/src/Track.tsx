@@ -1,6 +1,6 @@
 import { useContext, type Dispatch, type SetStateAction } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
 import { MusicPlayerContext } from './MusicPlayer';
 import './Track.css';
@@ -14,7 +14,17 @@ export interface TrackData {
   path: string;
 }
 
-export function Track({ track, enqueueTrack }: { track: TrackData, enqueueTrack?: (_: TrackData) => void }) {
+export function Track({ 
+  track, 
+  index,
+  enqueueTrack,
+  unqueueTrack
+}: { 
+  track: TrackData, 
+  index?: number,
+  enqueueTrack?: (_: TrackData) => void,
+  unqueueTrack?: (_: number) => void 
+}) {
   const { setCurrentTrack } = useContext(MusicPlayerContext);
   return (
     <div className="track">
@@ -30,6 +40,11 @@ export function Track({ track, enqueueTrack }: { track: TrackData, enqueueTrack?
       {enqueueTrack && (
         <button className="btn enqueue-btn" onClick={() => enqueueTrack(track)}>
           <FontAwesomeIcon icon={faPlus} />
+        </button>
+      )}
+      {unqueueTrack !== undefined && index !== undefined && (
+        <button className="btn unqueue-btn" onClick={() => unqueueTrack(index)}>
+          <FontAwesomeIcon icon={faMinus} />
         </button>
       )}
     </div>
