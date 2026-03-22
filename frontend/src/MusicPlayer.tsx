@@ -22,9 +22,8 @@ interface MusicPlayerState {
   setMuted: Dispatch<SetStateAction<boolean>>;
   enqueuedTracks: TrackData[];
   unqueueTrack: (index: number) => void;
-  // NEW
-  enqueuedTrackIndex: number;
-  setEnqueuedTrackIndex: Dispatch<SetStateAction<number>>;
+  enqueuedTrackIndex: number|null;
+  setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
 }
 
 export const MusicPlayerContext = createContext<MusicPlayerState|null>(null);
@@ -75,14 +74,13 @@ export function MusicPlayer() {
 
   useEffect(() => {
     function onEnded() {
-      // Instead of always taking the first track, increment the index
-      const nextIndex = c.enqueuedTrackIndex + 1;
+      const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
       if (nextIndex < c.enqueuedTracks.length) {
         c.setEnqueuedTrackIndex(nextIndex);
         c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
       } else {
         // No more tracks in queue
-        c.setEnqueuedTrackIndex(-1);
+        c.setEnqueuedTrackIndex(null);
         c.setIsPlaying(false);
       }
     }

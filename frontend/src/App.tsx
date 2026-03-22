@@ -12,8 +12,7 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
-  // NEW: track index in the enqueuedTracks list
-  const [enqueuedTrackIndex, setEnqueuedTrackIndex] = useState<number>(-1);
+  const [enqueuedTrackIndex, setEnqueuedTrackIndex] = useState<number|null>(null);
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
@@ -31,8 +30,8 @@ function App() {
   function unqueueTrack(index: number) {
     setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
     // If we remove a track before the current index, adjust the index
-    if (index < enqueuedTrackIndex) {
-      setEnqueuedTrackIndex(prev => prev - 1);
+    if (enqueuedTrackIndex !== null && index < enqueuedTrackIndex) {
+      setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
     } else if (index === enqueuedTrackIndex) {
       // If we remove the currently highlighted track, reset index
       setEnqueuedTrackIndex(-1);
