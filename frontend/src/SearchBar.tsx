@@ -11,22 +11,18 @@ interface SearchBarProps {
 function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchQuery(inputValue);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-
   return (
-    <form className="search-bar" onSubmit={handleSubmit}>
+    <form className="search-bar" onSubmit={e => {
+      e.preventDefault();
+      setSearchQuery(inputValue);
+    }}>
       <input
         type="text"
         placeholder="Search tracks..."
         value={inputValue}
-        onChange={handleChange}
+        onChange={e => {
+          setInputValue(e.target.value);
+        }}
         className="search-input"
       />
       <button type="submit" className="btn">
