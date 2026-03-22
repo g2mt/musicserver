@@ -4,7 +4,6 @@ import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
 import { MusicPlayerContext } from './MusicPlayer';
 import './Track.css';
-import './common.css';
 
 export interface TrackData {
   id: string;

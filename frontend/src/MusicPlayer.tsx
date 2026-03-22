@@ -5,7 +5,6 @@ import { Track } from './Track';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import './MusicPlayer.css';
-import './common.css';
 
 interface MusicPlayerState {
   currentTrack: TrackData | null;
