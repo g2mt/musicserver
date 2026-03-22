@@ -1,32 +1,34 @@
 @import url("common.css");
 
 .app-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   margin: 0;
   padding: 0;
 }
 
 .search-bar-container {
-  grid-column: 1 / -1;
-  grid-row: 1;
+  /* keep at top */
 }
 
-.full-tracks {
-  grid-column: 1;
-  grid-row: 2;
+.app-main {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+}
+
+.left-side {
+  flex: 1;
   overflow-y: auto;
 }
 
 .right-side {
-  grid-column: 2;
-  grid-row: 2;
+  flex: 1;
   overflow-y: auto;
 }
 
 .music-player {
-  grid-column: 1 / -1;
-  grid-row: 3;
+  /* stays at bottom */
 }

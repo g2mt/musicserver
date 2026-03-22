@@ -115,11 +115,13 @@ function App() {
         <div className="search-bar-container">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
-        <div className="full-tracks">
-          <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
-        </div>
-        <div className="right-side">
-          <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />
+        <div className="app-main">
+          <div className="left-side">
+            <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
+          </div>
+          <div className="right-side">
+            <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />
+          </div>
         </div>
         <div className="music-player">
           <MusicPlayer />
