@@ -1,4 +1,6 @@
 import { useContext } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
 import { MusicPlayerContext } from './MusicPlayer';
 import './Track.css';
@@ -25,7 +27,9 @@ export function Track({ track, showEnqueueButton = false }: { track: TrackData, 
         <span className="track-album">{track.album}</span>
       </div>
       {showEnqueueButton && (
-        <button className="track-enqueue" onClick={() => alert(`Enqueue: ${track.name}`)}>+</button>
+        <button className="track-enqueue" onClick={() => alert(`Enqueue: ${track.name}`)}>
+          <FontAwesomeIcon icon={faPlus} />
+        </button>
       )}
     </div>
   );
