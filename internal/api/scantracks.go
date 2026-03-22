@@ -11,6 +11,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+const WatchDirInterval = 10 * time.Second
+
 func (i *Interface) ScanTracks() (map[string]string, error) {
 	i.scanMu.Lock()
 	defer i.scanMu.Unlock()
@@ -64,6 +66,7 @@ func (i *Interface) WatchDataDir() error {
 		return err
 	}
 
+eventLoop:
 	for {
 		// Collect events for up to 1 second
 		writtenPaths := make(map[string]struct{})
@@ -72,6 +75,20 @@ func (i *Interface) WatchDataDir() error {
 		deadline := time.After(1 * time.Second)
 	collectLoop:
 		for {
+
+			// If ScanTracks is running, discard collected events and wait for it to finish.
+			if locked := i.scanMu.TryLock(); !locked {
+				slog.Debug("WatchDataDir paused, waiting for full scan to complete")
+				i.scanMu.Lock()
+				i.scanMu.Unlock()
+
+				slog.Debug("skipping current WatchDataDir iteration")
+				time.Sleep(WatchDirInterval)
+				continue eventLoop
+			} else {
+				i.scanMu.Unlock()
+			}
+
 			select {
 			case event, ok := <-watcher.Events:
 				if !ok {
@@ -87,21 +104,6 @@ func (i *Interface) WatchDataDir() error {
 				// ignore watcher errors
 			case <-deadline:
 				break collectLoop
-			}
-		}
-
-		// If ScanTracks is running, discard collected events and wait for it to finish.
-		if len(writtenPaths) > 0 || len(deletedPaths) > 0 {
-			if locked := i.scanMu.TryLock(); !locked {
-				slog.Debug("WatchDataDir paused, waiting for full scan to complete")
-				i.scanMu.Lock()
-				i.scanMu.Unlock()
-				slog.Debug("WatchDataDir resuming after full scan")
-				// Discard stale events collected during the scan.
-				writtenPaths = make(map[string]struct{})
-				deletedPaths = make(map[string]struct{})
-			} else {
-				i.scanMu.Unlock()
 			}
 		}
 
@@ -127,6 +129,6 @@ func (i *Interface) WatchDataDir() error {
 			}
 		}
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(WatchDirInterval)
 	}
 }
