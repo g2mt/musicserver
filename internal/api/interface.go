@@ -163,7 +163,7 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 		return nil, errors.New("unexpected path outside of data directory")
 	}
 
-	bytes, err := os.ReadFile(relPath)
+	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
