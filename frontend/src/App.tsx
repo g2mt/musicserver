@@ -19,7 +19,6 @@ function App() {
   function enqueueTrack(track: TrackData) {
     setEnqueuedTracks([...enqueuedTracks, track]);
   }
-
   function unqueueTrack(index: number) {
     setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
   }
