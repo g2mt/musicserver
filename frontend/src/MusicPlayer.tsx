@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef, useState, useEffect } from 'react';
+import { createContext, useContext, useRef, useState, useEffect, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
@@ -20,14 +20,33 @@ export function useMusicPlayer() {
   return useContext(MusicPlayerContext);
 }
 
+function useAudio(url: string | null) {
+  const audio = useMemo(() => new Audio(), []);
+
+  useEffect(() => {
+    if (!url) return;
+    audio.src = url;
+    audio.currentTime = 0;
+    audio.play();
+  }, [url]);
+
+  useEffect(() => {
+    return () => { audio.pause(); };
+  }, [audio]);
+
+  return audio;
+}
+
 export function MusicPlayer({ children }: { children?: React.ReactNode }) {
-  const audioRef = useRef<HTMLAudioElement>(null);
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
+
+  const audioUrl = currentTrack ? `${HOST}/track/${currentTrack.short_id}/data` : null;
+  const audio = useAudio(audioUrl);
 
   function play(track: TrackData) {
     setCurrentTrack(track);
@@ -36,44 +55,37 @@ export function MusicPlayer({ children }: { children?: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !currentTrack) return;
-    audio.src = `${HOST}/track/${currentTrack.short_id}/data`;
-    audio.currentTime = 0;
-    audio.play();
-  }, [currentTrack?.id]);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
     if (isPlaying) audio.play();
     else audio.pause();
   }, [isPlaying]);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
     audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
-  function onTimeUpdate() {
-    const audio = audioRef.current;
-    if (!audio) return;
-    setProgress(audio.currentTime);
-    setDuration(audio.duration || 0);
-  }
+  useEffect(() => {
+    function onEnded() { setIsPlaying(false); }
+    function onTimeUpdate() {
+      setProgress(audio.currentTime);
+      setDuration(audio.duration || 0);
+    }
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('ended', onEnded);
+    return () => {
+      audio.removeEventListener('timeupdate', onTimeUpdate);
+      audio.removeEventListener('ended', onEnded);
+    };
+  }, [audio]);
 
   function onScrub(e: React.ChangeEvent<HTMLInputElement>) {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.currentTime = Number(e.target.value);
-    setProgress(Number(e.target.value));
+    const val = Number(e.target.value);
+    audio.currentTime = val;
+    setProgress(val);
   }
 
   return (
     <MusicPlayerContext.Provider value={{ currentTrack, play }}>
       {children}
-      <audio ref={audioRef} onTimeUpdate={onTimeUpdate} onEnded={() => setIsPlaying(false)} />
       <div className="music-player">
         <input
           className="scrubber-bar"
