@@ -55,42 +55,30 @@ function useAudio(url: string | null) {
 }
 
 export function MusicPlayer() {
-  const { 
-    currentTrack, 
-    isPlaying, 
-    setIsPlaying, 
-    progress, 
-    setProgress, 
-    duration, 
-    setDuration, 
-    volume, 
-    setVolume, 
-    muted, 
-    setMuted 
-  } = useContext(MusicPlayerContext);
+  const c = useContext(MusicPlayerContext);
 
-  const audioUrl = currentTrack ? `${HOST}/track/${currentTrack.short_id}/data` : null;
+  const audioUrl = c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null;
   const audio = useAudio(audioUrl);
 
   useEffect(() => {
-    if (setProgress) setProgress(0);
-    if (setIsPlaying) setIsPlaying(true);
-  }, [currentTrack?.id]);
+    if (c.setProgress) c.setProgress(0);
+    if (c.setIsPlaying) c.setIsPlaying(true);
+  }, [c.currentTrack?.id]);
 
   useEffect(() => {
-    if (isPlaying) audio.play();
+    if (c.isPlaying) audio.play();
     else audio.pause();
-  }, [isPlaying]);
+  }, [c.isPlaying]);
 
   useEffect(() => {
-    audio.volume = muted ? 0 : volume;
-  }, [volume, muted]);
+    audio.volume = c.muted ? 0 : c.volume;
+  }, [c.volume, c.muted]);
 
   useEffect(() => {
-    function onEnded() { if (setIsPlaying) setIsPlaying(false); }
+    function onEnded() { if (c.setIsPlaying) c.setIsPlaying(false); }
     function onTimeUpdate() {
-      if (setProgress) setProgress(audio.currentTime);
-      if (setDuration) setDuration(audio.duration || 0);
+      if (c.setProgress) c.setProgress(audio.currentTime);
+      if (c.setDuration) c.setDuration(audio.duration || 0);
     }
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', onEnded);
@@ -103,7 +91,7 @@ export function MusicPlayer() {
   function onScrub(e: React.ChangeEvent<HTMLInputElement>) {
     const val = Number(e.target.value);
     audio.currentTime = val;
-    if (setProgress) setProgress(val);
+    if (c.setProgress) c.setProgress(val);
   }
 
   return (
@@ -112,19 +100,19 @@ export function MusicPlayer() {
         className="scrubber-bar"
         type="range"
         min={0}
-        max={duration || 0}
+        max={c.duration || 0}
         step={0.1}
-        value={progress}
+        value={c.progress}
         onChange={onScrub}
       />
       <div className="player-controls">
         <div className="player-left">
-          <button className="btn" onClick={() => setIsPlaying && setIsPlaying(p => !p)}>
-            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+          <button className="btn" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
+            <FontAwesomeIcon icon={c.isPlaying ? faPause : faPlay} />
           </button>
         </div>
         <div className="player-center">
-          {currentTrack && <Track track={currentTrack} />}
+          {c.currentTrack && <Track track={c.currentTrack} />}
         </div>
         <div className="player-right">
           <input
@@ -133,14 +121,14 @@ export function MusicPlayer() {
             min={0}
             max={1}
             step={0.01}
-            value={muted ? 0 : volume}
+            value={c.muted ? 0 : c.volume}
             onChange={e => { 
-              if (setVolume) setVolume(Number(e.target.value)); 
-              if (setMuted) setMuted(false); 
+              if (c.setVolume) c.setVolume(Number(e.target.value)); 
+              if (c.setMuted) c.setMuted(false); 
             }}
           />
-          <button className="btn" onClick={() => setMuted && setMuted(m => !m)}>
-            <FontAwesomeIcon icon={muted || volume === 0 ? faVolumeXmark : faVolumeHigh} />
+          <button className="btn" onClick={() => c.setMuted && c.setMuted(m => !m)}>
+            <FontAwesomeIcon icon={c.muted || c.volume === 0 ? faVolumeXmark : faVolumeHigh} />
           </button>
         </div>
       </div>
