@@ -46,6 +46,7 @@ func main() {
 	go func() {
 		if err := iface.WatchDataDir(); err != nil {
 			slog.Error("WatchDataDir error", "err", err)
+			os.Exit(1)
 		}
 	}()
 
