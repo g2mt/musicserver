@@ -102,28 +102,38 @@ export function MusicPlayer() {
     c.setProgress(val);
   }
 
-  // Calculate if back/forward buttons should be disabled
-  const isBackDisabled = useMemo(
-    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
-    [c.enqueuedTrackIndex]);
-  const isForwardDisabled = useMemo(
-    () => c.enqueuedTrackIndex === null || 
-    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
-    [c.enqueuedTrackIndex, c.enqueuedTracks]);
+  function useBackForward() {
+    const isBackDisabled = useMemo(
+      () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
+      [c.enqueuedTrackIndex]);
+    const isForwardDisabled = useMemo(
+      () => c.enqueuedTrackIndex === null || 
+      c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+      [c.enqueuedTrackIndex, c.enqueuedTracks]);
 
-  function handleBack() {
-    if (isBackDisabled) return;
-    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
-    c.setEnqueuedTrackIndex(prevIndex);
-    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+    function handleBack() {
+      if (isBackDisabled) return;
+      const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
+      c.setEnqueuedTrackIndex(prevIndex);
+      c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+    }
+
+    function handleForward() {
+      if (isForwardDisabled) return;
+      const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
+      c.setEnqueuedTrackIndex(nextIndex);
+      c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+    }
+
+    return {
+      handleBack,
+      handleForward,
+      isBackDisabled,
+      isForwardDisabled
+    };
   }
 
-  function handleForward() {
-    if (isForwardDisabled) return;
-    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
-    c.setEnqueuedTrackIndex(nextIndex);
-    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
-  }
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward();
 
   return (
     <div className="music-player">
