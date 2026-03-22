@@ -1,11 +1,17 @@
 :root {
     font-family: sans-serif;
     background: #fff;
+    --content-bg: #fff;
     --accent-color: #0000CD;
     --accent-color-light: #87CEFA;
     --accent-color-text: #000000;
     --gray: #666;
     --shadow: rgba(0, 0, 0, 0.05);
+    --thumbnail-size: 56px;
+}
+* {
+  margin:0; padding:0;
+  box-sizing: border-box;
 }
 
 .btn {

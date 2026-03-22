@@ -9,6 +9,7 @@
 }
 
 .app-main {
+  background: var(--content-bg);
   display: flex;
   flex-direction: row;
   flex: 1;
@@ -32,7 +33,10 @@
   }
 
   .left-side, .right-side {
-    overflow-y: visible;
     flex: none;
+  }
+
+  .right-side {
+    border-top: 1px solid var(--gray);
   }
 }

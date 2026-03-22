@@ -26,22 +26,28 @@
     .player-left {
       display: flex;
       align-items: center;
-      gap: 12px;
-      flex: 1;
     }
 
     .player-center {
-      flex: 2;
       display: flex;
+      flex-grow: 1;
       justify-content: center;
+
+      .track {
+        .track-info > * {
+          max-width: calc(100% - var(--thumbnail-size));
+          text-overflow: ellipsis;
+          display: block;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+      }
     }
 
     .player-right {
-      flex: 1;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 10px;
 
       .volume-slider {
         width: 90px;
@@ -49,5 +55,26 @@
         cursor: pointer;
       }
     }
+  }
+}
+
+@media (max-width: 1000px) {
+  .player-center {
+    max-width: 70vw;
+  }
+}
+
+@media (max-width: 800px) {
+  .player-left {
+    .btn-prev-song, .btn-next-song { display: none !important; }
+  }
+  .player-center {
+    max-width: unset;
+    .track-info > * {
+      width:250px;
+    }
+  }
+  .player-right {
+    display: none !important;
   }
 }

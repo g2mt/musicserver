@@ -29,26 +29,26 @@ export function Track({
   return (
     <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
       <img
-        className="cover"
+        className="track-cover"
         src={`${HOST}/track/${track.short_id}/cover`}
         alt={track.name}
       />
-      <div className="info">
-        <a className="title" href="#" onClick={e => {
+      <div className="track-info">
+        <a className="track-title" href="#" onClick={e => {
           e.preventDefault();
           if (index !== undefined)
             setEnqueuedTrackIndex(index);
           setCurrentTrack(track);
         }}>{track.name}</a>
-        <span className="album">{track.album}</span>
+        <span className="track-album">{track.album}</span>
       </div>
       {enqueueTrack && (
-        <button className="btn queue-btn" onClick={() => enqueueTrack(track)}>
+        <button className="btn track-queue-btn" onClick={() => enqueueTrack(track)}>
           <FontAwesomeIcon icon={faPlus} />
         </button>
       )}
       {unqueueTrack && index !== undefined && (
-        <button className="btn queue-btn" onClick={() => unqueueTrack(index)}>
+        <button className="btn track-queue-btn" onClick={() => unqueueTrack(index)}>
           <FontAwesomeIcon icon={faMinus} />
         </button>
       )}

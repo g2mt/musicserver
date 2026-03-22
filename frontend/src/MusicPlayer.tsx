@@ -139,17 +139,17 @@ export function MusicPlayer() {
       <div className="player-controls">
         <div className="player-left">
           <button 
-            className="btn" 
+            className="btn btn-prev-song" 
             onClick={handleBack}
             disabled={isBackDisabled}
           >
             <FontAwesomeIcon icon={faBackwardStep} />
           </button>
-          <button className="btn" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
+          <button className="btn btn-play-pause" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
             <FontAwesomeIcon icon={c.isPlaying ? faPause : faPlay} />
           </button>
           <button 
-            className="btn" 
+            className="btn btn-next-song" 
             onClick={handleForward}
             disabled={isForwardDisabled}
           >
