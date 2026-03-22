@@ -6,12 +6,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"musicserver/internal/schema"
+	"musicserver/internal/searchparser"
 	"musicserver/internal/taglib"
 )
 
@@ -76,9 +78,10 @@ func (i *Interface) Close() error {
 	return i.db.Close()
 }
 
-func (i *Interface) GetTracks(afterId string) (map[string]schema.Track, error) {
+func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[string]schema.Track, error) {
 	query := "SELECT id, short_id, name, path, album FROM tracks"
 	args := []interface{}{}
+	whereClauses := []string{}
 
 	if afterId != "" {
 		// First, get the long ID for the afterId (which could be short or long)
@@ -88,9 +91,38 @@ func (i *Interface) GetTracks(afterId string) (map[string]schema.Track, error) {
 			longAfterId = ""
 		}
 		if longAfterId != "" {
-			query += " WHERE id > ?"
+			whereClauses = append(whereClauses, "id > ?")
 			args = append(args, longAfterId)
 		}
+	}
+
+	// Apply search filters if search is not nil
+	if search != nil {
+		// Apply word filters
+		for _, word := range search.Words {
+			whereClauses = append(whereClauses, "(name LIKE ? OR album LIKE ?)")
+			args = append(args, "%"+word+"%", "%"+word+"%")
+		}
+
+		// Apply negated word filters
+		for _, negated := range search.Negated {
+			whereClauses = append(whereClauses, "(name NOT LIKE ? AND album NOT LIKE ?)")
+			args = append(args, "%"+negated+"%", "%"+negated+"%")
+		}
+
+		// Apply operator filters
+		for _, op := range search.Operators {
+			if op.Key == "album" {
+				whereClauses = append(whereClauses, "album LIKE ?")
+				args = append(args, "%"+op.Value+"%")
+			}
+			// Other operators could be added here in the future
+		}
+	}
+
+	// Combine WHERE clauses if any exist
+	if len(whereClauses) > 0 {
+		query += " WHERE " + strings.Join(whereClauses, " AND ")
 	}
 
 	// Order by id (which is the long ID) to ensure consistent sorting

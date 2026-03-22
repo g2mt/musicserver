@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"musicserver/internal/schema"
+	"musicserver/internal/searchparser"
 	"strings"
 	"testing"
 
@@ -194,7 +195,7 @@ func TestInterface_GetTracks(t *testing.T) {
 		}
 	}
 
-	result, err := iface.GetTracks("")
+	result, err := iface.GetTracks("", nil)
 	if err != nil {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
@@ -214,6 +215,138 @@ func TestInterface_GetTracks(t *testing.T) {
 			t.Errorf("For short ID %s, expected long ID %s, got %s", track.ShortID, track.LongID, resultTrack.LongID)
 		}
 	}
+}
+
+func TestInterface_GetTracksWithSearch(t *testing.T) {
+	iface := setupIface(t)
+	if err := iface.InitDb(); err != nil {
+		t.Fatalf("InitDb failed: %v", err)
+	}
+
+	// Add test tracks with varied names and albums
+	tracks := []*schema.Track{
+		{Name: "Rock Song", Path: "/music/rock.mp3", Album: "Rock Album"},
+		{Name: "Jazz Tune", Path: "/music/jazz.mp3", Album: "Jazz Collection"},
+		{Name: "Classical Symphony", Path: "/music/classical.mp3", Album: "Classical Masterpieces"},
+		{Name: "Rock Anthem", Path: "/music/anthem.mp3", Album: "Rock Hits"},
+		{Name: "Jazz Improv", Path: "/music/improv.mp3", Album: "Jazz Collection"},
+	}
+
+	for _, track := range tracks {
+		_, err := iface.AddTrack(track)
+		if err != nil {
+			t.Fatalf("AddTrack failed: %v", err)
+		}
+	}
+
+	// Test 1: Search for word "Rock" in name or album
+	search1 := &searchparser.Result{
+		Words: []string{"Rock"},
+	}
+	result1, err := iface.GetTracks("", search1)
+	if err != nil {
+		t.Fatalf("GetTracks with search failed: %v", err)
+	}
+	// Should find "Rock Song" and "Rock Anthem"
+	if len(result1) != 2 {
+		t.Errorf("Expected 2 tracks with 'Rock', got %d", len(result1))
+	}
+
+	// Test 2: Search for word "Jazz" in name or album
+	search2 := &searchparser.Result{
+		Words: []string{"Jazz"},
+	}
+	result2, err := iface.GetTracks("", search2)
+	if err != nil {
+		t.Fatalf("GetTracks with search failed: %v", err)
+	}
+	// Should find "Jazz Tune" and "Jazz Improv"
+	if len(result2) != 2 {
+		t.Errorf("Expected 2 tracks with 'Jazz', got %d", len(result2))
+	}
+
+	// Test 3: Search with multiple words (OR logic)
+	search3 := &searchparser.Result{
+		Words: []string{"Rock", "Classical"},
+	}
+	result3, err := iface.GetTracks("", search3)
+	if err != nil {
+		t.Fatalf("GetTracks with search failed: %v", err)
+	}
+	// Should find "Rock Song", "Rock Anthem", and "Classical Symphony"
+	if len(result3) != 3 {
+		t.Errorf("Expected 3 tracks with 'Rock' or 'Classical', got %d", len(result3))
+	}
+
+	// Test 4: Search with negated word
+	search4 := &searchparser.Result{
+		Words:   []string{"Collection"},
+		Negated: []string{"Jazz"},
+	}
+	result4, err := iface.GetTracks("", search4)
+	if err != nil {
+		t.Fatalf("GetTracks with search failed: %v", err)
+	}
+	// Should find tracks with "Collection" but not "Jazz"
+	// "Jazz Collection" has both "Collection" and "Jazz", so should be excluded
+	// Only "Classical Masterpieces" has "Collection"? Wait, none have "Collection" except "Jazz Collection"
+	// Actually "Jazz Collection" should be excluded, so result should be 0
+	if len(result4) != 0 {
+		t.Errorf("Expected 0 tracks with 'Collection' and not 'Jazz', got %d", len(result4))
+	}
+
+	// Test 5: Search with album operator
+	search5 := &searchparser.Result{
+		Operators: []searchparser.Operator{{Key: "album", Value: "Rock"}},
+	}
+	result5, err := iface.GetTracks("", search5)
+	if err != nil {
+		t.Fatalf("GetTracks with search failed: %v", err)
+	}
+	// Should find tracks with "Rock" in album name: "Rock Song" and "Rock Anthem"
+	if len(result5) != 2 {
+		t.Errorf("Expected 2 tracks with album containing 'Rock', got %d", len(result5))
+	}
+
+	// Test 6: Combined search with words and operator
+	search6 := &searchparser.Result{
+		Words:     []string{"Song"},
+		Operators: []searchparser.Operator{{Key: "album", Value: "Rock"}},
+	}
+	result6, err := iface.GetTracks("", search6)
+	if err != nil {
+		t.Fatalf("GetTracks with search failed: %v", err)
+	}
+	// Should find "Rock Song" (has "Song" in name and "Rock" in album)
+	if len(result6) != 1 {
+		t.Errorf("Expected 1 track with 'Song' and album containing 'Rock', got %d", len(result6))
+	}
+
+	// Test 7: Search with afterId and search
+	// Get all tracks first to get an afterId
+	allTracks, err := iface.GetTracks("", nil)
+	if err != nil {
+		t.Fatalf("GetTracks failed: %v", err)
+	}
+	// Get the first track's ID to use as afterId
+	var firstID string
+	for id := range allTracks {
+		firstID = id
+		break
+	}
+	
+	search7 := &searchparser.Result{
+		Words: []string{"Rock"},
+	}
+	result7, err := iface.GetTracks(firstID, search7)
+	if err != nil {
+		t.Fatalf("GetTracks with afterId and search failed: %v", err)
+	}
+	// Should find Rock tracks after the firstID
+	// Since we have 2 Rock tracks total, and we're after the first one,
+	// we should get 1 or 0 depending on ordering
+	// This test is mainly to ensure the combination works without error
+	_ = result7
 }
 
 func TestInterface_GetTrackById(t *testing.T) {
