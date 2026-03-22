@@ -11,6 +11,13 @@
 
 - This project uses Go for the backend.
 - In go, import libraries starting from "musicserver/" path (i.e. "musicserver/internal/schema")
+- When comparing structs for testing, use the `cmp.Diff` function:
+
+```go
+if diff := cmp.Diff(fetched, *track); diff != "" {
+  t.Errorf("GetTrackById() mismatch (-want +got):\n%s", diff)
+}
+```
 
 ## Frontend
 
