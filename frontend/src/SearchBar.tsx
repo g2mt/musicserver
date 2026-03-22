@@ -32,16 +32,8 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         onChange={handleChange}
         className="search-input"
       />
-      <button type="submit" className="btn search-btn">
+      <button type="submit" className="btn">
         Search
-      </button>
-      <button
-        type="button"
-        className="btn clear-btn"
-        onClick={handleClear}
-        disabled={!inputValue}
-      >
-        Clear
       </button>
     </form>
   );
