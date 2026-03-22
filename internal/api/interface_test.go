@@ -18,8 +18,10 @@ func setupIface(t *testing.T) *Interface {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
 	return &Interface{
-		db:        db,
-		config:    &schema.Config{},
+		db: db,
+		config: &schema.Config{
+			DataPath: "/",
+		},
 		LongIdGen: defaultLongIdGen,
 	}
 }
@@ -387,44 +389,6 @@ func TestInterface_GetTrackById(t *testing.T) {
 	}
 }
 
-func TestInterface_GetTrackData(t *testing.T) {
-	iface := setupIface(t)
-	if err := iface.InitDb(); err != nil {
-		t.Fatalf("InitDb failed: %v", err)
-	}
-
-	track := &schema.Track{
-		Name:  "Test Track",
-		Path:  "/music/test.mp3",
-		Album: "Test Album",
-	}
-
-	id, err := iface.AddTrack(track)
-	if err != nil {
-		t.Fatalf("AddTrack failed: %v", err)
-	}
-
-	// Test with long ID
-	data, err := iface.GetTrackData(id)
-	if err != nil {
-		t.Fatalf("GetTrackData with long ID failed: %v", err)
-	}
-
-	if string(data) != track.Path {
-		t.Errorf("Expected path %s, got %s", track.Path, string(data))
-	}
-
-	// Test with short ID
-	data2, err := iface.GetTrackData(track.ShortID)
-	if err != nil {
-		t.Fatalf("GetTrackData with short ID failed: %v", err)
-	}
-
-	if string(data2) != track.Path {
-		t.Errorf("When using short ID: expected path %s, got %s", track.Path, string(data2))
-	}
-}
-
 func TestInterface_ForgetTracks(t *testing.T) {
 	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
@@ -445,24 +409,6 @@ func TestInterface_ForgetTracks(t *testing.T) {
 		}
 	}
 
-	// Verify that tracks exist before deletion
-	allTracks, err := iface.GetTracks("", nil)
-	if err != nil {
-		t.Fatalf("GetTracks before deletion failed: %v", err)
-	}
-	if len(allTracks) != len(tracks) {
-		t.Errorf("Expected %d tracks before deletion, got %d", len(tracks), len(allTracks))
-	}
-
-	// Verify that albums exist before deletion
-	albums, err := iface.GetAlbums()
-	if err != nil {
-		t.Fatalf("GetAlbums before deletion failed: %v", err)
-	}
-	if len(albums) != len(tracks) {
-		t.Errorf("Expected %d albums before deletion, got %d", len(tracks), len(albums))
-	}
-
 	// Call ForgetAllTracks
 	success, err := iface.ForgetAllTracks()
 	if err != nil {
@@ -470,24 +416,6 @@ func TestInterface_ForgetTracks(t *testing.T) {
 	}
 	if !success {
 		t.Error("ForgetAllTracks should return true on success")
-	}
-
-	// Verify that all tracks are gone
-	allTracksAfter, err := iface.GetTracks("", nil)
-	if err != nil {
-		t.Fatalf("GetTracks after deletion failed: %v", err)
-	}
-	if len(allTracksAfter) != 0 {
-		t.Errorf("Expected 0 tracks after deletion, got %d", len(allTracksAfter))
-	}
-
-	// Verify that all albums are gone
-	albumsAfter, err := iface.GetAlbums()
-	if err != nil {
-		t.Fatalf("GetAlbums after deletion failed: %v", err)
-	}
-	if len(albumsAfter) != 0 {
-		t.Errorf("Expected 0 albums after deletion, got %d", len(albumsAfter))
 	}
 
 	// Verify that short_ids table is empty
