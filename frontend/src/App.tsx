@@ -1,5 +1,6 @@
 import TrackList from './TrackList';
 import { MusicPlayerContext, MusicPlayer } from './MusicPlayer';
+import SearchBar from './SearchBar';
 import { useEffect, useState } from 'react';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
@@ -21,6 +22,9 @@ function App() {
       .then(res => res.json())
       .then(data => setFullTracks(Object.values(data)));
   }, []);
+
+  // Search
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Track queue
   const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
@@ -103,6 +107,9 @@ function App() {
       setEnqueuedTrackIndex,
     }}>
       <div className="app-layout">
+        <div className="search-bar-container">
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        </div>
         <div className="full-tracks">
           <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
         </div>
