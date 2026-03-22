@@ -118,7 +118,7 @@ function App() {
         <div className="full-tracks">
           <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
         </div>
-        <div className="enqueued-tracks">
+        <div className="right-side">
           <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />
         </div>
         <div className="music-player">

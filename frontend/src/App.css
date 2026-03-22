@@ -18,7 +18,7 @@
   overflow-y: auto;
 }
 
-.enqueued-tracks {
+.right-side {
   grid-column: 2;
   grid-row: 2;
   overflow-y: auto;

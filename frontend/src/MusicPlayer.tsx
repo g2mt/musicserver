@@ -53,7 +53,7 @@ export function MusicPlayer() {
   useEffect(() => {
     c.setProgress(0);
     c.setIsPlaying(true);
-  }, [c.currentTrack?.id]);
+  }, [c.currentTrack, c.enqueuedTrackIndex]);
 
   useEffect(() => {
     if (c.isPlaying) audio.play();
@@ -67,7 +67,7 @@ export function MusicPlayer() {
   // Seek audio when progress changes (e.g., from keyboard shortcuts)
   useEffect(() => {
     // Only seek if the change didn't come from the audio's own timeupdate
-    if (Math.abs(audio.currentTime - c.progress) > 0.1) {
+    if (Math.abs(lastProgressUpdateFromAudioRef.current - c.progress) > 0.1) {
       audio.currentTime = c.progress;
     }
   }, [c.progress]);
