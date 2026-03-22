@@ -1,15 +1,7 @@
 import { useEffect, useState } from 'react';
 import { HOST } from './apiserver';
-import Track from './Track';
+import { Track, type TrackData } from './Track';
 import './TrackList.css';
-
-interface TrackData {
-  id: string;
-  short_id: string;
-  name: string;
-  album: string;
-  path: string;
-}
 
 function TrackList() {
   const [tracks, setTracks] = useState<Record<string, TrackData>>({});

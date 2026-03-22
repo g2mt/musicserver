@@ -1,7 +1,7 @@
 import { HOST } from './apiserver';
 import './Track.css';
 
-interface TrackData {
+export interface TrackData {
   id: string;
   short_id: string;
   name: string;
@@ -9,7 +9,7 @@ interface TrackData {
   path: string;
 }
 
-function Track({ shortId, track }: { shortId: string; track: TrackData }) {
+export function Track({ shortId, track }: { shortId: string; track: TrackData }) {
   return (
     <div className="track">
       <img
@@ -25,4 +25,3 @@ function Track({ shortId, track }: { shortId: string; track: TrackData }) {
   );
 }
 
-export default Track;
