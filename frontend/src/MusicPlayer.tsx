@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useMemo, type Dispatch, type SetStateAction, useContext } from 'react';
+import { createContext, useState, useEffect, useMemo, type Dispatch, type SetStateAction, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
@@ -56,9 +56,8 @@ function useAudio(url: string | null) {
 
 export function MusicPlayer() {
   const c = useContext(MusicPlayerContext);
-
-  const audioUrl = c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null;
-  const audio = useAudio(audioUrl);
+  const audio = useAudio(c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null);
+  const lastProgressUpdateFromAudioRef = useRef<number>(0);
 
   useEffect(() => {
     if (c.setProgress) c.setProgress(0);
@@ -74,9 +73,18 @@ export function MusicPlayer() {
     audio.volume = c.muted ? 0 : c.volume;
   }, [c.volume, c.muted]);
 
+  // Seek audio when progress changes (e.g., from keyboard shortcuts)
+  useEffect(() => {
+    // Only seek if the change didn't come from the audio's own timeupdate
+    if (Math.abs(audio.currentTime - c.progress) > 0.1) {
+      audio.currentTime = c.progress;
+    }
+  }, [c.progress]);
+
   useEffect(() => {
     function onEnded() { if (c.setIsPlaying) c.setIsPlaying(false); }
     function onTimeUpdate() {
+      lastProgressUpdateFromAudioRef.current = audio.currentTime;
       if (c.setProgress) c.setProgress(audio.currentTime);
       if (c.setDuration) c.setDuration(audio.duration || 0);
     }

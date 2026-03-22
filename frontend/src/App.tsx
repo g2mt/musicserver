@@ -31,6 +31,48 @@ function App() {
   }
 
   // Keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Ignore if user is typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (e.key) {
+        case ' ':
+          e.preventDefault();
+          setIsPlaying(prev => !prev);
+          break;
+        case 'm':
+          e.preventDefault();
+          setMuted(prev => !prev);
+          break;
+        case 'j':
+          e.preventDefault();
+          setProgress(prev => Math.max(0, prev - 10));
+          break;
+        case 'i':
+          e.preventDefault();
+          setProgress(prev => Math.min(duration, prev + 10));
+          break;
+        case '(':
+          e.preventDefault();
+          setVolume(prev => Math.max(0, prev - 0.05));
+          setMuted(false);
+          break;
+        case ')':
+          e.preventDefault();
+          setVolume(prev => Math.min(1, prev + 0.05));
+          setMuted(false);
+          break;
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [duration]);
 
   return (
     <MusicPlayerContext value={{
