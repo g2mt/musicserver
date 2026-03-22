@@ -103,7 +103,7 @@ func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[
 			orClauses = append(orClauses, "(name LIKE ?)")
 			args = append(args, "%"+word+"%")
 		}
-		if len(orClauses) > 1 {
+		if len(orClauses) > 0 {
 			whereClauses = append(whereClauses, strings.Join(orClauses, " OR "))
 		}
 
