@@ -1,6 +1,6 @@
 import { createContext, useEffect, useMemo, type Dispatch, type SetStateAction, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faPause, faVolumeHigh, faVolumeXmark, faBackwardStep, faForwardStep } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
@@ -103,6 +103,25 @@ export function MusicPlayer() {
     c.setProgress(val);
   }
 
+  // Calculate if back/forward buttons should be disabled
+  const isBackDisabled = c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0;
+  const isForwardDisabled = c.enqueuedTrackIndex === null || 
+    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length;
+
+  function handleBack() {
+    if (isBackDisabled) return;
+    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
+    c.setEnqueuedTrackIndex(prevIndex);
+    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+  }
+
+  function handleForward() {
+    if (isForwardDisabled) return;
+    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
+    c.setEnqueuedTrackIndex(nextIndex);
+    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+  }
+
   return (
     <div className="music-player">
       <input
@@ -116,8 +135,22 @@ export function MusicPlayer() {
       />
       <div className="player-controls">
         <div className="player-left">
+          <button 
+            className="btn" 
+            onClick={handleBack}
+            disabled={isBackDisabled}
+          >
+            <FontAwesomeIcon icon={faBackwardStep} />
+          </button>
           <button className="btn" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
             <FontAwesomeIcon icon={c.isPlaying ? faPause : faPlay} />
+          </button>
+          <button 
+            className="btn" 
+            onClick={handleForward}
+            disabled={isForwardDisabled}
+          >
+            <FontAwesomeIcon icon={faForwardStep} />
           </button>
         </div>
         <div className="player-center">
