@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, type Dispatch, type SetStateAction } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
@@ -14,7 +14,7 @@ export interface TrackData {
   path: string;
 }
 
-export function Track({ track, showEnqueueButton = false }: { track: TrackData, showEnqueueButton?: boolean }) {
+export function Track({ track, enqueueTrack }: { track: TrackData, enqueueTrack?: (_: TrackData) => void }) {
   const { setCurrentTrack } = useContext(MusicPlayerContext);
   return (
     <div className="track">
@@ -27,8 +27,8 @@ export function Track({ track, showEnqueueButton = false }: { track: TrackData, 
         <a className="title" href="#" onClick={e => { e.preventDefault(); if (setCurrentTrack) setCurrentTrack(track); }}>{track.name}</a>
         <span className="album">{track.album}</span>
       </div>
-      {showEnqueueButton && (
-        <button className="btn enqueue-btn" onClick={() => alert(`Enqueue: ${track.name}`)}>
+      {enqueueTrack && (
+        <button className="btn enqueue-btn" onClick={() => enqueueTrack(track)}>
           <FontAwesomeIcon icon={faPlus} />
         </button>
       )}

@@ -1,11 +1,11 @@
 import { Track, type TrackData } from './Track';
 import './TrackList.css';
 
-function TrackList({ tracks, showEnqueueButton = false }: { tracks: TrackData[], showEnqueueButton?: boolean }) {
+function TrackList({ tracks, enqueueTrack }: { tracks: TrackData[], enqueueTrack?: (_: TrackData) => void }) {
   return (
     <div className="track-list">
       {tracks.map(track => (
-        <Track track={track} showEnqueueButton={showEnqueueButton} />
+        <Track track={track} enqueueTrack={enqueueTrack} />
       ))}
     </div>
   );

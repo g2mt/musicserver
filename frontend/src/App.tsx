@@ -16,12 +16,15 @@ function App() {
   }, []);
 
   const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
+  function enqueueTrack(track: TrackData) {
+    setEnqueuedTracks([...enqueuedTracks, track]);
+  }
 
   return (
     <MusicPlayerContext value={{ currentTrack, setCurrentTrack }}>
       <div className="app-layout">
         <div className="full-tracks">
-          <TrackList tracks={fullTracks} showEnqueueButton />
+          <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
         </div>
         <div className="enqueued-tracks">
           <TrackList tracks={enqueuedTracks} />
