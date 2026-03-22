@@ -1,0 +1,25 @@
+.app-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr auto;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+
+  .full-tracks {
+    grid-column: 1;
+    grid-row: 1;
+    overflow-y: auto;
+  }
+
+  .enqueued-tracks {
+    grid-column: 2;
+    grid-row: 1;
+    overflow-y: auto;
+  }
+
+  .music-player {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

@@ -11,7 +11,7 @@ export interface TrackData {
   path: string;
 }
 
-export function Track({ track }: { track: TrackData }) {
+export function Track({ track, showEnqueueButton = false }: { track: TrackData, showEnqueueButton?: boolean }) {
   const { setCurrentTrack } = useContext(MusicPlayerContext);
   return (
     <div className="track">
@@ -24,6 +24,9 @@ export function Track({ track }: { track: TrackData }) {
         <a className="track-title" href="#" onClick={e => { e.preventDefault(); if (setCurrentTrack) setCurrentTrack(track); }}>{track.name}</a>
         <span className="track-album">{track.album}</span>
       </div>
+      {showEnqueueButton && (
+        <button className="track-enqueue" onClick={() => alert(`Enqueue: ${track.name}`)}>+</button>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { MusicPlayerContext, MusicPlayer } from './MusicPlayer';
 import { useEffect, useState } from 'react';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
+import './App.css';
 
 function App() {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
@@ -18,9 +19,17 @@ function App() {
 
   return (
     <MusicPlayerContext value={{ currentTrack, setCurrentTrack }}>
-      <MusicPlayer />
-      <TrackList tracks={fullTracks} />
-      <TrackList tracks={enqueuedTracks} />
+      <div className="app-layout">
+        <div className="full-tracks">
+          <TrackList tracks={fullTracks} showEnqueueButton />
+        </div>
+        <div className="enqueued-tracks">
+          <TrackList tracks={enqueuedTracks} />
+        </div>
+        <div className="music-player">
+          <MusicPlayer />
+        </div>
+      </div>
     </MusicPlayerContext>
   );
 }
