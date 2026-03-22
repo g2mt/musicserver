@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import './SearchBar.css';
 
 interface SearchBarProps {
@@ -33,7 +35,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         className="search-input"
       />
       <button type="submit" className="btn">
-        Search
+        <FontAwesomeIcon icon={faSearch} />
       </button>
     </form>
   );
