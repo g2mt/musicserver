@@ -100,7 +100,7 @@ func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[
 		// Apply word filters
 		orClauses := []string{}
 		for _, word := range search.Words {
-			orClauses = append(orClauses, "name LIKE ?")
+			orClauses = append(orClauses, "(name LIKE ?)")
 			args = append(args, "%"+word+"%")
 		}
 		whereClauses = append(whereClauses, strings.Join(orClauses, " OR "))
