@@ -88,7 +88,9 @@ function App() {
       volume,
       setVolume,
       muted,
-      setMuted
+      setMuted,
+      enqueuedTracks,
+      unqueueTrack,
     }}>
       <div className="app-layout">
         <div className="full-tracks">

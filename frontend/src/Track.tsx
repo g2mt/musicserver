@@ -25,7 +25,7 @@ export function Track({
   enqueueTrack?: (_: TrackData) => void,
   unqueueTrack?: (_: number) => void 
 }) {
-  const { setCurrentTrack } = useContext(MusicPlayerContext);
+  const { setCurrentTrack } = useContext(MusicPlayerContext)!;
   return (
     <div className="track">
       <img
@@ -34,7 +34,7 @@ export function Track({
         alt={track.name}
       />
       <div className="info">
-        <a className="title" href="#" onClick={e => { e.preventDefault(); if (setCurrentTrack) setCurrentTrack(track); }}>{track.name}</a>
+        <a className="title" href="#" onClick={e => { e.preventDefault(); setCurrentTrack(track); }}>{track.name}</a>
         <span className="album">{track.album}</span>
       </div>
       {enqueueTrack && (

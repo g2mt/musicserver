@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, useMemo, type Dispatch, type SetStateAction, useContext, useRef } from 'react';
+import { createContext, useEffect, useMemo, type Dispatch, type SetStateAction, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
@@ -9,33 +9,22 @@ import './common.css';
 
 interface MusicPlayerState {
   currentTrack: TrackData | null;
-  setCurrentTrack: Dispatch<SetStateAction<TrackData | null>> | null;
+  setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
   isPlaying: boolean;
-  setIsPlaying: Dispatch<SetStateAction<boolean>> | null;
+  setIsPlaying: Dispatch<SetStateAction<boolean>>;
   progress: number;
-  setProgress: Dispatch<SetStateAction<number>> | null;
+  setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
-  setDuration: Dispatch<SetStateAction<number>> | null;
+  setDuration: Dispatch<SetStateAction<number>>;
   volume: number;
-  setVolume: Dispatch<SetStateAction<number>> | null;
+  setVolume: Dispatch<SetStateAction<number>>;
   muted: boolean;
-  setMuted: Dispatch<SetStateAction<boolean>> | null;
+  setMuted: Dispatch<SetStateAction<boolean>>;
+  enqueuedTracks: TrackData[];
+  unqueueTrack: (index: number) => void;
 }
 
-export const MusicPlayerContext = createContext<MusicPlayerState>({
-  currentTrack: null,
-  setCurrentTrack: null,
-  isPlaying: false,
-  setIsPlaying: null,
-  progress: 0,
-  setProgress: null,
-  duration: 0,
-  setDuration: null,
-  volume: 1,
-  setVolume: null,
-  muted: false,
-  setMuted: null,
-});
+export const MusicPlayerContext = createContext<MusicPlayerState|null>(null);
 
 function useAudio(url: string | null) {
   const audio = useMemo(() => new Audio(), []);
@@ -55,13 +44,13 @@ function useAudio(url: string | null) {
 }
 
 export function MusicPlayer() {
-  const c = useContext(MusicPlayerContext);
+  const c = useContext(MusicPlayerContext)!;
   const audio = useAudio(c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null);
   const lastProgressUpdateFromAudioRef = useRef<number>(0);
 
   useEffect(() => {
-    if (c.setProgress) c.setProgress(0);
-    if (c.setIsPlaying) c.setIsPlaying(true);
+    c.setProgress(0);
+    c.setIsPlaying(true);
   }, [c.currentTrack?.id]);
 
   useEffect(() => {
@@ -82,11 +71,18 @@ export function MusicPlayer() {
   }, [c.progress]);
 
   useEffect(() => {
-    function onEnded() { if (c.setIsPlaying) c.setIsPlaying(false); }
+    function onEnded() {
+      if (c.enqueuedTracks.length > 0) {
+        c.setCurrentTrack(c.enqueuedTracks[0]);
+        c.unqueueTrack(0);
+      } else {
+        c.setIsPlaying(false);
+      }
+    }
     function onTimeUpdate() {
       lastProgressUpdateFromAudioRef.current = audio.currentTime;
-      if (c.setProgress) c.setProgress(audio.currentTime);
-      if (c.setDuration) c.setDuration(audio.duration || 0);
+      c.setProgress(audio.currentTime);
+      c.setDuration(audio.duration || 0);
     }
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', onEnded);
@@ -94,12 +90,12 @@ export function MusicPlayer() {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('ended', onEnded);
     };
-  }, [audio]);
+  }, [audio, c.enqueuedTracks]);
 
   function onScrub(e: React.ChangeEvent<HTMLInputElement>) {
     const val = Number(e.target.value);
     audio.currentTime = val;
-    if (c.setProgress) c.setProgress(val);
+    c.setProgress(val);
   }
 
   return (
