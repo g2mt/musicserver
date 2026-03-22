@@ -24,3 +24,15 @@
   flex: 1;
   overflow-y: auto;
 }
+
+@media (max-width: 800px) {
+  .app-main {
+    flex-direction: column;
+    overflow: auto;
+  }
+
+  .left-side, .right-side {
+    overflow-y: visible;
+    flex: none;
+  }
+}
