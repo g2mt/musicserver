@@ -1,4 +1,5 @@
 import { HOST } from './apiserver';
+import { useMusicPlayer } from './MusicPlayer';
 import './Track.css';
 
 export interface TrackData {
@@ -10,6 +11,7 @@ export interface TrackData {
 }
 
 export function Track({ shortId, track }: { shortId: string; track: TrackData }) {
+  const { play } = useMusicPlayer();
   return (
     <div className="track">
       <img
@@ -18,7 +20,7 @@ export function Track({ shortId, track }: { shortId: string; track: TrackData })
         alt={track.name}
       />
       <div className="track-info">
-        <span className="track-title">{track.name}</span>
+        <a className="track-title" href="#" onClick={e => { e.preventDefault(); play(track); }}>{track.name}</a>
         <span className="track-album">{track.album}</span>
       </div>
     </div>

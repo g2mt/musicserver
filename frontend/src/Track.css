@@ -28,6 +28,12 @@
 .track-title {
   font-size: 1rem;
   font-weight: 500;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .track-album {

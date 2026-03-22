@@ -1,8 +1,11 @@
 import TrackList from './TrackList';
+import { MusicPlayer } from './MusicPlayer';
 
 function App() {
   return (
-    <TrackList />
+    <MusicPlayer>
+      <TrackList />
+    </MusicPlayer>
   );
 }
 
