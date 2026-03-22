@@ -5,10 +5,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"musicserver/internal/taglib"
+
+	"github.com/fsnotify/fsnotify"
 )
 
+// TODO: add a locking mechanism (a single field, could be an anonymous struct) to Interface to pause collection within the WatchDataDir thread when ScanTracks is called. use slog.Debug to notify when a full scan has started
 func (i *Interface) ScanTracks() (map[string]string, error) {
 	added := make(map[string]string)
 
@@ -48,6 +50,7 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 	return added, nil
 }
 
+// TODO: when the WatchDataDir function is paused from the mechanism mentioned in ScanTracks, stop collecting and discard events already connected, then wait until the function is unpaused. add debug slog prints for event processing
 func (i *Interface) WatchDataDir() error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
