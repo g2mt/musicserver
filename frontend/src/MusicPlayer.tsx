@@ -10,11 +10,31 @@ import './common.css';
 interface MusicPlayerState {
   currentTrack: TrackData | null;
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>> | null;
+  isPlaying: boolean;
+  setIsPlaying: Dispatch<SetStateAction<boolean>> | null;
+  progress: number;
+  setProgress: Dispatch<SetStateAction<number>> | null;
+  duration: number;
+  setDuration: Dispatch<SetStateAction<number>> | null;
+  volume: number;
+  setVolume: Dispatch<SetStateAction<number>> | null;
+  muted: boolean;
+  setMuted: Dispatch<SetStateAction<boolean>> | null;
 }
 
 export const MusicPlayerContext = createContext<MusicPlayerState>({
   currentTrack: null,
   setCurrentTrack: null,
+  isPlaying: false,
+  setIsPlaying: null,
+  progress: 0,
+  setProgress: null,
+  duration: 0,
+  setDuration: null,
+  volume: 1,
+  setVolume: null,
+  muted: false,
+  setMuted: null,
 });
 
 function useAudio(url: string | null) {
@@ -35,20 +55,26 @@ function useAudio(url: string | null) {
 }
 
 export function MusicPlayer() {
-  const { currentTrack } = useContext(MusicPlayerContext);
-
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
+  const { 
+    currentTrack, 
+    isPlaying, 
+    setIsPlaying, 
+    progress, 
+    setProgress, 
+    duration, 
+    setDuration, 
+    volume, 
+    setVolume, 
+    muted, 
+    setMuted 
+  } = useContext(MusicPlayerContext);
 
   const audioUrl = currentTrack ? `${HOST}/track/${currentTrack.short_id}/data` : null;
   const audio = useAudio(audioUrl);
 
   useEffect(() => {
-    setProgress(0);
-    setIsPlaying(true);
+    if (setProgress) setProgress(0);
+    if (setIsPlaying) setIsPlaying(true);
   }, [currentTrack?.id]);
 
   useEffect(() => {
@@ -61,10 +87,10 @@ export function MusicPlayer() {
   }, [volume, muted]);
 
   useEffect(() => {
-    function onEnded() { setIsPlaying(false); }
+    function onEnded() { if (setIsPlaying) setIsPlaying(false); }
     function onTimeUpdate() {
-      setProgress(audio.currentTime);
-      setDuration(audio.duration || 0);
+      if (setProgress) setProgress(audio.currentTime);
+      if (setDuration) setDuration(audio.duration || 0);
     }
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('ended', onEnded);
@@ -77,7 +103,7 @@ export function MusicPlayer() {
   function onScrub(e: React.ChangeEvent<HTMLInputElement>) {
     const val = Number(e.target.value);
     audio.currentTime = val;
-    setProgress(val);
+    if (setProgress) setProgress(val);
   }
 
   return (
@@ -93,7 +119,7 @@ export function MusicPlayer() {
       />
       <div className="player-controls">
         <div className="player-left">
-          <button className="btn" onClick={() => setIsPlaying(p => !p)}>
+          <button className="btn" onClick={() => setIsPlaying && setIsPlaying(p => !p)}>
             <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
           </button>
         </div>
@@ -108,9 +134,12 @@ export function MusicPlayer() {
             max={1}
             step={0.01}
             value={muted ? 0 : volume}
-            onChange={e => { setVolume(Number(e.target.value)); setMuted(false); }}
+            onChange={e => { 
+              if (setVolume) setVolume(Number(e.target.value)); 
+              if (setMuted) setMuted(false); 
+            }}
           />
-          <button className="btn" onClick={() => setMuted(m => !m)}>
+          <button className="btn" onClick={() => setMuted && setMuted(m => !m)}>
             <FontAwesomeIcon icon={muted || volume === 0 ? faVolumeXmark : faVolumeHigh} />
           </button>
         </div>
