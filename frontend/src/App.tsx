@@ -13,6 +13,7 @@ function App() {
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
 
+  // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
   useEffect(() => {
     fetch(`${HOST}/track`)
@@ -20,6 +21,7 @@ function App() {
       .then(data => setFullTracks(Object.values(data)));
   }, []);
 
+  // Track queue
   const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
   function enqueueTrack(track: TrackData) {
     setEnqueuedTracks([...enqueuedTracks, track]);
@@ -27,6 +29,8 @@ function App() {
   function unqueueTrack(index: number) {
     setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
   }
+
+  // Keyboard shortcuts
 
   return (
     <MusicPlayerContext value={{
