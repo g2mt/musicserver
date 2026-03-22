@@ -92,6 +92,8 @@ Returns a mapping of short-id to the corresponding track's metadata, with a maxi
 
 If the `after` parameter is provided, then only the tracks whose ID comes after the parameter lexicographically will be shown. Example: `/track?after=abcdef`
 
+If the `q` parameter is provided, then the tracks will be filtered based on the query `q`.
+
 ### GET `/track/[id]`
 
 Returns the metadata of the track, encoded as JSON. Refer to the [track fields section above](#track-fields).

@@ -98,21 +98,23 @@ func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[
 	// Apply search filters if search is not nil
 	if search != nil {
 		// Apply word filters
+		orClauses := []string{}
 		for _, word := range search.Words {
-			whereClauses = append(whereClauses, "(name LIKE ? OR album LIKE ?)")
-			args = append(args, "%"+word+"%", "%"+word+"%")
+			orClauses = append(orClauses, "name LIKE ?")
+			args = append(args, "%"+word+"%")
 		}
+		whereClauses = append(whereClauses, strings.Join(orClauses, " OR "))
 
 		// Apply negated word filters
 		for _, negated := range search.Negated {
-			whereClauses = append(whereClauses, "(name NOT LIKE ? AND album NOT LIKE ?)")
-			args = append(args, "%"+negated+"%", "%"+negated+"%")
+			whereClauses = append(whereClauses, "(name NOT LIKE ?)")
+			args = append(args, "%"+negated+"%")
 		}
 
 		// Apply operator filters
 		for _, op := range search.Operators {
 			if op.Key == "album" {
-				whereClauses = append(whereClauses, "album LIKE ?")
+				whereClauses = append(whereClauses, "(album LIKE ?)")
 				args = append(args, "%"+op.Value+"%")
 			}
 			// Other operators could be added here in the future
