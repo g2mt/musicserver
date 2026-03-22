@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -101,7 +100,9 @@ func (i *Interface) WatchDataDir() error {
 
 		// Process deleted paths
 		for path := range deletedPaths {
-			fmt.Println("deleted:", path)
+			if err := i.removeTrackByPath(path); err != nil {
+				return err
+			}
 		}
 
 		time.Sleep(10 * time.Second)
