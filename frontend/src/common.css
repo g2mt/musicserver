@@ -1,5 +1,11 @@
 :root {
     font-family: sans-serif;
+    background: #fff;
+    --accent-color: #0000CD;
+    --accent-color-light: #87CEFA;
+    --accent-color-text: #000000;
+    --gray: #666;
+    --shadow: rgba(0, 0, 0, 0.05);
 }
 
 .btn {
@@ -11,7 +17,7 @@
     padding: 0 8px;
 
     &:hover {
-      color: #1db954;
+      color: var(--accent-color);
     }
 
     &[disabled] {

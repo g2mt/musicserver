@@ -28,3 +28,5 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 ### CSS
 
 - Use modern CSS with nested selectors.
+- Use color variables specified in common.css.
+- Animations and transitions should not be used.

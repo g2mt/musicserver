@@ -1,17 +1,15 @@
 .music-player {
   width: 100%;
   height: 100px;
-  background: #fff;
-  border-top: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 -2px 8px var(--shadow);
   z-index: 100;
 
   .scrubber-bar {
     width: 100%;
     height: 4px;
-    accent-color: #1db954;
+    accent-color: var(--accent-color);
     cursor: pointer;
     margin: 0;
     padding: 0;
@@ -47,7 +45,7 @@
 
       .volume-slider {
         width: 90px;
-        accent-color: #1db954;
+        accent-color: var(--accent-color);
         cursor: pointer;
       }
     }
