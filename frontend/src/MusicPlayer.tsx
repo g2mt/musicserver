@@ -5,6 +5,7 @@ import { Track } from './Track';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import './MusicPlayer.css';
+import './common.css';
 
 interface MusicPlayerState {
   currentTrack: TrackData | null;
@@ -92,7 +93,7 @@ export function MusicPlayer() {
       />
       <div className="player-controls">
         <div className="player-left">
-          <button className="play-pause-btn" onClick={() => setIsPlaying(p => !p)}>
+          <button className="btn" onClick={() => setIsPlaying(p => !p)}>
             <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
           </button>
         </div>
@@ -109,7 +110,7 @@ export function MusicPlayer() {
             value={muted ? 0 : volume}
             onChange={e => { setVolume(Number(e.target.value)); setMuted(false); }}
           />
-          <button className="volume-btn" onClick={() => setMuted(m => !m)}>
+          <button className="btn" onClick={() => setMuted(m => !m)}>
             <FontAwesomeIcon icon={muted || volume === 0 ? faVolumeXmark : faVolumeHigh} />
           </button>
         </div>

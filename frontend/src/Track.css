@@ -11,7 +11,7 @@
   }
 }
 
-.track-cover {
+.cover {
   width: 56px;
   height: 56px;
   object-fit: cover;
@@ -19,13 +19,13 @@
   flex-shrink: 0;
 }
 
-.track-info {
+.info {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.track-title {
+.title {
   font-size: 1rem;
   font-weight: 500;
   color: inherit;
@@ -36,12 +36,12 @@
   }
 }
 
-.track-album {
+.album {
   font-size: 0.85rem;
   color: #888;
 }
 
-.track-enqueue {
+.enqueue-btn {
   margin-left: auto;
   flex-shrink: 0;
 }

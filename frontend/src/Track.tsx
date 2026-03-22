@@ -4,6 +4,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
 import { MusicPlayerContext } from './MusicPlayer';
 import './Track.css';
+import './common.css';
 
 export interface TrackData {
   id: string;
@@ -18,16 +19,16 @@ export function Track({ track, showEnqueueButton = false }: { track: TrackData, 
   return (
     <div className="track">
       <img
-        className="track-cover"
+        className="cover"
         src={`${HOST}/track/${track.short_id}/cover`}
         alt={track.name}
       />
-      <div className="track-info">
-        <a className="track-title" href="#" onClick={e => { e.preventDefault(); if (setCurrentTrack) setCurrentTrack(track); }}>{track.name}</a>
-        <span className="track-album">{track.album}</span>
+      <div className="info">
+        <a className="title" href="#" onClick={e => { e.preventDefault(); if (setCurrentTrack) setCurrentTrack(track); }}>{track.name}</a>
+        <span className="album">{track.album}</span>
       </div>
       {showEnqueueButton && (
-        <button className="track-enqueue" onClick={() => alert(`Enqueue: ${track.name}`)}>
+        <button className="btn enqueue-btn" onClick={() => alert(`Enqueue: ${track.name}`)}>
           <FontAwesomeIcon icon={faPlus} />
         </button>
       )}
