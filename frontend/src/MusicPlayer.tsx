@@ -1,4 +1,4 @@
-import { createContext, useContext, useRef, useState, useEffect, useMemo } from 'react';
+import { createContext, useState, useEffect, useMemo, type Dispatch, type SetStateAction, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeHigh, faVolumeXmark } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
@@ -8,17 +8,13 @@ import './MusicPlayer.css';
 
 interface MusicPlayerState {
   currentTrack: TrackData | null;
-  play: (track: TrackData) => void;
+  setCurrentTrack: Dispatch<SetStateAction<TrackData | null>> | null;
 }
 
-const MusicPlayerContext = createContext<MusicPlayerState>({
+export const MusicPlayerContext = createContext<MusicPlayerState>({
   currentTrack: null,
-  play: () => {},
+  setCurrentTrack: null,
 });
-
-export function useMusicPlayer() {
-  return useContext(MusicPlayerContext);
-}
 
 function useAudio(url: string | null) {
   const audio = useMemo(() => new Audio(), []);
@@ -38,7 +34,8 @@ function useAudio(url: string | null) {
 }
 
 export function MusicPlayer() {
-  const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
+  const { currentTrack } = useContext(MusicPlayerContext);
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -48,11 +45,10 @@ export function MusicPlayer() {
   const audioUrl = currentTrack ? `${HOST}/track/${currentTrack.short_id}/data` : null;
   const audio = useAudio(audioUrl);
 
-  function play(track: TrackData) {
-    setCurrentTrack(track);
+  useEffect(() => {
     setProgress(0);
     setIsPlaying(true);
-  }
+  }, [currentTrack?.id]);
 
   useEffect(() => {
     if (isPlaying) audio.play();
@@ -84,42 +80,40 @@ export function MusicPlayer() {
   }
 
   return (
-    <MusicPlayerContext.Provider value={{ currentTrack, play }}>
-      <div className="music-player">
-        <input
-          className="scrubber-bar"
-          type="range"
-          min={0}
-          max={duration || 0}
-          step={0.1}
-          value={progress}
-          onChange={onScrub}
-        />
-        <div className="player-controls">
-          <div className="player-left">
-            <button className="play-pause-btn" onClick={() => setIsPlaying(p => !p)}>
-              <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
-            </button>
-          </div>
-          <div className="player-center">
-            {currentTrack && <Track shortId={currentTrack.short_id} track={currentTrack} />}
-          </div>
-          <div className="player-right">
-            <input
-              className="volume-slider"
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              value={muted ? 0 : volume}
-              onChange={e => { setVolume(Number(e.target.value)); setMuted(false); }}
-            />
-            <button className="volume-btn" onClick={() => setMuted(m => !m)}>
-              <FontAwesomeIcon icon={muted || volume === 0 ? faVolumeXmark : faVolumeHigh} />
-            </button>
-          </div>
+    <div className="music-player">
+      <input
+        className="scrubber-bar"
+        type="range"
+        min={0}
+        max={duration || 0}
+        step={0.1}
+        value={progress}
+        onChange={onScrub}
+      />
+      <div className="player-controls">
+        <div className="player-left">
+          <button className="play-pause-btn" onClick={() => setIsPlaying(p => !p)}>
+            <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} />
+          </button>
+        </div>
+        <div className="player-center">
+          {currentTrack && <Track track={currentTrack} />}
+        </div>
+        <div className="player-right">
+          <input
+            className="volume-slider"
+            type="range"
+            min={0}
+            max={1}
+            step={0.01}
+            value={muted ? 0 : volume}
+            onChange={e => { setVolume(Number(e.target.value)); setMuted(false); }}
+          />
+          <button className="volume-btn" onClick={() => setMuted(m => !m)}>
+            <FontAwesomeIcon icon={muted || volume === 0 ? faVolumeXmark : faVolumeHigh} />
+          </button>
         </div>
       </div>
-    </MusicPlayerContext.Provider>
+    </div>
   );
 }
