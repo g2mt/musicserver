@@ -203,15 +203,28 @@ func TestInterface_GetTracks(t *testing.T) {
 		t.Errorf("Expected %d tracks, got %d", len(tracks), len(result))
 	}
 
-	// Verify each track's short ID maps to correct name
+	// Verify each track's short ID maps to correct track metadata
 	for _, track := range tracks {
-		name, ok := result[track.ShortID]
+		resultTrack, ok := result[track.ShortID]
 		if !ok {
 			t.Errorf("Short ID %s not found in result", track.ShortID)
 			continue
 		}
-		if name != track.Name {
-			t.Errorf("For short ID %s, expected name %s, got %s", track.ShortID, track.Name, name)
+		// Compare the track fields
+		if resultTrack.Name != track.Name {
+			t.Errorf("For short ID %s, expected name %s, got %s", track.ShortID, track.Name, resultTrack.Name)
+		}
+		if resultTrack.Path != track.Path {
+			t.Errorf("For short ID %s, expected path %s, got %s", track.ShortID, track.Path, resultTrack.Path)
+		}
+		if resultTrack.Album != track.Album {
+			t.Errorf("For short ID %s, expected album %s, got %s", track.ShortID, track.Album, resultTrack.Album)
+		}
+		if resultTrack.LongID != track.LongID {
+			t.Errorf("For short ID %s, expected long ID %s, got %s", track.ShortID, track.LongID, resultTrack.LongID)
+		}
+		if resultTrack.ShortID != track.ShortID {
+			t.Errorf("For short ID %s, expected short ID %s, got %s", track.ShortID, track.ShortID, resultTrack.ShortID)
 		}
 	}
 }

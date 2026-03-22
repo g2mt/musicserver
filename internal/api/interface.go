@@ -76,8 +76,8 @@ func (i *Interface) Close() error {
 	return i.db.Close()
 }
 
-func (i *Interface) GetTracks(afterId string) (map[string]string, error) {
-	query := "SELECT short_id, name FROM tracks"
+func (i *Interface) GetTracks(afterId string) (map[string]schema.Track, error) {
+	query := "SELECT id, short_id, name, path, album FROM tracks"
 	args := []interface{}{}
 
 	if afterId != "" {
@@ -103,13 +103,13 @@ func (i *Interface) GetTracks(afterId string) (map[string]string, error) {
 	}
 	defer rows.Close()
 
-	result := make(map[string]string)
+	result := make(map[string]schema.Track)
 	for rows.Next() {
-		var shortID, name string
-		if err := rows.Scan(&shortID, &name); err != nil {
+		var track schema.Track
+		if err := rows.Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Album); err != nil {
 			return nil, err
 		}
-		result[shortID] = name
+		result[track.ShortID] = track
 	}
 	return result, nil
 }
