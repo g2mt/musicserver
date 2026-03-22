@@ -328,6 +328,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	return track.ShortID, nil
 }
 
+func (i *Interface) removeTrackByPath(path string) error {}
+
 func (i *Interface) GetAlbums() ([]string, error) {
 	rows, err := i.db.Query("SELECT name FROM albums")
 	if err != nil {
