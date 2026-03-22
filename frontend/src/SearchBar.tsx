@@ -20,11 +20,6 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
     setInputValue(e.target.value);
   };
 
-  const handleClear = () => {
-    setInputValue('');
-    setSearchQuery('');
-  };
-
   return (
     <form className="search-bar" onSubmit={handleSubmit}>
       <input

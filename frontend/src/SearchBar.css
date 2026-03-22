@@ -20,34 +20,3 @@
     border-color: #1db954;
   }
 }
-
-.search-btn,
-.clear-btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.search-btn {
-  background-color: #1db954;
-  color: white;
-
-  &:hover {
-    background-color: #1ed760;
-  }
-}
-
-.clear-btn {
-  background-color: #f0f0f0;
-  color: #333;
-
-  &:hover:not([disabled]) {
-    background-color: #e0e0e0;
-  }
-
-  &[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
