@@ -1,0 +1,16 @@
+:root {
+    font-family: sans-serif;
+}
+
+.btn {
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: #222;
+    padding: 0 8px;
+
+    &:hover {
+      color: #1db954;
+    }
+}
