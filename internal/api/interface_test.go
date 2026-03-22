@@ -334,7 +334,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		firstID = id
 		break
 	}
-	
+
 	search7 := &searchparser.Result{
 		Words: []string{"Rock"},
 	}
@@ -423,6 +423,10 @@ func TestInterface_GetTrackData(t *testing.T) {
 	if string(data2) != track.Path {
 		t.Errorf("When using short ID: expected path %s, got %s", track.Path, string(data2))
 	}
+}
+
+func TestInterface_ForgetTracks(t *testing.T) {
+	//TODO
 }
 
 func TestInterface_GetAlbums(t *testing.T) {
