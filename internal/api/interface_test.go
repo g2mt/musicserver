@@ -10,21 +10,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func setupTestDB(t *testing.T) *sql.DB {
+func setupIface(t *testing.T) *Interface {
 	t.Helper()
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatalf("Failed to open test database: %v", err)
 	}
-	return db
+	return &Interface{
+		db:        db,
+		config:    &schema.Config{},
+		LongIdGen: defaultLongIdGen,
+	}
 }
 
 func TestInterface_InitDb(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
+	db := iface.db
 	err := iface.InitDb()
 	if err != nil {
 		t.Fatalf("InitDb failed: %v", err)
@@ -45,11 +46,8 @@ func TestInterface_InitDb(t *testing.T) {
 }
 
 func TestInterface_AddTrack(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
+	db := iface.db
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -100,11 +98,7 @@ func TestInterface_AddTrack(t *testing.T) {
 }
 
 func TestInterface_AddTrackConflictResolution(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	iface.LongIdGen = func(track *schema.Track) string {
 		p := ""
 		if track.Name == "Track One" {
@@ -181,11 +175,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 }
 
 func TestInterface_GetTracks(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -204,7 +194,7 @@ func TestInterface_GetTracks(t *testing.T) {
 		}
 	}
 
-	result, err := iface.GetTracks()
+	result, err := iface.GetTracks("")
 	if err != nil {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
@@ -227,11 +217,7 @@ func TestInterface_GetTracks(t *testing.T) {
 }
 
 func TestInterface_GetTrackById(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -269,11 +255,7 @@ func TestInterface_GetTrackById(t *testing.T) {
 }
 
 func TestInterface_GetTrackData(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -311,11 +293,7 @@ func TestInterface_GetTrackData(t *testing.T) {
 }
 
 func TestInterface_GetAlbums(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -357,11 +335,7 @@ func TestInterface_GetAlbums(t *testing.T) {
 }
 
 func TestInterface_GetAlbumByName(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -409,11 +383,7 @@ func TestInterface_GetAlbumByName(t *testing.T) {
 }
 
 func TestInterface_GetAlbumByName_NotFound(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -425,11 +395,7 @@ func TestInterface_GetAlbumByName_NotFound(t *testing.T) {
 }
 
 func TestInterface_GetTrackById_NotFound(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}
@@ -441,11 +407,7 @@ func TestInterface_GetTrackById_NotFound(t *testing.T) {
 }
 
 func TestInterface_GetTrackData_NotFound(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-
-	config := &schema.Config{}
-	iface := NewInterface(db, config)
+	iface := setupIface(t)
 	if err := iface.InitDb(); err != nil {
 		t.Fatalf("InitDb failed: %v", err)
 	}

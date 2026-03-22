@@ -26,6 +26,11 @@ const MaxIdLength = 64
 const MinShortIdLength = 6
 const MaxPageCount = 50
 
+func defaultLongIdGen(track *schema.Track) string {
+	hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
+	return hex.EncodeToString(hash[:])
+}
+
 func NewInterface(config *schema.Config) (*Interface, error) {
 	// Open sql database in db_path/${SQL_DB_PATH}
 	dbDir := filepath.Join(config.DbDir, schema.SqlDbPath)
@@ -41,12 +46,9 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	}
 
 	return &Interface{
-		db:     db,
-		config: config,
-		LongIdGen: func(track *schema.Track) string {
-			hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
-			return hex.EncodeToString(hash[:])
-		},
+		db:        db,
+		config:    config,
+		LongIdGen: defaultLongIdGen,
 	}, nil
 }
 

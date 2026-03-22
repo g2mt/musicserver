@@ -81,12 +81,12 @@ A track has the following fields:
 
 ### GET `/track`
 
-Returns a mapping of short-id to the corresponding track's name, with a maximum of 50 items per page:
+Returns a mapping of short-id to the corresponding track's metadata, with a maximum of 50 items per page:
 
 ```
 {
-  "abcdef": "track name 1",
-  "xyz123": "track name 2"
+  "abcdef": {"id": ..., "name": "track name 1", ...},
+  "xyz123": {"id": ..., "name": "track name 2", ...},
 }
 ```
 
