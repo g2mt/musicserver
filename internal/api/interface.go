@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -394,7 +393,13 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if afterParam, ok := params["after"]; ok {
 				afterId = afterParam
 			}
-			response, err = i.GetTracks(afterId)
+			var search searchparser.Result
+			if searchParam, ok := params["q"]; ok {
+				search = searchparser.Parse(searchParam)
+				response, err = i.GetTracks(afterId, &search)
+			} else {
+				response, err = i.GetTracks(afterId, nil)
+			}
 		} else if method == "POST" {
 			response, err = i.ScanTracks()
 		} else {
