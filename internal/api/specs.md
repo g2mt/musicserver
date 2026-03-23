@@ -49,6 +49,25 @@ Under the UNIX endpoint, the response will be transferred as a stream of bytes w
 >       - `Interface.InitDb`: initializes every relevant table
 >       - additional methods for handling each API request: `getTracks`, `getTrackById(id)`,...
 
+## General
+
+### GET `/progress`
+
+Returns a JSON mapping between a key for an ongoing process, and its progress:
+
+```json
+{
+  "abcdef": {
+    "value": 0,
+    "maxValue": 100,
+  },
+  "xyz123": {
+    "value": 32,
+    "maxValue": 128,
+  }
+}
+```
+
 ## Tracks
 
 Tracks are music files, indexed by an ID.
@@ -83,7 +102,7 @@ A track has the following fields:
 
 Returns a mapping of short-id to the corresponding track's metadata, with a maximum of 50 items per page:
 
-```
+```json
 {
   "abcdef": {"id": ..., "name": "track name 1", ...},
   "xyz123": {"id": ..., "name": "track name 2", ...},
@@ -130,7 +149,7 @@ An album has the following fields:
 
 Returns a list of every album names:
 
-```
+```json
 ["album 1", "album 2"]
 ```
 
