@@ -24,6 +24,7 @@ export function Track({
   enqueueTrack?: (_: TrackData) => void,
   unqueueTrack?: (_: number) => void 
 }) {
+  const c = useContext(MusicPlayerContext)!;
   const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } = useContext(MusicPlayerContext)!;
   const isHighlighted = index !== undefined && index === enqueuedTrackIndex;
   return (
@@ -39,7 +40,10 @@ export function Track({
             setEnqueuedTrackIndex(index);
           setCurrentTrack(track);
         }}>{track.name}</a>
-        <span className="track-album">{track.album}</span>
+        <a className="track-album" href="#" onClick={e => {
+          e.preventDefault();
+          c.setSearchQuery(`album:"${track.album}"`);
+        }}>{track.album}</a>
       </div>
       {enqueueTrack && (
         <button className="icon-btn track-queue-btn" onClick={() => enqueueTrack(track)}>

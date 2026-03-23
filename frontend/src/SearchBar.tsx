@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faForwardStep, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { MusicPlayerContext, useBackForward } from './MusicPlayer';
@@ -17,6 +17,10 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
+
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
 
   return (
     <form className="search-bar" onSubmit={e => {

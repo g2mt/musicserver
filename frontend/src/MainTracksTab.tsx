@@ -9,8 +9,16 @@ import './MainTracksTab.css';
 export function MainTracksTab({
   tracks,
 }: {
-  tracks: TrackData[],
+  tracks: TrackData[]|null,
 }) {
+  if (tracks === null) {
+    return (
+      <div className="main-tracks-controls">
+        No tracks found
+      </div>
+    );
+  }
+
   const c = useContext(MusicPlayerContext)!;
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
