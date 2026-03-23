@@ -32,7 +32,7 @@ export function MainTracksTab({
     <div className="main-tracks-controls">
       <button
         className="btn"
-        onClick={() => firstTrack && setSearchQueryAndScroll(`before:${firstTrack.id}`)}
+        onClick={() => firstTrack && setSearchQueryAndScroll(`before:${firstTrack.short_id}`)}
         disabled={!firstTrack}
         title="Previous"
       >
@@ -41,7 +41,7 @@ export function MainTracksTab({
       </button>
       <button
         className="btn"
-        onClick={() => lastTrack && setSearchQueryAndScroll(`after:${lastTrack.id}`)}
+        onClick={() => lastTrack && setSearchQueryAndScroll(`after:${lastTrack.short_id}`)}
         disabled={!lastTrack}
         title="Next"
       >

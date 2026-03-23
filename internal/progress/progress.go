@@ -41,9 +41,12 @@ func (p *Progress) ToJSON() ([]byte, error) {
 	}
 	out := make(map[string]progressJSON)
 	for name, ticker := range p.progresses {
-		out[name] = progressJSON{
-			Value:    ticker.Value.Load(),
-			MaxValue: ticker.MaxValue.Load(),
+		MaxValue := ticker.MaxValue.Load()
+		if MaxValue > 0 {
+			out[name] = progressJSON{
+				Value:    ticker.Value.Load(),
+				MaxValue: ticker.MaxValue.Load(),
+			}
 		}
 	}
 	return json.Marshal(out)
