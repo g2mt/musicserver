@@ -4,6 +4,8 @@ import { faPlay, faPause, faVolumeHigh, faVolumeXmark, faBackwardStep, faForward
 import { Track } from './Track';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
+import { useWindowWidth } from './useWindowWidth';
+import { PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import './MusicPlayer.css';
 
 interface MusicPlayerState {
@@ -134,9 +136,11 @@ export function MusicPlayer() {
   }
 
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
+  const windowWidth = useWindowWidth();
+  const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
   return (
-    <div className="music-player">
+    <div className={`music-player${collapsed ? ' collapsed' : ''}`}>
       <input
         className="scrubber-bar"
         type="range"
