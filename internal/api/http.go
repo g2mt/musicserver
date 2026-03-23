@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 )
 
@@ -27,7 +28,10 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 
 	response, contentType, err := r.iface.handleRequest(req.URL.Path, req.Method, params)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		data, _ := json.Marshal(struct {
+			Error string `json:"error"`
+		}{Error: err.Error()})
+		http.Error(w, string(data), http.StatusInternalServerError)
 		return
 	}
 
