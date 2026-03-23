@@ -26,7 +26,7 @@ function SettingsTab() {
     <div className="settings-tab">
       <h2>Settings</h2>
       <hr />
-      <h2>Progress</h2>
+      <h2>Ongoing tasks</h2>
       <table className="progress-table">
         <thead>
           <tr>
