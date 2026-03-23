@@ -116,9 +116,11 @@ function App() {
       muted,
       setMuted,
       enqueuedTracks,
+      enqueueTrack,
       unqueueTrack,
       enqueuedTrackIndex,
       setEnqueuedTrackIndex,
+      setSearchQuery,
     }}>
       <ToastContainer position="bottom-right" theme="dark" />
       <div className="app-layout">
@@ -143,7 +145,7 @@ function App() {
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
-            {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} enqueueTrack={enqueueTrack} setSearchQuery={setSearchQuery} />}
+            {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>
           <div className="right-side">

@@ -21,9 +21,11 @@ interface MusicPlayerState {
   muted: boolean;
   setMuted: Dispatch<SetStateAction<boolean>>;
   enqueuedTracks: TrackData[];
+  enqueueTrack: (_: TrackData) => void;
   unqueueTrack: (index: number) => void;
   enqueuedTrackIndex: number|null;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
+  setSearchQuery: (_: string) => void;
 }
 
 export const MusicPlayerContext = createContext<MusicPlayerState|null>(null);

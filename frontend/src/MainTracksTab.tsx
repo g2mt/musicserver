@@ -2,23 +2,21 @@ import TrackList from './TrackList';
 import type { TrackData } from './Track';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useContext, useRef } from 'react';
+import { MusicPlayerContext } from './MusicPlayer';
 import './MainTracksTab.css';
-import { useRef } from 'react';
 
 export function MainTracksTab({
   tracks,
-  enqueueTrack,
-  setSearchQuery
 }: {
   tracks: TrackData[],
-  enqueueTrack?: (_: TrackData) => void,
-  setSearchQuery: (_: string) => void
 }) {
+  const c = useContext(MusicPlayerContext)!;
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
   const elRef = useRef<HTMLElement|null>(null);
   const setSearchQueryAndScroll = (text: string) => {
-    setSearchQuery(text);
+    c.setSearchQuery(text);
     elRef.current?.scrollIntoView({ block: "start" });
   };
 
@@ -48,7 +46,7 @@ export function MainTracksTab({
   return (
     <div className="main-tracks-tab" ref={elRef}>
       {controls}
-      <TrackList tracks={tracks} enqueueTrack={enqueueTrack} />
+      <TrackList tracks={tracks} enqueueTrack={c.enqueueTrack} />
       {controls}
     </div>
   );
