@@ -13,14 +13,43 @@ import (
 
 const WatchDirInterval = 10 * time.Second
 
+// countFiles counts the number of files (non-directories) in the given path
+func countFiles(path string) (int32, error) {
+	count := int32(0)
+	err := filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			count++
+		}
+		return nil
+	})
+	return count, err
+}
+
 func (i *Interface) ScanTracks() (map[string]string, error) {
 	i.scanMu.Lock()
 	defer i.scanMu.Unlock()
 
 	slog.Debug("full scan started")
 
+	// First, count total files for progress tracking
+	totalFiles, err := countFiles(i.config.DataPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Bind progress ticker
+	ticker, err := i.prog.Bind("scanTracks")
+	if err != nil {
+		return nil, err
+	}
+	defer i.prog.Unbind("scanTracks")
+	ticker.MaxValue.Store(totalFiles)
+
 	added := make(map[string]string)
-	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
+	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -46,6 +75,9 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 
 		// Successfully added, record in result map
 		added[shortID] = track.Name
+
+		// Update progress
+		ticker.Value.Add(1)
 		return nil
 	})
 
