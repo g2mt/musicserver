@@ -31,7 +31,6 @@ export function Track({
       <img
         className="track-cover"
         src={`${HOST}/track/${track.short_id}/cover`}
-        alt={track.name}
       />
       <div className="track-info">
         <a className="track-title" href="#" onClick={e => {

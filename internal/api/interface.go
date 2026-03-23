@@ -3,6 +3,7 @@ package api
 import (
 	"crypto/sha256"
 	"database/sql"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -19,6 +20,9 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 )
+
+const CoverFallbackMimetype = "image/png"
+const CoverFallback = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0lEQVR4AQEEAPv/ACEhIQDKAGSaOw/yAAAAAElFTkSuQmCC"
 
 type Interface struct {
 	db     *sql.DB
@@ -558,7 +562,11 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				return nil, "", err
 			}
 			if data == nil {
-				return nil, "", errors.New("cover not found")
+				data, err = base64.StdEncoding.DecodeString(CoverFallback)
+				if err != nil {
+					return nil, "", err
+				}
+				mimeType = CoverFallbackMimetype
 			}
 			return data, mimeType, nil
 		} else {
