@@ -1,4 +1,5 @@
 import TrackList from './TrackList';
+import { MainTracksTab } from './MainTracksTab';
 import SettingsTab from './SettingsTab';
 import { MusicPlayerContext, MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
@@ -142,7 +143,7 @@ function App() {
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
-            {leftTab === 'tracks' && <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />}
+            {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} enqueueTrack={enqueueTrack} setSearchQuery={setSearchQuery} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>
           <div className="right-side">
