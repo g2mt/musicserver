@@ -35,5 +35,16 @@ func (p *Progress) Unbind(name string) {
 }
 
 func (p *Progress) ToJSON() ([]byte, error) {
-	return json.Marshal(p.progresses)
+	type progressJSON struct {
+		Value    int32 `json:"value"`
+		MaxValue int32 `json:"max_value"`
+	}
+	out := make(map[string]progressJSON)
+	for name, ticker := range p.progresses {
+		out[name] = progressJSON{
+			Value:    ticker.Value.Load(),
+			MaxValue: ticker.MaxValue.Load(),
+		}
+	}
+	return json.Marshal(out)
 }
