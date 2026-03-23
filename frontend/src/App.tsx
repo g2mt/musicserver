@@ -5,6 +5,8 @@ import SearchBar from './SearchBar';
 import { useEffect, useState } from 'react';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
+import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './App.css';
 
 function App() {
@@ -126,12 +128,16 @@ function App() {
                 className={`tab-btn ${leftTab === 'tracks' ? 'active' : ''}`}
                 onClick={() => setLeftTab('tracks')}
                 title="Tracks"
-              >🎵</button>
+              >
+                <FontAwesomeIcon icon={faMusic} />
+              </button>
               <button
                 className={`tab-btn ${leftTab === 'settings' ? 'active' : ''}`}
                 onClick={() => setLeftTab('settings')}
                 title="Settings"
-              >⚙️</button>
+              >
+                <FontAwesomeIcon icon={faGear} />
+              </button>
             </div>
             {leftTab === 'tracks' && <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />}
             {leftTab === 'settings' && <SettingsTab />}
