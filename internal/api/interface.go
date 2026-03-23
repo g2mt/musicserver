@@ -501,6 +501,10 @@ func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
 	return album, nil
 }
 
+func (i *Interface) GetProgress() ([]byte, error) {
+	return i.prog.ToJSON()
+}
+
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out []byte, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
@@ -527,6 +531,11 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
+	} else if path == "/progress" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		response, err = i.GetProgress()
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
