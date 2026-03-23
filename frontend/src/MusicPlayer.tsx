@@ -25,6 +25,7 @@ interface MusicPlayerState {
   unqueueTrack: (index: number) => void;
   enqueuedTrackIndex: number|null;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
+  searchQuery: string;
   setSearchQuery: (_: string) => void;
 }
 

@@ -120,6 +120,7 @@ function App() {
       unqueueTrack,
       enqueuedTrackIndex,
       setEnqueuedTrackIndex,
+      searchQuery,
       setSearchQuery,
     }}>
       <ToastContainer position="bottom-right" theme="dark" />

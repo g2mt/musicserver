@@ -23,8 +23,8 @@ export function MainTracksTab({
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
   const elRef = useRef<HTMLElement|null>(null);
-  const setSearchQueryAndScroll = (text: string) => {
-    c.setSearchQuery(text);
+  const updateQuery = (text: string) => {
+    c.setSearchQuery(c.searchQuery.replace(/ *((\b(after|before):[^ ]+)|$)/, ` ${text}`).trim());
     elRef.current?.scrollIntoView({ block: "start" });
   };
 
@@ -32,7 +32,7 @@ export function MainTracksTab({
     <div className="main-tracks-controls">
       <button
         className="btn"
-        onClick={() => firstTrack && setSearchQueryAndScroll(`before:${firstTrack.short_id}`)}
+        onClick={() => firstTrack && updateQuery(`before:${firstTrack.short_id}`)}
         disabled={!firstTrack}
         title="Previous"
       >
@@ -41,7 +41,7 @@ export function MainTracksTab({
       </button>
       <button
         className="btn"
-        onClick={() => lastTrack && setSearchQueryAndScroll(`after:${lastTrack.short_id}`)}
+        onClick={() => lastTrack && updateQuery(`after:${lastTrack.short_id}`)}
         disabled={!lastTrack}
         title="Next"
       >
