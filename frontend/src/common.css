@@ -3,9 +3,11 @@
     background: #fff;
     --content-bg: #fff;
     --accent-color: #0000CD;
+    --accent-color-text: #FFFFFF;
     --accent-color-light: #87CEFA;
-    --accent-color-text: #000000;
-    --gray: #666;
+    --accent-color-light-text: #000000;
+    --gray: #ccc;
+    --light-gray: #ddd;
     --shadow: rgba(0, 0, 0, 0.05);
     --thumbnail-size: 56px;
     --border-radius: 4px;
@@ -16,11 +18,11 @@
 }
 
 .btn {
-  background: var(--accent-color);
-  color: var(--accent-color-text);
+  background: var(--light-gray);
   cursor: pointer;
-  padding: 5px;
+  padding: 8px;
   border-radius: var(--border-radius);
+  border: 1px solid var(--gray);
 }
 
 .icon-btn {
@@ -36,7 +38,7 @@
     }
 
     &[disabled] {
-      color: #ccc;
+      color: var(--light-gray);
       cursor: not-allowed;
     }
 }

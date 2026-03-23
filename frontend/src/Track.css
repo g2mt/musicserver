@@ -8,9 +8,9 @@
 
   &:hover, &.highlighted {
     background: var(--accent-color-light);
-    color: var(--accent-color-text);
-    .album {
-      color: var(--accent-color-text);
+    color: var(--accent-color-light-text);
+    .track-album {
+      color: var(--accent-color-light-text);
     }
   }
 }
