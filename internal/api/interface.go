@@ -96,6 +96,9 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 	args := []interface{}{}
 	whereClauses := []string{}
 
+	var longBeforeId string
+	var err error
+
 	// Apply search filters if search is not nil
 	if search != nil {
 		// Apply word filters
@@ -120,7 +123,6 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 			case "after":
 				longAfterId, err := i.resolveTrackShortId(op.Value)
 				if err != nil {
-					// If not found, treat as no afterId
 					longAfterId = ""
 				}
 				if longAfterId != "" {
@@ -128,9 +130,8 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 					args = append(args, longAfterId)
 				}
 			case "before":
-				longBeforeId, err := i.resolveTrackShortId(op.Value)
+				longBeforeId, err = i.resolveTrackShortId(op.Value)
 				if err != nil {
-					// If not found, treat as no afterId
 					longBeforeId = ""
 				}
 				if longBeforeId != "" {
@@ -149,9 +150,17 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 		query += " WHERE " + strings.Join(whereClauses, " AND ")
 	}
 
-	// Order by id (which is the long ID) to ensure consistent sorting
-	query += " ORDER BY id LIMIT ?"
-	args = append(args, MaxPageCount)
+	// Ordering
+
+	if longBeforeId != "" {
+		query = "SELECT * FROM (" +
+			query +
+			" ORDER BY id DESC LIMIT ?) as sub ORDER BY id ASC"
+		args = append(args, MaxPageCount)
+	} else {
+		query += " ORDER BY id LIMIT ?"
+		args = append(args, MaxPageCount)
+	}
 
 	rows, err := i.db.Query(query, args...)
 	if err != nil {
