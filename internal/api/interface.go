@@ -91,23 +91,10 @@ func (i *Interface) Close() error {
 	return i.db.Close()
 }
 
-func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[string]schema.Track, error) {
+func (i *Interface) GetTracks(search *searchparser.Result) (map[string]schema.Track, error) {
 	query := "SELECT id, short_id, name, path, album FROM tracks"
 	args := []interface{}{}
 	whereClauses := []string{}
-
-	if afterId != "" {
-		// First, get the long ID for the afterId (which could be short or long)
-		longAfterId, err := i.resolveTrackShortId(afterId)
-		if err != nil {
-			// If not found, treat as no afterId
-			longAfterId = ""
-		}
-		if longAfterId != "" {
-			whereClauses = append(whereClauses, "id > ?")
-			args = append(args, longAfterId)
-		}
-	}
 
 	// Apply search filters if search is not nil
 	if search != nil {
@@ -129,11 +116,22 @@ func (i *Interface) GetTracks(afterId string, search *searchparser.Result) (map[
 
 		// Apply operator filters
 		for _, op := range search.Operators {
-			if op.Key == "album" {
+			switch op.Key {
+			case "after":
+				// First, get the long ID for the afterId (which could be short or long)
+				longAfterId, err := i.resolveTrackShortId(op.Value)
+				if err != nil {
+					// If not found, treat as no afterId
+					longAfterId = ""
+				}
+				if longAfterId != "" {
+					whereClauses = append(whereClauses, "id > ?")
+					args = append(args, longAfterId)
+				}
+			case "album":
 				whereClauses = append(whereClauses, "(album LIKE ?)")
 				args = append(args, "%"+op.Value+"%")
 			}
-			// Other operators could be added here in the future
 		}
 	}
 
@@ -514,16 +512,12 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
-			afterId := ""
-			if afterParam, ok := params["after"]; ok {
-				afterId = afterParam
-			}
 			var search searchparser.Result
 			if searchParam, ok := params["q"]; ok {
 				search = searchparser.Parse(searchParam)
-				response, err = i.GetTracks(afterId, &search)
+				response, err = i.GetTracks(&search)
 			} else {
-				response, err = i.GetTracks(afterId, nil)
+				response, err = i.GetTracks(nil)
 			}
 		} else if method == "POST" {
 			response, err = i.ScanTracks()

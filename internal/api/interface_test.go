@@ -197,7 +197,7 @@ func TestInterface_GetTracks(t *testing.T) {
 		}
 	}
 
-	result, err := iface.GetTracks("", nil)
+	result, err := iface.GetTracks(nil)
 	if err != nil {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
