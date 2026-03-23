@@ -7,6 +7,8 @@ import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function App() {
@@ -117,6 +119,7 @@ function App() {
       enqueuedTrackIndex,
       setEnqueuedTrackIndex,
     }}>
+      <ToastContainer position="bottom-right" theme="dark" />
       <div className="app-layout">
         <div className="search-bar-container">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
