@@ -7,8 +7,8 @@ import (
 )
 
 type ProgressTicker struct {
-	Value    atomic.Int32 `json:"value"`
-	MaxValue atomic.Int32 `json:"max_value"`
+	Value    atomic.Int32
+	MaxValue atomic.Int32
 }
 
 type Progress struct {
