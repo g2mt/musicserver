@@ -1,4 +1,5 @@
 import TrackList from './TrackList';
+import SettingsTab from './SettingsTab';
 import { MusicPlayerContext, MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
 import { useEffect, useState } from 'react';
@@ -46,6 +47,9 @@ function App() {
       setEnqueuedTrackIndex(null);
     }
   }
+
+  // Left-side tab
+  const [leftTab, setLeftTab] = useState<'tracks' | 'settings'>('tracks');
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -117,7 +121,20 @@ function App() {
         </div>
         <div className="app-main">
           <div className="left-side">
-            <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />
+            <div className="tab-bar">
+              <button
+                className={`tab-btn ${leftTab === 'tracks' ? 'active' : ''}`}
+                onClick={() => setLeftTab('tracks')}
+                title="Tracks"
+              >🎵</button>
+              <button
+                className={`tab-btn ${leftTab === 'settings' ? 'active' : ''}`}
+                onClick={() => setLeftTab('settings')}
+                title="Settings"
+              >⚙️</button>
+            </div>
+            {leftTab === 'tracks' && <TrackList tracks={fullTracks} enqueueTrack={enqueueTrack} />}
+            {leftTab === 'settings' && <SettingsTab />}
           </div>
           <div className="right-side">
             <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />

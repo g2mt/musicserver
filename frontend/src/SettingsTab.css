@@ -1,0 +1,34 @@
+@import url("common.css");
+
+.settings-tab {
+  padding: 16px;
+
+  & h2 {
+    margin-bottom: 8px;
+  }
+
+  & hr {
+    border: none;
+    border-top: 1px solid var(--gray);
+    margin: 16px 0;
+  }
+}
+
+.progress-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+
+  & th, & td {
+    text-align: left;
+    padding: 6px 8px;
+  }
+
+  & th {
+    border-bottom: 1px solid var(--gray);
+  }
+
+  & progress {
+    width: 100%;
+  }
+}
