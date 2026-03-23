@@ -26,7 +26,7 @@ function App() {
   useEffect(() => {
     fetch(`${HOST}/track`)
       .then(res => res.json())
-      .then(data => setFullTracks(Object.values(data)));
+      .then(data => setFullTracks(data));
   }, []);
 
   // Search
@@ -34,7 +34,7 @@ function App() {
   useEffect(() => {
     fetch(`${HOST}/track?q=${encodeURIComponent(searchQuery)}`)
       .then(res => res.json())
-      .then(data => setFullTracks(Object.values(data)));
+      .then(data => setFullTracks(data));
   }, [searchQuery]);
 
   // Track queue

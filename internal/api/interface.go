@@ -91,7 +91,7 @@ func (i *Interface) Close() error {
 	return i.db.Close()
 }
 
-func (i *Interface) GetTracks(search *searchparser.Result) (map[string]schema.Track, error) {
+func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, error) {
 	query := "SELECT id, short_id, name, path, album FROM tracks"
 	args := []interface{}{}
 	whereClauses := []string{}
@@ -159,13 +159,13 @@ func (i *Interface) GetTracks(search *searchparser.Result) (map[string]schema.Tr
 	}
 	defer rows.Close()
 
-	result := make(map[string]schema.Track)
+	var result []schema.Track
 	for rows.Next() {
 		var track schema.Track
 		if err := rows.Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Album); err != nil {
 			return nil, err
 		}
-		result[track.ShortID] = track
+		result = append(result, track)
 	}
 	return result, nil
 }

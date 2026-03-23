@@ -100,13 +100,13 @@ A track has the following fields:
 
 ### GET `/track`
 
-Returns a mapping of short-id to the corresponding track's metadata, with a maximum of 50 items per page:
+Returns a list of tracks, with a maximum of 50 items per page:
 
 ```json
-{
-  "abcdef": {"id": ..., "name": "track name 1", ...},
-  "xyz123": {"id": ..., "name": "track name 2", ...},
-}
+[
+  {"id": ..., "name": "track name 1", ...},
+  {"id": ..., "name": "track name 2", ...},
+]
 ```
 
 If the `q` parameter is provided, then the tracks will be filtered based on the query `q`. When searching, keywords and the negation operator targets the word. The query supports the following named operators:
