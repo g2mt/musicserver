@@ -29,18 +29,18 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         }}
         className="search-input"
       />
-      <button type="submit" className="btn">
+      <button type="submit" className="icon-btn">
         <FontAwesomeIcon icon={faSearch} />
       </button>
       <button 
-        className="btn btn-prev-song" 
+        className="icon-btn btn-prev-song" 
         onClick={handleBack}
         disabled={isBackDisabled}
       >
         <FontAwesomeIcon icon={faBackwardStep} />
       </button>
       <button 
-        className="btn btn-next-song" 
+        className="icon-btn btn-next-song" 
         onClick={handleForward}
         disabled={isForwardDisabled}
       >

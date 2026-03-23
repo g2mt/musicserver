@@ -149,17 +149,17 @@ export function MusicPlayer() {
       <div className="player-controls">
         <div className="player-left">
           <button 
-            className="btn btn-prev-song" 
+            className="icon-btn btn-prev-song" 
             onClick={handleBack}
             disabled={isBackDisabled}
           >
             <FontAwesomeIcon icon={faBackwardStep} />
           </button>
-          <button className="btn btn-play-pause" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
+          <button className="icon-btn btn-play-pause" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
             <FontAwesomeIcon icon={c.isPlaying ? faPause : faPlay} />
           </button>
           <button 
-            className="btn btn-next-song" 
+            className="icon-btn btn-next-song" 
             onClick={handleForward}
             disabled={isForwardDisabled}
           >
@@ -182,7 +182,7 @@ export function MusicPlayer() {
               if (c.setMuted) c.setMuted(false); 
             }}
           />
-          <button className="btn" onClick={() => c.setMuted && c.setMuted(m => !m)}>
+          <button className="icon-btn" onClick={() => c.setMuted && c.setMuted(m => !m)}>
             <FontAwesomeIcon icon={c.muted || c.volume === 0 ? faVolumeXmark : faVolumeHigh} />
           </button>
         </div>
