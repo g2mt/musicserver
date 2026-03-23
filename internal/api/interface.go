@@ -118,7 +118,6 @@ func (i *Interface) GetTracks(search *searchparser.Result) (map[string]schema.Tr
 		for _, op := range search.Operators {
 			switch op.Key {
 			case "after":
-				// First, get the long ID for the afterId (which could be short or long)
 				longAfterId, err := i.resolveTrackShortId(op.Value)
 				if err != nil {
 					// If not found, treat as no afterId
@@ -127,6 +126,16 @@ func (i *Interface) GetTracks(search *searchparser.Result) (map[string]schema.Tr
 				if longAfterId != "" {
 					whereClauses = append(whereClauses, "id > ?")
 					args = append(args, longAfterId)
+				}
+			case "before":
+				longBeforeId, err := i.resolveTrackShortId(op.Value)
+				if err != nil {
+					// If not found, treat as no afterId
+					longBeforeId = ""
+				}
+				if longBeforeId != "" {
+					whereClauses = append(whereClauses, "id < ?")
+					args = append(args, longBeforeId)
 				}
 			case "album":
 				whereClauses = append(whereClauses, "(album LIKE ?)")

@@ -109,10 +109,10 @@ Returns a mapping of short-id to the corresponding track's metadata, with a maxi
 }
 ```
 
-If the `after` parameter is provided, then only the tracks whose ID comes after the parameter lexicographically will be shown. Example: `/track?after=abcdef`
-
 If the `q` parameter is provided, then the tracks will be filtered based on the query `q`. When searching, keywords and the negation operator targets the word. The query supports the following named operators:
 
+  - `after`: only the tracks whose ID comes after the parameter lexicographically will be shown
+  - `before`: only the tracks whose ID comes before the parameter lexicographically will be shown
   - `album`: search for tracks whose album title contains the value specified
 
 ### GET `/track/[id]`
