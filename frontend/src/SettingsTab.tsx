@@ -35,17 +35,22 @@ function SettingsTab() {
           </tr>
         </thead>
         <tbody>
-          {Object.entries(progresses).map(([name, entry]) => (
-            <tr key={name}>
-              <td>{name}</td>
-              <td>
-                <progress value={entry.value} max={entry.max_value} />
-              </td>
-            </tr>
-          ))}
-          {Object.keys(progresses).length === 0 && (
-            <tr><td colSpan={2}>No active processes.</td></tr>
-          )}
+          {
+            Object.keys(progresses).length > 0
+            ? Object.entries(progresses).map(([name, entry]) => (
+                <tr key={name}
+                    title={`${entry.value}/${entry.max_value}`}>
+                  <td>{name}</td>
+                  <td>
+                    <progress
+                      value={entry.value} max={entry.max_value}/>
+                  </td>
+                </tr>
+              ))
+            : (
+              <tr><td colSpan={2}>No active processes.</td></tr>
+            )
+          }
         </tbody>
       </table>
     </div>

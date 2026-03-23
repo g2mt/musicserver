@@ -28,6 +28,7 @@
   border-bottom: 1px solid var(--gray);
   background: var(--content-bg);
   flex-shrink: 0;
+  justify-content: center;
 }
 
 .tab-btn {

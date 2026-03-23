@@ -31,3 +31,22 @@
       cursor: not-allowed;
     }
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+
+  & th, & td {
+    text-align: left;
+    padding: 6px 8px;
+  }
+
+  & th {
+    border-bottom: 1px solid var(--gray);
+  }
+}
+
+progress {
+  width: 100%;
+}

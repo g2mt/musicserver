@@ -536,7 +536,11 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
-		response, err = i.GetProgress()
+		data, err := i.GetProgress()
+		if err != nil {
+			return nil, "", err
+		}
+		return data, "text/json", nil
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
