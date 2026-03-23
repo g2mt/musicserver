@@ -12,19 +12,24 @@ import (
 	"strings"
 	"sync"
 
+	"musicserver/internal/progress"
 	"musicserver/internal/schema"
 	"musicserver/internal/searchparser"
 	"musicserver/internal/taglib"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 type Interface struct {
 	db     *sql.DB
 	config *schema.Config // readonly
+	prog   progress.Progress
 
 	LongIdGen func(track *schema.Track) string
 
 	// scanMu is held during a full ScanTracks call, causing WatchDataDir to pause.
-	scanMu sync.Mutex
+	scanMu  sync.Mutex
+	watcher *fsnotify.Watcher
 }
 
 const MaxIdLength = 64

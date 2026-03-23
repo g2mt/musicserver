@@ -16,9 +16,10 @@ const WatchDirInterval = 10 * time.Second
 func (i *Interface) ScanTracks() (map[string]string, error) {
 	i.scanMu.Lock()
 	defer i.scanMu.Unlock()
-	slog.Debug("full scan started")
-	added := make(map[string]string)
 
+	slog.Debug("full scan started")
+
+	added := make(map[string]string)
 	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -56,13 +57,23 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 }
 
 func (i *Interface) WatchDataDir() error {
-	watcher, err := fsnotify.NewWatcher()
+	var err error
+	if i.watcher != nil {
+		panic("WatchDataDir started twice")
+	}
+	i.watcher, err = fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
-	defer watcher.Close()
+	defer func() { i.watcher.Close(); i.watcher = nil }()
 
-	if err := watcher.Add(i.config.DataPath); err != nil {
+	ticker, err := i.prog.Bind("watchData")
+	if err != nil {
+		return err
+	}
+	defer i.prog.Unbind("watchData")
+
+	if err := i.watcher.Add(i.config.DataPath); err != nil {
 		return err
 	}
 
@@ -90,17 +101,19 @@ eventLoop:
 			}
 
 			select {
-			case event, ok := <-watcher.Events:
+			case event, ok := <-i.watcher.Events:
 				if !ok {
 					return nil
 				}
 				switch {
 				case event.Has(fsnotify.Create) || event.Has(fsnotify.Write) || event.Has(fsnotify.Rename):
 					writtenPaths[event.Name] = struct{}{}
+					ticker.MaxValue.Add(1)
 				case event.Has(fsnotify.Remove):
 					deletedPaths[event.Name] = struct{}{}
+					ticker.MaxValue.Add(1)
 				}
-			case <-watcher.Errors:
+			case <-i.watcher.Errors:
 				// ignore watcher errors
 			case <-deadline:
 				break collectLoop
@@ -119,6 +132,7 @@ eventLoop:
 				continue
 			}
 			i.AddTrack(&track)
+			ticker.Value.Add(1)
 		}
 
 		// Process deleted paths
@@ -127,6 +141,7 @@ eventLoop:
 			if err := i.ForgetTrackByPath(path); err != nil {
 				return err
 			}
+			ticker.Value.Add(1)
 		}
 
 		time.Sleep(WatchDirInterval)
