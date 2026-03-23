@@ -19,9 +19,3 @@
     }
   }
 }
-
-@media (min-width: 800px) {
-  .search-bar {
-    .btn-prev-song, .btn-next-song { display: none !important; }
-  }
-}

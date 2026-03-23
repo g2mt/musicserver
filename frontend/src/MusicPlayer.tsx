@@ -4,8 +4,7 @@ import { faPlay, faPause, faVolumeHigh, faVolumeXmark, faBackwardStep, faForward
 import { Track } from './Track';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
-import { useWindowWidth } from './useWindowWidth';
-import { PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
+import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import './MusicPlayer.css';
 
 interface MusicPlayerState {

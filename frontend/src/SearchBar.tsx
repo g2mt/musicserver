@@ -2,8 +2,7 @@ import { useContext, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faForwardStep, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { MusicPlayerContext, useBackForward } from './MusicPlayer';
-import { useWindowWidth } from './useWindowWidth';
-import { PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
+import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 
 import './SearchBar.css';
 

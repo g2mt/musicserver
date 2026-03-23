@@ -34,6 +34,7 @@
       justify-content: center;
 
       .track {
+        width: calc(min(100%, 70vw));
         .track-info > * {
           max-width: calc(100% - var(--thumbnail-size));
           text-overflow: ellipsis;
@@ -56,25 +57,20 @@
       }
     }
   }
-}
 
-@media (max-width: 1000px) {
-  .player-center {
-    max-width: 70vw;
-  }
-}
-
-@media (max-width: 800px) {
-  .player-left {
-    .btn-prev-song, .btn-next-song { display: none !important; }
-  }
-  .player-center {
-    max-width: unset;
-    .track-info > * {
-      width: calc(min(50vw, 500px));
+  &.collapsed {
+    .player-left {
+      .btn-prev-song, .btn-next-song { display: none !important; }
+    }
+    .player-center {
+      max-width: unset;
+      .track-info > * {
+        width: calc(min(50vw, 500px));
+      }
+    }
+    .player-right {
+      display: none !important;
     }
   }
-  .player-right {
-    display: none !important;
-  }
 }
+

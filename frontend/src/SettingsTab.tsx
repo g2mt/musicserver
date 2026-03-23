@@ -21,7 +21,7 @@ function SettingsTab() {
         .catch(() => {});
     }
     fetchProgress();
-    const interval = setInterval(fetchProgress, 2000);
+    const interval = setInterval(fetchProgress, 1000);
     return () => clearInterval(interval);
   }, []);
 
