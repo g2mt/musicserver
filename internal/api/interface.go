@@ -23,7 +23,7 @@ import (
 type Interface struct {
 	db     *sql.DB
 	config *schema.Config // readonly
-	prog   progress.Progress
+	prog   *progress.Progress
 
 	LongIdGen func(track *schema.Track) string
 
@@ -58,6 +58,7 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	return &Interface{
 		db:        db,
 		config:    config,
+		prog:      progress.NewProgress(),
 		LongIdGen: defaultLongIdGen,
 	}, nil
 }
