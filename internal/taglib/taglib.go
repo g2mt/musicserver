@@ -5,7 +5,10 @@ package taglib
 // #include <stdlib.h>
 import "C"
 import (
+	"io/fs"
 	"musicserver/internal/schema"
+	"os"
+	"path/filepath"
 	"unsafe"
 )
 
@@ -53,6 +56,8 @@ func LoadTrack(path string) (schema.Track, error) {
 }
 
 // ExtractCoverArt extracts embedded cover art from the audio file at path.
+// If no embedded cover art exists, falls back to searching for an image file
+// in the parent directory (.png, .jpg, .webp).
 // Returns nil data (and no error) if the file has no cover art.
 func ExtractCoverArt(path string) (data []byte, mimeType string, _ error) {
 	cPath := C.CString(path)
@@ -66,11 +71,65 @@ func ExtractCoverArt(path string) (data []byte, mimeType string, _ error) {
 		return nil, "", err
 	}
 
-	if cArt.data == nil || cArt.data_length == 0 {
+	if cArt.data != nil && cArt.data_length > 0 {
+		data = C.GoBytes(unsafe.Pointer(cArt.data), cArt.data_length)
+		mimeType = C.GoString(cArt.mime_type)
+		return data, mimeType, nil
+	}
+
+	// Fallback: look for image file in parent directory
+	parentDir := filepath.Dir(path)
+	extensions := []string{".png", ".jpg", ".webp"}
+
+	var foundPath string
+	for _, ext := range extensions {
+		foundPath = filepath.Join(parentDir, "cover"+ext)
+		if _, err := os.Stat(foundPath); err == nil {
+			break
+		}
+		foundPath = ""
+	}
+
+	if foundPath == "" {
+		// Try to find any image file with these extensions
+		entries, err := os.ReadDir(parentDir)
+		if err != nil {
+			return nil, "", nil
+		}
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+			for _, ext := range extensions {
+				if filepath.Ext(entry.Name()) == ext {
+					foundPath = filepath.Join(parentDir, entry.Name())
+					break
+				}
+			}
+			if foundPath != "" {
+				break
+			}
+		}
+	}
+
+	if foundPath == "" {
 		return nil, "", nil
 	}
 
-	data = C.GoBytes(unsafe.Pointer(cArt.data), cArt.data_length)
-	mimeType = C.GoString(cArt.mime_type)
+	data, err := os.ReadFile(foundPath)
+	if err != nil {
+		return nil, "", nil
+	}
+
+	ext := filepath.Ext(foundPath)
+	switch ext {
+	case ".png":
+		mimeType = "image/png"
+	case ".jpg":
+		mimeType = "image/jpeg"
+	case ".webp":
+		mimeType = "image/webp"
+	}
+
 	return data, mimeType, nil
 }
