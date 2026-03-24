@@ -83,11 +83,22 @@ func ExtractCoverArt(path string) (data []byte, mimeType string, _ error) {
 
 	var foundPath string
 	for _, ext := range extensions {
-		foundPath = filepath.Join(parentDir, "cover"+ext)
-		if _, err := os.Stat(foundPath); err == nil {
+		entries, err := os.ReadDir(parentDir)
+		if err != nil {
+			continue
+		}
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+			if strings.HasSuffix(entry.Name(), ext) {
+				foundPath = filepath.Join(parentDir, entry.Name())
+				break
+			}
+		}
+		if foundPath != "" {
 			break
 		}
-		foundPath = ""
 	}
 
 	if foundPath == "" {
