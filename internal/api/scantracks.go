@@ -13,21 +13,6 @@ import (
 
 const WatchDirInterval = 10 * time.Second
 
-// countFiles counts the number of files (non-directories) in the given path
-func countFiles(path string) (int32, error) {
-	count := int32(0)
-	err := filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() {
-			count++
-		}
-		return nil
-	})
-	return count, err
-}
-
 func (i *Interface) ScanTracks() (map[string]string, error) {
 	i.scanMu.Lock()
 	defer i.scanMu.Unlock()
@@ -35,7 +20,16 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 	slog.Debug("full scan started")
 
 	// First, count total files for progress tracking
-	totalFiles, err := countFiles(i.config.DataPath)
+	totalFiles := int32(0)
+	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			totalFiles++
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
