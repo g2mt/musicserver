@@ -9,10 +9,10 @@ import (
 )
 
 type dlInfo struct {
-	Title    string `json:"title"`
-	Uploader string `json:"uploader"`
-	Album    string `json:"album"`
-	Filename string `json:"filename"`
+	Title     string `json:"title"`
+	Uploader  string `json:"uploader"`
+	Album     string `json:"album"`
+	Thumbnail string `json:"thumbnail"`
 }
 
 func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
@@ -31,10 +31,11 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 	}
 
 	track := schema.Track{
-		Name:   info.Title,
-		Artist: info.Uploader,
-		Album:  info.Album,
-		Path:   info.Filename,
+		Name:          info.Title,
+		Artist:        info.Uploader,
+		Album:         info.Album,
+		Path:          u,
+		ThumbnailPath: info.Thumbnail,
 	}
 
 	return track, nil
