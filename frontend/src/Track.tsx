@@ -9,6 +9,7 @@ export interface TrackData {
   id: string;
   short_id: string;
   name: string;
+  artist: string;
   album: string;
   path: string;
 }
@@ -44,6 +45,10 @@ export function Track({
           e.preventDefault();
           c.setSearchQuery(`album:"${track.album}"`);
         }}>{track.album}</a>
+        <a className="track-artist" href="#" onClick={e => {
+          e.preventDefault();
+          c.setSearchQuery(`artist:"${track.artist}"`);
+        }}>{track.artist}</a>
       </div>
       {enqueueTrack && (
         <button className="icon-btn track-queue-btn" onClick={() => enqueueTrack(track)}>

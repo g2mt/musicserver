@@ -11,6 +11,7 @@ typedef struct {
 
 typedef struct {
     char* title;
+    char* artist;
     char* album;
 } TrackMetadata;
 

@@ -5,6 +5,7 @@ type Track struct {
 	ShortID string `json:"short_id"`
 	Name    string `json:"name"`
 	Path    string `json:"path"` // absolute path to file
+	Artist  string `json:"artist"`
 	Album   string `json:"album"`
 }
 

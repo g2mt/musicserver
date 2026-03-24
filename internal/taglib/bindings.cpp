@@ -40,6 +40,7 @@ BindingResult load_track_metadata(const char* filepath, TrackMetadata* metadata)
 
     // Initialize metadata
     metadata->title = nullptr;
+    metadata->artist = nullptr;
     metadata->album = nullptr;
 
     // Create TagLib file reference
@@ -72,6 +73,21 @@ BindingResult load_track_metadata(const char* filepath, TrackMetadata* metadata)
         }
     }
 
+    // Extract artist
+    if (!tag->artist().isEmpty()) {
+        std::string artist = tag->artist().toCString(true);
+        metadata->artist = static_cast<char*>(malloc(artist.length() + 1));
+        if (metadata->artist) {
+            strcpy(metadata->artist, artist.c_str());
+        }
+    } else {
+        // If no artist, use empty string
+        metadata->artist = static_cast<char*>(malloc(1));
+        if (metadata->artist) {
+            metadata->artist[0] = '\0';
+        }
+    }
+
     // Extract album
     if (!tag->album().isEmpty()) {
         std::string album = tag->album().toCString(true);
@@ -89,6 +105,7 @@ BindingResult load_track_metadata(const char* filepath, TrackMetadata* metadata)
 
     // Check if memory allocation failed
     if ((!metadata->title && tag->title().isEmpty()) ||
+        (!metadata->artist && tag->artist().isEmpty()) ||
         (!metadata->album && tag->album().isEmpty())) {
         free_track_metadata(metadata);
         result.err = MEMORY_ERROR_MSG;
@@ -104,6 +121,11 @@ void free_track_metadata(TrackMetadata* metadata) {
     if (metadata->title) {
         free(metadata->title);
         metadata->title = nullptr;
+    }
+
+    if (metadata->artist) {
+        free(metadata->artist);
+        metadata->artist = nullptr;
     }
 
     if (metadata->album) {

@@ -49,6 +49,7 @@ func LoadTrack(path string) (schema.Track, error) {
 		ShortID: "",
 		Name:    C.GoString(cTrack.title),
 		Path:    path,
+		Artist:  C.GoString(cTrack.artist),
 		Album:   C.GoString(cTrack.album),
 	}
 
