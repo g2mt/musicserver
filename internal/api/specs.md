@@ -48,6 +48,7 @@ Under the UNIX endpoint, the response will be transferred as a stream of bytes w
 >       - `NewInterface(sqlite database connection)`
 >       - `Interface.InitDb`: initializes every relevant table
 >       - additional methods for handling each API request: `getTracks`, `getTrackById(id)`,...
+>   - `external.go`: external interface code with methods for handling each API request involving external resources
 
 ## General
 
@@ -98,6 +99,7 @@ A track has the following fields:
   * `path`: the path of the file relative to the data directory of the server
   * `album`: the name of the album
   * `artist`: the name of the artist
+  * `thumbnail_path` (optional): path of the thumbnail
 
 ### GET `/track`
 
@@ -115,6 +117,7 @@ If the `q` parameter is provided, then the tracks will be filtered based on the 
   - `after`: only the tracks whose ID comes after the parameter lexicographically will be shown
   - `before`: only the tracks whose ID comes before the parameter lexicographically will be shown
   - `album`: search for tracks whose album title contains the value specified
+  - `artist`: search for tracks whose artist name contains the value specified
 
 ### GET `/track/[id]`
 
@@ -127,6 +130,10 @@ Returns the audio of the track as a raw stream of bytes.
 ### GET `/track/[id]/cover`
 
 Returns the cover art image of the track as a raw stream of bytes.
+
+### GET `/track/:external/[url]`
+
+Returns the track metadata for the URL `url` using the media downloader specified in the config file.
 
 ### DELETE `/track`
 
