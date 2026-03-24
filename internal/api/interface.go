@@ -19,6 +19,7 @@ import (
 	"musicserver/internal/taglib"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/hashicorp/golang-lru/v2"
 )
 
 const CoverFallbackMimetype = "image/png"
@@ -34,6 +35,8 @@ type Interface struct {
 	// scanMu is held during a full ScanTracks call, causing WatchDataDir to pause.
 	scanMu  sync.Mutex
 	watcher *fsnotify.Watcher
+
+	trackCache *lru.Cache[string, schema.Track]
 }
 
 const MaxIdLength = 64
@@ -59,11 +62,14 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		return nil, err
 	}
 
+	trackCache, _ := lru.New[string, schema.Track](32)
+
 	return &Interface{
-		db:        db,
-		config:    config,
-		prog:      progress.NewProgress(),
-		LongIdGen: defaultLongIdGen,
+		db:         db,
+		config:     config,
+		prog:       progress.NewProgress(),
+		LongIdGen:  defaultLongIdGen,
+		trackCache: trackCache,
 	}, nil
 }
 
