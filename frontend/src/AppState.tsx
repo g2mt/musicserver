@@ -17,6 +17,7 @@ export interface AppState {
   muted: boolean;
   setMuted: Dispatch<SetStateAction<boolean>>;
   enqueuedTracks: TrackData[];
+  setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (_: TrackData) => void;
   unqueueTrack: (index: number) => void;
   enqueuedTrackIndex: number|null;

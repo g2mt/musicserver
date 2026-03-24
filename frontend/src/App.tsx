@@ -11,7 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import { AppContext } from './AppState';
+import { AppContext, type AppState } from './AppState';
 
 function App() {
   const a = {} as AppState;
@@ -34,7 +34,7 @@ function App() {
   }, []);
 
   // Search
-  const [a.searchQuery, a.setSearchQuery] = useState('');
+  [a.searchQuery, a.setSearchQuery] = useState('');
   useEffect(() => {
     fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
       .then(res => res.json())
@@ -42,7 +42,7 @@ function App() {
   }, [a.searchQuery]);
 
   // Track queue
-  const [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
+  [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
   a.enqueueTrack = (track: TrackData) => {
     a.setEnqueuedTracks([...a.enqueuedTracks, track]);
   };
