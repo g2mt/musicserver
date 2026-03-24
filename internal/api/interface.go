@@ -74,6 +74,7 @@ func (i *Interface) InitDb() error {
 			short_id TEXT NOT NULL,
 			name TEXT NOT NULL,
 			path TEXT NOT NULL,
+			artist TEXT NOT NULL,
 			album TEXT NOT NULL
 		);
 		CREATE TABLE IF NOT EXISTS albums (
@@ -92,7 +93,7 @@ func (i *Interface) Close() error {
 }
 
 func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, error) {
-	query := "SELECT id, short_id, name, path, album FROM tracks"
+	query := "SELECT id, short_id, name, path, artist, album FROM tracks"
 	args := []interface{}{}
 	whereClauses := []string{}
 
@@ -141,6 +142,9 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 			case "album":
 				whereClauses = append(whereClauses, "(album LIKE ?)")
 				args = append(args, "%"+op.Value+"%")
+			case "artist":
+				whereClauses = append(whereClauses, "(artist LIKE ?)")
+				args = append(args, "%"+op.Value+"%")
 			}
 		}
 	}
@@ -171,7 +175,7 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 	var result []schema.Track
 	for rows.Next() {
 		var track schema.Track
-		if err := rows.Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Album); err != nil {
+		if err := rows.Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Artist, &track.Album); err != nil {
 			return nil, err
 		}
 		result = append(result, track)
@@ -199,8 +203,8 @@ func (i *Interface) GetTrackById(id string) (schema.Track, error) {
 	}
 
 	var track schema.Track
-	err = i.db.QueryRow("SELECT id, short_id, name, path, album FROM tracks WHERE id = ?", longID).
-		Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Album)
+	err = i.db.QueryRow("SELECT id, short_id, name, path, artist, album FROM tracks WHERE id = ?", longID).
+		Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Artist, &track.Album)
 	if err != nil {
 		return schema.Track{}, err
 	}
@@ -342,8 +346,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 
 	// Insert track into tracks table
 	_, err := i.db.Exec(
-		"INSERT INTO tracks (id, short_id, name, path, album) VALUES (?, ?, ?, ?, ?)",
-		track.LongID, track.ShortID, track.Name, track.Path, track.Album,
+		"INSERT INTO tracks (id, short_id, name, path, artist, album) VALUES (?, ?, ?, ?, ?, ?)",
+		track.LongID, track.ShortID, track.Name, track.Path, track.Artist, track.Album,
 	)
 	if err != nil {
 		return "", err
