@@ -585,7 +585,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				mimeType = CoverFallbackMimetype
 			}
 			return data, mimeType, nil
-		} else if url, ok := strings.CutPrefix(id, "external/"); ok {
+		} else if url, ok := strings.CutPrefix(id, ":external/"); ok {
 			response, err = i.GetExternalTrackByURL(url)
 		} else {
 			response, err = i.GetTrackById(id)
