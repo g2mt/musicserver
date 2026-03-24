@@ -8,7 +8,7 @@ import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ToastContainer } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import { AppContext, type AppState } from './AppState';
@@ -27,10 +27,19 @@ function App() {
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
+
+  const setFullTracksFromData = (data: any) => {
+    if (data === null || data.length === 0) {
+      toast.warn('No tracks found');
+    } else {
+      setFullTracks(data);
+    }
+  };
+
   useEffect(() => {
     fetch(`${HOST}/track`)
       .then(res => res.json())
-      .then(data => setFullTracks(data));
+      .then(data => setFullTracksFromData(data));
   }, []);
 
   // Search
@@ -38,7 +47,7 @@ function App() {
   useEffect(() => {
     fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
       .then(res => res.json())
-      .then(data => setFullTracks(data));
+      .then(data => setFullTracksFromData(data));
   }, [a.searchQuery]);
 
   // Track queue

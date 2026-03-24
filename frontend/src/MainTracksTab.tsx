@@ -12,7 +12,7 @@ export function MainTracksTab({
 }: {
   tracks: TrackData[]|null,
 }) {
-  if (tracks === null) {
+  if (tracks === null || tracks.length === 0) {
     return (
       <div className="main-tracks-controls">
         No tracks found
