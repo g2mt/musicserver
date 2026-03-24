@@ -1,4 +1,4 @@
-import { useContext, type Dispatch, type SetStateAction } from 'react';
+import { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
@@ -12,6 +12,7 @@ export interface TrackData {
   artist: string;
   album: string;
   path: string;
+  thumbnail_path?: string;
 }
 
 export function Track({ 
@@ -32,7 +33,7 @@ export function Track({
     <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
       <img
         className="track-cover"
-        src={`${HOST}/track/${track.short_id}/cover`}
+        src={track.thumbnail_path ?? `${HOST}/track/${track.short_id}/cover`}
       />
       <div className="track-info">
         <a className="track-title" href="#" onClick={e => {
