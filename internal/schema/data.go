@@ -1,12 +1,13 @@
 package schema
 
 type Track struct {
-	LongID  string `json:"id"`
-	ShortID string `json:"short_id"`
-	Name    string `json:"name"`
-	Path    string `json:"path"` // absolute path to file
-	Artist  string `json:"artist"`
-	Album   string `json:"album"`
+	LongID        string `json:"id"`
+	ShortID       string `json:"short_id"`
+	Name          string `json:"name"`
+	Path          string `json:"path"` // absolute path to file
+	Artist        string `json:"artist"`
+	Album         string `json:"album"`
+	ThumbnailPath string `json:"thumbnail_path,omitempty"`
 }
 
 type Album struct {

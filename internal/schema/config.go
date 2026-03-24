@@ -19,6 +19,8 @@ type Config struct {
 	DataPath string `yaml:"data_path"`
 	// path where database and other info is stored. defaults to /var/lib/musicserver for root users, ~/.musicserver/db if non-root
 	DbDir string `yaml:"db_dir"`
+	// path to generic media downloader binary
+	MediaDownloader string `yaml:"media_downloader"`
 }
 
 const SqlDbPath = "./info.db"
