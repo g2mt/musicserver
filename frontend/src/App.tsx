@@ -14,13 +14,16 @@ import './App.css';
 import { AppContext } from './AppState';
 
 function App() {
-  const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [enqueuedTrackIndex, setEnqueuedTrackIndex] = useState<number|null>(null);
+  const a = {} as AppState;
+
+  // State variables
+  [a.currentTrack, a.setCurrentTrack] = useState<TrackData | null>(null);
+  [a.isPlaying, a.setIsPlaying] = useState(false);
+  [a.progress, a.setProgress] = useState(0);
+  [a.duration, a.setDuration] = useState(0);
+  [a.volume, a.setVolume] = useState(1);
+  [a.muted, a.setMuted] = useState(false);
+  [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
@@ -31,28 +34,28 @@ function App() {
   }, []);
 
   // Search
-  const [searchQuery, setSearchQuery] = useState('');
+  const [a.searchQuery, a.setSearchQuery] = useState('');
   useEffect(() => {
-    fetch(`${HOST}/track?q=${encodeURIComponent(searchQuery)}`)
+    fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
       .then(res => res.json())
       .then(data => setFullTracks(data));
-  }, [searchQuery]);
+  }, [a.searchQuery]);
 
   // Track queue
-  const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
-  function enqueueTrack(track: TrackData) {
-    setEnqueuedTracks([...enqueuedTracks, track]);
-  }
-  function unqueueTrack(index: number) {
-    setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
+  const [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
+  a.enqueueTrack = (track: TrackData) => {
+    a.setEnqueuedTracks([...a.enqueuedTracks, track]);
+  };
+  a.unqueueTrack = (index: number) => {
+    a.setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
     // If we remove a track before the current index, adjust the index
-    if (enqueuedTrackIndex !== null && index < enqueuedTrackIndex) {
-      setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
-    } else if (index === enqueuedTrackIndex) {
+    if (a.enqueuedTrackIndex !== null && index < a.enqueuedTrackIndex) {
+      a.setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
+    } else if (index === a.enqueuedTrackIndex) {
       // If we remove the currently highlighted track, reset index
-      setEnqueuedTrackIndex(null);
+      a.setEnqueuedTrackIndex(null);
     }
-  }
+  };
 
   // Left-side tab
   const [leftTab, setLeftTab] = useState<'tracks' | 'settings'>('tracks');
@@ -69,29 +72,29 @@ function App() {
         case ' ':
         case 'k':
           e.preventDefault();
-          setIsPlaying(prev => !prev);
+          a.setIsPlaying(prev => !prev);
           break;
         case 'm':
           e.preventDefault();
-          setMuted(prev => !prev);
+          a.setMuted(prev => !prev);
           break;
         case 'j':
           e.preventDefault();
-          setProgress(prev => Math.max(0, prev - 10));
+          a.setProgress(prev => Math.max(0, prev - 10));
           break;
         case 'l':
           e.preventDefault();
-          setProgress(prev => Math.min(duration, prev + 10));
+          a.setProgress(prev => Math.min(a.duration, prev + 10));
           break;
         case '(':
           e.preventDefault();
-          setVolume(prev => Math.max(0, prev - 0.05));
-          setMuted(false);
+          a.setVolume(prev => Math.max(0, prev - 0.05));
+          a.setMuted(false);
           break;
         case ')':
           e.preventDefault();
-          setVolume(prev => Math.min(1, prev + 0.05));
-          setMuted(false);
+          a.setVolume(prev => Math.min(1, prev + 0.05));
+          a.setMuted(false);
           break;
       }
     }
@@ -100,34 +103,14 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [duration]);
+  }, [a.duration]);
 
   return (
-    <AppContext value={{
-      currentTrack, 
-      setCurrentTrack,
-      isPlaying,
-      setIsPlaying,
-      progress,
-      setProgress,
-      duration,
-      setDuration,
-      volume,
-      setVolume,
-      muted,
-      setMuted,
-      enqueuedTracks,
-      enqueueTrack,
-      unqueueTrack,
-      enqueuedTrackIndex,
-      setEnqueuedTrackIndex,
-      searchQuery,
-      setSearchQuery,
-    }}>
+    <AppContext value={a}>
       <ToastContainer position="bottom-right" theme="dark" />
       <div className="app-layout">
         <div className="search-bar-container">
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <SearchBar searchQuery={a.searchQuery} setSearchQuery={a.setSearchQuery} />
         </div>
         <div className="app-main">
           <div className="left-side">
@@ -151,8 +134,8 @@ function App() {
             {leftTab === 'settings' && <SettingsTab />}
           </div>
           <div className="right-side"
-              style={{display: enqueuedTracks.length > 0 ? 'block' : 'none' }}>
-            <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />
+              style={{display: a.enqueuedTracks.length > 0 ? 'block' : 'none' }}>
+            <TrackList tracks={a.enqueuedTracks} unqueueTrack={a.unqueueTrack} />
           </div>
         </div>
         <div className="music-player">
