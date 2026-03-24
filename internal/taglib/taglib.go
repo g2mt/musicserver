@@ -5,10 +5,10 @@ package taglib
 // #include <stdlib.h>
 import "C"
 import (
-	"io/fs"
 	"musicserver/internal/schema"
 	"os"
 	"path/filepath"
+	"strings"
 	"unsafe"
 )
 
