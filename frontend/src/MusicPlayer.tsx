@@ -1,35 +1,11 @@
-import { createContext, useEffect, useMemo, type Dispatch, type SetStateAction, useContext, useRef } from 'react';
+import { useEffect, useMemo, useContext, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeHigh, faVolumeXmark, faBackwardStep, faForwardStep } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
-import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import './MusicPlayer.css';
-
-interface MusicPlayerState {
-  currentTrack: TrackData | null;
-  setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
-  isPlaying: boolean;
-  setIsPlaying: Dispatch<SetStateAction<boolean>>;
-  progress: number;
-  setProgress: Dispatch<SetStateAction<number>>;
-  duration: number;
-  setDuration: Dispatch<SetStateAction<number>>;
-  volume: number;
-  setVolume: Dispatch<SetStateAction<number>>;
-  muted: boolean;
-  setMuted: Dispatch<SetStateAction<boolean>>;
-  enqueuedTracks: TrackData[];
-  enqueueTrack: (_: TrackData) => void;
-  unqueueTrack: (index: number) => void;
-  enqueuedTrackIndex: number|null;
-  setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
-  searchQuery: string;
-  setSearchQuery: (_: string) => void;
-}
-
-export const MusicPlayerContext = createContext<MusicPlayerState|null>(null);
+import { AppContext, type AppState } from './AppState';
 
 function useAudio(url: string | null) {
   const audio = useMemo(() => new Audio(), []);
@@ -48,7 +24,7 @@ function useAudio(url: string | null) {
   return audio;
 }
 
-export function useBackForward(c: MusicPlayerState) {
+export function useBackForward(c: AppState) {
   const isBackDisabled = useMemo(
     () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
     [c.enqueuedTrackIndex]);
@@ -80,7 +56,7 @@ export function useBackForward(c: MusicPlayerState) {
 }
 
 export function MusicPlayer() {
-  const c = useContext(MusicPlayerContext)!;
+  const c = useContext(AppContext)!;
   const audio = useAudio(c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null);
   const lastProgressUpdateFromAudioRef = useRef<number>(0);
 

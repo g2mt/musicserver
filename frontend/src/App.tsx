@@ -1,7 +1,7 @@
 import TrackList from './TrackList';
 import { MainTracksTab } from './MainTracksTab';
 import SettingsTab from './SettingsTab';
-import { MusicPlayerContext, MusicPlayer } from './MusicPlayer';
+import { MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
 import { useEffect, useState } from 'react';
 import type { TrackData } from './Track';
@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import { AppContext } from './AppState';
 
 function App() {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
@@ -102,7 +103,7 @@ function App() {
   }, [duration]);
 
   return (
-    <MusicPlayerContext value={{
+    <AppContext value={{
       currentTrack, 
       setCurrentTrack,
       isPlaying,
@@ -149,7 +150,8 @@ function App() {
             {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>
-          <div className="right-side">
+          <div className="right-side"
+              style={{display: enqueuedTracks.length > 0 ? 'block' : 'none' }}>
             <TrackList tracks={enqueuedTracks} unqueueTrack={unqueueTrack} />
           </div>
         </div>
@@ -157,7 +159,7 @@ function App() {
           <MusicPlayer />
         </div>
       </div>
-    </MusicPlayerContext>
+    </AppContext>
   );
 }
 

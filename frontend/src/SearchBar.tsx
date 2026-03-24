@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faForwardStep, faSearch } from '@fortawesome/free-solid-svg-icons';
-import { MusicPlayerContext, useBackForward } from './MusicPlayer';
+import { useBackForward } from './MusicPlayer';
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
+import { AppContext } from './AppState';
 
 import './SearchBar.css';
 
@@ -13,7 +14,7 @@ interface SearchBarProps {
 
 function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [inputValue, setInputValue] = useState(searchQuery);
-  const c = useContext(MusicPlayerContext)!;
+  const c = useContext(AppContext)!;
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;

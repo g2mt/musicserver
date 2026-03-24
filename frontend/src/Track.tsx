@@ -2,7 +2,7 @@ import { useContext, type Dispatch, type SetStateAction } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
-import { MusicPlayerContext } from './MusicPlayer';
+import { AppContext } from './AppState';
 import './Track.css';
 
 export interface TrackData {
@@ -25,8 +25,8 @@ export function Track({
   enqueueTrack?: (_: TrackData) => void,
   unqueueTrack?: (_: number) => void 
 }) {
-  const c = useContext(MusicPlayerContext)!;
-  const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } = useContext(MusicPlayerContext)!;
+  const c = useContext(AppContext)!;
+  const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } = useContext(AppContext)!;
   const isHighlighted = index !== undefined && index === enqueuedTrackIndex;
   return (
     <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
@@ -41,14 +41,20 @@ export function Track({
             setEnqueuedTrackIndex(index);
           setCurrentTrack(track);
         }}>{track.name}</a>
-        <a className="track-album" href="#" onClick={e => {
-          e.preventDefault();
-          c.setSearchQuery(`album:"${track.album}"`);
-        }}>{track.album}</a>
-        <a className="track-artist" href="#" onClick={e => {
-          e.preventDefault();
-          c.setSearchQuery(`artist:"${track.artist}"`);
-        }}>{track.artist}</a>
+        <p>
+          {track.album !== "" && (
+            <a className="track-album" href="#" onClick={e => {
+              e.preventDefault();
+              c.setSearchQuery(`album:"${track.album}"`);
+            }}>{track.album}</a>
+          )}
+          {track.artist !== "" && (
+            <a className="track-artist" href="#" onClick={e => {
+              e.preventDefault();
+              c.setSearchQuery(`artist:"${track.artist}"`);
+            }}>{track.artist}</a>
+          )}
+        </p>
       </div>
       {enqueueTrack && (
         <button className="icon-btn track-queue-btn" onClick={() => enqueueTrack(track)}>

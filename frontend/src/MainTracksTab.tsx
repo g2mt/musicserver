@@ -3,7 +3,8 @@ import type { TrackData } from './Track';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useContext, useRef } from 'react';
-import { MusicPlayerContext } from './MusicPlayer';
+import { AppContext } from './AppState';
+
 import './MainTracksTab.css';
 
 export function MainTracksTab({
@@ -19,7 +20,7 @@ export function MainTracksTab({
     );
   }
 
-  const c = useContext(MusicPlayerContext)!;
+  const c = useContext(AppContext)!;
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
   const elRef = useRef<HTMLElement|null>(null);
