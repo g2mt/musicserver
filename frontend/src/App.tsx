@@ -54,12 +54,17 @@ function App() {
   }, [a.searchQuery]);
 
   // Confirm boxes
-  const confirmBoxes = useRef<HTMLElement|null>(null);
+  const [confirmBoxes, setConfirmBoxes] = useState<{
+    key: number;
+    el: React.ReactNode
+  }[]>([]);
+  let confirmBoxesCounter = useRef(0);
   a.addConfirmBox = (confirmBox: React.ReactNode) => {
-    const div = document.createElement('div');
-    const root = createRoot(div);
-    flushSync(() => root.render(confirmBox));
-    confirmBoxes.current?.prepend(div);
+    setConfirmBoxes([
+      { key: confirmBoxesCounter.current, el: confirmBox },
+      ...confirmBoxes
+    ]);
+    confirmBoxesCounter.current += 1;
   };
 
   // Track queue
@@ -151,7 +156,7 @@ function App() {
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
-            <div className="confirm-box-container" ref={confirmBoxes}></div>
+            {confirmBoxes.map(b => (<div key={b.key}>{b.el}</div>))}
             {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>
