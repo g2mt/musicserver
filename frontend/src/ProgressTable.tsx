@@ -21,6 +21,8 @@ type ProgressEvent =
     data: string,
   };
 
+type ProgressEventWithSource = ProgressEvent & { source: string };
+
 function ProgressTable({ progresses }: ProgressTableProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [outputs, setOutputs] = useState<Record<string, string>>({});
@@ -30,7 +32,7 @@ function ProgressTable({ progresses }: ProgressTableProps) {
     const es = new EventSource(`${HOST}/progress/:events`);
 
     es.onmessage = (event) => {
-      const data = JSON.parse(event.data) as ProgressEvent & { source?: string };
+      const data = JSON.parse(event.data) as ProgressEventWithSource;
       const name = data.source;
       if (!name) return;
 
