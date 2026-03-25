@@ -3,15 +3,18 @@ import { MainTracksTab } from './MainTracksTab';
 import SettingsTab from './SettingsTab';
 import { MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './App.css';
 import { AppContext, type AppState } from './AppState';
+import { flushSync } from 'react-dom';
+
+import './App.css';
+import { createRoot } from 'react-dom/client';
 
 function App() {
   const a = {} as AppState;
@@ -51,9 +54,12 @@ function App() {
   }, [a.searchQuery]);
 
   // Confirm boxes
-  [a.confirmBoxes, a.setConfirmBoxes] = useState<React.ReactNode[]>([]);
+  const confirmBoxes = useRef<HTMLElement|null>(null);
   a.addConfirmBox = (confirmBox: React.ReactNode) => {
-    a.setConfirmBoxes(prev => [confirmBox, ...prev]);
+    const div = document.createElement('div');
+    const root = createRoot(div);
+    flushSync(() => root.render(confirmBox));
+    confirmBoxes.current?.prepend(div);
   };
 
   // Track queue
@@ -145,9 +151,7 @@ function App() {
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
-            <div className="confirm-box-container">
-              {a.confirmBoxes}
-            </div>
+            <div className="confirm-box-container" ref={confirmBoxes}></div>
             {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>

@@ -41,6 +41,11 @@ func (t *ProgressTicker) GetOutput() string {
 	return t.output
 }
 
+func (t *ProgressTicker) AddValue(d int32) {
+	v := t.value.Add(d)
+	t.emitEvent(Event{Type: "Value", Data: v})
+}
+
 func (t *ProgressTicker) SetValue(v int32) {
 	t.value.Store(v)
 	t.emitEvent(Event{Type: "Value", Data: v})

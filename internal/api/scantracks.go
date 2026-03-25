@@ -40,7 +40,7 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 		return nil, err
 	}
 	defer i.prog.Unbind("scanTracks")
-	ticker.MaxValue.Store(totalFiles)
+	ticker.SetMaxValue(totalFiles)
 
 	added := make(map[string]string)
 	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
@@ -71,7 +71,7 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 		added[shortID] = track.Name
 
 		// Update progress
-		ticker.Value.Add(1)
+		ticker.AddValue(1)
 		return nil
 	})
 
@@ -158,7 +158,7 @@ eventLoop:
 				continue
 			}
 			i.AddTrack(&track)
-			ticker.Value.Add(1)
+			ticker.AddValue(1)
 		}
 
 		// Process deleted paths
@@ -167,7 +167,7 @@ eventLoop:
 			if err := i.ForgetTrackByPath(path); err != nil {
 				return err
 			}
-			ticker.Value.Add(1)
+			ticker.AddValue(1)
 		}
 
 		time.Sleep(WatchDirInterval)
