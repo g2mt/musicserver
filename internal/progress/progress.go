@@ -18,6 +18,7 @@ type EventWithSource struct {
 }
 
 type ProgressTicker struct {
+	progress      *Progress
 	value         atomic.Int32
 	maxValue      atomic.Int32
 	output        string
@@ -63,6 +64,15 @@ func (t *ProgressTicker) emitEvent(event Event) {
 		default:
 		}
 	}
+	// Also emit to global listeners
+	if t.progress != nil {
+		for globalChannel := range t.progress.globalEventChannel {
+			select {
+			case globalChannel <- EventWithSource{Event: event, Source: ""}:
+			default:
+			}
+		}
+	}
 }
 
 func (t *ProgressTicker) addChannel() chan Event {
@@ -81,7 +91,8 @@ type Progress struct {
 
 func NewProgress() *Progress {
 	return &Progress{
-		progresses: make(map[string]*ProgressTicker),
+		progresses:         make(map[string]*ProgressTicker),
+		globalEventChannel: make(map[chan EventWithSource]chan EventWithSource),
 	}
 }
 
@@ -94,7 +105,7 @@ func (p *Progress) Bind(name string) (*ProgressTicker, error) {
 	if _, ok := p.progresses[name]; ok {
 		return nil, errors.New(name + " already bound")
 	}
-	ticker := &ProgressTicker{}
+	ticker := &ProgressTicker{progress: p}
 	p.progresses[name] = ticker
 	return ticker, nil
 }
@@ -113,6 +124,16 @@ func (p *Progress) ListenEvents(name string) chan Event {
 
 func (p *Progress) UnlistenEvents(name string, ch chan Event) {
 	delete(p.progresses[name].eventChannels, ch)
+}
+
+func (p *Progress) ListenGlobalEvents() chan EventWithSource {
+	c := make(chan EventWithSource)
+	p.globalEventChannel[c] = c
+	return c
+}
+
+func (p *Progress) UnlistenGlobalEvents(ch chan EventWithSource) {
+	delete(p.globalEventChannel, ch)
 }
 
 func (p *Progress) ToJSON() ([]byte, error) {
