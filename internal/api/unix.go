@@ -3,6 +3,7 @@ package api
 import (
 	"bufio"
 	"encoding/json"
+	"io"
 	"net"
 	"os"
 	"os/signal"

@@ -12,6 +12,11 @@ type Event struct {
 	Data interface{} `json:"data"`
 }
 
+type GlobalEvent struct {
+	Event
+	Source string `json:"source"`
+}
+
 type ProgressTicker struct {
 	value         atomic.Int32
 	maxValue      atomic.Int32
@@ -28,28 +33,22 @@ func (t *ProgressTicker) GetMaxValue() int32 {
 	return t.maxValue.Load()
 }
 
-// GetOutput returns the current output string.
-// It locks outputMu to ensure thread‑safe access.
 func (t *ProgressTicker) GetOutput() string {
 	t.outputMu.Lock()
 	defer t.outputMu.Unlock()
 	return t.output
 }
 
-// SetValue updates the current value and emits a Value event.
 func (t *ProgressTicker) SetValue(v int32) {
 	t.value.Store(v)
 	t.emitEvent(Event{Type: "Value", Data: v})
 }
 
-// SetMaxValue updates the maximum value and emits a MaxValue event.
 func (t *ProgressTicker) SetMaxValue(v int32) {
 	t.maxValue.Store(v)
 	t.emitEvent(Event{Type: "MaxValue", Data: v})
 }
 
-// AddOutput appends to the output string in a thread‑safe manner
-// and emits an AddOutput event.
 func (t *ProgressTicker) AddOutput(output string) {
 	t.outputMu.Lock()
 	t.output += output
@@ -64,6 +63,15 @@ func (t *ProgressTicker) emitEvent(event Event) {
 		default:
 		}
 	}
+}
+
+func (t *ProgressTicker) addChannel() chan Event {
+	if t.eventChannels == nil {
+		t.eventChannels = make(map[chan Event]chan Event)
+	}
+	c := make(chan Event)
+	t.eventChannels[c] = c
+	return c
 }
 
 type Progress struct {
@@ -95,13 +103,8 @@ func (p *Progress) Unbind(name string) {
 }
 
 func (p *Progress) ListenEvents(name string) chan Event {
-	if pr, ok := p.progresses[name]; ok {
-		if pr.eventChannels == nil {
-			pr.eventChannels = make(map[chan Event]chan Event)
-		}
-		c := make(chan Event)
-		pr.eventChannels[c] = c
-		return c
+	if t, ok := p.progresses[name]; ok {
+		return t.addChannel()
 	} else {
 		panic("invalid name")
 	}
