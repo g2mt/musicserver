@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 )
 
@@ -27,7 +28,7 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	response, contentType, err := r.iface.handleRequest(req.URL.Path, req.Method, params)
+	reader, contentType, err := r.iface.handleRequest(req.URL.Path, req.Method, params)
 	if err != nil {
 		data, _ := json.Marshal(struct {
 			Error string `json:"error"`
@@ -37,5 +38,13 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	io.Copy(w, response)
+	reader = io.TeeReader(reader, w)
+	if _, err := io.ReadAll(reader); err != nil {
+		slog.Error(err.Error())
+		data, _ := json.Marshal(struct {
+			Error string `json:"error"`
+		}{Error: err.Error()})
+		http.Error(w, string(data), http.StatusInternalServerError)
+		return
+	}
 }

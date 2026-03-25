@@ -66,6 +66,11 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	if _, exists := i.dlExternal[url]; exists {
 		return true, nil
 	}
+	defer func() {
+		i.dlExternalMu.Lock()
+		delete(i.dlExternal, url)
+		i.dlExternalMu.Unlock()
+	}()
 
 	// Create a new ticker for this download
 	tickerName := "dl:" + url
@@ -89,14 +94,10 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	cmd.Dir = i.config.DataPath
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		delete(i.dlExternal, url)
-		i.prog.Unbind(url)
 		return false, err
 	}
 
 	if err := cmd.Start(); err != nil {
-		delete(i.dlExternal, url)
-		i.prog.Unbind(url)
 		return false, err
 	}
 
@@ -113,13 +114,8 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 				break
 			}
 		}
-		cmd.Wait()
 	}()
 
-	// Cleanup
-	i.dlExternalMu.Lock()
-	delete(i.dlExternal, url)
-	i.dlExternalMu.Unlock()
-
+	cmd.Wait()
 	return true, nil
 }

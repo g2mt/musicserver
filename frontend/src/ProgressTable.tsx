@@ -35,6 +35,7 @@ function ProgressTable() {
     const es = new EventSource(`${HOST}/progress/:events`);
 
     es.onmessage = (event) => {
+      console.log(event);
       const data = JSON.parse(event.data) as ProgressEventWithSource;
       const name = data.source;
       if (!name) return;

@@ -19,12 +19,14 @@ type EventWithSource struct {
 }
 
 type ProgressTicker struct {
+	name          string // readonly
 	progress      *Progress
-	value         atomic.Int32
-	maxValue      atomic.Int32
-	output        string
-	outputMu      sync.Mutex
 	eventChannels map[chan Event]chan Event
+
+	value    atomic.Int32
+	maxValue atomic.Int32
+	output   string
+	outputMu sync.Mutex
 }
 
 func (t *ProgressTicker) GetValue() int32 {
@@ -77,19 +79,23 @@ func (t *ProgressTicker) emitEvent(event Event) {
 	}
 	for globalChannel := range t.progress.globalEventChannel {
 		select {
-		case globalChannel <- EventWithSource{Event: event, Source: ""}:
+		case globalChannel <- EventWithSource{Event: event, Source: t.name}:
 		default:
 		}
 	}
 }
 
-func (t *ProgressTicker) addChannel() chan Event {
+func (t *ProgressTicker) ListenEvents() chan Event {
 	if t.eventChannels == nil {
 		t.eventChannels = make(map[chan Event]chan Event)
 	}
 	c := make(chan Event)
 	t.eventChannels[c] = c
 	return c
+}
+
+func (t *ProgressTicker) UnlistenEvents(ch chan Event) {
+	delete(t.eventChannels, ch)
 }
 
 type Progress struct {
@@ -116,7 +122,7 @@ func (p *Progress) Bind(name string) (*ProgressTicker, error) {
 	if _, ok := p.progresses[name]; ok {
 		return nil, errors.New(name + " already bound")
 	}
-	ticker := &ProgressTicker{progress: p}
+	ticker := &ProgressTicker{name: name, progress: p}
 	p.progresses[name] = ticker
 	return ticker, nil
 }
@@ -125,25 +131,13 @@ func (p *Progress) Unbind(name string) {
 	delete(p.progresses, name)
 }
 
-func (p *Progress) ListenEvents(name string) chan Event {
-	if t, ok := p.progresses[name]; ok {
-		return t.addChannel()
-	} else {
-		panic("invalid name")
-	}
-}
-
-func (p *Progress) UnlistenEvents(name string, ch chan Event) {
-	delete(p.progresses[name].eventChannels, ch)
-}
-
-func (p *Progress) ListenGlobalEvents() chan EventWithSource {
+func (p *Progress) ListenEvents() chan EventWithSource {
 	c := make(chan EventWithSource)
 	p.globalEventChannel[c] = c
 	return c
 }
 
-func (p *Progress) UnlistenGlobalEvents(ch chan EventWithSource) {
+func (p *Progress) UnlistenEvents(ch chan EventWithSource) {
 	delete(p.globalEventChannel, ch)
 }
 
