@@ -76,6 +76,11 @@ func NewProgress() *Progress {
 	}
 }
 
+func (p *Progress) GetTicker(name string) (*ProgressTicker, bool) {
+	t, b := p.progresses[name]
+	return t, b
+}
+
 func (p *Progress) Bind(name string) (*ProgressTicker, error) {
 	if _, ok := p.progresses[name]; ok {
 		return nil, errors.New(name + " already bound")

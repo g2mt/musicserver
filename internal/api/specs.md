@@ -70,9 +70,13 @@ Returns a JSON mapping between a key for an ongoing process, and its progress:
 }
 ```
 
+### GET `/progress/[id]/output`
+
+Returns the command output of the progress.
+
 ### GET `/progress/[id]/events`
 
-Returns the command output of the progress using SSE events.
+Returns SSE events related to the progress.
 
 Emits event types: "Value", "MaxValue", "AddOutput"
 

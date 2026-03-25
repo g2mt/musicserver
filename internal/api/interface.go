@@ -603,12 +603,19 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				return nil, "", err
 			}
 			return data, "text/event-stream", nil
+		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
+			t, ok := i.prog.GetTicker(id)
+			if !ok {
+				return nil, "", errors.New("ticker not found")
+			}
+			response = t.GetOutput()
+		} else {
+			data, err := i.GetProgress()
+			if err != nil {
+				return nil, "", err
+			}
+			return data, "text/json", nil
 		}
-		data, err := i.GetProgress()
-		if err != nil {
-			return nil, "", err
-		}
-		return data, "text/json", nil
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
