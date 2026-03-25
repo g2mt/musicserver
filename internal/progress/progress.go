@@ -3,6 +3,7 @@ package progress
 import (
 	"encoding/json"
 	"errors"
+	"sync"
 	"sync/atomic"
 )
 
@@ -15,6 +16,7 @@ type ProgressTicker struct {
 	value         atomic.Int32
 	maxValue      atomic.Int32
 	output        string
+	outputMu      sync.Mutex
 	eventChannels map[chan Event]chan Event
 }
 
