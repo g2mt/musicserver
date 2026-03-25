@@ -1,9 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackwardStep, faForwardStep, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faForwardStep, faSearch, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { useBackForward } from './MusicPlayer';
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import { AppContext } from './AppState';
+import { TrackData } from './Track';
+import { HOST } from './apiserver';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import './SearchBar.css';
 
@@ -22,6 +26,27 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   useEffect(() => {
     setInputValue(searchQuery);
   }, [searchQuery]);
+
+  const confirmTrackDownload = async (url: string) => {
+    try {
+      const response = await fetch(`${HOST}/track/:external/${url}`);
+      if (!response.ok) {
+        toast.error('Unable to get track data');
+        return;
+      }
+      const trackData: TrackData = await response.json();
+      c.addConfirmBox(
+        <div>
+          <p>Download this track?</p>
+          <button onClick={() => alert(`Downloading: ${trackData.name}`)}>Yes</button>
+        </div>
+      );
+    } catch {
+      toast.error('Unable to get track data');
+    }
+  };
+
+  const isValidUrl = inputValue.startsWith('http://') || inputValue.startsWith('https://');
 
   return (
     <form className="search-bar" onSubmit={e => {
@@ -58,6 +83,14 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
           <FontAwesomeIcon icon={faForwardStep} />
         </button>
       )}
+      <button 
+        type="button"
+        className="icon-btn btn-download" 
+        onClick={() => confirmTrackDownload(inputValue)}
+        disabled={!isValidUrl}
+      >
+        <FontAwesomeIcon icon={faDownload} />
+      </button>
     </form>
   );
 }
