@@ -74,3 +74,30 @@ func (p *Progress) ToJSON() ([]byte, error) {
 	}
 	return json.Marshal(out)
 }
+
+func (t *ProgressTicker) GetValue() int32 {
+	return t.value.Load()
+}
+
+func (t *ProgressTicker) GetMaxValue() int32 {
+	return t.maxValue.Load()
+}
+
+func (t *ProgressTicker) SetValue(v int32) {
+	t.value.Store(v)
+	t.emitEvent(Event{Type: "Value", Data: v})
+}
+
+func (t *ProgressTicker) SetMaxValue(v int32) {
+	t.maxValue.Store(v)
+	t.emitEvent(Event{Type: "MaxValue", Data: v})
+}
+
+func (t *ProgressTicker) emitEvent(event Event) {
+	for ch := range t.eventChannels {
+		select {
+		case ch <- event:
+		default:
+		}
+	}
+}
