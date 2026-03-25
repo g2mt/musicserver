@@ -3,6 +3,7 @@ import { HOST } from './apiserver';
 import { toast } from 'react-toastify';
 import { faRotate } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import ProgressTable from './ProgressTable';
 import './SettingsTab.css';
 
 interface ProgressEntry {
@@ -42,32 +43,7 @@ function SettingsTab() {
       </button>
       <hr />
       <h2>Ongoing tasks</h2>
-      <table className="progress-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Progress</th>
-          </tr>
-        </thead>
-        <tbody>
-          {
-            Object.keys(progresses).length > 0
-            ? Object.entries(progresses).map(([name, entry]) => (
-                <tr key={name}
-                    title={`${entry.value}/${entry.max_value}`}>
-                  <td>{name}</td>
-                  <td>
-                    <progress
-                      value={entry.value} max={entry.max_value}/>
-                  </td>
-                </tr>
-              ))
-            : (
-              <tr><td colSpan={2}>No active processes.</td></tr>
-            )
-          }
-        </tbody>
-      </table>
+      <ProgressTable progresses={progresses} />
     </div>
   );
 }
