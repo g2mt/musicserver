@@ -43,7 +43,7 @@ Under the UNIX endpoint, the response will be transferred as a stream of bytes w
 >       - `NewUnixSocketServer(Interface)`
 >       - `UnixSocketServer.Start(path)`: binds to the path and processes requests, blocking the current running thread
 >       - `UnixSocketServer.Stop()`: stops the socket server, may be used in another goroutine
->   - `interface.go`: common interface code with:
+>   - `interface_*.go`: common interface code with:
 >     - struct Interface with methods for handling each request
 >       - `NewInterface(sqlite database connection)`
 >       - `Interface.InitDb`: initializes every relevant table
