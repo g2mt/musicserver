@@ -37,7 +37,15 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       }
       const trackData: TrackData = await response.json();
       c.addConfirmBox(
-        <ConfirmBox onAccept={() => alert(`Downloading: ${trackData.name}`)}>
+        <ConfirmBox onAccept={() => {
+          toast.info((<>Download for <b>{url}</b> started</>));
+          fetch(`${HOST}/track/:external/${encodeURIComponent(url)}`, { method: 'POST' })
+            .then(res => {
+              if (!res.ok) throw new Error();
+              toast.success((<>Download for <b>{url}</b> completed</>));
+            })
+            .catch(() => toast.error((<>Download for <b>{url}</b> failed</>)));
+        }}>
           <p>Download this track?</p>
           <Track highlighted={true} track={trackData} />
         </ConfirmBox>
