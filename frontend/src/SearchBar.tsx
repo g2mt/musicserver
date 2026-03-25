@@ -13,8 +13,8 @@ interface SearchBarProps {
 }
 
 function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
-  const [inputValue, setInputValue] = useState(searchQuery);
   const c = useContext(AppContext)!;
+  const [inputValue, setInputValue] = useState(searchQuery);
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
