@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"flag"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func main() {
 			level = slog.LevelError
 		}
 	}
-	slog.SetLevel(level)
+	slog.SetLogLoggerLevel(level)
 
 	if *configPath == "" {
 		slog.Error("Error: -config flag is required")
@@ -74,7 +75,7 @@ func main() {
 
 	// Bind http server to http_bind
 	httpRouter := api.NewHTTPRouter(iface)
-	http.HandleFunc("/api", httpRouter.Serve)
+	http.Handle("/api/", http.StripPrefix("/api", http.HandlerFunc(httpRouter.Serve)))
 
 	if *debug {
 		// Mount frontend from filesystem in debug mode
@@ -89,7 +90,11 @@ func main() {
 	} else {
 		// Serve embedded frontend in production
 		slog.Info("Serving embedded frontend")
-		http.Handle("/", http.FileServer(http.FS(embeddedFrontend)))
+		sub, err := fs.Sub(embeddedFrontend, "frontend/dist")
+		if err != nil {
+			panic(err)
+		}
+		http.Handle("/", http.FileServer(http.FS(sub)))
 	}
 
 	go func() {
