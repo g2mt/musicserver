@@ -598,12 +598,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				}
 			}()
 
-			// Read all data from the pipe and return
-			data, err := io.ReadAll(pr)
-			if err != nil {
-				return nil, "", err
-			}
-			return data, "text/event-stream", nil
+			return pr, "text/event-stream", nil
 		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
 			t, ok := i.prog.GetTicker(id)
 			if !ok {
