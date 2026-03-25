@@ -41,10 +41,7 @@ type Interface struct {
 	trackCache *lru.Cache[string, schema.Track]
 
 	// dlExternal stores the state of ongoing external downloads
-	dlExternal map[string]struct {
-		ticker *progress.ProgressTicker
-		done   chan struct{}
-	}
+	dlExternal   map[string]dlExternal
 	dlExternalMu sync.Mutex
 }
 

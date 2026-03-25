@@ -9,6 +9,11 @@ import (
 	"musicserver/internal/schema"
 )
 
+type dlExternal struct {
+	ticker *progress.ProgressTicker
+	done   chan struct{}
+}
+
 type dlInfo struct {
 	Title     string `json:"title"`
 	Uploader  string `json:"uploader"`
@@ -55,6 +60,9 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	defer i.dlExternalMu.Unlock()
 
 	// Check if already downloading
+	if i.dlExternal == nil {
+		i.dlExternal = make(map[string]dlExternal)
+	}
 	if _, exists := i.dlExternal[url]; exists {
 		return true, nil
 	}
