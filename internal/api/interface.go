@@ -27,7 +27,9 @@ const CoverFallbackMimetype = "image/png"
 const CoverFallback = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0lEQVR4AQEEAPv/ACEhIQDKAGSaOw/yAAAAAElFTkSuQmCC"
 
 type Interface struct {
-	db     *sql.DB
+	db      *sql.DB
+	cacheDb *sql.DB // nullable
+
 	config *schema.Config // readonly
 	prog   *progress.Progress
 
@@ -44,9 +46,13 @@ type Interface struct {
 	dlExternalMu sync.Mutex
 }
 
+const SqlDbPath = "./info.db"
 const MaxIdLength = 64
 const MinShortIdLength = 6
 const MaxPageCount = 50
+
+const CacheDbPath = "./cache.db"
+const CacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
 
 func defaultLongIdGen(track *schema.Track) string {
 	hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
@@ -55,7 +61,7 @@ func defaultLongIdGen(track *schema.Track) string {
 
 func NewInterface(config *schema.Config) (*Interface, error) {
 	// Open sql database in db_path/${SQL_DB_PATH}
-	dbDir := filepath.Join(config.DbDir, schema.SqlDbPath)
+	dbDir := filepath.Join(config.DbDir, SqlDbPath)
 
 	// Ensure the directory exists
 	if err := os.MkdirAll(config.DbDir, 0755); err != nil {
@@ -98,6 +104,8 @@ func (i *Interface) InitDb() error {
 	`)
 	return err
 }
+
+func (i *Interface) CleanCache() error {}
 
 func (i *Interface) Close() error {
 	return i.db.Close()
