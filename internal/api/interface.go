@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -561,6 +562,47 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	} else if path == "/progress" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
+		}
+		data, err := i.GetProgress()
+		if err != nil {
+			return nil, "", err
+		}
+		return data, "text/json", nil
+	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		if id, ok = strings.CutSuffix(id, "/events"); ok {
+			// SSE events endpoint
+			ch := i.prog.ListenEvents(id)
+			defer i.prog.UnlistenEvents(id, ch)
+
+			// Create a pipe to stream the response
+			pr, pw := io.Pipe()
+			go func() {
+				defer pw.Close()
+				for event := range ch {
+					data, err := json.Marshal(event)
+					if err != nil {
+						return
+					}
+					_, err = pw.Write([]byte("event: " + event.Type + "\n"))
+					if err != nil {
+						return
+					}
+					_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
+					if err != nil {
+						return
+					}
+				}
+			}()
+
+			// Read all data from the pipe and return
+			data, err := io.ReadAll(pr)
+			if err != nil {
+				return nil, "", err
+			}
+			return data, "text/event-stream", nil
 		}
 		data, err := i.GetProgress()
 		if err != nil {
