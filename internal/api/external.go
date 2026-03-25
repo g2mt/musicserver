@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"os/exec"
@@ -97,24 +98,16 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 		return false, err
 	}
 
+	go func() {
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			ticker.AddOutput(scanner.Text())
+		}
+	}()
+
 	if err := cmd.Start(); err != nil {
 		return false, err
 	}
-
-	go func() {
-		// Read stdout and add to ticker
-		buf := make([]byte, 1024)
-		for {
-			n, err := stdout.Read(buf)
-			if n > 0 {
-				println(buf[:n])
-				ticker.AddOutput(string(buf[:n]))
-			}
-			if err != nil {
-				break
-			}
-		}
-	}()
 
 	cmd.Wait()
 	return true, nil

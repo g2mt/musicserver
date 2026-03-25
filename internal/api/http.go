@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bufio"
 	"encoding/json"
 	"io"
 	"log/slog"
@@ -38,13 +39,29 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	reader = io.TeeReader(reader, w)
-	if _, err := io.ReadAll(reader); err != nil {
-		slog.Error(err.Error())
-		data, _ := json.Marshal(struct {
-			Error string `json:"error"`
-		}{Error: err.Error()})
-		http.Error(w, string(data), http.StatusInternalServerError)
-		return
+	if data, ok := reader.([]byte); ok {
+		w.Write(data)
+	} else if reader, ok := reader.(io.ReadCloser); ok {
+		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Connection", "keep-alive")
+
+		flusher, ok := w.(http.Flusher)
+		if !ok {
+			http.Error(w, "{error:\"Streaming not supported\"}", http.StatusInternalServerError)
+		}
+
+		scanner := bufio.NewScanner(reader)
+		for scanner.Scan() {
+			w.Write(scanner.Bytes())
+			w.Write([]byte{'\n'})
+			flusher.Flush()
+		}
+		if err := scanner.Err(); err != nil {
+			slog.Error(err.Error())
+			data, _ := json.Marshal(struct {
+				Error string `json:"error"`
+			}{Error: err.Error()})
+			w.Write(data)
+		}
 	}
 }

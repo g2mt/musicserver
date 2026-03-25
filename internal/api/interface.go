@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
@@ -604,7 +603,8 @@ func streamEvents[T any](i *Interface, ch chan T, unlisten func(chan T)) (io.Rea
 	return stream, "text/event-stream", nil
 }
 
-func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.ReadCloser, contentType string, err error) {
+// out is either []byte, or io.ReadCloser
+func (i *Interface) handleRequest(path string, method string, params map[string]string) (out interface{}, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
@@ -634,7 +634,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		if err != nil {
 			return nil, "", err
 		}
-		return io.NopCloser(bytes.NewReader(data)), "text/json", nil
+		return data, "text/json", nil
 	} else if path == "/progress/:events" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -661,7 +661,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return io.NopCloser(bytes.NewReader(data)), "text/json", nil
+			return data, "text/json", nil
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if url, ok := strings.CutPrefix(id, ":external/"); ok {
@@ -683,7 +683,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return io.NopCloser(bytes.NewReader(data)), "application/octet-stream", nil
+			return data, "application/octet-stream", nil
 		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
 			data, mimeType, err := i.GetTrackCover(id)
 			if err != nil {
@@ -696,7 +696,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				}
 				mimeType = CoverFallbackMimetype
 			}
-			return io.NopCloser(bytes.NewReader(data)), mimeType, nil
+			return data, mimeType, nil
 		} else {
 			response, err = i.GetTrackById(id)
 		}
@@ -733,5 +733,5 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	if err != nil {
 		return nil, "", err
 	}
-	return io.NopCloser(bytes.NewReader(data)), "text/json", nil
+	return data, "text/json", nil
 }

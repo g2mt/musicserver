@@ -101,7 +101,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 			continue
 		}
 
-		response, _, err := s.iface.handleRequest(req.Path, req.Method, req.Params)
+		reader, _, err := s.iface.handleRequest(req.Path, req.Method, req.Params)
 		if err != nil {
 			data, _ := json.Marshal(struct {
 				Error string `json:"error"`
@@ -111,6 +111,21 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 			continue
 		}
 
-		io.Copy(conn, response)
+		if data, ok := reader.([]byte); ok {
+			conn.Write(data)
+		} else if reader, ok := reader.(io.ReadCloser); ok {
+			scanner := bufio.NewScanner(reader)
+			for scanner.Scan() {
+				conn.Write(scanner.Bytes())
+				conn.Write([]byte{'\n'})
+			}
+			if err := scanner.Err(); err != nil {
+				data, _ := json.Marshal(struct {
+					Error string `json:"error"`
+				}{Error: err.Error()})
+				conn.Write(data)
+			}
+		}
+
 	}
 }
