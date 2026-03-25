@@ -56,7 +56,7 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 	return track, nil
 }
 
-func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
+func (i *Interface) DownloadExternalTrack(url string) (string, error) {
 	i.dlExternalMu.Lock()
 	defer i.dlExternalMu.Unlock()
 
@@ -65,7 +65,7 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 		i.dlExternal = make(map[string]dlExternal)
 	}
 	if _, exists := i.dlExternal[url]; exists {
-		return true, nil
+		return "", nil
 	}
 	defer func() {
 		i.dlExternalMu.Lock()
@@ -77,7 +77,7 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	tickerName := "dl:" + url
 	ticker, err := i.prog.Bind(tickerName)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 	defer func() {
 		i.prog.Unbind(tickerName)
@@ -95,7 +95,7 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	cmd.Dir = i.config.DataPath
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
 	go func() {
@@ -106,9 +106,9 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		return false, err
+		return "", err
 	}
 
 	cmd.Wait()
-	return true, nil
+	return ticker.GetOutput(), nil
 }

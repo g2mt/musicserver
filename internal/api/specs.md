@@ -170,7 +170,7 @@ Returns the track metadata for the URL `url` using the media downloader specifie
 
 Starts downloading the URL `url` using the media downloader specified in the config file.
 
-Returns the JSON value `true`.
+Returns a JSON string containing the output captured from the media downloader.
 
 ### DELETE `/track`
 
