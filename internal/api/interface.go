@@ -39,6 +39,13 @@ type Interface struct {
 	watcher *fsnotify.Watcher
 
 	trackCache *lru.Cache[string, schema.Track]
+
+	// dlExternal stores the state of ongoing external downloads
+	dlExternal map[string]struct {
+		ticker *progress.ProgressTicker
+		done   chan struct{}
+	}
+	dlExternalMu sync.Mutex
 }
 
 const MaxIdLength = 64
@@ -623,11 +630,21 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return bytes.NewReader(data), "text/json", nil
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
-		if method != "GET" {
+		if url, ok := strings.CutPrefix(id, ":external/"); ok {
+			if method == "POST" {
+				success, err := i.DownloadExternalTrack(url)
+				if err != nil {
+					return nil, "", err
+				}
+				response = success
+			} else if method == "GET" {
+				response, err = i.GetExternalTrackByURL(url)
+			} else {
+				return nil, "", errors.New("method not allowed")
+			}
+		} else if method != "GET" {
 			return nil, "", errors.New("method not allowed")
-		}
-
-		if id, ok = strings.CutSuffix(id, "/data"); ok {
+		} else if id, ok = strings.CutSuffix(id, "/data"); ok {
 			data, err := i.GetTrackData(id)
 			if err != nil {
 				return nil, "", err
@@ -646,8 +663,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				mimeType = CoverFallbackMimetype
 			}
 			return bytes.NewReader(data), mimeType, nil
-		} else if url, ok := strings.CutPrefix(id, ":external/"); ok {
-			response, err = i.GetExternalTrackByURL(url)
 		} else {
 			response, err = i.GetTrackById(id)
 		}

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os/exec"
 
+	"musicserver/internal/progress"
 	"musicserver/internal/schema"
 )
 
@@ -47,4 +48,63 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 	i.trackCache.Add(u, track)
 
 	return track, nil
+}
+
+func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
+	i.dlExternalMu.Lock()
+	defer i.dlExternalMu.Unlock()
+
+	// Check if already downloading
+	if _, exists := i.dlExternal[url]; exists {
+		return true, nil
+	}
+
+	// Create a new ticker for this download
+	ticker, err := i.prog.Bind(url)
+	if err != nil {
+		return false, err
+	}
+
+	// Store in map
+	i.dlExternal[url] = struct {
+		ticker *progress.ProgressTicker
+		done   chan struct{}
+	}{ticker: ticker, done: make(chan struct{})}
+
+	// Spawn the command
+	cmd := exec.Command(i.config.MediaDownloader, url)
+	cmd.Dir = i.config.DataPath
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		delete(i.dlExternal, url)
+		i.prog.Unbind(url)
+		return false, err
+	}
+
+	if err := cmd.Start(); err != nil {
+		delete(i.dlExternal, url)
+		i.prog.Unbind(url)
+		return false, err
+	}
+
+	// Read stdout in a goroutine and add to ticker
+	buf := make([]byte, 1024)
+	for {
+		n, err := stdout.Read(buf)
+		if n > 0 {
+			ticker.AddOutput(string(buf[:n]))
+		}
+		if err != nil {
+			break
+		}
+	}
+	cmd.Wait()
+
+	// Cleanup
+	i.dlExternalMu.Lock()
+	delete(i.dlExternal, url)
+	i.prog.Unbind(url)
+	i.dlExternalMu.Unlock()
+
+	return true, nil
 }

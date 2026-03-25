@@ -168,7 +168,9 @@ Returns the track metadata for the URL `url` using the media downloader specifie
 
 ### POST `/track/:external/[url]`
 
-Downalods the URL `url` using the media downloader specified in the config file.
+Starts downloading the URL `url` using the media downloader specified in the config file.
+
+Returns the JSON value `true`.
 
 ### DELETE `/track`
 
