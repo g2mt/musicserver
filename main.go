@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"log/slog"
 	"net/http"
@@ -13,9 +14,30 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+//go:embed frontend/dist
+var embeddedFrontend embed.FS
+
 func main() {
 	configPath := flag.String("config", "", "path to config file")
+	debug := flag.Bool("debug", false, "enable debug mode")
+	loglevel := flag.String("loglevel", "info", "log level (debug, info, warn, error)")
 	flag.Parse()
+
+	// Set up logging based on flags
+	level := slog.LevelInfo
+	if *debug {
+		level = slog.LevelDebug
+	} else if *loglevel != "" {
+		switch *loglevel {
+		case "debug":
+			level = slog.LevelDebug
+		case "warn":
+			level = slog.LevelWarn
+		case "error":
+			level = slog.LevelError
+		}
+	}
+	slog.SetLevel(level)
 
 	if *configPath == "" {
 		slog.Error("Error: -config flag is required")
@@ -53,6 +75,22 @@ func main() {
 	// Bind http server to http_bind
 	httpRouter := api.NewHTTPRouter(iface)
 	http.HandleFunc("/api", httpRouter.Serve)
+
+	if *debug {
+		// Mount frontend from filesystem in debug mode
+		execPath, err := os.Executable()
+		if err != nil {
+			slog.Error("Error getting executable path", "err", err)
+			os.Exit(1)
+		}
+		frontendDir := filepath.Join(filepath.Dir(execPath), "frontend", "dist")
+		slog.Debug("Serving frontend from filesystem", "path", frontendDir)
+		http.Handle("/", http.FileServer(http.Dir(frontendDir)))
+	} else {
+		// Serve embedded frontend in production
+		slog.Info("Serving embedded frontend")
+		http.Handle("/", http.FileServer(http.FS(embeddedFrontend)))
+	}
 
 	go func() {
 		slog.Info("Starting HTTP server", "bind", config.HTTPBind)
