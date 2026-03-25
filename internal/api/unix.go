@@ -102,14 +102,14 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 
 		response, _, err := s.iface.handleRequest(req.Path, req.Method, req.Params)
 		if err != nil {
-			response, _ = json.Marshal(struct {
+			data, _ := json.Marshal(struct {
 				Error string `json:"error"`
 			}{Error: err.Error()})
-			conn.Write(response)
+			conn.Write(data)
 			// Continue to read next line
 			continue
 		}
 
-		conn.Write(response)
+		io.Copy(conn, response)
 	}
 }

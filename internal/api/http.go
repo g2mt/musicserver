@@ -36,5 +36,5 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	w.Write(response)
+	io.Copy(w, response)
 }
