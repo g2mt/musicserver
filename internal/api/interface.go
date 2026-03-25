@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
@@ -537,7 +538,7 @@ func (i *Interface) GetProgress() ([]byte, error) {
 	return i.prog.ToJSON()
 }
 
-func (i *Interface) handleRequest(path string, method string, params map[string]string) (out []byte, contentType string, err error) {
+func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.Reader, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
@@ -567,7 +568,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		if err != nil {
 			return nil, "", err
 		}
-		return data, "text/json", nil
+		return bytes.NewReader(data), "text/json", nil
 	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -614,7 +615,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return data, "text/json", nil
+			return bytes.NewReader(data), "text/json", nil
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if method != "GET" {
@@ -626,7 +627,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return data, "application/octet-stream", nil
+			return bytes.NewReader(data), "application/octet-stream", nil
 		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
 			data, mimeType, err := i.GetTrackCover(id)
 			if err != nil {
@@ -639,7 +640,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				}
 				mimeType = CoverFallbackMimetype
 			}
-			return data, mimeType, nil
+			return bytes.NewReader(data), mimeType, nil
 		} else if url, ok := strings.CutPrefix(id, ":external/"); ok {
 			response, err = i.GetExternalTrackByURL(url)
 		} else {
@@ -678,5 +679,5 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	if err != nil {
 		return nil, "", err
 	}
-	return data, "text/json", nil
+	return bytes.NewReader(data), "text/json", nil
 }
