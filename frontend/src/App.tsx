@@ -42,9 +42,22 @@ function App() {
       .then(data => setFullTracksFromData(data));
   }, []);
 
+  // Hash params (parsed like URLSearchParams but from window.location.hash)
+  const getHashParams = () => new URLSearchParams(window.location.hash.slice(1));
+  const setHashParam = (key: string, value: string) => {
+    const params = getHashParams();
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    window.location.hash = params.toString();
+  };
+
   // Search
-  [a.searchQuery, a.setSearchQuery] = useState('');
+  [a.searchQuery, a.setSearchQuery] = useState(() => getHashParams().get('q') ?? '');
   useEffect(() => {
+    setHashParam('q', a.searchQuery);
     fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
       .then(res => res.json())
       .then(data => setFullTracksFromData(data));
