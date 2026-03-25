@@ -546,12 +546,54 @@ type eventStreamer[T any] struct {
 	i        *Interface
 	ch       chan T
 	unlisten func(chan T)
+
+	buf    []byte
+	bufMu  sync.Mutex
+	closed bool
 }
 
 func (s *eventStreamer[T]) Read(p []byte) (n int, err error) {
+	s.bufMu.Lock()
+	defer s.bufMu.Unlock()
+
+	if s.closed {
+		return 0, io.EOF
+	}
+
+	// If buffer has data, return it
+	if len(s.buf) > 0 {
+		n = copy(p, s.buf)
+		s.buf = s.buf[n:]
+		return n, nil
+	}
+
+	// Wait for next event from channel
+	event, ok := <-s.ch
+	if !ok {
+		return 0, io.EOF
+	}
+
+	// Marshal event to JSON
+	data, err := json.Marshal(event)
+	if err != nil {
+		return 0, err
+	}
+
+	// Format as SSE
+	sse := []byte("event: data\ndata: " + string(data) + "\n\n")
+
+	// Copy to output buffer
+	n = copy(p, sse)
+	if len(sse) > n {
+		s.buf = sse[n:]
+	}
+	return n, nil
 }
 
 func (s *eventStreamer[T]) Close() error {
+	s.bufMu.Lock()
+	defer s.bufMu.Unlock()
+	s.closed = false
 	s.unlisten(s.ch)
 	return nil
 }
