@@ -569,6 +569,29 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", err
 		}
 		return bytes.NewReader(data), "text/json", nil
+	} else if path == "/progress/:events" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		ch := i.prog.ListenGlobalEvents()
+		defer i.prog.UnlistenGlobalEvents(ch)
+
+		pr, pw := io.Pipe()
+		go func() {
+			defer pw.Close()
+			for event := range ch {
+				data, err := json.Marshal(event)
+				if err != nil {
+					return
+				}
+				_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
+				if err != nil {
+					return
+				}
+			}
+		}()
+
+		return pr, "text/event-stream", nil
 	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
