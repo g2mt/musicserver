@@ -52,7 +52,7 @@ func main() {
 
 	// Bind http server to http_bind
 	httpRouter := api.NewHTTPRouter(iface)
-	http.HandleFunc("/", httpRouter.Serve)
+	http.HandleFunc("/api", httpRouter.Serve)
 
 	go func() {
 		slog.Info("Starting HTTP server", "bind", config.HTTPBind)
