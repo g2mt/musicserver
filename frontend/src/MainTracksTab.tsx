@@ -23,7 +23,7 @@ export function MainTracksTab({
   const c = useContext(AppContext)!;
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
-  const elRef = useRef<HTMLElement|null>(null);
+  const elRef = useRef<HTMLDivElement|null>(null);
   const updateQuery = (text: string) => {
     c.setSearchQuery(c.searchQuery.replace(/ *((\b(after|before):[^ ]+)|$)/, ` ${text}`).trim());
     elRef.current?.scrollIntoView({ block: "start" });

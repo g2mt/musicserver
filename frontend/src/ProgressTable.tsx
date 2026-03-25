@@ -62,6 +62,29 @@ function ProgressTable() {
     setExpanded(prev => ({ ...prev, [name]: !prev[name] }));
   }
 
+  function Row({name, entry}: {name: string, entry: ProgressEntry}) {
+    return (
+      <>
+        <tr
+            title={`${entry.value}/${entry.max_value}`}>
+          <td>{name}</td>
+          <td>
+            <progress
+              value={entry.value} max={entry.max_value}/>
+          </td>
+          <td>
+            <button onClick={() => toggleOutput(name)}>
+              {expanded[name] ? 'Hide' : 'Show'}
+            </button>
+          </td>
+        </tr>
+        {expanded[name] && (
+          <tr><td colSpan={3}><pre>{entry.output}</pre></td></tr>
+        )}
+      </>
+    )
+  }
+
   return (
     <table className="progress-table">
       <thead>
@@ -75,24 +98,7 @@ function ProgressTable() {
         {
           Object.keys(progresses).length > 0
           ? Object.entries(progresses).map(([name, entry]) => (
-              <>
-                <tr key={name}
-                    title={`${entry.value}/${entry.max_value}`}>
-                  <td>{name}</td>
-                  <td>
-                    <progress
-                      value={entry.value} max={entry.max_value}/>
-                  </td>
-                  <td>
-                    <button onClick={() => toggleOutput(name)}>
-                      {expanded[name] ? 'Hide' : 'Show'}
-                    </button>
-                  </td>
-                </tr>
-                {expanded[name] && (
-                  <tr><td colSpan={3}><pre>{entry.output}</pre></td></tr>
-                )}
-              </>
+              <Row key={name} name={name} entry={entry} />
             ))
           : (
             <tr><td colSpan={3}>No active processes.</td></tr>

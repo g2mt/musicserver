@@ -11,8 +11,8 @@ import (
 type Config struct {
 	// binds the HTTP API backend to this path. defaults to localhost:8000
 	HTTPBind string `yaml:"http_bind"`
-	// If explicitly set, then enable or disable the local unix socket. Otherwise, defaults to true
-	UnixBindEnabled *bool `yaml:"unix_bind_enabled"`
+	// If set, then enable the local unix socket
+	UnixBindEnabled bool `yaml:"unix_bind_enabled"`
 	// binds the Unix socket API backend to this path. By default, binds to /run/musicserver/socket for root, ~/.musicserver/socket for non-root
 	UnixBind string `yaml:"unix_bind"`
 	// path where music data is stored
@@ -45,14 +45,8 @@ func LoadConfig(path string) (*Config, error) {
 		config.HTTPBind = "localhost:8000"
 	}
 
-	if config.UnixBindEnabled == nil {
-		// Default to true if not explicitly set
-		defaultEnabled := true
-		config.UnixBindEnabled = &defaultEnabled
-	}
-
 	// Only set default UnixBind if Unix socket is enabled
-	if *config.UnixBindEnabled && config.UnixBind == "" {
+	if config.UnixBindEnabled && config.UnixBind == "" {
 		if currentUser.Uid == "0" {
 			config.UnixBind = "/run/musicserver/socket"
 		} else {

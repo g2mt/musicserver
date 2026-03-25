@@ -10,7 +10,7 @@ interface ConfirmBoxProps {
 }
 
 function ConfirmBox({ children, onAccept, onDecline }: ConfirmBoxProps) {
-  const elRef = useRef<HTMLElement|null>(null);
+  const elRef = useRef<HTMLDivElement|null>(null);
   function remove() {
     elRef.current?.remove();
   }

@@ -62,7 +62,7 @@ func main() {
 		}
 	}()
 
-	if *config.UnixBindEnabled {
+	if config.UnixBindEnabled {
 		// Bind unix socket in another socket
 		unixServer := api.NewUnixSocketServer(iface)
 

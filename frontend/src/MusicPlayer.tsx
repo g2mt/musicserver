@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useContext, useRef } from 'react';
+import { useEffect, useMemo, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeHigh, faVolumeXmark, faBackwardStep, faForwardStep } from '@fortawesome/free-solid-svg-icons';
 import { Track } from './Track';
