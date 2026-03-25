@@ -17,18 +17,20 @@ export interface TrackData {
 
 export function Track({ 
   track, 
+  highlighted,
   index,
   enqueueTrack,
   unqueueTrack
 }: { 
   track: TrackData, 
+  highlighted?: boolean,
   index?: number,
   enqueueTrack?: (_: TrackData) => void,
   unqueueTrack?: (_: number) => void 
 }) {
   const c = useContext(AppContext)!;
   const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } = useContext(AppContext)!;
-  const isHighlighted = index !== undefined && index === enqueuedTrackIndex;
+  const isHighlighted = highlighted || (index !== undefined && index === enqueuedTrackIndex);
   return (
     <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
       <img

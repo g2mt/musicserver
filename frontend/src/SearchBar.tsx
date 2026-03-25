@@ -4,12 +4,13 @@ import { faBackwardStep, faForwardStep, faSearch, faDownload } from '@fortawesom
 import { useBackForward } from './MusicPlayer';
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import { AppContext } from './AppState';
-import { TrackData } from './Track';
+import { Track, type TrackData } from './Track';
 import { HOST } from './apiserver';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import './SearchBar.css';
+import ConfirmBox from './ConfirmBox';
 
 interface SearchBarProps {
   searchQuery: string;
@@ -29,17 +30,17 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
 
   const confirmTrackDownload = async (url: string) => {
     try {
-      const response = await fetch(`${HOST}/track/:external/${url}`);
+      const response = await fetch(`${HOST}/track/:external/${encodeURIComponent(url)}`);
       if (!response.ok) {
         toast.error('Unable to get track data');
         return;
       }
       const trackData: TrackData = await response.json();
       c.addConfirmBox(
-        <div>
+        <ConfirmBox onAccept={() => alert(`Downloading: ${trackData.name}`)}>
           <p>Download this track?</p>
-          <button onClick={() => alert(`Downloading: ${trackData.name}`)}>Yes</button>
-        </div>
+          <Track highlighted={true} track={trackData} />
+        </ConfirmBox>
       );
     } catch {
       toast.error('Unable to get track data');
@@ -86,6 +87,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       <button 
         type="button"
         className="icon-btn btn-download" 
+        title='Paste a URL beginning with "http:" or "https:" to download it.'
         onClick={() => confirmTrackDownload(inputValue)}
         disabled={!isValidUrl}
       >
