@@ -584,6 +584,10 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				if err != nil {
 					return
 				}
+				_, err = pw.Write([]byte("event: " + event.Type + "\n"))
+				if err != nil {
+					return
+				}
 				_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
 				if err != nil {
 					return
