@@ -11,10 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AppContext, type AppState } from './AppState';
-import { flushSync } from 'react-dom';
-
 import './App.css';
-import { createRoot } from 'react-dom/client';
 
 function App() {
   const a = {} as AppState;
