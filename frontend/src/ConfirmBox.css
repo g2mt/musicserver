@@ -1,0 +1,22 @@
+.confirm-box {
+  background-color: #90ee90;
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .confirm-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+
+  .confirm-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+  }
+}
