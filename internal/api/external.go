@@ -87,7 +87,7 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 		return false, err
 	}
 
-	// Read stdout in a goroutine and add to ticker
+	// Read stdout and add to ticker
 	buf := make([]byte, 1024)
 	for {
 		n, err := stdout.Read(buf)
