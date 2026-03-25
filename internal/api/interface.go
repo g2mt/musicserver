@@ -542,10 +542,15 @@ func (i *Interface) GetProgress() ([]byte, error) {
 	return i.prog.ToJSON()
 }
 
-func streamEvents[T any](i *Interface, ch <-chan T) (io.Reader, string, error) {
-	pr, pw := io.Pipe()
+type eventStreamer[T any] struct { // TODO: implement ReadCloser
+	i        *Interface
+	unlisten func(chan T) // TODO: should call this on close
+}
+
+/*
+TODO: this is old code:
+func streamEvents[T any](i *Interface, ch <-chan T) (io.ReadCloser, string, error) {
 	go func() {
-		defer pw.Close()
 		for event := range ch {
 			data, err := json.Marshal(event)
 			if err != nil {
@@ -563,8 +568,9 @@ func streamEvents[T any](i *Interface, ch <-chan T) (io.Reader, string, error) {
 	}()
 	return pr, "text/event-stream", nil
 }
+*/
 
-func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.Reader, contentType string, err error) {
+func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.ReadCloser, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
@@ -594,25 +600,22 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		if err != nil {
 			return nil, "", err
 		}
-		return bytes.NewReader(data), "text/json", nil
+		return io.NopCloser(bytes.NewReader(data)), "text/json", nil
 	} else if path == "/progress/:events" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
-		ch := i.prog.ListenGlobalEvents()
-		defer i.prog.UnlistenGlobalEvents(ch)
-
-		return streamEvents(i, ch)
+		return streamEvents(i, i.prog.ListenEvents(), i.prog.UnlistenEvents)
 	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
 		if id, ok = strings.CutSuffix(id, "/events"); ok {
-			// SSE events endpoint
-			ch := i.prog.ListenEvents(id)
-			defer i.prog.UnlistenEvents(id, ch)
-
-			return streamEvents(i, ch)
+			t, ok := i.prog.GetTicker(id)
+			if !ok {
+				return nil, "", errors.New("ticker not found")
+			}
+			return streamEvents(i, t.ListenEvents(), i.prog.UnlistenEvents)
 		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
 			t, ok := i.prog.GetTicker(id)
 			if !ok {
@@ -624,7 +627,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return bytes.NewReader(data), "text/json", nil
+			return io.NopCloser(bytes.NewReader(data)), "text/json", nil
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if url, ok := strings.CutPrefix(id, ":external/"); ok {
@@ -646,7 +649,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return bytes.NewReader(data), "application/octet-stream", nil
+			return io.NopCloser(bytes.NewReader(data)), "application/octet-stream", nil
 		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
 			data, mimeType, err := i.GetTrackCover(id)
 			if err != nil {
@@ -659,7 +662,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				}
 				mimeType = CoverFallbackMimetype
 			}
-			return bytes.NewReader(data), mimeType, nil
+			return io.NopCloser(bytes.NewReader(data)), mimeType, nil
 		} else {
 			response, err = i.GetTrackById(id)
 		}
@@ -696,5 +699,5 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	if err != nil {
 		return nil, "", err
 	}
-	return bytes.NewReader(data), "text/json", nil
+	return io.NopCloser(bytes.NewReader(data)), "text/json", nil
 }
