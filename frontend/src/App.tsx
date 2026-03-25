@@ -139,6 +139,7 @@ function App() {
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
+            // TODO: add confirm box
             {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>
