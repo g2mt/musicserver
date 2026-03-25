@@ -11,7 +11,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-const WatchDirInterval = 10 * time.Second
+const WatchDirInterval = 1 * time.Second
 
 func (i *Interface) ScanTracks() (map[string]string, error) {
 	i.scanMu.Lock()

@@ -155,14 +155,11 @@ func (p *Progress) ToJSON() ([]byte, error) {
 	}
 	out := make(map[string]progressJSON)
 	for name, ticker := range p.progresses {
-		MaxValue := ticker.maxValue.Load()
 		ticker.outputMu.Lock()
-		if MaxValue > 0 {
-			out[name] = progressJSON{
-				Value:    ticker.value.Load(),
-				MaxValue: ticker.maxValue.Load(),
-				Output:   ticker.output,
-			}
+		out[name] = progressJSON{
+			Value:    ticker.value.Load(),
+			MaxValue: ticker.maxValue.Load(),
+			Output:   ticker.output,
 		}
 		ticker.outputMu.Unlock()
 	}

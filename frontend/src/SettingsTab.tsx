@@ -14,18 +14,6 @@ interface ProgressEntry {
 function SettingsTab() {
   const [progresses, setProgresses] = useState<Record<string, ProgressEntry>>({});
 
-  useEffect(() => {
-    function fetchProgress() {
-      fetch(`${HOST}/progress`)
-        .then(res => res.json())
-        .then(data => setProgresses(data ?? {}))
-        .catch(() => {});
-    }
-    fetchProgress();
-    const interval = setInterval(fetchProgress, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   function rescanMusic() {
     fetch(`${HOST}/track`, { method: 'POST' })
       .then(res => {
@@ -43,7 +31,7 @@ function SettingsTab() {
       </button>
       <hr />
       <h2>Ongoing tasks</h2>
-      <ProgressTable progresses={progresses} />
+      <ProgressTable />
     </div>
   );
 }

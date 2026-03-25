@@ -7,10 +7,6 @@ interface ProgressEntry {
   output?: string;
 }
 
-interface ProgressTableProps {
-  progresses: Record<string, ProgressEntry>;
-}
-
 type ProgressEvent =
   {
     type: "Value" | "MaxValue",
@@ -23,9 +19,16 @@ type ProgressEvent =
 
 type ProgressEventWithSource = ProgressEvent & { source: string };
 
-function ProgressTable({ progresses }: ProgressTableProps) {
+function ProgressTable() {
+  const [progresses, setProgresses] = useState<Record<string, ProgressEntry>>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [outputs, setOutputs] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch(`${HOST}/progress`)
+      .then(res => res.json())
+      .then(data => setProgresses(data ?? {}))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     // Set up SSE for global progress events
@@ -37,13 +40,15 @@ function ProgressTable({ progresses }: ProgressTableProps) {
       if (!name) return;
 
       if (data.type === 'AddOutput') {
-        setOutputs(prev => ({
-          ...prev,
-          [name]: (prev[name] || '') + data.data
-        }));
+        setProgresses(old => {
+          old[name].output = (old[name].output ?? '') + data.data;
+          return old;
+        });
       } else if (data.type === 'Value' || data.type === 'MaxValue') {
-        // Force re-render by updating state
-        setOutputs(prev => ({ ...prev }));
+        setProgresses(old => {
+          old[name].value = data.data;
+          return old;
+        });
       }
     };
 
@@ -69,22 +74,24 @@ function ProgressTable({ progresses }: ProgressTableProps) {
         {
           Object.keys(progresses).length > 0
           ? Object.entries(progresses).map(([name, entry]) => (
-              <tr key={name}
-                  title={`${entry.value}/${entry.max_value}`}>
-                <td>{name}</td>
-                <td>
-                  <progress
-                    value={entry.value} max={entry.max_value}/>
-                </td>
-                <td>
-                  <button onClick={() => toggleOutput(name)}>
-                    {expanded[name] ? 'Hide' : 'Show'}
-                  </button>
-                  {expanded[name] && (
-                    <pre>{outputs[name] || ''}</pre>
-                  )}
-                </td>
-              </tr>
+              <>
+                <tr key={name}
+                    title={`${entry.value}/${entry.max_value}`}>
+                  <td>{name}</td>
+                  <td>
+                    <progress
+                      value={entry.value} max={entry.max_value}/>
+                  </td>
+                  <td>
+                    <button onClick={() => toggleOutput(name)}>
+                      {expanded[name] ? 'Hide' : 'Show'}
+                    </button>
+                  </td>
+                </tr>
+                {expanded[name] && (
+                  <tr><td colSpan={3}><pre>{entry.output}</pre></td></tr>
+                )}
+              </>
             ))
           : (
             <tr><td colSpan={3}>No active processes.</td></tr>

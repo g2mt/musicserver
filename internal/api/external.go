@@ -68,10 +68,14 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	}
 
 	// Create a new ticker for this download
-	ticker, err := i.prog.Bind(url)
+	tickerName := "dl:" + url
+	ticker, err := i.prog.Bind(tickerName)
 	if err != nil {
 		return false, err
 	}
+	defer func() {
+		i.prog.Unbind(tickerName)
+	}()
 
 	// Store in map
 	i.dlExternal[url] = struct {
@@ -80,7 +84,8 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 	}{ticker: ticker, done: make(chan struct{})}
 
 	// Spawn the command
-	cmd := exec.Command(i.config.MediaDownloader, url)
+	// cmd := exec.Command(i.config.MediaDownloader, url)
+	cmd := exec.Command(i.config.MediaDownloader, "about:blank")
 	cmd.Dir = i.config.DataPath
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -95,23 +100,25 @@ func (i *Interface) DownloadExternalTrack(url string) (bool, error) {
 		return false, err
 	}
 
-	// Read stdout and add to ticker
-	buf := make([]byte, 1024)
-	for {
-		n, err := stdout.Read(buf)
-		if n > 0 {
-			ticker.AddOutput(string(buf[:n]))
+	go func() {
+		// Read stdout and add to ticker
+		buf := make([]byte, 1024)
+		for {
+			n, err := stdout.Read(buf)
+			if n > 0 {
+				println(buf[:n])
+				ticker.AddOutput(string(buf[:n]))
+			}
+			if err != nil {
+				break
+			}
 		}
-		if err != nil {
-			break
-		}
-	}
-	cmd.Wait()
+		cmd.Wait()
+	}()
 
 	// Cleanup
 	i.dlExternalMu.Lock()
 	delete(i.dlExternal, url)
-	i.prog.Unbind(url)
 	i.dlExternalMu.Unlock()
 
 	return true, nil
