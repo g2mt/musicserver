@@ -23,8 +23,6 @@ type Config struct {
 	MediaDownloader string `yaml:"media_downloader"`
 }
 
-const SqlDbPath = "./info.db"
-
 func LoadConfig(path string) (*Config, error) {
 	configData, err := os.ReadFile(path)
 	if err != nil {
