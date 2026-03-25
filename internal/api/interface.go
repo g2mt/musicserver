@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -117,8 +118,7 @@ func (i *Interface) InitDb() error {
 			CREATE TABLE IF NOT EXISTS cover_cache (
 				path TEXT PRIMARY KEY,
 				data BLOB NOT NULL,
-				mime_type TEXT NOT NULL,
-				size INTEGER NOT NULL
+				mime_type TEXT NOT NULL
 			);
 		`)
 	}
@@ -136,7 +136,15 @@ func (i *Interface) CleanCache() error {
 }
 
 func (i *Interface) Close() error {
-	return i.db.Close()
+	if err := i.db.Close(); err != nil {
+		return err
+	}
+	if i.cacheDb != nil {
+		if err := i.cacheDb.Close(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, error) {
@@ -317,10 +325,9 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Cache the result if cache db is available
 	if i.cacheDb != nil && data != nil {
-		_, err = i.cacheDb.Exec("INSERT OR REPLACE INTO cover_cache (path, data, mime_type, size) VALUES (?, ?, ?, ?)", path, data, mimeType, len(data))
+		_, err = i.cacheDb.Exec("INSERT OR REPLACE INTO cover_cache (path, data, mime_type) VALUES (?, ?, ?)", path, data, mimeType)
 		if err != nil {
-			// Log error but don't fail the request
-			// In production, you'd want proper logging
+			slog.Warn("Unable to cache track", "path", path)
 		}
 	}
 
