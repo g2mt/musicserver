@@ -538,6 +538,28 @@ func (i *Interface) GetProgress() ([]byte, error) {
 	return i.prog.ToJSON()
 }
 
+func (i *Interface) streamEvents(ch <-chan progress.Event) (io.Reader, string) {
+	pr, pw := io.Pipe()
+	go func() {
+		defer pw.Close()
+		for event := range ch {
+			data, err := json.Marshal(event)
+			if err != nil {
+				return
+			}
+			_, err = pw.Write([]byte("event: " + event.Type + "\n"))
+			if err != nil {
+				return
+			}
+			_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
+			if err != nil {
+				return
+			}
+		}
+	}()
+	return pr, "text/event-stream"
+}
+
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.Reader, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
@@ -576,26 +598,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		ch := i.prog.ListenGlobalEvents()
 		defer i.prog.UnlistenGlobalEvents(ch)
 
-		pr, pw := io.Pipe()
-		go func() {
-			defer pw.Close()
-			for event := range ch {
-				data, err := json.Marshal(event)
-				if err != nil {
-					return
-				}
-				_, err = pw.Write([]byte("event: " + event.Type + "\n"))
-				if err != nil {
-					return
-				}
-				_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
-				if err != nil {
-					return
-				}
-			}
-		}()
-
-		return pr, "text/event-stream", nil
+		return i.streamEvents(ch)
 	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -605,27 +608,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			ch := i.prog.ListenEvents(id)
 			defer i.prog.UnlistenEvents(id, ch)
 
-			// Create a pipe to stream the response
-			pr, pw := io.Pipe()
-			go func() {
-				defer pw.Close()
-				for event := range ch {
-					data, err := json.Marshal(event)
-					if err != nil {
-						return
-					}
-					_, err = pw.Write([]byte("event: " + event.Type + "\n"))
-					if err != nil {
-						return
-					}
-					_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
-					if err != nil {
-						return
-					}
-				}
-			}()
-
-			return pr, "text/event-stream", nil
+			return i.streamEvents(ch)
 		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
 			t, ok := i.prog.GetTicker(id)
 			if !ok {
