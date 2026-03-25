@@ -58,52 +58,53 @@ export function useBackForward(c: AppState) {
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
   const audio = useAudio(c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null);
-  const lastProgressUpdateFromAudioRef = useRef<number>(0);
+
+  function goNextQueue(doSetIsPlaying: boolean=true) {
+    const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
+    if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
+      c.setEnqueuedTrackIndex(nextIndex);
+      c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+    } else {
+      // No more tracks in queue
+      c.setEnqueuedTrackIndex(null);
+      if (doSetIsPlaying)
+        c.setIsPlaying(false);
+    }
+  }
 
   useEffect(() => {
-    c.setProgress(0);
-    c.setIsPlaying(true);
+    if (c.currentTrack !== null) {
+      c.setProgress(0);
+      c.setIsPlaying(true);
+    }
   }, [c.currentTrack, c.enqueuedTrackIndex]);
 
   useEffect(() => {
-    if (c.isPlaying) audio.play();
-    else audio.pause();
+    if (c.isPlaying) {
+      if (c.currentTrack !== null) {
+        audio.play();
+      } else {
+        goNextQueue(false);
+      }
+    } else {
+      audio.pause();
+    }
   }, [c.isPlaying]);
 
   useEffect(() => {
     audio.volume = c.muted ? 0 : c.volume;
   }, [c.volume, c.muted]);
 
-  // Seek audio when progress changes (e.g., from keyboard shortcuts)
   useEffect(() => {
-    // Only seek if the change didn't come from the audio's own timeupdate
-    if (Math.abs(lastProgressUpdateFromAudioRef.current - c.progress) > 0.1) {
-      audio.currentTime = c.progress;
-    }
-  }, [c.progress]);
-
-  useEffect(() => {
-    function onEnded() {
-      const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
-      if (nextIndex < c.enqueuedTracks.length) {
-        c.setEnqueuedTrackIndex(nextIndex);
-        c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
-      } else {
-        // No more tracks in queue
-        c.setEnqueuedTrackIndex(null);
-        c.setIsPlaying(false);
-      }
-    }
     function onTimeUpdate() {
-      lastProgressUpdateFromAudioRef.current = audio.currentTime;
       c.setProgress(audio.currentTime);
       c.setDuration(audio.duration || 0);
     }
     audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('ended', onEnded);
+    audio.addEventListener('ended', () => goNextQueue());
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('ended', onEnded);
+      audio.removeEventListener('ended', () => goNextQueue());
     };
   }, [audio, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
