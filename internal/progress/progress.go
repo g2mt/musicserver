@@ -108,18 +108,22 @@ func (p *Progress) UnlistenEvents(name string, ch chan Event) {
 
 func (p *Progress) ToJSON() ([]byte, error) {
 	type progressJSON struct {
-		Value    int32 `json:"value"`
-		MaxValue int32 `json:"max_value"`
+		Value    int32  `json:"value"`
+		MaxValue int32  `json:"max_value"`
+		Output   string `json:"output,omitempty"`
 	}
 	out := make(map[string]progressJSON)
 	for name, ticker := range p.progresses {
 		MaxValue := ticker.maxValue.Load()
+		ticker.outputMu.Lock()
 		if MaxValue > 0 {
 			out[name] = progressJSON{
 				Value:    ticker.value.Load(),
 				MaxValue: ticker.maxValue.Load(),
+				Output:   ticker.output,
 			}
 		}
+		ticker.outputMu.Unlock()
 	}
 	return json.Marshal(out)
 }

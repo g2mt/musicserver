@@ -50,7 +50,7 @@ Under the UNIX endpoint, the response will be transferred as a stream of bytes w
 >       - additional methods for handling each API request: `getTracks`, `getTrackById(id)`,...
 >   - `external.go`: external interface code with methods for handling each API request involving external resources
 
-## General
+## Progress
 
 ### GET `/progress`
 
@@ -65,9 +65,16 @@ Returns a JSON mapping between a key for an ongoing process, and its progress:
   "xyz123": {
     "value": 32,
     "maxValue": 128,
+    "output": ...,
   }
 }
 ```
+
+### GET `/progress/[id]/events`
+
+Returns the command output of the progress using SSE events.
+
+Emits event types: "Value", "MaxValue", "AddOutput"
 
 ## Tracks
 
@@ -134,6 +141,10 @@ Returns the cover art image of the track as a raw stream of bytes.
 ### GET `/track/:external/[url]`
 
 Returns the track metadata for the URL `url` using the media downloader specified in the config file.
+
+### POST `/track/:external/[url]`
+
+Downalods the URL `url` using the media downloader specified in the config file.
 
 ### DELETE `/track`
 
