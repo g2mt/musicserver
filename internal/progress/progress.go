@@ -12,9 +12,9 @@ type Event struct {
 	Data interface{} `json:"data"`
 }
 
-type GlobalEvent struct {
+type EventWithSource struct {
 	Event
-	Source string `json:"source"`
+	Source string `json:"source"` // source name of event
 }
 
 type ProgressTicker struct {
@@ -75,7 +75,8 @@ func (t *ProgressTicker) addChannel() chan Event {
 }
 
 type Progress struct {
-	progresses map[string]*ProgressTicker
+	progresses         map[string]*ProgressTicker
+	globalEventChannel map[chan EventWithSource]chan EventWithSource
 }
 
 func NewProgress() *Progress {
