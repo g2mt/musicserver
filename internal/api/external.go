@@ -5,7 +5,6 @@ import (
 	"errors"
 	"os/exec"
 
-	"github.com/hashicorp/golang-lru/v2"
 	"musicserver/internal/schema"
 )
 
