@@ -57,6 +57,10 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 }
 
 func (i *Interface) DownloadExternalTrack(url string) (string, error) {
+	if i.config.MediaDownloader == "" {
+		return "", errors.New("no media downloader configured")
+	}
+
 	i.dlExternalMu.Lock()
 	defer i.dlExternalMu.Unlock()
 

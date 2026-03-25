@@ -152,7 +152,7 @@ eventLoop:
 			if err != nil {
 				continue
 			}
-			slog.Debug("WatchDataDir processing written path", "path", absPath)
+			slog.Info("WatchDataDir processing written path", "path", absPath)
 			track, err := taglib.LoadTrack(absPath)
 			if err != nil {
 				continue
@@ -163,7 +163,7 @@ eventLoop:
 
 		// Process deleted paths
 		for path := range deletedPaths {
-			slog.Debug("WatchDataDir processing deleted path", "path", path)
+			slog.Info("WatchDataDir processing deleted path", "path", path)
 			if err := i.ForgetTrackByPath(path); err != nil {
 				return err
 			}
