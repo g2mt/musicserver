@@ -6,9 +6,15 @@ import (
 	"sync/atomic"
 )
 
+type Event struct {
+	Type string      `json:"type"` // "Value", "MaxValue"
+	Data interface{} `json:"data"`
+}
+
 type ProgressTicker struct {
-	Value    atomic.Int32
-	MaxValue atomic.Int32
+	value         atomic.Int32
+	maxValue      atomic.Int32
+	eventChannels map[chan Event]chan Event
 }
 
 type Progress struct {
@@ -32,6 +38,23 @@ func (p *Progress) Bind(name string) (*ProgressTicker, error) {
 
 func (p *Progress) Unbind(name string) {
 	delete(p.progresses, name)
+}
+
+func (p *Progress) ListenEvents(name string) chan Event {
+	if pr, ok := p.progresses[name]; ok {
+		if pr.eventChannels == nil {
+			pr.eventChannels = make(map[chan Event]chan Event)
+		}
+		c := make(chan Event)
+		pr.eventChannels[c] = c
+		return c
+	} else {
+		panic("invalid name")
+	}
+}
+
+func (p *Progress) UnlistenEvents(name string, ch chan Event) {
+	delete(p.progresses[name].eventChannels, ch)
 }
 
 func (p *Progress) ToJSON() ([]byte, error) {
