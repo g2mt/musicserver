@@ -7,14 +7,42 @@ import (
 )
 
 type Event struct {
-	Type string      `json:"type"` // "Value", "MaxValue"
+	Type string      `json:"type"` // "Value", "MaxValue", "AddOutput"
 	Data interface{} `json:"data"`
 }
 
 type ProgressTicker struct {
 	value         atomic.Int32
 	maxValue      atomic.Int32
+	output        string
 	eventChannels map[chan Event]chan Event
+}
+
+func (t *ProgressTicker) GetValue() int32 {
+	return t.value.Load()
+}
+
+func (t *ProgressTicker) GetMaxValue() int32 {
+	return t.maxValue.Load()
+}
+
+func (t *ProgressTicker) SetValue(v int32) {
+	t.value.Store(v)
+	t.emitEvent(Event{Type: "Value", Data: v})
+}
+
+func (t *ProgressTicker) SetMaxValue(v int32) {
+	t.maxValue.Store(v)
+	t.emitEvent(Event{Type: "MaxValue", Data: v})
+}
+
+func (t *ProgressTicker) emitEvent(event Event) {
+	for ch := range t.eventChannels {
+		select {
+		case ch <- event:
+		default:
+		}
+	}
 }
 
 type Progress struct {
@@ -64,40 +92,13 @@ func (p *Progress) ToJSON() ([]byte, error) {
 	}
 	out := make(map[string]progressJSON)
 	for name, ticker := range p.progresses {
-		MaxValue := ticker.MaxValue.Load()
+		MaxValue := ticker.maxValue.Load()
 		if MaxValue > 0 {
 			out[name] = progressJSON{
-				Value:    ticker.Value.Load(),
-				MaxValue: ticker.MaxValue.Load(),
+				Value:    ticker.value.Load(),
+				MaxValue: ticker.maxValue.Load(),
 			}
 		}
 	}
 	return json.Marshal(out)
-}
-
-func (t *ProgressTicker) GetValue() int32 {
-	return t.value.Load()
-}
-
-func (t *ProgressTicker) GetMaxValue() int32 {
-	return t.maxValue.Load()
-}
-
-func (t *ProgressTicker) SetValue(v int32) {
-	t.value.Store(v)
-	t.emitEvent(Event{Type: "Value", Data: v})
-}
-
-func (t *ProgressTicker) SetMaxValue(v int32) {
-	t.maxValue.Store(v)
-	t.emitEvent(Event{Type: "MaxValue", Data: v})
-}
-
-func (t *ProgressTicker) emitEvent(event Event) {
-	for ch := range t.eventChannels {
-		select {
-		case ch <- event:
-		default:
-		}
-	}
 }
