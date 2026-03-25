@@ -51,6 +51,11 @@ func (t *ProgressTicker) SetValue(v int32) {
 	t.emitEvent(Event{Type: "Value", Data: v})
 }
 
+func (t *ProgressTicker) AddMaxValue(d int32) {
+	v := t.maxValue.Add(d)
+	t.emitEvent(Event{Type: "MaxValue", Data: v})
+}
+
 func (t *ProgressTicker) SetMaxValue(v int32) {
 	t.maxValue.Store(v)
 	t.emitEvent(Event{Type: "MaxValue", Data: v})

@@ -134,10 +134,10 @@ eventLoop:
 				switch {
 				case event.Has(fsnotify.Create) || event.Has(fsnotify.Write) || event.Has(fsnotify.Rename):
 					writtenPaths[event.Name] = struct{}{}
-					ticker.MaxValue.Add(1)
+					ticker.AddMaxValue(1)
 				case event.Has(fsnotify.Remove):
 					deletedPaths[event.Name] = struct{}{}
-					ticker.MaxValue.Add(1)
+					ticker.AddMaxValue(1)
 				}
 			case <-i.watcher.Errors:
 				// ignore watcher errors
