@@ -26,6 +26,10 @@ func (t *ProgressTicker) GetMaxValue() int32 {
 	return t.maxValue.Load()
 }
 
+func (t *ProgressTicker) GetOutput() string {
+	return t.output
+}
+
 func (t *ProgressTicker) SetValue(v int32) {
 	t.value.Store(v)
 	t.emitEvent(Event{Type: "Value", Data: v})
@@ -34,6 +38,11 @@ func (t *ProgressTicker) SetValue(v int32) {
 func (t *ProgressTicker) SetMaxValue(v int32) {
 	t.maxValue.Store(v)
 	t.emitEvent(Event{Type: "MaxValue", Data: v})
+}
+
+func (t *ProgressTicker) AddOutput(output string) {
+	t.output += output
+	t.emitEvent(Event{Type: "AddOutput", Data: output})
 }
 
 func (t *ProgressTicker) emitEvent(event Event) {
