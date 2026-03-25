@@ -542,9 +542,27 @@ func (i *Interface) GetProgress() ([]byte, error) {
 	return i.prog.ToJSON()
 }
 
-type eventStreamer[T any] struct { // TODO: implement ReadCloser
+type eventStreamer[T any] struct {
 	i        *Interface
-	unlisten func(chan T) // TODO: should call this on close
+	ch       chan T
+	unlisten func(chan T)
+}
+
+func (s *eventStreamer[T]) Read(p []byte) (n int, err error) {
+}
+
+func (s *eventStreamer[T]) Close() error {
+	s.unlisten(s.ch)
+	return nil
+}
+
+func streamEvents[T any](i *Interface, ch chan T, unlisten func(chan T)) (io.ReadCloser, string, error) {
+	stream := &eventStreamer[T]{
+		i:        i,
+		ch:       ch,
+		unlisten: unlisten,
+	}
+	return stream, "text/event-stream", nil
 }
 
 /*
@@ -566,7 +584,7 @@ func streamEvents[T any](i *Interface, ch <-chan T) (io.ReadCloser, string, erro
 			}
 		}
 	}()
-	return pr, "text/event-stream", nil
+	return pr
 }
 */
 
@@ -615,7 +633,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if !ok {
 				return nil, "", errors.New("ticker not found")
 			}
-			return streamEvents(i, t.ListenEvents(), i.prog.UnlistenEvents)
+			return streamEvents(i, t.ListenEvents(), t.UnlistenEvents)
 		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
 			t, ok := i.prog.GetTicker(id)
 			if !ok {
