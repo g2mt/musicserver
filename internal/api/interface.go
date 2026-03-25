@@ -118,8 +118,14 @@ func (i *Interface) InitDb() error {
 			CREATE TABLE IF NOT EXISTS cover_cache (
 				path TEXT PRIMARY KEY,
 				data BLOB NOT NULL,
-				mime_type TEXT NOT NULL
+				mime_type TEXT NOT NULL,
+				timestamp INTEGER NOT NULL DEFAULT 0
 			);
+			CREATE TABLE IF NOT EXISTS stats (
+				key TEXT PRIMARY KEY,
+				value INTEGER NOT NULL
+			);
+			INSERT OR IGNORE INTO stats (key, value) VALUES ('size', 0);
 		`)
 	}
 
@@ -310,9 +316,10 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	if i.cacheDb != nil {
 		var cachedData []byte
 		var mimeType string
-		var size int
-		err := i.cacheDb.QueryRow("SELECT data, mime_type, size FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType, &size)
+		err := i.cacheDb.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
 		if err == nil {
+			// Update timestamp on cache hit
+			i.cacheDb.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
 			return cachedData, mimeType, nil
 		}
 	}
@@ -325,9 +332,39 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Cache the result if cache db is available
 	if i.cacheDb != nil && data != nil {
-		_, err = i.cacheDb.Exec("INSERT OR REPLACE INTO cover_cache (path, data, mime_type) VALUES (?, ?, ?)", path, data, mimeType)
+		dataLen := len(data)
+
+		// Evict old entries if cache is full
+		var currentSize int
+		err = i.cacheDb.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
+		if err == nil && currentSize+dataLen >= CacheMaxBytes {
+			// Expire oldest entries first until we have enough space
+			rows, qErr := i.cacheDb.Query("SELECT path, length(data) FROM cover_cache ORDER BY timestamp ASC")
+			if qErr == nil {
+				defer rows.Close()
+				for rows.Next() && currentSize+dataLen >= CacheMaxBytes {
+					var evictPath string
+					var evictSize int
+					if rows.Scan(&evictPath, &evictSize) == nil {
+						i.cacheDb.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
+						i.cacheDb.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
+						currentSize -= evictSize
+					}
+				}
+			}
+		}
+
+		_, err = i.cacheDb.Exec(
+			"INSERT OR REPLACE INTO cover_cache (path, data, mime_type, timestamp) VALUES (?, ?, ?, strftime('%s','now'))",
+			path, data, mimeType,
+		)
 		if err != nil {
 			slog.Warn("Unable to cache track", "path", path)
+		} else {
+			_, err = i.cacheDb.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
+			if err != nil {
+				slog.Warn("Unable to update cache size", "path", path)
+			}
 		}
 	}
 
