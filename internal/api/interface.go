@@ -546,17 +546,15 @@ type eventStreamer[T any] struct {
 	i        *Interface
 	ch       chan T
 	unlisten func(chan T)
-
-	buf    []byte
-	bufMu  sync.Mutex
-	closed bool
+	buf      []byte
+	bufMu    sync.Mutex
 }
 
 func (s *eventStreamer[T]) Read(p []byte) (n int, err error) {
 	s.bufMu.Lock()
 	defer s.bufMu.Unlock()
 
-	if s.closed {
+	if s.ch == nil {
 		return 0, io.EOF
 	}
 
@@ -593,7 +591,6 @@ func (s *eventStreamer[T]) Read(p []byte) (n int, err error) {
 func (s *eventStreamer[T]) Close() error {
 	s.bufMu.Lock()
 	defer s.bufMu.Unlock()
-	s.closed = false
 	s.unlisten(s.ch)
 	return nil
 }
@@ -606,29 +603,6 @@ func streamEvents[T any](i *Interface, ch chan T, unlisten func(chan T)) (io.Rea
 	}
 	return stream, "text/event-stream", nil
 }
-
-/*
-TODO: this is old code:
-func streamEvents[T any](i *Interface, ch <-chan T) (io.ReadCloser, string, error) {
-	go func() {
-		for event := range ch {
-			data, err := json.Marshal(event)
-			if err != nil {
-				return
-			}
-			_, err = pw.Write([]byte("event: data\n"))
-			if err != nil {
-				return
-			}
-			_, err = pw.Write([]byte("data: " + string(data) + "\n\n"))
-			if err != nil {
-				return
-			}
-		}
-	}()
-	return pr
-}
-*/
 
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.ReadCloser, contentType string, err error) {
 	var response interface{}
