@@ -81,7 +81,9 @@ Returns SSE events related to the progress with `id`.
 Emits event types: "Value", "MaxValue", "AddOutput"
 
 ```
+event: data
 data: {type:"Value", data:10}
+event: data
 data: {type:"AddOutput", data:"output"}
 ```
 
@@ -90,8 +92,11 @@ data: {type:"AddOutput", data:"output"}
 Returns SSE events related to all progresses.
 
 ```
+event: data
 data: {type:"Value", data:10, source: "abc"}
+event: data
 data: {type:"AddOutput", data:"output", source: "abc"}
+event: data
 data: {type:"AddOutput", data:"output", source: "cdef"}
 ```
 

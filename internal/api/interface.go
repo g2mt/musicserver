@@ -538,7 +538,7 @@ func (i *Interface) GetProgress() ([]byte, error) {
 	return i.prog.ToJSON()
 }
 
-func (i *Interface) streamEvents(ch <-chan progress.Event) (io.Reader, string) {
+func streamEvents[T any](i *Interface, ch <-chan T) (io.Reader, string, error) {
 	pr, pw := io.Pipe()
 	go func() {
 		defer pw.Close()
@@ -547,7 +547,7 @@ func (i *Interface) streamEvents(ch <-chan progress.Event) (io.Reader, string) {
 			if err != nil {
 				return
 			}
-			_, err = pw.Write([]byte("event: " + event.Type + "\n"))
+			_, err = pw.Write([]byte("event: data\n"))
 			if err != nil {
 				return
 			}
@@ -557,7 +557,7 @@ func (i *Interface) streamEvents(ch <-chan progress.Event) (io.Reader, string) {
 			}
 		}
 	}()
-	return pr, "text/event-stream"
+	return pr, "text/event-stream", nil
 }
 
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out io.Reader, contentType string, err error) {
@@ -598,7 +598,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		ch := i.prog.ListenGlobalEvents()
 		defer i.prog.UnlistenGlobalEvents(ch)
 
-		return i.streamEvents(ch)
+		return streamEvents(i, ch)
 	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -608,7 +608,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			ch := i.prog.ListenEvents(id)
 			defer i.prog.UnlistenEvents(id, ch)
 
-			return i.streamEvents(ch)
+			return streamEvents(i, ch)
 		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
 			t, ok := i.prog.GetTicker(id)
 			if !ok {
