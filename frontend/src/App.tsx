@@ -3,7 +3,7 @@ import { MainTracksTab } from './MainTracksTab';
 import SettingsTab from './SettingsTab';
 import { MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { TrackData } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
@@ -49,6 +49,12 @@ function App() {
       .then(res => res.json())
       .then(data => setFullTracksFromData(data));
   }, [a.searchQuery]);
+
+  // Confirm boxes
+  [a.confirmBoxes, a.setConfirmBoxes] = useState<React.ReactNode[]>([]);
+  a.addConfirmBox = (confirmBox: React.ReactNode) => {
+    a.setConfirmBoxes(prev => [confirmBox, ...prev]);
+  };
 
   // Track queue
   [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
@@ -139,7 +145,9 @@ function App() {
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
-            // TODO: add confirm box
+            <div className="confirm-box-container">
+              {a.confirmBoxes}
+            </div>
             {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
             {leftTab === 'settings' && <SettingsTab />}
           </div>

@@ -1,4 +1,5 @@
 import { createContext, type Dispatch, type SetStateAction } from 'react';
+import type React from 'react';
 import type { TrackData } from './Track';
 import './MusicPlayer.css';
 
@@ -20,6 +21,9 @@ export interface AppState {
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (_: TrackData) => void;
   unqueueTrack: (index: number) => void;
+  confirmBoxes: React.ReactNode[];
+  setConfirmBoxes: Dispatch<SetStateAction<React.ReactNode[]>>;
+  addConfirmBox: (confirmBox: React.ReactNode) => void;
   enqueuedTrackIndex: number|null;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
   searchQuery: string;
