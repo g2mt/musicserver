@@ -26,29 +26,27 @@ function ProgressTable({ progresses }: ProgressTableProps) {
   const [outputs, setOutputs] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    // Set up SSE for each progress entry
-    const eventSources: Record<string, EventSource> = {};
-    
-    Object.keys(progresses).forEach(name => {
-      const es = new EventSource(`${HOST}/progress/${name}/events`);
-      eventSources[name] = es;
-      
-      es.onmessage = (event) => {
-        const data = JSON.parse(event.data) as ProgressEvent;
-        if (data.type === 'AddOutput') {
-          setOutputs(prev => ({
-            ...prev,
-            [name]: (prev[name] || '') + data.data
-          }));
-        } else if (data.type === 'Value' || data.type === 'MaxValue') {
-          // Force re-render by updating state
-          setOutputs(prev => ({ ...prev }));
-        }
-      };
-    });
+    // Set up SSE for global progress events
+    const es = new EventSource(`${HOST}/progress/:events`);
+
+    es.onmessage = (event) => {
+      const data = JSON.parse(event.data) as ProgressEvent & { source?: string };
+      const name = data.source;
+      if (!name) return;
+
+      if (data.type === 'AddOutput') {
+        setOutputs(prev => ({
+          ...prev,
+          [name]: (prev[name] || '') + data.data
+        }));
+      } else if (data.type === 'Value' || data.type === 'MaxValue') {
+        // Force re-render by updating state
+        setOutputs(prev => ({ ...prev }));
+      }
+    };
 
     return () => {
-      Object.values(eventSources).forEach(es => es.close());
+      es.close();
     };
   }, [progresses]);
 
