@@ -73,10 +73,18 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		return nil, err
 	}
 
+	// Open cache database
+	cacheDbDir := filepath.Join(config.DbDir, CacheDbPath)
+	cacheDb, err := sql.Open("sqlite3", cacheDbDir)
+	if err != nil {
+		return nil, err
+	}
+
 	trackCache, _ := lru.New[string, schema.Track](32)
 
 	return &Interface{
 		db:         db,
+		cacheDb:    cacheDb,
 		config:     config,
 		prog:       progress.NewProgress(),
 		LongIdGen:  defaultLongIdGen,
@@ -102,10 +110,30 @@ func (i *Interface) InitDb() error {
 			long_id TEXT NOT NULL
 		);
 	`)
+
+	// Initialize cache db if available
+	if i.cacheDb != nil {
+		_, err = i.cacheDb.Exec(`
+			CREATE TABLE IF NOT EXISTS cover_cache (
+				path TEXT PRIMARY KEY,
+				data BLOB NOT NULL,
+				mime_type TEXT NOT NULL,
+				size INTEGER NOT NULL
+			);
+		`)
+	}
+
 	return err
 }
 
-func (i *Interface) CleanCache() error {}
+func (i *Interface) CleanCache() error {
+	if i.cacheDb == nil {
+		return nil
+	}
+
+	_, err := i.cacheDb.Exec("DELETE FROM cover_cache")
+	return err
+}
 
 func (i *Interface) Close() error {
 	return i.db.Close()
@@ -270,12 +298,32 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		return nil, "", err
 	}
 
+	// Check cache first
+	if i.cacheDb != nil {
+		var cachedData []byte
+		var mimeType string
+		var size int
+		err := i.cacheDb.QueryRow("SELECT data, mime_type, size FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType, &size)
+		if err == nil {
+			return cachedData, mimeType, nil
+		}
+	}
+
 	// Use taglib to extract cover art
-	// We need to import the taglib package
 	data, mimeType, err := taglib.ExtractCoverArt(path)
 	if err != nil {
 		return nil, "", err
 	}
+
+	// Cache the result if cache db is available
+	if i.cacheDb != nil && data != nil {
+		_, err = i.cacheDb.Exec("INSERT OR REPLACE INTO cover_cache (path, data, mime_type, size) VALUES (?, ?, ?, ?)", path, data, mimeType, len(data))
+		if err != nil {
+			// Log error but don't fail the request
+			// In production, you'd want proper logging
+		}
+	}
+
 	return data, mimeType, nil
 }
 
