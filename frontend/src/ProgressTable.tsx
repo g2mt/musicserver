@@ -11,6 +11,16 @@ interface ProgressTableProps {
   progresses: Record<string, ProgressEntry>;
 }
 
+type ProgressEvent =
+  {
+    type: "Value" | "MaxValue",
+    data: number;
+  }
+  | {
+    type: "AddOutput",
+    data: string,
+  };
+
 function ProgressTable({ progresses }: ProgressTableProps) {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [outputs, setOutputs] = useState<Record<string, string>>({});
@@ -24,7 +34,7 @@ function ProgressTable({ progresses }: ProgressTableProps) {
       eventSources[name] = es;
       
       es.onmessage = (event) => {
-        const data = JSON.parse(event.data);
+        const data = JSON.parse(event.data) as ProgressEvent;
         if (data.type === 'AddOutput') {
           setOutputs(prev => ({
             ...prev,

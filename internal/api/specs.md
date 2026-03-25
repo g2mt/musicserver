@@ -72,13 +72,28 @@ Returns a JSON mapping between a key for an ongoing process, and its progress:
 
 ### GET `/progress/[id]/output`
 
-Returns the command output of the progress.
+Returns the command output of the progress with `id`.
 
 ### GET `/progress/[id]/events`
 
-Returns SSE events related to the progress.
+Returns SSE events related to the progress with `id`.
 
 Emits event types: "Value", "MaxValue", "AddOutput"
+
+```
+data: {type:"Value", data:10}
+data: {type:"AddOutput", data:"output"}
+```
+
+### GET `/progress/:events`
+
+Returns SSE events related to all progresses.
+
+```
+data: {type:"Value", data:10, source: "abc"}
+data: {type:"AddOutput", data:"output", source: "abc"}
+data: {type:"AddOutput", data:"output", source: "cdef"}
+```
 
 ## Tracks
 

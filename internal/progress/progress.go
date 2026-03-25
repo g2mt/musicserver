@@ -3,6 +3,7 @@ package progress
 import (
 	"encoding/json"
 	"errors"
+	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -64,13 +65,10 @@ func (t *ProgressTicker) emitEvent(event Event) {
 		default:
 		}
 	}
-	// Also emit to global listeners
-	if t.progress != nil {
-		for globalChannel := range t.progress.globalEventChannel {
-			select {
-			case globalChannel <- EventWithSource{Event: event, Source: ""}:
-			default:
-			}
+	for globalChannel := range t.progress.globalEventChannel {
+		select {
+		case globalChannel <- EventWithSource{Event: event, Source: ""}:
+		default:
 		}
 	}
 }
@@ -102,6 +100,9 @@ func (p *Progress) GetTicker(name string) (*ProgressTicker, bool) {
 }
 
 func (p *Progress) Bind(name string) (*ProgressTicker, error) {
+	if strings.HasPrefix(name, ":") {
+		panic("name cannot start with colon")
+	}
 	if _, ok := p.progresses[name]; ok {
 		return nil, errors.New(name + " already bound")
 	}
