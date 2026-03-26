@@ -24,8 +24,11 @@
     --s5: 3rem;
 
     /* Colors */
+    --color-secondary: var(--light-gray);
     --color-info: #90ee90;
 }
+
+/* TODO: dark mode */
 
 * {
   margin:0; padding:0;
@@ -33,7 +36,7 @@
 }
 
 .btn {
-  background: var(--light-gray);
+  background: var(--color-secondary);
   cursor: pointer;
   padding: var(--s2);
   border-radius: var(--border-radius);
@@ -42,21 +45,21 @@
 }
 
 .icon-btn {
-    background: none;
-    border: none;
-    font-size: 1.6rem;
-    cursor: pointer;
-    color: var(--dark-gray);
-    padding: 0 var(--s2);
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: var(--dark-gray);
+  padding: 0 var(--s2);
 
-    &:hover {
-      color: var(--accent-color);
-    }
+  &:hover {
+    color: var(--accent-color);
+  }
 
-    &[disabled] {
-      color: var(--light-gray);
-      cursor: not-allowed;
-    }
+  &[disabled] {
+    color: var(--light-gray);
+    cursor: not-allowed;
+  }
 }
 
 table {
