@@ -131,3 +131,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 
 	}
 }
+
+func (iface *Interface) WriteToUnixSocket(path, method string, params map[string]string) ([]byte, error) {
+	// TODO: write to the same unix socket specified in handleConnection, returning the outputted line as response
+}
