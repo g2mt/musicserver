@@ -81,34 +81,28 @@ export function App() {
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
-    if (a.darkMode) {
-      overlay.innerHTML = `
-      <style>:root { fill: #000; stroke: none; }</style>
-      <filter id="blur">
-        <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
-        <feComponentTransfer>
-          <feFuncR type="linear" slope="0.1"/>
-          <feFuncG type="linear" slope="0.1"/>
-          <feFuncB type="linear" slope="0.1"/>
-          <feFuncA type="linear" slope="1"/>
-        </feComponentTransfer>
-      </filter>
-      <image width="100%" href="" filter="url(#blur)"/>`;
-    } else {
-      overlay.innerHTML = "";
-    }
-  }, [a.darkMode]);
-  useEffect(() => {
-    const image = overlay.querySelector('image');
-    if (!image)
-      return;
     if (a.currentTrack && a.darkMode) {
+      if (overlay.childElementCount === 0) {
+        overlay.innerHTML = `
+        <style>:root { fill: #000; stroke: none; }</style>
+        <filter id="blur">
+          <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
+          <feComponentTransfer>
+            <feFuncR type="linear" slope="0.1"/>
+            <feFuncG type="linear" slope="0.1"/>
+            <feFuncB type="linear" slope="0.1"/>
+            <feFuncA type="linear" slope="1"/>
+          </feComponentTransfer>
+        </filter>
+        <image width="100%" href="" filter="url(#blur)"/>`;
+      }
+      const image = overlay.querySelector('image');
       const cover = getTrackCover(a.currentTrack);
-      if (cover !== image.getAttribute('href')) {
+      if (image && cover !== image.getAttribute('href')) {
         image.setAttribute('href', cover);
       }
-    } else if (image.getAttribute('href')) {
-      image.setAttribute('href', '');
+    } else if (overlay.childElementCount > 0) {
+      overlay.innerHTML = "";
     }
   }, [a.currentTrack, a.darkMode]);
 
