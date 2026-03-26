@@ -50,8 +50,7 @@ func LoadConfig(path string) (*Config, error) {
 		if currentUser.Uid == "0" {
 			config.UnixBind = "/run/musicserver/socket"
 		} else {
-			homeDir := currentUser.HomeDir
-			config.UnixBind = homeDir + "/.musicserver/socket"
+			config.UnixBind = currentUser.HomeDir + "/.musicserver/socket"
 		}
 	}
 
@@ -59,8 +58,7 @@ func LoadConfig(path string) (*Config, error) {
 		if currentUser.Uid == "0" {
 			config.DbDir = "/var/lib/musicserver"
 		} else {
-			homeDir := currentUser.HomeDir
-			config.DbDir = homeDir + "/.musicserver/db"
+			config.DbDir = currentUser.HomeDir + "/.musicserver/db"
 		}
 	}
 
