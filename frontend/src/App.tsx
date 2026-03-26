@@ -9,7 +9,7 @@ import { HOST } from "./apiserver";
 import { faMusic, faGear } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
-import { AppContext, type AppState } from "./AppState";
+import { AppContext, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -64,6 +64,12 @@ export function App() {
   );
   [a.darkMode, a.setDarkMode] = useState(false);
   [a.showBlurredCover, a.setShowBlurredCover] = useState(true);
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", () => {
+      saveConfig(a);
+    });
+  }, []);
 
   // Media Session API
   const { handleBack, handleForward } = useBackForward(a);
