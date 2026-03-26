@@ -141,6 +141,15 @@ function App() {
     };
   }, [a.duration]);
 
+  // Update body background when current track changes
+  useEffect(() => {
+    if (a.currentTrack) {
+      document.body.style.background = '#1a1a1a';
+    } else {
+      document.body.style.background = '#121212';
+    }
+  }, [a.currentTrack]);
+
   return (
     <AppContext value={a}>
       <ToastContainer position="bottom-right" theme="dark" />
