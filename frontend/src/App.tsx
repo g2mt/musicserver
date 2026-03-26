@@ -4,7 +4,7 @@ import SettingsTab from './SettingsTab';
 import { MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getTrackCover, type TrackData } from './Track';
+import { getTrackCover } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,6 +12,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AppContext, type AppState } from './AppState';
 import './App.css';
+import type { TrackData } from './TrackData';
 
 export function useBackForward(c: AppState) {
   const isBackDisabled = useMemo(

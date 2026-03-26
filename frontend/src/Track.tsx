@@ -3,20 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { HOST } from './apiserver';
 import { AppContext } from './AppState';
-import * as z from "zod";
+import type { TrackData } from './TrackData';
 import './Track.css';
-
-export const TrackDataSchema = z.object({
-  id: z.string(),
-  short_id: z.string(),
-  name: z.string(),
-  artist: z.string(),
-  album: z.string(),
-  path: z.string(),
-  thumbnail_path: z.string().optional(),
-});
-
-export type TrackData = z.infer<typeof TrackDataSchema>;
 
 export function getTrackCover(track: TrackData): string {
   return track.thumbnail_path ?? `${HOST}/track/${track.short_id}/cover`;

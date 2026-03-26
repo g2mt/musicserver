@@ -1,9 +1,9 @@
 import { createContext, type Dispatch, type SetStateAction } from 'react';
 import * as z from "zod";
 import type React from 'react';
-import { TrackDataSchema, type TrackData } from './Track';
 import './MusicPlayer.css';
 import { toast } from 'react-toastify';
+import { TrackDataSchema, type TrackData } from './TrackData';
 
 export const AppStateSchema = z.object({
   currentTrack: TrackDataSchema.nullable().default(null),
