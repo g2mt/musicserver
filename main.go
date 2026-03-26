@@ -2,7 +2,9 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -22,6 +24,9 @@ func main() {
 	configPath := flag.String("config", "", "path to config file")
 	debug := flag.Bool("debug", false, "enable debug mode")
 	loglevel := flag.String("loglevel", "info", "log level (debug, info, warn, error)")
+	path := flag.String("path", "", "path for unix socket call")
+	method := flag.String("method", "", "method for unix socket call")
+	params := flag.String("params", "{}", "params for unix socket call (json encoded)")
 	flag.Parse()
 
 	// Set up logging based on flags
@@ -60,6 +65,22 @@ func main() {
 		os.Exit(1)
 	}
 	defer iface.Close()
+
+	// Handle unix socket call if path and method are provided
+	if *path != "" && *method != "" {
+		var paramsMap map[string]string
+		if err := json.Unmarshal([]byte(*params), &paramsMap); err != nil {
+			slog.Error("Error parsing params", "err", err)
+			os.Exit(1)
+		}
+		result, err := iface.WriteToUnixSocket(*path, *method, paramsMap)
+		if err != nil {
+			slog.Error("WriteToUnixSocket error", "err", err)
+			os.Exit(1)
+		}
+		fmt.Println(string(result))
+		return
+	}
 
 	if err := iface.InitDb(); err != nil {
 		slog.Error("Error initializing database", "err", err)

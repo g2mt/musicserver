@@ -133,5 +133,45 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 }
 
 func (iface *Interface) WriteToUnixSocket(path, method string, params map[string]string) ([]byte, error) {
-	// TODO: write to the same unix socket specified in handleConnection, returning the outputted line as response
+	// Connect to the unix socket
+	conn, err := net.Dial("unix", path)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	// Set a read deadline
+	conn.SetReadDeadline(time.Now().Add(time.Minute))
+
+	// Create the request
+	req := struct {
+		Path   string            `json:"path"`
+		Method string            `json:"method"`
+		Params map[string]string `json:"params,omitempty"`
+	}{
+		Path:   path,
+		Method: method,
+		Params: params,
+	}
+
+	// Marshal to JSON and add newline
+	data, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	data = append(data, '\n')
+
+	// Write the request
+	if _, err := conn.Write(data); err != nil {
+		return nil, err
+	}
+
+	// Read the response
+	reader := bufio.NewReader(conn)
+	response, err := reader.ReadBytes('\n')
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
