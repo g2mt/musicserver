@@ -9,6 +9,7 @@
     --accent-color-light-text: #000000;
 
     --gray: #ccc;
+    --dark-gray: #222;
     --light-gray: #ddd;
 
     --shadow: rgba(0, 0, 0, 0.05);
@@ -41,7 +42,7 @@
     border: none;
     font-size: 1.6rem;
     cursor: pointer;
-    color: #222;
+    color: var(--dark-gray);
     padding: 0 var(--s2);
 
     &:hover {
