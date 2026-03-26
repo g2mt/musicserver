@@ -28,6 +28,8 @@ export interface AppState {
   setSearchQuery: (_: string) => void;
   darkMode: boolean;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
+  showBlurredCover: boolean;
+  setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppState|null>(null);

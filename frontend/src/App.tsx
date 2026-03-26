@@ -56,6 +56,7 @@ export function App() {
   [a.muted, a.setMuted] = useState(false);
   [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
   [a.darkMode, a.setDarkMode] = useState(false);
+  [a.showBlurredCover, a.setShowBlurredCover] = useState(true);
 
   // Media Session API
   const { handleBack, handleForward } = useBackForward(a);
@@ -81,7 +82,7 @@ export function App() {
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
-    if (a.currentTrack && a.darkMode) {
+    if (a.currentTrack && a.darkMode && a.showBlurredCover) {
       if (overlay.childElementCount === 0) {
         overlay.innerHTML = `
         <style>:root { fill: #000; stroke: none; }</style>
