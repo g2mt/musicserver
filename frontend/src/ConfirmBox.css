@@ -1,7 +1,7 @@
 .confirm-box {
-  background-color: #90ee90;
+  background-color: var(--color-info);
   padding: var(--s3);
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   display: flex;
   flex-direction: column;
   gap: var(--s3);
