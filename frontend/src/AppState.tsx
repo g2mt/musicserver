@@ -42,7 +42,41 @@ export const AppContext = createContext<AppState|null>(null);
 const CONFIG_KEY = "_config";
 
 export function mergeConfig(dest: AppState) {
+  const saved = localStorage.getItem(CONFIG_KEY);
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      const config = AppStateSchema.parse(parsed);
+      if (config.currentTrack !== null) dest.setCurrentTrack(config.currentTrack);
+      if (config.isPlaying !== undefined) dest.setIsPlaying(config.isPlaying);
+      if (config.progress !== undefined) dest.setProgress(config.progress);
+      if (config.duration !== undefined) dest.setDuration(config.duration);
+      if (config.volume !== undefined) dest.setVolume(config.volume);
+      if (config.muted !== undefined) dest.setMuted(config.muted);
+      if (config.enqueuedTracks.length > 0) dest.setEnqueuedTracks(config.enqueuedTracks);
+      if (config.enqueuedTrackIndex !== null) dest.setEnqueuedTrackIndex(config.enqueuedTrackIndex);
+      if (config.searchQuery !== '') dest.setSearchQuery(config.searchQuery);
+      if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
+      if (config.showBlurredCover !== undefined) dest.setShowBlurredCover(config.showBlurredCover);
+    } catch (e) {
+      console.error('Failed to parse config from localStorage:', e);
+    }
+  }
 }
 
-export function saveConfig() {
+export function saveConfig(state: AppState) {
+  const config = {
+    currentTrack: state.currentTrack,
+    isPlaying: state.isPlaying,
+    progress: state.progress,
+    duration: state.duration,
+    volume: state.volume,
+    muted: state.muted,
+    enqueuedTracks: state.enqueuedTracks,
+    enqueuedTrackIndex: state.enqueuedTrackIndex,
+    searchQuery: state.searchQuery,
+    darkMode: state.darkMode,
+    showBlurredCover: state.showBlurredCover,
+  };
+  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
 }
