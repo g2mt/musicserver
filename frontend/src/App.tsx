@@ -29,8 +29,8 @@ function App() {
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
-    const image = overlay.querySelector('image');
-    if (a.currentTrack && a.darkMode && image) {
+    const image = overlay.querySelector('image')!;
+    if (a.currentTrack && a.darkMode) {
       const cover = getTrackCover(a.currentTrack);
       image.setAttribute('href', cover);
     } else if (image) {
