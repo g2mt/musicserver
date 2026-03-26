@@ -1,0 +1,12 @@
+# https://vincent.jousse.org/blog/en/running-prettier-with-pre-commit/
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: run prettier
+        language: system
+        files: ^frontend/src/.*$
+        types_or: [javascript, jsx, ts, tsx]
+        entry: |
+          bash -c 'npm --prefix frontend/ run format -- "${@#frontend/}"' --
+
