@@ -6,8 +6,6 @@ import { AppContext } from './AppState';
 import * as z from "zod";
 import './Track.css';
 
-import { z } from "zod";
-
 export const TrackDataSchema = z.object({
   id: z.string(),
   short_id: z.string(),
