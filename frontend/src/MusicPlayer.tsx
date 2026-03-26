@@ -6,6 +6,7 @@ import { HOST } from './apiserver';
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import './MusicPlayer.css';
 import { AppContext, type AppState } from './AppState';
+import { useBackForward } from './App';
 
 function useAudio(url: string | null) {
   const audio = useMemo(() => new Audio(), []);
@@ -22,37 +23,6 @@ function useAudio(url: string | null) {
   }, [audio]);
 
   return audio;
-}
-
-export function useBackForward(c: AppState) {
-  const isBackDisabled = useMemo(
-    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
-    [c.enqueuedTrackIndex]);
-  const isForwardDisabled = useMemo(
-    () => c.enqueuedTrackIndex === null || 
-    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
-    [c.enqueuedTrackIndex, c.enqueuedTracks]);
-
-  function handleBack() {
-    if (isBackDisabled) return;
-    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
-    c.setEnqueuedTrackIndex(prevIndex);
-    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
-  }
-
-  function handleForward() {
-    if (isForwardDisabled) return;
-    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
-    c.setEnqueuedTrackIndex(nextIndex);
-    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
-  }
-
-  return {
-    handleBack,
-    handleForward,
-    isBackDisabled,
-    isForwardDisabled
-  };
 }
 
 export function MusicPlayer() {

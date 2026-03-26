@@ -3,7 +3,7 @@ import { MainTracksTab } from './MainTracksTab';
 import SettingsTab from './SettingsTab';
 import { MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { getTrackCover, type TrackData } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
@@ -13,7 +13,38 @@ import 'react-toastify/dist/ReactToastify.css';
 import { AppContext, type AppState } from './AppState';
 import './App.css';
 
-function App() {
+export function useBackForward(c: AppState) {
+  const isBackDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
+    [c.enqueuedTrackIndex]);
+  const isForwardDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || 
+    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+    [c.enqueuedTrackIndex, c.enqueuedTracks]);
+
+  function handleBack() {
+    if (isBackDisabled) return;
+    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
+    c.setEnqueuedTrackIndex(prevIndex);
+    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+  }
+
+  function handleForward() {
+    if (isForwardDisabled) return;
+    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
+    c.setEnqueuedTrackIndex(nextIndex);
+    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+  }
+
+  return {
+    handleBack,
+    handleForward,
+    isBackDisabled,
+    isForwardDisabled
+  };
+}
+
+export function App() {
   const a = {} as AppState;
 
   // State variables
@@ -27,6 +58,7 @@ function App() {
   [a.darkMode, a.setDarkMode] = useState(false);
 
   // Media Session API
+  const { handleBack, handleForward } = useBackForward(a);
   useEffect(() => {
     if ('mediaSession' in navigator && a.currentTrack) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -34,42 +66,17 @@ function App() {
         artist: a.currentTrack.artist,
         album: a.currentTrack.album,
         artwork: [
-          { src: getTrackCover(a.currentTrack), sizes: '96x96', type: 'image/png' },
-          { src: getTrackCover(a.currentTrack), sizes: '128x128', type: 'image/png' },
-          { src: getTrackCover(a.currentTrack), sizes: '192x192', type: 'image/png' },
-          { src: getTrackCover(a.currentTrack), sizes: '256x256', type: 'image/png' },
-          { src: getTrackCover(a.currentTrack), sizes: '384x384', type: 'image/png' },
-          { src: getTrackCover(a.currentTrack), sizes: '512x512', type: 'image/png' },
+          { src: getTrackCover(a.currentTrack) },
         ]
       });
 
-      // Set up action handlers
-      const handlePlay = () => a.setIsPlaying(true);
-      const handlePause = () => a.setIsPlaying(false);
-      const handlePrevTrack = () => {
-        // If there's a previous track in the queue, play it
-        if (a.enqueuedTrackIndex !== null && a.enqueuedTrackIndex > 0) {
-          const prevIndex = a.enqueuedTrackIndex - 1;
-          a.setEnqueuedTrackIndex(prevIndex);
-          a.setCurrentTrack(a.enqueuedTracks[prevIndex]);
-        }
-      };
-      const handleNextTrack = () => {
-        // If there's a next track in the queue, play it
-        if (a.enqueuedTrackIndex !== null && a.enqueuedTrackIndex < a.enqueuedTracks.length - 1) {
-          const nextIndex = a.enqueuedTrackIndex + 1;
-          a.setEnqueuedTrackIndex(nextIndex);
-          a.setCurrentTrack(a.enqueuedTracks[nextIndex]);
-        }
-      };
-
-      navigator.mediaSession.setActionHandler('play', handlePlay);
-      navigator.mediaSession.setActionHandler('pause', handlePause);
-      navigator.mediaSession.setActionHandler('previoustrack', handlePrevTrack);
-      navigator.mediaSession.setActionHandler('nexttrack', handleNextTrack);
+      navigator.mediaSession.setActionHandler('play', () => a.setIsPlaying(true));
+      navigator.mediaSession.setActionHandler('pause', () => a.setIsPlaying(false));
+      navigator.mediaSession.setActionHandler('previoustrack', handleBack);
+      navigator.mediaSession.setActionHandler('nexttrack', handleForward);
       navigator.mediaSession.setActionHandler('stop', null);
     }
-  }, [a.currentTrack, a.enqueuedTrackIndex, a.enqueuedTracks, a.setIsPlaying, a.setCurrentTrack, a.setEnqueuedTrackIndex]);
+  }, [a.currentTrack]);
 
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
@@ -264,4 +271,3 @@ function App() {
   );
 }
 
-export default App;

@@ -1,16 +1,17 @@
 import { useContext, useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBackwardStep, faForwardStep, faSearch, faDownload } from '@fortawesome/free-solid-svg-icons';
-import { useBackForward } from './MusicPlayer';
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
 import { AppContext } from './AppState';
 import { Track, type TrackData } from './Track';
 import { HOST } from './apiserver';
 import { toast } from 'react-toastify';
+import ConfirmBox from './ConfirmBox';
+import { useBackForward } from './App';
+
 import 'react-toastify/dist/ReactToastify.css';
 
 import './SearchBar.css';
-import ConfirmBox from './ConfirmBox';
 
 interface SearchBarProps {
   searchQuery: string;
