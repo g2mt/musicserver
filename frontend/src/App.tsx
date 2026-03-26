@@ -26,6 +26,8 @@ function App() {
   [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
   [a.darkMode, a.setDarkMode] = useState(false);
 
+  // TODO: media session API
+
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
@@ -60,17 +62,6 @@ function App() {
     }
   }, [a.currentTrack, a.darkMode]);
 
-
-  // Tracks
-  const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
-
-  const setFullTracksFromData = (data: any) => {
-    if (data === null || data.length === 0) {
-      toast.warn('No tracks found');
-    } else {
-      setFullTracks(data);
-    }
-  };
 
   useEffect(() => {
     fetch(`${HOST}/track`)
@@ -112,25 +103,6 @@ function App() {
     ]);
     confirmBoxesCounter.current += 1;
   };
-
-  // Track queue
-  [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
-  a.enqueueTrack = (track: TrackData) => {
-    a.setEnqueuedTracks([...a.enqueuedTracks, track]);
-  };
-  a.unqueueTrack = (index: number) => {
-    a.setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
-    // If we remove a track before the current index, adjust the index
-    if (a.enqueuedTrackIndex !== null && index < a.enqueuedTrackIndex) {
-      a.setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
-    } else if (index === a.enqueuedTrackIndex) {
-      // If we remove the currently highlighted track, reset index
-      a.setEnqueuedTrackIndex(null);
-    }
-  };
-
-  // Left-side tab
-  const [leftTab, setLeftTab] = useState<'tracks' | 'settings'>('tracks');
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -176,6 +148,36 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [a.duration]);
+
+  // Tracks
+  const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
+
+  const setFullTracksFromData = (data: any) => {
+    if (data === null || data.length === 0) {
+      toast.warn('No tracks found');
+    } else {
+      setFullTracks(data);
+    }
+  };
+
+  // Track queue
+  [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
+  a.enqueueTrack = (track: TrackData) => {
+    a.setEnqueuedTracks([...a.enqueuedTracks, track]);
+  };
+  a.unqueueTrack = (index: number) => {
+    a.setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
+    // If we remove a track before the current index, adjust the index
+    if (a.enqueuedTrackIndex !== null && index < a.enqueuedTrackIndex) {
+      a.setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
+    } else if (index === a.enqueuedTrackIndex) {
+      // If we remove the currently highlighted track, reset index
+      a.setEnqueuedTrackIndex(null);
+    }
+  };
+
+  // Left-side tab
+  const [leftTab, setLeftTab] = useState<'tracks' | 'settings'>('tracks');
 
   return (
     <AppContext value={a}>
