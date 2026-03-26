@@ -110,7 +110,6 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 				Error string `json:"error"`
 			}{Error: err.Error()})
 			conn.Write(data)
-			// Continue to read next line
 			continue
 		}
 
