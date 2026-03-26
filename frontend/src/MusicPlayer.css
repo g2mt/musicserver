@@ -20,6 +20,9 @@
       background: var(--color-disabled);
       border: 0 none;
     }
+    &::-moz-range-progress {
+      background: var(--accent-color);
+    }
   }
 
   .player-controls {

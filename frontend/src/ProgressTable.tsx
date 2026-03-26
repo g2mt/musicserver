@@ -73,7 +73,7 @@ function ProgressTable() {
               value={entry.value} max={entry.max_value}/>
           </td>
           <td>
-            <button onClick={() => toggleOutput(name)}>
+            <button className="btn" onClick={() => toggleOutput(name)}>
               {expanded[name] ? 'Hide' : 'Show'}
             </button>
           </td>

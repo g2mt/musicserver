@@ -34,15 +34,15 @@ body.dark-mode {
   background: var(--content-bg);
   color: var(--content-color);
 
-  --front-bg: #000000;
-  --content-bg: #2a2a2a;
+  --front-bg: #0e0f15;
+  --content-bg: #1f2020;
   --content-color: #ffffff;
-  --accent-color: #50ecdd;
-  --accent-color-text: #ffffff;
-  --accent-color-light: #c2fff9;
-  --accent-color-light-text: #ffffff;
+  --accent-color: #10d0bd;
+  --accent-color-text: #000000;
+  --accent-color-light: #000000;
+  --accent-color-light-text: #c2fff9;
 
-  --gray: #ccc;
+  --gray: #909090;
   --gray-text: #000;
 
   --shadow: rgba(255, 255, 255, 0.05);
