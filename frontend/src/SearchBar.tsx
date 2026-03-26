@@ -1,17 +1,21 @@
-import { useContext, useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBackwardStep, faForwardStep, faSearch, faDownload } from '@fortawesome/free-solid-svg-icons';
-import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
-import { AppContext } from './AppState';
-import { Track, type TrackData } from './Track';
-import { HOST } from './apiserver';
-import { toast } from 'react-toastify';
-import ConfirmBox from './ConfirmBox';
-import { useBackForward } from './App';
+import { useContext, useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBackwardStep,
+  faForwardStep,
+  faSearch,
+  faDownload,
+} from "@fortawesome/free-solid-svg-icons";
+import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
+import { AppContext } from "./AppState";
+import { Track } from "./Track";
+import { HOST } from "./apiserver";
+import { toast } from "react-toastify";
+import ConfirmBox from "./ConfirmBox";
+import { useBackForward } from "./App";
+import type { TrackData } from "./TrackData";
 
-import 'react-toastify/dist/ReactToastify.css';
-
-import './SearchBar.css';
+import "./SearchBar.css";
 
 interface SearchBarProps {
   searchQuery: string;
@@ -21,7 +25,8 @@ interface SearchBarProps {
 function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const c = useContext(AppContext)!;
   const [inputValue, setInputValue] = useState(searchQuery);
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
+    useBackForward(c);
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
@@ -31,43 +36,67 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
 
   const confirmTrackDownload = async (url: string) => {
     try {
-      const response = await fetch(`${HOST}/track/:external/${encodeURIComponent(url)}`);
+      const response = await fetch(
+        `${HOST}/track/:external/${encodeURIComponent(url)}`,
+      );
       if (!response.ok) {
-        toast.error('Unable to get track data');
+        toast.error("Unable to get track data");
         return;
       }
       const trackData: TrackData = await response.json();
       c.addConfirmBox(
-        <ConfirmBox onAccept={() => {
-          toast.info((<>Download for <b>{url}</b> started</>));
-          fetch(`${HOST}/track/:external/${encodeURIComponent(url)}`, { method: 'POST' })
-            .then(res => {
-              if (!res.ok) throw new Error();
-              toast.success((<>Download for <b>{url}</b> completed</>));
+        <ConfirmBox
+          onAccept={() => {
+            toast.info(
+              <>
+                Download for <b>{url}</b> started
+              </>,
+            );
+            fetch(`${HOST}/track/:external/${encodeURIComponent(url)}`, {
+              method: "POST",
             })
-            .catch(() => toast.error((<>Download for <b>{url}</b> failed</>)));
-        }}>
+              .then((res) => {
+                if (!res.ok) throw new Error();
+                toast.success(
+                  <>
+                    Download for <b>{url}</b> completed
+                  </>,
+                );
+              })
+              .catch(() =>
+                toast.error(
+                  <>
+                    Download for <b>{url}</b> failed
+                  </>,
+                ),
+              );
+          }}
+        >
           <p>Download this track?</p>
           <Track highlighted={true} track={trackData} />
-        </ConfirmBox>
+        </ConfirmBox>,
       );
     } catch {
-      toast.error('Unable to get track data');
+      toast.error("Unable to get track data");
     }
   };
 
-  const isValidUrl = inputValue.startsWith('http://') || inputValue.startsWith('https://');
+  const isValidUrl =
+    inputValue.startsWith("http://") || inputValue.startsWith("https://");
 
   return (
-    <form className="search-bar" onSubmit={e => {
-      e.preventDefault();
-      setSearchQuery(inputValue);
-    }}>
+    <form
+      className="search-bar"
+      onSubmit={(e) => {
+        e.preventDefault();
+        setSearchQuery(inputValue);
+      }}
+    >
       <input
         type="text"
         placeholder="Search tracks..."
         value={inputValue}
-        onChange={e => {
+        onChange={(e) => {
           setInputValue(e.target.value);
         }}
         className="search-input"
@@ -76,8 +105,8 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         <FontAwesomeIcon icon={faSearch} />
       </button>
       {collapsed && (
-        <button 
-          className="icon-btn btn-prev-song" 
+        <button
+          className="icon-btn btn-prev-song"
           onClick={handleBack}
           disabled={isBackDisabled}
         >
@@ -85,17 +114,17 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         </button>
       )}
       {collapsed && (
-        <button 
-          className="icon-btn btn-next-song" 
+        <button
+          className="icon-btn btn-next-song"
           onClick={handleForward}
           disabled={isForwardDisabled}
         >
           <FontAwesomeIcon icon={faForwardStep} />
         </button>
       )}
-      <button 
+      <button
         type="button"
-        className="icon-btn btn-download" 
+        className="icon-btn btn-download"
         title='Paste a URL beginning with "http:" or "https:" to download it.'
         onClick={() => confirmTrackDownload(inputValue)}
         disabled={!isValidUrl}

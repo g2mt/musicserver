@@ -1,31 +1,30 @@
-import TrackList from './TrackList';
-import type { TrackData } from './Track';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useContext, useRef } from 'react';
-import { AppContext } from './AppState';
+import TrackList from "./TrackList";
+import type { TrackData } from "./Track";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext, useRef } from "react";
+import { AppContext } from "./AppState";
 
-import './MainTracksTab.css';
+import "./MainTracksTab.css";
 
-export function MainTracksTab({
-  tracks,
-}: {
-  tracks: TrackData[]|null,
-}) {
+export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   if (tracks === null || tracks.length === 0) {
-    return (
-      <div className="main-tracks-controls">
-        No tracks found
-      </div>
-    );
+    return <div className="main-tracks-controls">No tracks found</div>;
   }
 
   const c = useContext(AppContext)!;
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
-  const elRef = useRef<HTMLDivElement|null>(null);
+  const elRef = useRef<HTMLDivElement | null>(null);
   const updateQuery = (text: string) => {
-    c.setSearchQuery(c.searchQuery.replace(/ *((\b(after|before):[^ ]+)|$)/, ` ${text}`).trim());
+    c.setSearchQuery(
+      c.searchQuery
+        .replace(/ *((\b(after|before):[^ ]+)|$)/, ` ${text}`)
+        .trim(),
+    );
     elRef.current?.scrollIntoView({ block: "start" });
   };
 
@@ -33,7 +32,9 @@ export function MainTracksTab({
     <div className="main-tracks-controls">
       <button
         className="btn"
-        onClick={() => firstTrack && updateQuery(`before:${firstTrack.short_id}`)}
+        onClick={() =>
+          firstTrack && updateQuery(`before:${firstTrack.short_id}`)
+        }
         disabled={!firstTrack}
         title="Previous"
       >

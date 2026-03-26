@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { HOST } from './apiserver';
+import { useEffect, useState } from "react";
+import { HOST } from "./apiserver";
 
 interface ProgressEntry {
   value: number;
@@ -8,25 +8,27 @@ interface ProgressEntry {
 }
 
 type ProgressEvent =
-  {
-    type: "Value" | "MaxValue",
-    data: number;
-  }
   | {
-    type: "AddOutput",
-    data: string,
-  };
+      type: "Value" | "MaxValue";
+      data: number;
+    }
+  | {
+      type: "AddOutput";
+      data: string;
+    };
 
 type ProgressEventWithSource = ProgressEvent & { source: string };
 
 function ProgressTable() {
-  const [progresses, setProgresses] = useState<Record<string, ProgressEntry>>({});
+  const [progresses, setProgresses] = useState<Record<string, ProgressEntry>>(
+    {},
+  );
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetch(`${HOST}/progress`)
-      .then(res => res.json())
-      .then(data => setProgresses(data ?? {}))
+      .then((res) => res.json())
+      .then((data) => setProgresses(data ?? {}))
       .catch(() => {});
   }, []);
 
@@ -39,13 +41,13 @@ function ProgressTable() {
       const name = data.source;
       if (!name) return;
 
-      if (data.type === 'AddOutput') {
-        setProgresses(old => {
-          old[name].output = (old[name].output ?? '') + data.data;
+      if (data.type === "AddOutput") {
+        setProgresses((old) => {
+          old[name].output = (old[name].output ?? "") + data.data;
           return old;
         });
-      } else if (data.type === 'Value' || data.type === 'MaxValue') {
-        setProgresses(old => {
+      } else if (data.type === "Value" || data.type === "MaxValue") {
+        setProgresses((old) => {
           old[name].value = data.data;
           return old;
         });
@@ -58,30 +60,32 @@ function ProgressTable() {
   }, [progresses]);
 
   function toggleOutput(name: string) {
-    setExpanded(prev => ({ ...prev, [name]: !prev[name] }));
+    setExpanded((prev) => ({ ...prev, [name]: !prev[name] }));
   }
 
-  function Row({name, entry}: {name: string, entry: ProgressEntry}) {
+  function Row({ name, entry }: { name: string; entry: ProgressEntry }) {
     return (
       <>
-        <tr
-            title={`${entry.value}/${entry.max_value}`}>
+        <tr title={`${entry.value}/${entry.max_value}`}>
           <td>{name}</td>
           <td>
-            <progress
-              value={entry.value} max={entry.max_value}/>
+            <progress value={entry.value} max={entry.max_value} />
           </td>
           <td>
             <button className="btn" onClick={() => toggleOutput(name)}>
-              {expanded[name] ? 'Hide' : 'Show'}
+              {expanded[name] ? "Hide" : "Show"}
             </button>
           </td>
         </tr>
         {expanded[name] && (
-          <tr><td colSpan={3}><pre>{entry.output}</pre></td></tr>
+          <tr>
+            <td colSpan={3}>
+              <pre>{entry.output}</pre>
+            </td>
+          </tr>
         )}
       </>
-    )
+    );
   }
 
   return (
@@ -94,15 +98,15 @@ function ProgressTable() {
         </tr>
       </thead>
       <tbody>
-        {
-          Object.keys(progresses).length > 0
-          ? Object.entries(progresses).map(([name, entry]) => (
-              <Row key={name} name={name} entry={entry} />
-            ))
-          : (
-            <tr><td colSpan={3}>No active processes.</td></tr>
-          )
-        }
+        {Object.keys(progresses).length > 0 ? (
+          Object.entries(progresses).map(([name, entry]) => (
+            <Row key={name} name={name} entry={entry} />
+          ))
+        ) : (
+          <tr>
+            <td colSpan={3}>No active processes.</td>
+          </tr>
+        )}
       </tbody>
     </table>
   );

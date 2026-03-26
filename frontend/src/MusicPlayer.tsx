@@ -1,12 +1,20 @@
-import { useEffect, useMemo, useContext } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay, faPause, faVolumeHigh, faVolumeXmark, faBackwardStep, faForwardStep } from '@fortawesome/free-solid-svg-icons';
-import { Track } from './Track';
-import { HOST } from './apiserver';
-import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from './responsive';
-import './MusicPlayer.css';
-import { AppContext, type AppState } from './AppState';
-import { useBackForward } from './App';
+import { useEffect, useMemo, useContext } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlay,
+  faPause,
+  faVolumeHigh,
+  faVolumeXmark,
+  faBackwardStep,
+  faForwardStep,
+} from "@fortawesome/free-solid-svg-icons";
+import { Track } from "./Track";
+import { HOST } from "./apiserver";
+import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
+import { AppContext, type AppState } from "./AppState";
+import { useBackForward } from "./App";
+
+import "./MusicPlayer.css";
 
 function useAudio(url: string | null) {
   const audio = useMemo(() => new Audio(), []);
@@ -19,7 +27,9 @@ function useAudio(url: string | null) {
   }, [url]);
 
   useEffect(() => {
-    return () => { audio.pause(); };
+    return () => {
+      audio.pause();
+    };
   }, [audio]);
 
   return audio;
@@ -27,9 +37,11 @@ function useAudio(url: string | null) {
 
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
-  const audio = useAudio(c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null);
+  const audio = useAudio(
+    c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null,
+  );
 
-  function goNextQueue(doSetIsPlaying: boolean=true) {
+  function goNextQueue(doSetIsPlaying: boolean = true) {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
     if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
       c.setEnqueuedTrackIndex(nextIndex);
@@ -37,8 +49,7 @@ export function MusicPlayer() {
     } else {
       // No more tracks in queue
       c.setEnqueuedTrackIndex(null);
-      if (doSetIsPlaying)
-        c.setIsPlaying(false);
+      if (doSetIsPlaying) c.setIsPlaying(false);
     }
   }
 
@@ -70,11 +81,11 @@ export function MusicPlayer() {
       c.setProgress(audio.currentTime);
       c.setDuration(audio.duration || 0);
     }
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('ended', () => goNextQueue());
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", () => goNextQueue());
     return () => {
-      audio.removeEventListener('timeupdate', onTimeUpdate);
-      audio.removeEventListener('ended', () => goNextQueue());
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", () => goNextQueue());
     };
   }, [audio, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
@@ -84,12 +95,13 @@ export function MusicPlayer() {
     c.setProgress(val);
   }
 
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } = useBackForward(c);
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
+    useBackForward(c);
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
   return (
-    <div className={`music-player${collapsed ? ' collapsed' : ''}`}>
+    <div className={`music-player${collapsed ? " collapsed" : ""}`}>
       <input
         className="scrubber-bar"
         type="range"
@@ -101,18 +113,21 @@ export function MusicPlayer() {
       />
       <div className="player-controls">
         <div className="player-left">
-          <button 
-            className="icon-btn btn-prev-song" 
+          <button
+            className="icon-btn btn-prev-song"
             onClick={handleBack}
             disabled={isBackDisabled}
           >
             <FontAwesomeIcon icon={faBackwardStep} />
           </button>
-          <button className="icon-btn btn-play-pause" onClick={() => c.setIsPlaying && c.setIsPlaying(p => !p)}>
+          <button
+            className="icon-btn btn-play-pause"
+            onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
+          >
             <FontAwesomeIcon icon={c.isPlaying ? faPause : faPlay} />
           </button>
-          <button 
-            className="icon-btn btn-next-song" 
+          <button
+            className="icon-btn btn-next-song"
             onClick={handleForward}
             disabled={isForwardDisabled}
           >
@@ -130,13 +145,18 @@ export function MusicPlayer() {
             max={1}
             step={0.01}
             value={c.muted ? 0 : c.volume}
-            onChange={e => { 
-              if (c.setVolume) c.setVolume(Number(e.target.value)); 
-              if (c.setMuted) c.setMuted(false); 
+            onChange={(e) => {
+              if (c.setVolume) c.setVolume(Number(e.target.value));
+              if (c.setMuted) c.setMuted(false);
             }}
           />
-          <button className="icon-btn" onClick={() => c.setMuted && c.setMuted(m => !m)}>
-            <FontAwesomeIcon icon={c.muted || c.volume === 0 ? faVolumeXmark : faVolumeHigh} />
+          <button
+            className="icon-btn"
+            onClick={() => c.setMuted && c.setMuted((m) => !m)}
+          >
+            <FontAwesomeIcon
+              icon={c.muted || c.volume === 0 ? faVolumeXmark : faVolumeHigh}
+            />
           </button>
         </div>
       </div>

@@ -1,27 +1,31 @@
-import TrackList from './TrackList';
-import { MainTracksTab } from './MainTracksTab';
-import SettingsTab from './SettingsTab';
-import { MusicPlayer } from './MusicPlayer';
-import SearchBar from './SearchBar';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { getTrackCover } from './Track';
-import { HOST } from './apiserver';
-import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { AppContext, type AppState } from './AppState';
-import './App.css';
-import type { TrackData } from './TrackData';
+import TrackList from "./TrackList";
+import { MainTracksTab } from "./MainTracksTab";
+import SettingsTab from "./SettingsTab";
+import { MusicPlayer } from "./MusicPlayer";
+import SearchBar from "./SearchBar";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { getTrackCover } from "./Track";
+import { HOST } from "./apiserver";
+import { faMusic, faGear } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast, ToastContainer } from "react-toastify";
+import { AppContext, type AppState } from "./AppState";
+import type { TrackData } from "./TrackData";
+
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
 
 export function useBackForward(c: AppState) {
   const isBackDisabled = useMemo(
     () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
-    [c.enqueuedTrackIndex]);
+    [c.enqueuedTrackIndex],
+  );
   const isForwardDisabled = useMemo(
-    () => c.enqueuedTrackIndex === null || 
-    c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
-    [c.enqueuedTrackIndex, c.enqueuedTracks]);
+    () =>
+      c.enqueuedTrackIndex === null ||
+      c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+    [c.enqueuedTrackIndex, c.enqueuedTracks],
+  );
 
   function handleBack() {
     if (isBackDisabled) return;
@@ -41,7 +45,7 @@ export function useBackForward(c: AppState) {
     handleBack,
     handleForward,
     isBackDisabled,
-    isForwardDisabled
+    isForwardDisabled,
   };
 }
 
@@ -55,28 +59,32 @@ export function App() {
   [a.duration, a.setDuration] = useState(0);
   [a.volume, a.setVolume] = useState(1);
   [a.muted, a.setMuted] = useState(false);
-  [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
+  [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number | null>(
+    null,
+  );
   [a.darkMode, a.setDarkMode] = useState(false);
   [a.showBlurredCover, a.setShowBlurredCover] = useState(true);
 
   // Media Session API
   const { handleBack, handleForward } = useBackForward(a);
   useEffect(() => {
-    if ('mediaSession' in navigator && a.currentTrack) {
+    if ("mediaSession" in navigator && a.currentTrack) {
       navigator.mediaSession.metadata = new MediaMetadata({
         title: a.currentTrack.name,
         artist: a.currentTrack.artist,
         album: a.currentTrack.album,
-        artwork: [
-          { src: getTrackCover(a.currentTrack) },
-        ]
+        artwork: [{ src: getTrackCover(a.currentTrack) }],
       });
 
-      navigator.mediaSession.setActionHandler('play', () => a.setIsPlaying(true));
-      navigator.mediaSession.setActionHandler('pause', () => a.setIsPlaying(false));
-      navigator.mediaSession.setActionHandler('previoustrack', handleBack);
-      navigator.mediaSession.setActionHandler('nexttrack', handleForward);
-      navigator.mediaSession.setActionHandler('stop', null);
+      navigator.mediaSession.setActionHandler("play", () =>
+        a.setIsPlaying(true),
+      );
+      navigator.mediaSession.setActionHandler("pause", () =>
+        a.setIsPlaying(false),
+      );
+      navigator.mediaSession.setActionHandler("previoustrack", handleBack);
+      navigator.mediaSession.setActionHandler("nexttrack", handleForward);
+      navigator.mediaSession.setActionHandler("stop", null);
     }
   }, [a.currentTrack]);
 
@@ -98,25 +106,25 @@ export function App() {
         </filter>
         <image width="100%" href="" filter="url(#blur)"/>`;
       }
-      const image = overlay.querySelector('image');
+      const image = overlay.querySelector("image");
       const cover = getTrackCover(a.currentTrack);
-      if (image && cover !== image.getAttribute('href')) {
-        image.setAttribute('href', cover);
+      if (image && cover !== image.getAttribute("href")) {
+        image.setAttribute("href", cover);
       }
     } else if (overlay.childElementCount > 0) {
       overlay.innerHTML = "";
     }
   }, [a.currentTrack, a.darkMode]);
 
-
   useEffect(() => {
     fetch(`${HOST}/track`)
-      .then(res => res.json())
-      .then(data => setFullTracksFromData(data));
+      .then((res) => res.json())
+      .then((data) => setFullTracksFromData(data));
   }, []);
 
   // Hash params (parsed like URLSearchParams but from window.location.hash)
-  const getHashParams = () => new URLSearchParams(window.location.hash.slice(1));
+  const getHashParams = () =>
+    new URLSearchParams(window.location.hash.slice(1));
   const setHashParam = (key: string, value: string) => {
     const params = getHashParams();
     if (value) {
@@ -128,24 +136,28 @@ export function App() {
   };
 
   // Search
-  [a.searchQuery, a.setSearchQuery] = useState(() => getHashParams().get('q') ?? '');
+  [a.searchQuery, a.setSearchQuery] = useState(
+    () => getHashParams().get("q") ?? "",
+  );
   useEffect(() => {
-    setHashParam('q', a.searchQuery);
+    setHashParam("q", a.searchQuery);
     fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
-      .then(res => res.json())
-      .then(data => setFullTracksFromData(data));
+      .then((res) => res.json())
+      .then((data) => setFullTracksFromData(data));
   }, [a.searchQuery]);
 
   // Confirm boxes
-  const [confirmBoxes, setConfirmBoxes] = useState<{
-    key: number;
-    el: React.ReactNode
-  }[]>([]);
+  const [confirmBoxes, setConfirmBoxes] = useState<
+    {
+      key: number;
+      el: React.ReactNode;
+    }[]
+  >([]);
   let confirmBoxesCounter = useRef(0);
   a.addConfirmBox = (confirmBox: React.ReactNode) => {
     setConfirmBoxes([
       { key: confirmBoxesCounter.current, el: confirmBox },
-      ...confirmBoxes
+      ...confirmBoxes,
     ]);
     confirmBoxesCounter.current += 1;
   };
@@ -154,44 +166,47 @@ export function App() {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       // Ignore if user is typing in an input field
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
         return;
       }
 
       switch (e.key) {
-        case ' ':
-        case 'k':
+        case " ":
+        case "k":
           e.preventDefault();
-          a.setIsPlaying(prev => !prev);
+          a.setIsPlaying((prev) => !prev);
           break;
-        case 'm':
+        case "m":
           e.preventDefault();
-          a.setMuted(prev => !prev);
+          a.setMuted((prev) => !prev);
           break;
-        case 'j':
+        case "j":
           e.preventDefault();
-          a.setProgress(prev => Math.max(0, prev - 10));
+          a.setProgress((prev) => Math.max(0, prev - 10));
           break;
-        case 'l':
+        case "l":
           e.preventDefault();
-          a.setProgress(prev => Math.min(a.duration, prev + 10));
+          a.setProgress((prev) => Math.min(a.duration, prev + 10));
           break;
-        case '(':
+        case "(":
           e.preventDefault();
-          a.setVolume(prev => Math.max(0, prev - 0.05));
+          a.setVolume((prev) => Math.max(0, prev - 0.05));
           a.setMuted(false);
           break;
-        case ')':
+        case ")":
           e.preventDefault();
-          a.setVolume(prev => Math.min(1, prev + 0.05));
+          a.setVolume((prev) => Math.min(1, prev + 0.05));
           a.setMuted(false);
           break;
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [a.duration]);
 
@@ -200,7 +215,7 @@ export function App() {
 
   const setFullTracksFromData = (data: any) => {
     if (data === null || data.length === 0) {
-      toast.warn('No tracks found');
+      toast.warn("No tracks found");
     } else {
       setFullTracks(data);
     }
@@ -212,10 +227,10 @@ export function App() {
     a.setEnqueuedTracks([...a.enqueuedTracks, track]);
   };
   a.unqueueTrack = (index: number) => {
-    a.setEnqueuedTracks(prev => prev.filter((_, i) => i !== index));
+    a.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
     // If we remove a track before the current index, adjust the index
     if (a.enqueuedTrackIndex !== null && index < a.enqueuedTrackIndex) {
-      a.setEnqueuedTrackIndex(prev => (prev ?? 1) - 1);
+      a.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
     } else if (index === a.enqueuedTrackIndex) {
       // If we remove the currently highlighted track, reset index
       a.setEnqueuedTrackIndex(null);
@@ -223,40 +238,50 @@ export function App() {
   };
 
   // Left-side tab
-  const [leftTab, setLeftTab] = useState<'tracks' | 'settings'>('tracks');
+  const [leftTab, setLeftTab] = useState<"tracks" | "settings">("tracks");
 
   return (
     <AppContext value={a}>
       <ToastContainer position="bottom-right" theme="dark" />
       <div className="app-layout">
         <div className="search-bar-container">
-          <SearchBar searchQuery={a.searchQuery} setSearchQuery={a.setSearchQuery} />
+          <SearchBar
+            searchQuery={a.searchQuery}
+            setSearchQuery={a.setSearchQuery}
+          />
         </div>
         <div className="app-main">
           <div className="left-side">
             <div className="tab-bar">
               <button
-                className={`tab-btn ${leftTab === 'tracks' ? 'active' : ''}`}
-                onClick={() => setLeftTab('tracks')}
+                className={`tab-btn ${leftTab === "tracks" ? "active" : ""}`}
+                onClick={() => setLeftTab("tracks")}
                 title="Tracks"
               >
                 <FontAwesomeIcon icon={faMusic} />
               </button>
               <button
-                className={`tab-btn ${leftTab === 'settings' ? 'active' : ''}`}
-                onClick={() => setLeftTab('settings')}
+                className={`tab-btn ${leftTab === "settings" ? "active" : ""}`}
+                onClick={() => setLeftTab("settings")}
                 title="Settings"
               >
                 <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
-            {confirmBoxes.map(b => (<div key={b.key}>{b.el}</div>))}
-            {leftTab === 'tracks' && <MainTracksTab tracks={fullTracks} />}
-            {leftTab === 'settings' && <SettingsTab />}
+            {confirmBoxes.map((b) => (
+              <div key={b.key}>{b.el}</div>
+            ))}
+            {leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
+            {leftTab === "settings" && <SettingsTab />}
           </div>
-          <div className="right-side"
-              style={{display: a.enqueuedTracks.length > 0 ? 'block' : 'none' }}>
-            <TrackList tracks={a.enqueuedTracks} unqueueTrack={a.unqueueTrack} />
+          <div
+            className="right-side"
+            style={{ display: a.enqueuedTracks.length > 0 ? "block" : "none" }}
+          >
+            <TrackList
+              tracks={a.enqueuedTracks}
+              unqueueTrack={a.unqueueTrack}
+            />
           </div>
         </div>
         <div className="music-player">
@@ -266,4 +291,3 @@ export function App() {
     </AppContext>
   );
 }
-

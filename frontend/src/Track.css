@@ -6,10 +6,12 @@
   padding: var(--s2);
   border-radius: var(--border-radius);
 
-  &:hover, &.highlighted {
+  &:hover,
+  &.highlighted {
     background: var(--accent-color-light);
     color: var(--accent-color-light-text);
-    .track-album, .track-artist {
+    .track-album,
+    .track-artist {
       color: var(--accent-color-light-text);
     }
   }
@@ -41,7 +43,8 @@
   }
 }
 
-.track-album, .track-artist {
+.track-album,
+.track-artist {
   font-size: small;
   color: var(--gray);
   text-decoration: none;
@@ -54,7 +57,7 @@
 .track-album + .track-artist::before {
   content: "・";
   text-decoration: none;
-  display:inline-block;
+  display: inline-block;
 }
 
 .track-queue-btn {

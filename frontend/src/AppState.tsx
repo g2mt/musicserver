@@ -1,9 +1,8 @@
-import { createContext, type Dispatch, type SetStateAction } from 'react';
+import { createContext, type Dispatch, type SetStateAction } from "react";
 import * as z from "zod";
-import type React from 'react';
-import './MusicPlayer.css';
-import { toast } from 'react-toastify';
-import { TrackDataSchema, type TrackData } from './TrackData';
+import type React from "react";
+import { toast } from "react-toastify";
+import { TrackDataSchema, type TrackData } from "./TrackData";
 
 export const AppStateSchema = z.object({
   currentTrack: TrackDataSchema.nullable().default(null),
@@ -14,7 +13,7 @@ export const AppStateSchema = z.object({
   muted: z.boolean().default(false),
   enqueuedTracks: z.array(TrackDataSchema).default([]),
   enqueuedTrackIndex: z.number().nullable().default(null),
-  searchQuery: z.string().default(''),
+  searchQuery: z.string().default(""),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
 });
@@ -32,13 +31,13 @@ export interface AppState extends AppStateData {
   enqueueTrack: (_: TrackData) => void;
   unqueueTrack: (index: number) => void;
   addConfirmBox: (confirmBox: React.ReactNode) => void;
-  setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
+  setEnqueuedTrackIndex: Dispatch<SetStateAction<number | null>>;
   setSearchQuery: (_: string) => void;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
 }
 
-export const AppContext = createContext<AppState|null>(null);
+export const AppContext = createContext<AppState | null>(null);
 
 const CONFIG_KEY = "_config";
 
@@ -48,19 +47,27 @@ export function mergeConfig(dest: AppState) {
     try {
       const parsed = JSON.parse(saved);
       const config = AppStateSchema.parse(parsed);
-      if (config.currentTrack !== null) dest.setCurrentTrack(config.currentTrack);
+      if (config.currentTrack !== null)
+        dest.setCurrentTrack(config.currentTrack);
       if (config.isPlaying !== undefined) dest.setIsPlaying(config.isPlaying);
       if (config.progress !== undefined) dest.setProgress(config.progress);
       if (config.duration !== undefined) dest.setDuration(config.duration);
       if (config.volume !== undefined) dest.setVolume(config.volume);
       if (config.muted !== undefined) dest.setMuted(config.muted);
-      if (config.enqueuedTracks.length > 0) dest.setEnqueuedTracks(config.enqueuedTracks);
-      if (config.enqueuedTrackIndex !== null) dest.setEnqueuedTrackIndex(config.enqueuedTrackIndex);
-      if (config.searchQuery !== '') dest.setSearchQuery(config.searchQuery);
+      if (config.enqueuedTracks.length > 0)
+        dest.setEnqueuedTracks(config.enqueuedTracks);
+      if (config.enqueuedTrackIndex !== null)
+        dest.setEnqueuedTrackIndex(config.enqueuedTrackIndex);
+      if (config.searchQuery !== "") dest.setSearchQuery(config.searchQuery);
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
-      if (config.showBlurredCover !== undefined) dest.setShowBlurredCover(config.showBlurredCover);
+      if (config.showBlurredCover !== undefined)
+        dest.setShowBlurredCover(config.showBlurredCover);
     } catch (e: any) {
-      toast.error((<p>Failed to parse config from localStorage: <b>{e.toString()}</b></p>));
+      toast.error(
+        <p>
+          Failed to parse config from localStorage: <b>{e.toString()}</b>
+        </p>,
+      );
     }
   }
 }

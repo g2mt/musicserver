@@ -1,28 +1,29 @@
-import { useContext } from 'react';
-import { HOST } from './apiserver';
-import { toast } from 'react-toastify';
-import { faRotate, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ProgressTable from './ProgressTable';
-import { AppContext } from './AppState';
-import './SettingsTab.css';
+import { useContext } from "react";
+import { HOST } from "./apiserver";
+import { toast } from "react-toastify";
+import { faRotate, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import ProgressTable from "./ProgressTable";
+import { AppContext } from "./AppState";
+
+import "./SettingsTab.css";
 
 function SettingsTab() {
   const c = useContext(AppContext)!;
 
   function rescanMusic() {
-    fetch(`${HOST}/track`, { method: 'POST' })
-      .then(res => {
+    fetch(`${HOST}/track`, { method: "POST" })
+      .then((res) => {
         if (!res.ok) throw new Error();
-        toast.success('Syncing complete');
+        toast.success("Syncing complete");
       })
-      .catch(() => toast.error('Sync failed'));
+      .catch(() => toast.error("Sync failed"));
   }
 
   function toggleDarkMode() {
     const newMode = !c.darkMode;
     c.setDarkMode(newMode);
-    document.body.classList.toggle('dark-mode', newMode);
+    document.body.classList.toggle("dark-mode", newMode);
   }
 
   return (
@@ -35,10 +36,13 @@ function SettingsTab() {
           checked={c.showBlurredCover}
           onChange={() => c.setShowBlurredCover(!c.showBlurredCover)}
         />
-        <label htmlFor="setting-show-blurred-cover">Show blurred album cover as background in dark mode</label>
+        <label htmlFor="setting-show-blurred-cover">
+          Show blurred album cover as background in dark mode
+        </label>
       </div>
       <button className="btn" onClick={toggleDarkMode}>
-        <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} /> {c.darkMode ? 'Light Mode' : 'Dark Mode'}
+        <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
+        {c.darkMode ? "Light Mode" : "Dark Mode"}
       </button>
       <button className="btn" onClick={rescanMusic}>
         <FontAwesomeIcon icon={faRotate} /> Rescan Music

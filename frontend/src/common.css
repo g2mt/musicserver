@@ -6,9 +6,9 @@
   --front-bg: #ffffff;
   --content-bg: #fff;
   --content-color: #000;
-  --accent-color: #0000CD;
-  --accent-color-text: #FFFFFF;
-  --accent-color-light: #87CEFA;
+  --accent-color: #0000cd;
+  --accent-color-text: #ffffff;
+  --accent-color-light: #87cefa;
   --accent-color-light-text: #000000;
 
   --gray: #ccc;
@@ -56,13 +56,19 @@ body.dark-mode {
     color: #fff;
   }
 
-  input { background: rgba(255,255,255,0.2); }
-  .tab-bar, .search-bar {border-bottom: 0 none;}
+  input {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .tab-bar,
+  .search-bar {
+    border-bottom: 0 none;
+  }
   /* .right-side{ border-left: 1px solid var(--gray); } */
 }
 
 * {
-  margin:0; padding:0;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -94,14 +100,17 @@ body.dark-mode {
   }
 }
 
-input { color: var(--content-color); }
+input {
+  color: var(--content-color);
+}
 
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: var(--s2);
 
-  & th, & td {
+  & th,
+  & td {
     text-align: left;
     padding: var(--s1) var(--s2);
   }

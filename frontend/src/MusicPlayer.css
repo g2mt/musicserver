@@ -69,7 +69,10 @@
 
   &.collapsed {
     .player-left {
-      .btn-prev-song, .btn-next-song { display: none !important; }
+      .btn-prev-song,
+      .btn-next-song {
+        display: none !important;
+      }
     }
     .player-center {
       max-width: unset;
@@ -82,4 +85,3 @@
     }
   }
 }
-
