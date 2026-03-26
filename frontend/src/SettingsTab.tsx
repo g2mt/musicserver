@@ -8,7 +8,7 @@ import { AppContext } from './AppState';
 import './SettingsTab.css';
 
 function SettingsTab() {
-  const app = useContext(AppContext);
+  const c = useContext(AppContext)!;
 
   function rescanMusic() {
     fetch(`${HOST}/track`, { method: 'POST' })
@@ -20,8 +20,8 @@ function SettingsTab() {
   }
 
   function toggleDarkMode() {
-    const newMode = !app!.darkMode;
-    app!.setDarkMode(newMode);
+    const newMode = !c.darkMode;
+    c.setDarkMode(newMode);
     document.body.classList.toggle('dark-mode', newMode);
   }
 
@@ -29,7 +29,7 @@ function SettingsTab() {
     <div className="settings-tab">
       <h2>Settings</h2>
       <button className="btn" onClick={toggleDarkMode}>
-        <FontAwesomeIcon icon={app!.darkMode ? faSun : faMoon} /> {app!.darkMode ? 'Light Mode' : 'Dark Mode'}
+        <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} /> {c.darkMode ? 'Light Mode' : 'Dark Mode'}
       </button>
       <button className="btn" onClick={rescanMusic}>
         <FontAwesomeIcon icon={faRotate} /> Rescan Music
