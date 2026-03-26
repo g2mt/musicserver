@@ -30,3 +30,15 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 - Use modern CSS with nested selectors.
 - Use color variables specified in common.css.
 - Animations and transitions should not be used.
+- Rather than specifying a specific padding/margin/spacing, use the spacing variable found in common.css (`var(--s1)` to `var(--s5)`):
+
+```css
+--s1: 0.25rem;
+--s2: 0.5rem;
+--s3: 1rem;
+--s4: 1.5rem;
+--s5: 3rem;
+```
+
+  For zero spacing, use the value `0`.
+
