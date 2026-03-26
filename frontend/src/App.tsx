@@ -4,7 +4,7 @@ import SettingsTab from './SettingsTab';
 import { MusicPlayer } from './MusicPlayer';
 import SearchBar from './SearchBar';
 import React, { useEffect, useRef, useState } from 'react';
-import type { TrackData } from './Track';
+import { getTrackCover, type TrackData } from './Track';
 import { HOST } from './apiserver';
 import { faMusic, faGear } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -24,6 +24,34 @@ function App() {
   [a.volume, a.setVolume] = useState(1);
   [a.muted, a.setMuted] = useState(false);
   [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
+
+  // Update body background when current track changes
+  const overlay = document.getElementById("background-overlay")!;
+  useEffect(() => {
+    if (a.currentTrack) {
+      const cover = getTrackCover(a.currentTrack);
+      const blurred =
+      `
+      <style>    :root { fill: #000; stroke: none; }  </style>
+        <filter id="blur">
+          <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
+  <!-- reduce RGB channels to 20% -->
+  <feComponentTransfer>
+    <feFuncR type="linear" slope="0.2"/>
+    <feFuncG type="linear" slope="0.2"/>
+    <feFuncB type="linear" slope="0.2"/>
+    <!-- keep alpha unchanged -->
+    <feFuncA type="linear" slope="1"/>
+  </feComponentTransfer>
+        </filter>
+        <image width="100%" href="${cover}" filter="url(#blur)"/>
+      `;
+      overlay.innerHTML = blurred;
+    } else {
+      overlay.style.background = '';
+    }
+  }, [a.currentTrack]);
+
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
@@ -140,15 +168,6 @@ function App() {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [a.duration]);
-
-  // Update body background when current track changes
-  useEffect(() => {
-    if (a.currentTrack) {
-      document.body.style.background = '#1a1a1a';
-    } else {
-      document.body.style.background = '#121212';
-    }
-  }, [a.currentTrack]);
 
   return (
     <AppContext value={a}>

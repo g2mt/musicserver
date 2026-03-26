@@ -15,6 +15,10 @@ export interface TrackData {
   thumbnail_path?: string;
 }
 
+export function getTrackCover(track: TrackData): string {
+  return track.thumbnail_path ?? `${HOST}/track/${track.short_id}/cover`;
+}
+
 export function Track({ 
   track, 
   highlighted,
@@ -35,7 +39,7 @@ export function Track({
     <div className={`track ${isHighlighted ? 'highlighted' : ''}`}>
       <img
         className="track-cover"
-        src={track.thumbnail_path ?? `${HOST}/track/${track.short_id}/cover`}
+        src={getTrackCover(track)}
       />
       <div className="track-info">
         <a className="track-title" href="#" onClick={e => {

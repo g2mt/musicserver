@@ -4,12 +4,11 @@
   gap: var(--s2);
   padding: var(--s3) var(--s3);
   border-bottom: 1px solid var(--gray);
-  background: var(--front-bg);
+  background: var(--content-bg);
 
   .search-input {
     flex: 1;
     padding: var(--s2) var(--s3);
-    background: inherit;
     border: 1px solid var(--gray);
     border-radius: var(--border-radius);
     font-size: medium;
