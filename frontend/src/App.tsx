@@ -26,7 +26,50 @@ function App() {
   [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
   [a.darkMode, a.setDarkMode] = useState(false);
 
-  // TODO: media session API
+  // Media Session API
+  useEffect(() => {
+    if ('mediaSession' in navigator && a.currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: a.currentTrack.name,
+        artist: a.currentTrack.artist,
+        album: a.currentTrack.album,
+        artwork: [
+          { src: getTrackCover(a.currentTrack), sizes: '96x96', type: 'image/png' },
+          { src: getTrackCover(a.currentTrack), sizes: '128x128', type: 'image/png' },
+          { src: getTrackCover(a.currentTrack), sizes: '192x192', type: 'image/png' },
+          { src: getTrackCover(a.currentTrack), sizes: '256x256', type: 'image/png' },
+          { src: getTrackCover(a.currentTrack), sizes: '384x384', type: 'image/png' },
+          { src: getTrackCover(a.currentTrack), sizes: '512x512', type: 'image/png' },
+        ]
+      });
+
+      // Set up action handlers
+      const handlePlay = () => a.setIsPlaying(true);
+      const handlePause = () => a.setIsPlaying(false);
+      const handlePrevTrack = () => {
+        // If there's a previous track in the queue, play it
+        if (a.enqueuedTrackIndex !== null && a.enqueuedTrackIndex > 0) {
+          const prevIndex = a.enqueuedTrackIndex - 1;
+          a.setEnqueuedTrackIndex(prevIndex);
+          a.setCurrentTrack(a.enqueuedTracks[prevIndex]);
+        }
+      };
+      const handleNextTrack = () => {
+        // If there's a next track in the queue, play it
+        if (a.enqueuedTrackIndex !== null && a.enqueuedTrackIndex < a.enqueuedTracks.length - 1) {
+          const nextIndex = a.enqueuedTrackIndex + 1;
+          a.setEnqueuedTrackIndex(nextIndex);
+          a.setCurrentTrack(a.enqueuedTracks[nextIndex]);
+        }
+      };
+
+      navigator.mediaSession.setActionHandler('play', handlePlay);
+      navigator.mediaSession.setActionHandler('pause', handlePause);
+      navigator.mediaSession.setActionHandler('previoustrack', handlePrevTrack);
+      navigator.mediaSession.setActionHandler('nexttrack', handleNextTrack);
+      navigator.mediaSession.setActionHandler('stop', null);
+    }
+  }, [a.currentTrack, a.enqueuedTrackIndex, a.enqueuedTracks, a.setIsPlaying, a.setCurrentTrack, a.setEnqueuedTrackIndex]);
 
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
