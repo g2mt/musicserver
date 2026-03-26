@@ -34,7 +34,7 @@
 .tab-btn {
   background: none;
   border: none;
-  font-size: 1.4rem;
+  font-size: large;
   padding: var(--s2) var(--s3);
   cursor: pointer;
   border-bottom: 2px solid transparent;

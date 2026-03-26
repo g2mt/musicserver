@@ -31,7 +31,7 @@
 }
 
 .track-title {
-  font-size: 1rem;
+  font-size: medium;
   font-weight: 500;
   color: inherit;
   text-decoration: none;
@@ -42,7 +42,7 @@
 }
 
 .track-album, .track-artist {
-  font-size: 0.85rem;
+  font-size: small;
   color: var(--gray);
   text-decoration: none;
 
