@@ -5,17 +5,17 @@ import { TrackDataSchema, type TrackData } from './Track';
 import './MusicPlayer.css';
 
 export const AppStateSchema = z.object({
-  currentTrack: TrackDataSchema.nullable(),
-  isPlaying: z.boolean(),
-  progress: z.number(),
-  duration: z.number(),
-  volume: z.number(),
-  muted: z.boolean(),
-  enqueuedTracks: z.array(TrackDataSchema),
-  enqueuedTrackIndex: z.number().nullable(),
-  searchQuery: z.string(),
-  darkMode: z.boolean(),
-  showBlurredCover: z.boolean(),
+  currentTrack: TrackDataSchema.nullable().default(null),
+  isPlaying: z.boolean().default(false),
+  progress: z.number().default(0),
+  duration: z.number().default(0),
+  volume: z.number().default(1),
+  muted: z.boolean().default(false),
+  enqueuedTracks: z.array(TrackDataSchema).default([]),
+  enqueuedTrackIndex: z.number().nullable().default(null),
+  searchQuery: z.string().default(''),
+  darkMode: z.boolean().default(false),
+  showBlurredCover: z.boolean().default(true),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
