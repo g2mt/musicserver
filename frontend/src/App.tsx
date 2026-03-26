@@ -32,11 +32,13 @@ function App() {
     const image = overlay.querySelector('image')!;
     if (a.currentTrack && a.darkMode) {
       const cover = getTrackCover(a.currentTrack);
-      image.setAttribute('href', cover);
-    } else if (image) {
+      if (cover !== image.getAttribute('href')) {
+        image.setAttribute('href', cover);
+      }
+    } else if (image.getAttribute('href')) {
       image.setAttribute('href', '');
     }
-  }, [a.currentTrack]);
+  }, [a.currentTrack, a.darkMode]);
 
 
   // Tracks
