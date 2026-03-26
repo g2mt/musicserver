@@ -38,3 +38,11 @@ export interface AppState extends AppStateData {
 }
 
 export const AppContext = createContext<AppState|null>(null);
+
+const CONFIG_KEY = "_config";
+
+export function mergeConfig(dest: AppState) {
+}
+
+export function saveConfig() {
+}
