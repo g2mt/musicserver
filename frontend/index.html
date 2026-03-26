@@ -9,17 +9,6 @@
   <body>
     <div id="root"></div>
     <svg id="background-overlay">
-      <style>:root { fill: #000; stroke: none; }</style>
-      <filter id="blur">
-        <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
-        <feComponentTransfer>
-          <feFuncR type="linear" slope="0.1"/>
-          <feFuncG type="linear" slope="0.1"/>
-          <feFuncB type="linear" slope="0.1"/>
-          <feFuncA type="linear" slope="1"/>
-        </feComponentTransfer>
-      </filter>
-      <image width="100%" href="" filter="url(#blur)"/>
     </svg>
     <script type="module" src="/src/main.tsx"></script>
   </body>
