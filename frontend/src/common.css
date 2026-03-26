@@ -81,3 +81,23 @@ progress {
   width: 100%;
   accent-color: var(--accent-color);
 }
+
+/* Dark mode */
+body.dark-mode {
+  background: #1a1a1a;
+  color: #eee;
+
+  --content-bg: #2a2a2a;
+  --accent-color: #6a5acd;
+  --accent-color-text: #ffffff;
+  --accent-color-light: #483d8b;
+  --accent-color-light-text: #ffffff;
+
+  --gray: #555;
+  --dark-gray: #ddd;
+  --light-gray: #444;
+
+  --shadow: rgba(255, 255, 255, 0.05);
+  --color-secondary: var(--light-gray);
+  --color-info: #2e8b57;
+}

@@ -1,11 +1,14 @@
+import { useState } from 'react';
 import { HOST } from './apiserver';
 import { toast } from 'react-toastify';
-import { faRotate } from '@fortawesome/free-solid-svg-icons';
+import { faRotate, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ProgressTable from './ProgressTable';
 import './SettingsTab.css';
 
 function SettingsTab() {
+  const [darkMode, setDarkMode] = useState(false);
+
   function rescanMusic() {
     fetch(`${HOST}/track`, { method: 'POST' })
       .then(res => {
@@ -15,9 +18,18 @@ function SettingsTab() {
       .catch(() => toast.error('Sync failed'));
   }
 
+  function toggleDarkMode() {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    document.body.classList.toggle('dark-mode', newMode);
+  }
+
   return (
     <div className="settings-tab">
       <h2>Settings</h2>
+      <button className="btn" onClick={toggleDarkMode}>
+        <FontAwesomeIcon icon={darkMode ? faSun : faMoon} /> {darkMode ? 'Light Mode' : 'Dark Mode'}
+      </button>
       <button className="btn" onClick={rescanMusic}>
         <FontAwesomeIcon icon={faRotate} /> Rescan Music
       </button>
