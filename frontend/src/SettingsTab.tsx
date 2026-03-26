@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useContext } from 'react';
 import { HOST } from './apiserver';
 import { toast } from 'react-toastify';
 import { faRotate, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ProgressTable from './ProgressTable';
+import { AppContext } from './AppState';
 import './SettingsTab.css';
 
 function SettingsTab() {
-  const [darkMode, setDarkMode] = useState(false);
+  const app = useContext(AppContext);
 
   function rescanMusic() {
     fetch(`${HOST}/track`, { method: 'POST' })
@@ -19,8 +20,8 @@ function SettingsTab() {
   }
 
   function toggleDarkMode() {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
+    const newMode = !app!.darkMode;
+    app!.setDarkMode(newMode);
     document.body.classList.toggle('dark-mode', newMode);
   }
 
@@ -28,7 +29,7 @@ function SettingsTab() {
     <div className="settings-tab">
       <h2>Settings</h2>
       <button className="btn" onClick={toggleDarkMode}>
-        <FontAwesomeIcon icon={darkMode ? faSun : faMoon} /> {darkMode ? 'Light Mode' : 'Dark Mode'}
+        <FontAwesomeIcon icon={app!.darkMode ? faSun : faMoon} /> {app!.darkMode ? 'Light Mode' : 'Dark Mode'}
       </button>
       <button className="btn" onClick={rescanMusic}>
         <FontAwesomeIcon icon={faRotate} /> Rescan Music

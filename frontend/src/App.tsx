@@ -24,6 +24,7 @@ function App() {
   [a.volume, a.setVolume] = useState(1);
   [a.muted, a.setMuted] = useState(false);
   [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number|null>(null);
+  [a.darkMode, a.setDarkMode] = useState(false);
 
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;

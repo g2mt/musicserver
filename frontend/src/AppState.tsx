@@ -26,6 +26,8 @@ export interface AppState {
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
   searchQuery: string;
   setSearchQuery: (_: string) => void;
+  darkMode: boolean;
+  setDarkMode: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppState|null>(null);
