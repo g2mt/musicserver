@@ -69,7 +69,13 @@ export function App() {
     window.addEventListener("beforeunload", () => {
       saveConfig(a);
     });
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    a.setDarkMode(prefersDark);
   }, []);
+
+  useEffect(() => {
+    document.body.classList.toggle("dark-mode", a.darkMode);
+  }, [a.darkMode]);
 
   // Media Session API
   const { handleBack, handleForward } = useBackForward(a);
@@ -145,11 +151,28 @@ export function App() {
   [a.searchQuery, a.setSearchQuery] = useState(
     () => getHashParams().get("q") ?? "",
   );
+  const previousWorkingValue = useRef("");
+  const didSetToPreviousWorkingValue = useRef(false);
   useEffect(() => {
     setHashParam("q", a.searchQuery);
+    if (didSetToPreviousWorkingValue.current) {
+      didSetToPreviousWorkingValue.current = false;
+      return;
+    }
     fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
       .then((res) => res.json())
-      .then((data) => setFullTracksFromData(data));
+      .then((data) => {
+        setFullTracksFromData(data);
+        if (data === null || data.length === 0) {
+          if (!didSetToPreviousWorkingValue.current) {
+            didSetToPreviousWorkingValue.current = true;
+            a.setSearchQuery(previousWorkingValue.current);
+            previousWorkingValue.current = "";
+          }
+        } else {
+          previousWorkingValue.current = a.searchQuery;
+        }
+      });
   }, [a.searchQuery]);
 
   // Confirm boxes

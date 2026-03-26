@@ -20,12 +20,6 @@ function SettingsTab() {
       .catch(() => toast.error("Sync failed"));
   }
 
-  function toggleDarkMode() {
-    const newMode = !c.darkMode;
-    c.setDarkMode(newMode);
-    document.body.classList.toggle("dark-mode", newMode);
-  }
-
   return (
     <div className="settings-tab">
       <h2>Settings</h2>
@@ -40,7 +34,7 @@ function SettingsTab() {
           Show blurred album cover as background in dark mode
         </label>
       </div>
-      <button className="btn" onClick={toggleDarkMode}>
+      <button className="btn" onClick={() => c.setDarkMode(b => !b)}>
         <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
         {c.darkMode ? "Light Mode" : "Dark Mode"}
       </button>
