@@ -24,9 +24,11 @@ func main() {
 	configPath := flag.String("config", "", "path to config file")
 	debug := flag.Bool("debug", false, "enable debug mode")
 	loglevel := flag.String("loglevel", "info", "log level (debug, info, warn, error)")
+
 	path := flag.String("path", "", "path for unix socket call")
 	method := flag.String("method", "", "method for unix socket call")
 	params := flag.String("params", "{}", "params for unix socket call (json encoded)")
+
 	flag.Parse()
 
 	// Set up logging based on flags
