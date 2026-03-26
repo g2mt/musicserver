@@ -1,17 +1,17 @@
 import { createContext, type Dispatch, type SetStateAction } from 'react';
 import * as z from "zod";
 import type React from 'react';
-import type { TrackData } from './Track';
+import { TrackDataSchema, type TrackData } from './Track';
 import './MusicPlayer.css';
 
 export const AppStateSchema = z.object({
-  currentTrack: TrackData.nullable(),
+  currentTrack: TrackDataSchema.nullable(),
   isPlaying: z.boolean(),
   progress: z.number(),
   duration: z.number(),
   volume: z.number(),
   muted: z.boolean(),
-  enqueuedTracks: z.array(TrackData),
+  enqueuedTracks: z.array(TrackDataSchema),
   enqueuedTrackIndex: z.number().nullable(),
   searchQuery: z.string(),
   darkMode: z.boolean(),
