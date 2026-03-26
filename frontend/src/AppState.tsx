@@ -3,6 +3,7 @@ import * as z from "zod";
 import type React from 'react';
 import { TrackDataSchema, type TrackData } from './Track';
 import './MusicPlayer.css';
+import { toast } from 'react-toastify';
 
 export const AppStateSchema = z.object({
   currentTrack: TrackDataSchema.nullable().default(null),
@@ -58,14 +59,14 @@ export function mergeConfig(dest: AppState) {
       if (config.searchQuery !== '') dest.setSearchQuery(config.searchQuery);
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined) dest.setShowBlurredCover(config.showBlurredCover);
-    } catch (e) {
-      console.error('Failed to parse config from localStorage:', e);
+    } catch (e: any) {
+      toast.error((<p>Failed to parse config from localStorage: <b>{e.toString()}</b></p>));
     }
   }
 }
 
 export function saveConfig(state: AppState) {
-  const config = {
+  const config: AppStateData = {
     currentTrack: state.currentTrack,
     isPlaying: state.isPlaying,
     progress: state.progress,
