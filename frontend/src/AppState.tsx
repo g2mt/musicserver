@@ -1,8 +1,10 @@
 import { createContext, type Dispatch, type SetStateAction } from 'react';
+import * as z from "zod";
 import type React from 'react';
 import type { TrackData } from './Track';
 import './MusicPlayer.css';
 
+export const AppStateSchema = z.object({});
 
 export interface AppState {
   currentTrack: TrackData | null;
