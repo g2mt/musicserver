@@ -29,27 +29,12 @@ function App() {
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
-    if (a.currentTrack && a.darkMode) {
+    const image = overlay.querySelector('image');
+    if (a.currentTrack && a.darkMode && image) {
       const cover = getTrackCover(a.currentTrack);
-      const blurred =
-      `
-      <style>    :root { fill: #000; stroke: none; }  </style>
-        <filter id="blur">
-          <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
-  <!-- reduce RGB channels to 20% -->
-  <feComponentTransfer>
-    <feFuncR type="linear" slope="0.2"/>
-    <feFuncG type="linear" slope="0.2"/>
-    <feFuncB type="linear" slope="0.2"/>
-    <!-- keep alpha unchanged -->
-    <feFuncA type="linear" slope="1"/>
-  </feComponentTransfer>
-        </filter>
-        <image width="100%" href="${cover}" filter="url(#blur)"/>
-      `;
-      overlay.innerHTML = blurred;
-    } else {
-      overlay.innerHTML = '';
+      image.setAttribute('href', cover);
+    } else if (image) {
+      image.setAttribute('href', '');
     }
   }, [a.currentTrack]);
 
