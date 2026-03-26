@@ -28,18 +28,18 @@ function SettingsTab() {
   return (
     <div className="settings-tab">
       <h2>Settings</h2>
-      <button className="btn" onClick={toggleDarkMode}>
-        <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} /> {c.darkMode ? 'Light Mode' : 'Dark Mode'}
-      </button>
-      <div className="checkbox-container">
+      <div>
         <input
           type="checkbox"
-          id="show-blurred-cover"
+          id="setting-show-blurred-cover"
           checked={c.showBlurredCover}
           onChange={() => c.setShowBlurredCover(!c.showBlurredCover)}
         />
-        <label htmlFor="show-blurred-cover">Show blurred album cover as background in dark mode</label>
+        <label htmlFor="setting-show-blurred-cover">Show blurred album cover as background in dark mode</label>
       </div>
+      <button className="btn" onClick={toggleDarkMode}>
+        <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} /> {c.darkMode ? 'Light Mode' : 'Dark Mode'}
+      </button>
       <button className="btn" onClick={rescanMusic}>
         <FontAwesomeIcon icon={faRotate} /> Rescan Music
       </button>
