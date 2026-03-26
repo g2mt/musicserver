@@ -9,4 +9,10 @@ repos:
         types_or: [javascript, jsx, ts, tsx]
         entry: |
           bash -c 'npm --prefix frontend/ run format -- "${@#frontend/}"' --
-
+      - id: clang-format
+        name: run clang-format
+        language: system
+        files: ^internal/.*$
+        types_or: [c++, c]
+        entry: |
+          clang-format -i --
