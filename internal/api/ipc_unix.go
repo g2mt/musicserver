@@ -140,7 +140,6 @@ func (iface *Interface) WriteToUnixSocket(path, method string, params map[string
 	}
 	defer conn.Close()
 
-	// Set a read deadline
 	conn.SetReadDeadline(time.Now().Add(time.Minute))
 
 	// Create the request
@@ -166,9 +165,8 @@ func (iface *Interface) WriteToUnixSocket(path, method string, params map[string
 		return nil, err
 	}
 
-	// Read the response
-	reader := bufio.NewReader(conn)
-	response, err := reader.ReadBytes('\n')
+	// Read all response until socket closes
+	response, err := io.ReadAll(conn)
 	if err != nil {
 		return nil, err
 	}
