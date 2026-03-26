@@ -29,7 +29,7 @@ function App() {
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
-    if (a.currentTrack) {
+    if (a.currentTrack && a.darkMode) {
       const cover = getTrackCover(a.currentTrack);
       const blurred =
       `
@@ -49,7 +49,7 @@ function App() {
       `;
       overlay.innerHTML = blurred;
     } else {
-      overlay.style.background = '';
+      overlay.innerHTML = '';
     }
   }, [a.currentTrack]);
 
