@@ -1,15 +1,15 @@
 .confirm-box {
   background-color: #90ee90;
-  padding: 16px;
+  padding: var(--s3);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--s3);
 
   .confirm-title {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--s2);
     font-size: 1.2em;
     font-weight: bold;
   }
@@ -17,6 +17,6 @@
   .confirm-buttons {
     display: flex;
     justify-content: center;
-    gap: 16px;
+    gap: var(--s3);
   }
 }

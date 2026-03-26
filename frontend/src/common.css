@@ -30,10 +30,10 @@
 .btn {
   background: var(--light-gray);
   cursor: pointer;
-  padding: 8px;
+  padding: var(--s2);
   border-radius: var(--border-radius);
   border: 1px solid var(--gray);
-  margin: 4px;
+  margin: var(--s1);
 }
 
 .icon-btn {
@@ -42,7 +42,7 @@
     font-size: 1.6rem;
     cursor: pointer;
     color: #222;
-    padding: 0 8px;
+    padding: 0 var(--s2);
 
     &:hover {
       color: var(--accent-color);
@@ -57,11 +57,11 @@
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 8px;
+  margin-top: var(--s2);
 
   & th, & td {
     text-align: left;
-    padding: 6px 8px;
+    padding: var(--s1) var(--s2);
   }
 
   & th {

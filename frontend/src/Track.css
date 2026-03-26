@@ -2,8 +2,8 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
+  gap: var(--s3);
+  padding: var(--s2);
   border-radius: var(--border-radius);
 
   &:hover, &.highlighted {
@@ -26,7 +26,7 @@
 .track-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--s1);
   flex: 1;
 }
 

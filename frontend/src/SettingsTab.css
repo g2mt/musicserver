@@ -1,16 +1,16 @@
 @import url("common.css");
 
 .settings-tab {
-  padding: 16px;
+  padding: var(--s3);
 
   & h2 {
-    margin-bottom: 8px;
+    margin-bottom: var(--s2);
     text-align: center;
   }
 
   & hr {
     border: none;
     border-top: 1px solid var(--gray);
-    margin: 16px 0;
+    margin: var(--s3) 0;
   }
 }

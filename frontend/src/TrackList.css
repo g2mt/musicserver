@@ -1,6 +1,6 @@
 .track-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 16px;
+  gap: var(--s2);
+  padding: var(--s3);
 }

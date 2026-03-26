@@ -1,4 +1,4 @@
 .main-tracks-controls {
-  padding: 8px;
+  padding: var(--s2);
   text-align: center;
 }
