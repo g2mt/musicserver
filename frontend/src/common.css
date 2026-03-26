@@ -1,34 +1,60 @@
 :root {
-    font-family: sans-serif;
-    background: #fff;
+  font-family: sans-serif;
+  background: var(--content-bg);
+  color: var(--content-color);
 
-    --content-bg: #fff;
-    --accent-color: #0000CD;
-    --accent-color-text: #FFFFFF;
-    --accent-color-light: #87CEFA;
-    --accent-color-light-text: #000000;
+  --front-bg: #ffffff;
+  --content-bg: #fff;
+  --content-color: #000;
+  --accent-color: #0000CD;
+  --accent-color-text: #FFFFFF;
+  --accent-color-light: #87CEFA;
+  --accent-color-light-text: #000000;
 
-    --gray: #ccc;
-    --dark-gray: #222;
-    --light-gray: #ddd;
+  --gray: #ccc;
+  --gray-text: #000;
 
-    --shadow: rgba(0, 0, 0, 0.05);
-    --thumbnail-size: 56px;
-    --border-radius: 4px;
+  --shadow: rgba(0, 0, 0, 0.05);
+  --thumbnail-size: 56px;
+  --border-radius: 4px;
 
-    /* Spacing variables used for padding, margin */
-    --s1: 0.25rem;
-    --s2: 0.5rem;
-    --s3: 1rem;
-    --s4: 1.5rem;
-    --s5: 3rem;
+  /* Spacing variables used for padding, margin */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 1rem;
+  --s4: 1.5rem;
+  --s5: 3rem;
 
-    /* Colors */
-    --color-secondary: var(--light-gray);
-    --color-info: #90ee90;
+  /* Colors */
+  --color-disabled: #ddd;
+  --color-info: #90ee90;
 }
 
-/* TODO: dark mode */
+body.dark-mode {
+  background: var(--content-bg);
+  color: var(--content-color);
+
+  --front-bg: #000000;
+  --content-bg: #2a2a2a;
+  --content-color: #ffffff;
+  --accent-color: #50ecdd;
+  --accent-color-text: #ffffff;
+  --accent-color-light: #c2fff9;
+  --accent-color-light-text: #ffffff;
+
+  --gray: #ccc;
+  --gray-text: #000;
+
+  --shadow: rgba(255, 255, 255, 0.05);
+
+  --color-disabled: #808080;
+  --color-info: #2e8b57;
+
+  .btn {
+    background: #000;
+    color: #fff;
+  }
+}
 
 * {
   margin:0; padding:0;
@@ -36,7 +62,8 @@
 }
 
 .btn {
-  background: var(--color-secondary);
+  background: var(--gray);
+  color: var(--gray-text);
   cursor: pointer;
   padding: var(--s2);
   border-radius: var(--border-radius);
@@ -49,7 +76,7 @@
   border: none;
   font-size: 1.6rem;
   cursor: pointer;
-  color: var(--dark-gray);
+  color: var(--color-gray);
   padding: 0 var(--s2);
 
   &:hover {
@@ -57,10 +84,12 @@
   }
 
   &[disabled] {
-    color: var(--light-gray);
+    color: var(--color-disabled);
     cursor: not-allowed;
   }
 }
+
+input { color: var(--content-color); }
 
 table {
   width: 100%;
@@ -80,24 +109,4 @@ table {
 progress {
   width: 100%;
   accent-color: var(--accent-color);
-}
-
-/* Dark mode */
-body.dark-mode {
-  background: #1a1a1a;
-  color: #eee;
-
-  --content-bg: #2a2a2a;
-  --accent-color: #6a5acd;
-  --accent-color-text: #ffffff;
-  --accent-color-light: #483d8b;
-  --accent-color-light-text: #ffffff;
-
-  --gray: #555;
-  --dark-gray: #ddd;
-  --light-gray: #444;
-
-  --shadow: rgba(255, 255, 255, 0.05);
-  --color-secondary: var(--light-gray);
-  --color-info: #2e8b57;
 }

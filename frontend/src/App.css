@@ -26,7 +26,6 @@
 .tab-bar {
   display: flex;
   border-bottom: 1px solid var(--gray);
-  background: var(--content-bg);
   flex-shrink: 0;
   justify-content: center;
 }
@@ -36,14 +35,17 @@
   border: none;
   font-size: large;
   padding: var(--s2) var(--s3);
+  color: var(--color-disabled);
   cursor: pointer;
   border-bottom: 2px solid transparent;
 
   &.active {
+    color: var(--accent-color);
     border-bottom-color: var(--accent-color);
   }
 
   &:hover {
+    color: var(--accent-color);
     background: var(--shadow);
   }
 }

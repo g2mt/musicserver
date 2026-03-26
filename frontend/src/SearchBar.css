@@ -4,6 +4,8 @@
   gap: var(--s2);
   padding: var(--s3) var(--s3);
   border-bottom: 1px solid var(--gray);
+  background: var(--front-bg);
+
   .search-input {
     flex: 1;
     padding: var(--s2) var(--s3);
