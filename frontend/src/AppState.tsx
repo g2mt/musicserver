@@ -4,33 +4,36 @@ import type React from 'react';
 import type { TrackData } from './Track';
 import './MusicPlayer.css';
 
-export const AppStateSchema = z.object({});
+export const AppStateSchema = z.object({
+  currentTrack: TrackData.nullable(),
+  isPlaying: z.boolean(),
+  progress: z.number(),
+  duration: z.number(),
+  volume: z.number(),
+  muted: z.boolean(),
+  enqueuedTracks: z.array(TrackData),
+  enqueuedTrackIndex: z.number().nullable(),
+  searchQuery: z.string(),
+  darkMode: z.boolean(),
+  showBlurredCover: z.boolean(),
+});
 
-export interface AppState {
-  currentTrack: TrackData | null;
+export type AppStateData = z.infer<typeof AppStateSchema>;
+
+export interface AppState extends AppStateData {
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
-  isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
-  progress: number;
   setProgress: Dispatch<SetStateAction<number>>;
-  duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
-  volume: number;
   setVolume: Dispatch<SetStateAction<number>>;
-  muted: boolean;
   setMuted: Dispatch<SetStateAction<boolean>>;
-  enqueuedTracks: TrackData[];
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (_: TrackData) => void;
   unqueueTrack: (index: number) => void;
   addConfirmBox: (confirmBox: React.ReactNode) => void;
-  enqueuedTrackIndex: number|null;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number|null>>;
-  searchQuery: string;
   setSearchQuery: (_: string) => void;
-  darkMode: boolean;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
-  showBlurredCover: boolean;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
 }
 
