@@ -96,6 +96,27 @@ export function MusicPlayer() {
   }
 
   useEffect(() => {
+    function onTimeUpdate() {
+      didUpdatePosition.current = true;
+      c.setProgress(audio.currentTime);
+      c.setDuration(audio.duration);
+    }
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    return () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+    }
+  }, [c.currentTrack]);
+
+  useEffect(() => {
+    audio.addEventListener("ended", () => goNextQueue());
+    return () => {
+      audio.removeEventListener("ended", () => goNextQueue());
+    };
+  }, [c.enqueuedTracks, c.enqueuedTrackIndex]);
+
+  // Progress
+
+  useEffect(() => {
     if (didUpdatePosition.current) {
       didUpdatePosition.current = false;
       return;
@@ -103,12 +124,14 @@ export function MusicPlayer() {
     audio.currentTime = c.progress;
   }, [c.progress]);
 
+  // Play state
+
   useEffect(() => {
     if (c.currentTrack !== null) {
       c.setProgress(0);
       c.setIsPlaying(true);
     }
-  }, [c.currentTrack, c.enqueuedTrackIndex]);
+  }, [c.currentTrack]);
 
   useEffect(() => {
     if (c.isPlaying) {
@@ -122,27 +145,18 @@ export function MusicPlayer() {
     }
   }, [c.isPlaying]);
 
+  // Volume
+
   useEffect(() => {
     audio.volume = c.muted ? 0 : c.volume;
   }, [c.volume, c.muted]);
 
-  useEffect(() => {
-    function onTimeUpdate() {
-      didUpdatePosition.current = true;
-      c.setProgress(audio.currentTime);
-      c.setDuration(audio.duration || 0);
-    }
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("ended", () => goNextQueue());
-    return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("ended", () => goNextQueue());
-    };
-  }, [audio, c.enqueuedTracks, c.enqueuedTrackIndex]);
-
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
     useBackForward();
 
+
+  // Media info
+  
   useEffect(() => {
     if ("mediaSession" in navigator && c.currentTrack) {
       navigator.mediaSession.metadata = new MediaMetadata({
