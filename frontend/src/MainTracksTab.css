@@ -1,4 +1,18 @@
 .main-tracks-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: var(--s2);
-  text-align: center;
+}
+
+.main-tracks-controls-left,
+.main-tracks-controls-right {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.limit-select {
+  padding: var(--s1);
+  font-size: small;
 }
