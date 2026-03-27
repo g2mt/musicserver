@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./TrackList.css";
 
 const PAGE_SIZE = 50;
-const TRACK_HEIGHT_PX = 72; // approximate height of a single track row in pixels
+const TRACK_HEIGHT_PX = 72;
 
 function TrackList({
   tracks,
@@ -20,6 +20,39 @@ function TrackList({
   canUnqueue?: boolean;
 }) {
   const c = useContext(AppContext)!;
+  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const hasMore = displayedCount < tracks.length;
+
+  const loadMore = useCallback(() => {
+    if (hasMore) {
+      setDisplayedCount((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
+    }
+  }, [hasMore, tracks.length]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { rootMargin: `${TRACK_HEIGHT_PX * 2}px` }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  useEffect(() => {
+    setDisplayedCount(PAGE_SIZE);
+  }, [tracks.length]);
+
+  const displayedTracks = tracks.slice(0, displayedCount);
 
   return (
     <div className="track-list">
@@ -43,7 +76,7 @@ function TrackList({
         </div>
       )}
 
-      {tracks.map((track, i) => {
+      {displayedTracks.map((track, i) => {
         const index = i;
         return (
           <Track
@@ -51,7 +84,7 @@ function TrackList({
               canUnqueue
                 ? `${index}-${track.id}`
                 : track.id
-            } /* queued items have order */
+            }
             track={track}
             index={canUnqueue ? index : undefined}
             canEnqueue={canEnqueue}
@@ -59,6 +92,8 @@ function TrackList({
           />
         );
       })}
+
+      {hasMore && <div ref={sentinelRef} style={{ height: "1px" }} />}
     </div>
   );
 }
