@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder, faFile, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { HOST } from "./apiserver";
@@ -74,7 +74,9 @@ export default function FileBrowserTab() {
               <td>
                 <a href="#" onClick={(e) => {
                   e.preventDefault();
-                  fetch(`${HOST}/file/:by-path/${}`)
+                  fetch(`${HOST}/file/:by-path/${path.map(encodeURIComponent).join("/")}/${file}`)
+                    .then((res) => res.json())
+                    .then((data) => c.setCurrentTrack(data));
                 }}>
                   {file}
                 </a>
@@ -85,7 +87,4 @@ export default function FileBrowserTab() {
       </table>
     </div>
   );
-}
-function useContext(AppContext: any) {
-    throw new Error("Function not implemented.");
 }
