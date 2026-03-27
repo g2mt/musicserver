@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
   faDownload,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 import { AppContext } from "./AppState";
 import { Track } from "./Track";
@@ -85,15 +86,29 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
         setSearchQuery(inputValue);
       }}
     >
-      <input
-        type="search"
-        placeholder="Search tracks..."
-        value={inputValue}
-        onChange={(e) => {
-          setInputValue(e.target.value);
-        }}
-        className="search-input"
-      />
+      <div className="search-input-wrapper">
+        <input
+          type="search"
+          placeholder="Search tracks..."
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+          }}
+          className="search-input"
+        />
+        {inputValue && (
+          <button
+            type="button"
+            className="clear-btn"
+            onClick={() => {
+              setInputValue("");
+              setSearchQuery("");
+            }}
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        )}
+      </div>
       <button type="submit" className="icon-btn">
         <FontAwesomeIcon icon={faSearch} />
       </button>
