@@ -218,7 +218,7 @@ Returns a list of albums in the page `[page]`. See `/album` endpoint.
 
 ### GET `/file/[path]`
 
-Returns the files and directories in the `[path]` relative to the data directory of the server.
+If the `[path]` relative to the data directory of the server is a directory, then returns the files and directories said path.
 
 ```json
 {
@@ -226,3 +226,5 @@ Returns the files and directories in the `[path]` relative to the data directory
   "directories": ["directory1"],
 }
 ```
+
+Otherwise, returns a byte stream of the file specified in path.

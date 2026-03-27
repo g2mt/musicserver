@@ -22,9 +22,6 @@ import (
 	lru "github.com/hashicorp/golang-lru/v2"
 )
 
-const CoverFallbackMimetype = "image/png"
-const CoverFallback = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0lEQVR4AQEEAPv/ACEhIQDKAGSaOw/yAAAAAElFTkSuQmCC"
-
 type Interface struct {
 	db      *sql.DB
 	cacheDb *sql.DB // nullable
@@ -298,7 +295,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", errors.New("method not allowed")
 		}
 
-		response, err = i.GetFilesInPath(filePath)
+		response, err = i.ReadFileInPath(filePath)
 	} else {
 		return nil, "", errors.New("invalid api request")
 	}
