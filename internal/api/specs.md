@@ -174,7 +174,7 @@ Returns a JSON string containing the output captured from the media downloader.
 
 ### GET `/track/:by-path/[path]`
 
-Resolves the track ID by path and redirects to `/track/[id]`.
+Resolves the track ID by path and redirects to `/track/[id]`. This endpoint also redirects any subpaths to the correct location (`/track/:by-path/[path]/data` to `/track/[id]/data`)
 
 ### DELETE `/track`
 

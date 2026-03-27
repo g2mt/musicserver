@@ -226,6 +226,19 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			}
 		} else if method != "GET" {
 			return nil, "", errors.New("method not allowed")
+		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
+			path, rest, hasRest := strings.Cut(path, "/")
+			id, err = i.resolveTrackFromPath(path)
+			if err != nil {
+				return nil, "", errors.New("invalid path")
+			} else {
+				r := &redirectHandler{path: "/track/" + id}
+				if hasRest {
+					r.path += "/"
+					r.path += rest
+				}
+				return r, "text/json", nil
+			}
 		} else if id, ok = strings.CutSuffix(id, "/data"); ok {
 			data, err := i.GetTrackData(id)
 			if err != nil {
