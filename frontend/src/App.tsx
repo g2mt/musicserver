@@ -7,7 +7,7 @@ import SearchBar from "./SearchBar";
 import React, { useEffect, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
 import { HOST } from "./apiserver";
-import { faMusic, faGear, faFolder } from "@fortawesome/free-solid-svg-icons";
+import { faMusic, faGear, faFolder, faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
@@ -235,6 +235,15 @@ export function App() {
     mergeConfig(c);
   }, []);
 
+  // Scroll navigation
+  const scrollToRightSide = () => {
+    document.getElementById("app-right-side")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToLeftSide = () => {
+    document.getElementById("app-left-side")?.scrollIntoView({ behavior: "smooth" });
+  };
+
   return (
     <AppContext value={c}>
       <ToastContainer position="bottom-right" theme="dark" />
@@ -269,6 +278,13 @@ export function App() {
               >
                 <FontAwesomeIcon icon={faGear} />
               </button>
+              <button
+                className="tab-btn"
+                onClick={scrollToRightSide}
+                title="Go to queue"
+              >
+                <FontAwesomeIcon icon={faArrowRight} />
+              </button>
             </div>
             {confirmBoxes.map((b) => (
               <div key={b.key}>{b.el}</div>
@@ -281,6 +297,14 @@ export function App() {
             id="app-right-side"
             style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
           >
+            <button
+              className="tab-btn"
+              onClick={scrollToLeftSide}
+              title="Go to tracks"
+              style={{ position: "sticky", top: 0, float: "right" }}
+            >
+              <FontAwesomeIcon icon={faArrowLeft} />
+            </button>
             <TrackList
               tracks={c.enqueuedTracks}
               canUnqueue={true}
