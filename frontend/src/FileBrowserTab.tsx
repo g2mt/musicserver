@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder, faFile, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { HOST } from "./apiserver";
+import { AppContext } from "./AppState";
 
 import "./FileBrowserTab.css";
 
@@ -11,6 +12,7 @@ interface FileList {
 }
 
 export default function FileBrowserTab() {
+  const c = useContext(AppContext)!;
   const [path, setPath] = useState<string[]>([]);
   const [fileList, setFileList] = useState<FileList>({ files: [], directories: [] });
 
@@ -69,11 +71,21 @@ export default function FileBrowserTab() {
           {fileList.files?.map((file) => (
             <tr key={file}>
               <td><FontAwesomeIcon icon={faFile} /></td>
-              <td>{file}</td>
+              <td>
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  fetch(`${HOST}/file/:by-path/${}`)
+                }}>
+                  {file}
+                </a>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   );
+}
+function useContext(AppContext: any) {
+    throw new Error("Function not implemented.");
 }
