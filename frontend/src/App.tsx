@@ -303,18 +303,18 @@ export function App() {
                 <FontAwesomeIcon icon={faMusic} />
               </button>
               <button
-                className={`tab-btn ${leftTab === "settings" ? "active" : ""}`}
-                onClick={() => setLeftTab("settings")}
-                title="Settings"
-              >
-                <FontAwesomeIcon icon={faGear} />
-              </button>
-              <button
                 className={`tab-btn ${leftTab === "files" ? "active" : ""}`}
                 onClick={() => setLeftTab("files")}
                 title="Files"
               >
                 <FontAwesomeIcon icon={faFolder} />
+              </button>
+              <button
+                className={`tab-btn ${leftTab === "settings" ? "active" : ""}`}
+                onClick={() => setLeftTab("settings")}
+                title="Settings"
+              >
+                <FontAwesomeIcon icon={faGear} />
               </button>
             </div>
             {confirmBoxes.map((b) => (

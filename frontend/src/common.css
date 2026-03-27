@@ -124,3 +124,7 @@ progress {
   width: 100%;
   accent-color: var(--accent-color);
 }
+
+a {
+  color: var(--accent-color);
+}

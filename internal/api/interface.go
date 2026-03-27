@@ -151,70 +151,8 @@ func (i *Interface) Close() error {
 	return nil
 }
 
-type eventStreamer[T any] struct {
-	i        *Interface
-	ch       chan T
-	unlisten func(chan T)
-	buf      []byte
-	bufMu    sync.Mutex
-}
-
-func (s *eventStreamer[T]) Read(p []byte) (n int, err error) {
-	s.bufMu.Lock()
-	defer s.bufMu.Unlock()
-
-	if s.ch == nil {
-		return 0, io.EOF
-	}
-
-	// If buffer has data, return it
-	if len(s.buf) > 0 {
-		n = copy(p, s.buf)
-		s.buf = s.buf[n:]
-		return n, nil
-	}
-
-	// Wait for next event from channel
-	event, ok := <-s.ch
-	if !ok {
-		return 0, io.EOF
-	}
-
-	// Marshal event to JSON
-	data, err := json.Marshal(event)
-	if err != nil {
-		return 0, err
-	}
-
-	// Format as SSE
-	sse := []byte("event: data\ndata: " + string(data) + "\n\n")
-
-	// Copy to output buffer
-	n = copy(p, sse)
-	if len(sse) > n {
-		s.buf = sse[n:]
-	}
-	return n, nil
-}
-
-func (s *eventStreamer[T]) Close() error {
-	s.bufMu.Lock()
-	defer s.bufMu.Unlock()
-	s.unlisten(s.ch)
-	return nil
-}
-
-func streamEvents[T any](i *Interface, ch chan T, unlisten func(chan T)) (io.ReadCloser, string, error) {
-	stream := &eventStreamer[T]{
-		i:        i,
-		ch:       ch,
-		unlisten: unlisten,
-	}
-	return stream, "text/event-stream", nil
-}
-
 // out is either []byte, or io.ReadCloser
-func (i *Interface) handleRequest(path string, method string, params map[string]string) (out interface{}, contentType string, err error) {
+func (i *Interface) handleRequest(path string, method string, params map[string]string) (out handler, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
 		if method == "GET" {
@@ -244,7 +182,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		if err != nil {
 			return nil, "", err
 		}
-		return data, "text/json", nil
+		return &byteHandler{b: data}, "text/json", nil
 	} else if path == "/progress/:events" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -271,7 +209,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return data, "text/json", nil
+			return &byteHandler{b: data}, "text/json", nil
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if url, ok := strings.CutPrefix(id, ":external/"); ok {
@@ -293,7 +231,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			if err != nil {
 				return nil, "", err
 			}
-			return data, "application/octet-stream", nil
+			return &byteHandler{b: data}, "application/octet-stream", nil
 		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
 			data, mimeType, err := i.GetTrackCover(id)
 			if err != nil {
@@ -306,7 +244,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				}
 				mimeType = CoverFallbackMimetype
 			}
-			return data, mimeType, nil
+			return &byteHandler{b: data}, mimeType, nil
 		} else {
 			response, err = i.GetTrackById(id)
 		}
@@ -349,5 +287,5 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	if err != nil {
 		return nil, "", err
 	}
-	return data, "text/json", nil
+	return &byteHandler{b: data}, "text/json", nil
 }

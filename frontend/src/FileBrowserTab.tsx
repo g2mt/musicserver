@@ -3,9 +3,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder, faFile, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
 import { HOST } from "./apiserver";
 
+import "./FileBrowserTab.css";
+
 interface FileList {
-  files: string[];
-  directories: string[];
+  files: string[]|null;
+  directories: string[]|null;
 }
 
 export default function FileBrowserTab() {
@@ -54,7 +56,7 @@ export default function FileBrowserTab() {
               </td>
             </tr>
           )}
-          {fileList.directories.map((dir) => (
+          {fileList.directories?.map((dir) => (
             <tr key={dir}>
               <td><FontAwesomeIcon icon={faFolder} /></td>
               <td>
@@ -64,7 +66,7 @@ export default function FileBrowserTab() {
               </td>
             </tr>
           ))}
-          {fileList.files.map((file) => (
+          {fileList.files?.map((file) => (
             <tr key={file}>
               <td><FontAwesomeIcon icon={faFile} /></td>
               <td>{file}</td>
