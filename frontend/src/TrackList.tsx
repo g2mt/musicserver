@@ -21,58 +21,6 @@ function TrackList({
 }) {
   const c = useContext(AppContext)!;
 
-  const [startIndex, setStartIndex] = useState(0);
-  const [endIndex, setEndIndex] = useState(PAGE_SIZE);
-
-  const topSentinelRef = useRef<HTMLDivElement>(null);
-  const bottomSentinelRef = useRef<HTMLDivElement>(null);
-
-  // Reset window when tracks array changes
-  useEffect(() => {
-    setStartIndex(0);
-    setEndIndex(PAGE_SIZE);
-  }, [tracks]);
-
-  const loadMore = useCallback(() => {
-    setEndIndex((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
-  }, [tracks.length]);
-
-  const loadPrev = useCallback(() => {
-    setStartIndex((prev) => Math.max(0, prev - PAGE_SIZE));
-  }, []);
-
-  useEffect(() => {
-    const bottomSentinel = bottomSentinelRef.current;
-    if (!bottomSentinel) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) loadMore();
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(bottomSentinel);
-    return () => observer.disconnect();
-  }, [loadMore]);
-
-  useEffect(() => {
-    const topSentinel = topSentinelRef.current;
-    if (!topSentinel) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) loadPrev();
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(topSentinel);
-    return () => observer.disconnect();
-  }, [loadPrev]);
-
-  const clampedEnd = Math.min(endIndex, tracks.length);
-  const visibleTracks = tracks.slice(startIndex, clampedEnd);
-
-  const topPlaceholderHeight = startIndex * TRACK_HEIGHT_PX;
-  const bottomPlaceholderHeight = (tracks.length - clampedEnd) * TRACK_HEIGHT_PX;
-
   return (
     <div className="track-list">
       {canUnqueue && (
@@ -95,16 +43,8 @@ function TrackList({
         </div>
       )}
 
-      {/* Top placeholder preserves scroll position for unloaded upper tracks */}
-      {topPlaceholderHeight > 0 && (
-        <div style={{ height: topPlaceholderHeight }} />
-      )}
-
-      {/* Sentinel to detect scrolling back up */}
-      {startIndex > 0 && <div ref={topSentinelRef} />}
-
-      {visibleTracks.map((track, i) => {
-        const index = startIndex + i;
+      {tracks.map((track, i) => {
+        const index = i;
         return (
           <Track
             key={
@@ -119,14 +59,6 @@ function TrackList({
           />
         );
       })}
-
-      {/* Sentinel to detect scrolling down */}
-      {clampedEnd < tracks.length && <div ref={bottomSentinelRef} />}
-
-      {/* Bottom placeholder preserves scroll position for unloaded lower tracks */}
-      {bottomPlaceholderHeight > 0 && (
-        <div style={{ height: bottomPlaceholderHeight }} />
-      )}
     </div>
   );
 }
