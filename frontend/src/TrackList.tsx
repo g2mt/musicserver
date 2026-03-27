@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./TrackList.css";
 
 const PAGE_SIZE = 50;
+const TRACK_HEIGHT_PX = 72; // approximate height of a single track row in pixels
 
 function TrackList({
   tracks,
@@ -19,32 +20,60 @@ function TrackList({
   canUnqueue?: boolean;
 }) {
   const c = useContext(AppContext)!;
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  // Reset visible count when tracks array changes
+  const [startIndex, setStartIndex] = useState(0);
+  const [endIndex, setEndIndex] = useState(PAGE_SIZE);
+
+  const topSentinelRef = useRef<HTMLDivElement>(null);
+  const bottomSentinelRef = useRef<HTMLDivElement>(null);
+
+  // Reset window when tracks array changes
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
+    setStartIndex(0);
+    setEndIndex(PAGE_SIZE);
   }, [tracks]);
 
   const loadMore = useCallback(() => {
-    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
+    setEndIndex((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
+    setStartIndex((prev) => Math.max(0, prev - PAGE_SIZE));
+  }, [tracks.length]);
+
+  const loadPrev = useCallback(() => {
+    setStartIndex((prev) => Math.max(0, prev - PAGE_SIZE));
+    setEndIndex((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
   }, [tracks.length]);
 
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    const bottomSentinel = bottomSentinelRef.current;
+    if (!bottomSentinel) return;
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) loadMore();
       },
       { threshold: 0.1 }
     );
-    observer.observe(sentinel);
+    observer.observe(bottomSentinel);
     return () => observer.disconnect();
   }, [loadMore]);
 
-  const visibleTracks = tracks.slice(0, visibleCount);
+  useEffect(() => {
+    const topSentinel = topSentinelRef.current;
+    if (!topSentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadPrev();
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(topSentinel);
+    return () => observer.disconnect();
+  }, [loadPrev]);
+
+  const clampedEnd = Math.min(endIndex, tracks.length);
+  const visibleTracks = tracks.slice(startIndex, clampedEnd);
+
+  const topPlaceholderHeight = startIndex * TRACK_HEIGHT_PX;
+  const bottomPlaceholderHeight = (tracks.length - clampedEnd) * TRACK_HEIGHT_PX;
 
   return (
     <div className="track-list">
@@ -54,20 +83,39 @@ function TrackList({
           Remove all from queue
         </button>
       )}
-      {visibleTracks.map((track, index) => (
-        <Track
-          key={
-            canUnqueue
-              ? `${index}-${track.id}`
-              : track.id
-          } /* queued items have order */
-          track={track}
-          index={canUnqueue ? index : undefined}
-          canEnqueue={canEnqueue}
-          canUnqueue={canUnqueue}
-        />
-      ))}
-      {visibleCount < tracks.length && <div ref={sentinelRef} />}
+
+      {/* Top placeholder preserves scroll position for unloaded upper tracks */}
+      {topPlaceholderHeight > 0 && (
+        <div style={{ height: topPlaceholderHeight }} />
+      )}
+
+      {/* Sentinel to detect scrolling back up */}
+      {startIndex > 0 && <div ref={topSentinelRef} />}
+
+      {visibleTracks.map((track, i) => {
+        const index = startIndex + i;
+        return (
+          <Track
+            key={
+              canUnqueue
+                ? `${index}-${track.id}`
+                : track.id
+            } /* queued items have order */
+            track={track}
+            index={canUnqueue ? index : undefined}
+            canEnqueue={canEnqueue}
+            canUnqueue={canUnqueue}
+          />
+        );
+      })}
+
+      {/* Sentinel to detect scrolling down */}
+      {clampedEnd < tracks.length && <div ref={bottomSentinelRef} />}
+
+      {/* Bottom placeholder preserves scroll position for unloaded lower tracks */}
+      {bottomPlaceholderHeight > 0 && (
+        <div style={{ height: bottomPlaceholderHeight }} />
+      )}
     </div>
   );
 }
