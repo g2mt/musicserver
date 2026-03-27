@@ -44,23 +44,38 @@ func (i *Interface) GetAlbumsByPage(page int) ([]string, error) {
 
 func (i *Interface) GetAlbumByName(name string) (schema.Album, error) {
 	var album schema.Album
-	err := i.db.QueryRow("SELECT name FROM albums WHERE name = ?", name).Scan(&album.Name)
+
+	tx, err := i.db.Begin()
 	if err != nil {
 		return schema.Album{}, err
 	}
 
-	rows, err := i.db.Query("SELECT id FROM tracks WHERE album = ?", name)
+	err = tx.QueryRow("SELECT name FROM albums WHERE name = ?", name).Scan(&album.Name)
 	if err != nil {
+		tx.Rollback()
 		return schema.Album{}, err
 	}
-	defer rows.Close()
+
+	rows, err := tx.Query("SELECT id FROM tracks WHERE album = ?", name)
+	if err != nil {
+		tx.Rollback()
+		return schema.Album{}, err
+	}
 
 	for rows.Next() {
 		var id string
 		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			tx.Rollback()
 			return schema.Album{}, err
 		}
 		album.Tracks = append(album.Tracks, id)
 	}
+	rows.Close()
+
+	if err := tx.Commit(); err != nil {
+		return schema.Album{}, err
+	}
+
 	return album, nil
 }
