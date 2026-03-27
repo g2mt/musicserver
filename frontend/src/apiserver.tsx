@@ -4,3 +4,6 @@ export const HOST = (() => {
   }
   return `${location.origin}/api`;
 })();
+
+export function fetchAPI(path: string, params?: Record<string, string>, method: string = "GET") {
+}
