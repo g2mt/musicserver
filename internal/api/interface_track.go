@@ -266,21 +266,21 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		} else {
 			var cachedData []byte
 			var mimeType string
-			var txErr error
+			var cacheTxErr error
 			defer func() {
-				if txErr != nil {
+				if cacheTxErr != nil {
 					cacheTx.Rollback()
 				} else {
 					cacheTx.Commit()
 				}
 			}()
 
-			txErr = cacheTx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
-			if txErr == nil {
+			cacheTxErr = cacheTx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
+			if cacheTxErr == nil {
 				// Update timestamp on cache hit
-				_, txErr = cacheTx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
-				if txErr != nil {
-					slog.Warn("Unable to update cached track", "path", path, "err", txErr)
+				_, cacheTxErr = cacheTx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+				if cacheTxErr != nil {
+					slog.Warn("Unable to update cached track", "path", path, "err", cacheTxErr)
 				}
 				return cachedData, mimeType, nil
 			}
