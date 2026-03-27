@@ -1,5 +1,5 @@
 import TrackList from "./TrackList";
-import type { TrackData } from "./Track";
+import type { TrackData } from "./TrackData";
 import {
   faChevronLeft,
   faChevronRight,
@@ -19,10 +19,10 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
   const elRef = useRef<HTMLDivElement | null>(null);
-  const updateQuery = (text: string) => {
+  const updateQuery = (text: string, searchGroup: string="after|before") => {
     c.setSearchQuery(
       c.searchQuery
-        .replace(/ *((\b(after|before):[^ ]+)|$)/, ` ${text}`)
+        .replace(new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`), ` ${text}`)
         .trim(),
     );
     elRef.current?.scrollIntoView({ block: "start" });
