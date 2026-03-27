@@ -227,36 +227,53 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	if i.cacheDb != nil && data != nil {
 		dataLen := len(data)
 
-		// Evict old entries if cache is full
-		var currentSize int
-		err = i.cacheDb.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
-		if err == nil && currentSize+dataLen >= CacheMaxBytes {
-			// Expire oldest entries first until we have enough space
-			rows, qErr := i.cacheDb.Query("SELECT path, length(data) FROM cover_cache ORDER BY timestamp ASC")
-			if qErr == nil {
-				defer rows.Close()
-				for rows.Next() && currentSize+dataLen >= CacheMaxBytes {
-					var evictPath string
-					var evictSize int
-					if rows.Scan(&evictPath, &evictSize) == nil {
-						i.cacheDb.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
-						i.cacheDb.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
-						currentSize -= evictSize
+		// Begin a transaction for caching
+		tx, err := i.cacheDb.Begin()
+		if err != nil {
+			slog.Warn("Unable to begin cache transaction", "path", path, "err", err)
+		} else {
+			var txErr error
+			// Use a function to handle commit/rollback
+			defer func() {
+				if txErr != nil {
+					tx.Rollback()
+				} else {
+					tx.Commit()
+				}
+			}()
+
+			// Evict old entries if cache is full
+			var currentSize int
+			txErr = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
+			if txErr == nil && currentSize+dataLen >= CacheMaxBytes {
+				// Expire oldest entries first until we have enough space
+				rows, qErr := tx.Query("SELECT path, length(data) FROM cover_cache ORDER BY timestamp ASC")
+				if qErr == nil {
+					defer rows.Close()
+					for rows.Next() && currentSize+dataLen >= CacheMaxBytes {
+						var evictPath string
+						var evictSize int
+						if rows.Scan(&evictPath, &evictSize) == nil {
+							tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
+							tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
+							currentSize -= evictSize
+						}
 					}
 				}
 			}
-		}
 
-		_, err = i.cacheDb.Exec(
-			"INSERT OR REPLACE INTO cover_cache (path, data, mime_type, timestamp) VALUES (?, ?, ?, strftime('%s','now'))",
-			path, data, mimeType,
-		)
-		if err != nil {
-			slog.Warn("Unable to cache track", "path", path, "err", err)
-		} else {
-			_, err = i.cacheDb.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
-			if err != nil {
-				slog.Warn("Unable to update cache size", "path", path, "err", err)
+			_, txErr = tx.Exec(
+				"INSERT OR REPLACE INTO cover_cache (path, data, mime_type, timestamp) VALUES (?, ?, ?, strftime('%s','now'))",
+				path, data, mimeType,
+			)
+			if txErr != nil {
+				slog.Warn("Unable to cache track", "path", path, "err", txErr)
+				return data, mimeType, nil
+			}
+
+			_, txErr = tx.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
+			if txErr != nil {
+				slog.Warn("Unable to update cache size", "path", path, "err", txErr)
 			}
 		}
 	}
