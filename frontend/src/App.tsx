@@ -148,11 +148,23 @@ export function App() {
   };
 
   // Search
+  const initialHashParams = getHashParams();
   [a.searchQuery, a.setSearchQuery] = useState(
-    () => getHashParams().get("q") ?? "",
+    () => initialHashParams.get("q") ?? "",
   );
   a.previousWorkingValue = useRef("");
   const didSetToPreviousWorkingValue = useRef(false);
+  useEffect(() => {
+    function onHashchange() {
+      const hashParams = getHashParams();
+      a.setSearchQuery(hashParams.get("q") ?? "");
+    }
+
+    window.addEventListener("hashchange", onHashchange);
+    return () => {
+      window.removeEventListener("hashchange", onHashchange);
+    };
+  });
   useEffect(() => {
     setHashParam("q", a.searchQuery);
     if (didSetToPreviousWorkingValue.current) {
