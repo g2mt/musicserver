@@ -1,12 +1,13 @@
 import TrackList from "./TrackList";
 import { MainTracksTab } from "./MainTracksTab";
 import SettingsTab from "./SettingsTab";
+import FileBrowserTab from "./FileBrowserTab";
 import { MusicPlayer } from "./MusicPlayer";
 import SearchBar from "./SearchBar";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
 import { HOST } from "./apiserver";
-import { faMusic, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faMusic, faGear, faFolder } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { AppContext, saveConfig, type AppState } from "./AppState";
@@ -279,7 +280,7 @@ export function App() {
   };
 
   // Left-side tab
-  const [leftTab, setLeftTab] = useState<"tracks" | "settings">("tracks");
+  const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">("tracks");
 
   return (
     <AppContext value={a}>
@@ -308,12 +309,20 @@ export function App() {
               >
                 <FontAwesomeIcon icon={faGear} />
               </button>
+              <button
+                className={`tab-btn ${leftTab === "files" ? "active" : ""}`}
+                onClick={() => setLeftTab("files")}
+                title="Files"
+              >
+                <FontAwesomeIcon icon={faFolder} />
+              </button>
             </div>
             {confirmBoxes.map((b) => (
               <div key={b.key}>{b.el}</div>
             ))}
             {leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
             {leftTab === "settings" && <SettingsTab />}
+            {leftTab === "files" && <FileBrowserTab />}
           </div>
           <div
             className="right-side"
