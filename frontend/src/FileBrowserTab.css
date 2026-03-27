@@ -1,0 +1,7 @@
+.file-browser-tab {
+  padding: var(--s4);
+  
+  .file-browser-table tr td:first-child {
+    width: 15px;
+  }
+}
