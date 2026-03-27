@@ -209,7 +209,10 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		err := i.cacheDb.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
 		if err == nil {
 			// Update timestamp on cache hit
-			i.cacheDb.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+			_, err := i.cacheDb.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+			if err != nil {
+				slog.Warn("Unable to update cached track", "path", path, "err", err)
+			}
 			return cachedData, mimeType, nil
 		}
 	}
@@ -249,11 +252,11 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 			path, data, mimeType,
 		)
 		if err != nil {
-			slog.Warn("Unable to cache track", "path", path)
+			slog.Warn("Unable to cache track", "path", path, "err", err)
 		} else {
 			_, err = i.cacheDb.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
 			if err != nil {
-				slog.Warn("Unable to update cache size", "path", path)
+				slog.Warn("Unable to update cache size", "path", path, "err", err)
 			}
 		}
 	}
