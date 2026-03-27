@@ -229,7 +229,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			path, rest, hasRest := strings.Cut(path, "/")
 			id, err = i.resolveTrackFromPath(path)
 			if err != nil {
-				return nil, "", errors.New("invalid path")
+				return nil, "", err
 			} else {
 				r := &redirectHandler{path: "/track/" + id}
 				if hasRest {

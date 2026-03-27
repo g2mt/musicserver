@@ -34,7 +34,6 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 			break
 		}
 	}
-	defer reader.Close()
 
 	if err != nil {
 		data, _ := json.Marshal(struct {
@@ -46,4 +45,5 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("Content-Type", contentType)
 	reader.HandleHTTP(w, req)
+	reader.Close()
 }
