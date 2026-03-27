@@ -33,18 +33,3 @@ func (i *Interface) getFilesInPath(fullPath string) (FileList, error) {
 		Directories: directories,
 	}, nil
 }
-
-func (i *Interface) ReadFileInPath(path string) (interface{}, error) {
-	fullPath := filepath.Join(i.config.DataPath, path)
-
-	info, err := os.Stat(fullPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if info.IsDir() {
-		return i.getFilesInPath(fullPath)
-	}
-
-	return os.ReadFile(fullPath)
-}

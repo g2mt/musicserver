@@ -299,12 +299,25 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		}
 
 		response, err = i.GetAlbumByName(name)
-	} else if filePath, ok := strings.CutPrefix(path, "/file/"); ok {
+	} else if path, ok := strings.CutPrefix(path, "/file/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
 
-		response, err = i.ReadFileInPath(filePath)
+		fullPath := filepath.Join(i.config.DataPath, path)
+		info, err := os.Stat(fullPath)
+		if err != nil {
+			return nil, "", err
+		}
+		if info.IsDir() {
+			response, err = i.getFilesInPath(fullPath)
+		} else {
+			data, err := os.ReadFile(fullPath)
+			if err != nil {
+				return nil, "", err
+			}
+			return &byteHandler{b: data}, "application/octet-stream", nil
+		}
 	} else {
 		return nil, "", errors.New("invalid api request")
 	}
