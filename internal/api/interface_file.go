@@ -2,7 +2,6 @@ package api
 
 import (
 	"os"
-	"path/filepath"
 )
 
 type FileList struct {
