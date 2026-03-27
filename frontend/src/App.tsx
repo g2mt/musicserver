@@ -259,8 +259,12 @@ export function App() {
 
   // Track queue
   [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
-  c.enqueueTrack = (track: TrackData) => {
-    c.setEnqueuedTracks([...c.enqueuedTracks, track]);
+  c.enqueueTrack = (track: TrackData|TrackData[]) => {
+    if (Array.isArray(track)) {
+      c.setEnqueuedTracks([...c.enqueuedTracks, ...track]);
+    } else {
+      c.setEnqueuedTracks([...c.enqueuedTracks, track]);
+    }
   };
   c.unqueueTrack = (index: number) => {
     c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));

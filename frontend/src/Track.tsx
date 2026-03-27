@@ -21,7 +21,7 @@ export function Track({
   track: TrackData;
   highlighted?: boolean;
   index?: number;
-  enqueueTrack?: (_: TrackData) => void;
+  enqueueTrack?: (_: TrackData|TrackData[]) => void;
   unqueueTrack?: (_: number) => void;
 }) {
   const c = useContext(AppContext)!;

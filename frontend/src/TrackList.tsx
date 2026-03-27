@@ -9,7 +9,7 @@ function TrackList({
   unqueueTrack,
 }: {
   tracks: TrackData[];
-  enqueueTrack?: (_: TrackData) => void;
+  enqueueTrack?: (_: TrackData|TrackData[]) => void;
   unqueueTrack?: (_: number) => void;
 }) {
   return (

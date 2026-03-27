@@ -3,6 +3,7 @@ import type { TrackData } from "./TrackData";
 import {
   faChevronLeft,
   faChevronRight,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useRef } from "react";
@@ -33,10 +34,6 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
     e.preventDefault();
     const newLimit = e.target.value === "unlimited" ? -1 : Number(e.target.value);
     updateQuery(`limit:${newLimit}`, "limit");
-  };
-
-  const handleAddAllToQueue = () => {
-    c.enqueueTrack(tracks);
   };
 
   const controls = (
@@ -75,7 +72,8 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           <option value={150}>150</option>
           <option value="unlimited">unlimited</option>
         </select>
-        <button className="btn" onClick={handleAddAllToQueue}>
+        <button className="btn" onClick={() => c.enqueueTrack(tracks)}>
+          <FontAwesomeIcon icon={faPlus} />
           Add all to queue
         </button>
       </div>

@@ -28,7 +28,7 @@ export interface AppState extends AppStateData {
   setVolume: Dispatch<SetStateAction<number>>;
   setMuted: Dispatch<SetStateAction<boolean>>;
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
-  enqueueTrack: (_: TrackData) => void;
+  enqueueTrack: (_: TrackData|TrackData[]) => void;
   unqueueTrack: (index: number) => void;
   addConfirmBox: (confirmBox: React.ReactNode) => void;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number | null>>;
