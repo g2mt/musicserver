@@ -107,7 +107,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 		reader, _, err := s.iface.handleRequest(req.Path, req.Method, req.Params)
 		for {
 			if re, ok := reader.(*redirectHandler); ok {
-				reader, _, err = s.iface.handleRequest(re.path, re.method, re.params)
+				reader, _, err = s.iface.handleRequest(re.path, req.Method, req.Params)
 			} else {
 				break
 			}
@@ -122,6 +122,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 		}
 
 		reader.HandleUnix(conn)
+		reader.Close()
 	}
 }
 

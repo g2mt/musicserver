@@ -32,11 +32,12 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	reader, contentType, err := r.iface.handleRequest(req.URL.Path, req.Method, params)
 	for {
 		if re, ok := reader.(*redirectHandler); ok {
-			reader, contentType, err = r.iface.handleRequest(re.path, re.method, re.params)
+			reader, contentType, err = r.iface.handleRequest(re.path, req.Method, params)
 		} else {
 			break
 		}
 	}
+	defer reader.Close()
 
 	if err != nil {
 		data, _ := json.Marshal(struct {

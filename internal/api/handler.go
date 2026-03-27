@@ -108,17 +108,16 @@ func streamEvents[T any](i *Interface, ch chan T, unlisten func(chan T)) (handle
 }
 
 type redirectHandler struct {
-	path   string
-	method string
-	params map[string]string
+	path string
 }
 
 func (r *redirectHandler) Close() error {
-	panic("redirectHandler called")
+	return nil
 }
 
 func (r *redirectHandler) HandleHTTP(w http.ResponseWriter, req *http.Request) error {
-	panic("redirectHandler called")
+	http.Redirect(w, req, r.path, http.StatusFound)
+	return nil
 }
 
 func (r *redirectHandler) HandleUnix(conn net.Conn) error {
