@@ -246,7 +246,7 @@ export function App() {
           />
         </div>
         <div className="app-main">
-          <div className="left-side">
+          <div id="app-left-side">
             <div className="tab-bar">
               <button
                 className={`tab-btn ${leftTab === "tracks" ? "active" : ""}`}
@@ -278,7 +278,7 @@ export function App() {
             {leftTab === "files" && <FileBrowserTab />}
           </div>
           <div
-            className="right-side"
+            id="app-right-side"
             style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
           >
             <TrackList
