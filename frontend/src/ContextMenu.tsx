@@ -13,7 +13,13 @@ export function ContextMenuItem({
   children: React.ReactNode;
 }) {
   return (
-    <div className="context-menu-item" onClick={onClick}>
+    <div
+      className="context-menu-item"
+      onClick={() => {
+        onClick();
+        setMenuState?.(null);
+      }}
+    >
       {icon && <FontAwesomeIcon icon={icon} />}
       {children}
     </div>
