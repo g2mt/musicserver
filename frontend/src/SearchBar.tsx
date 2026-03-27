@@ -1,18 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBackwardStep,
-  faForwardStep,
   faSearch,
   faDownload,
 } from "@fortawesome/free-solid-svg-icons";
-import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
 import { Track } from "./Track";
 import { HOST } from "./apiserver";
 import { toast } from "react-toastify";
 import ConfirmBox from "./ConfirmBox";
-import { useBackForward } from "./App";
 import type { TrackData } from "./TrackData";
 
 import "./SearchBar.css";
@@ -25,10 +21,6 @@ interface SearchBarProps {
 function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const c = useContext(AppContext)!;
   const [inputValue, setInputValue] = useState(searchQuery);
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
-    useBackForward(c);
-  const windowWidth = useWindowWidth();
-  const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
   useEffect(() => {
     setInputValue(searchQuery);
@@ -105,24 +97,6 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       <button type="submit" className="icon-btn">
         <FontAwesomeIcon icon={faSearch} />
       </button>
-      {collapsed && (
-        <button
-          className="icon-btn btn-prev-song"
-          onClick={handleBack}
-          disabled={isBackDisabled}
-        >
-          <FontAwesomeIcon icon={faBackwardStep} />
-        </button>
-      )}
-      {collapsed && (
-        <button
-          className="icon-btn btn-next-song"
-          onClick={handleForward}
-          disabled={isForwardDisabled}
-        >
-          <FontAwesomeIcon icon={faForwardStep} />
-        </button>
-      )}
       <button
         type="button"
         className="icon-btn btn-download"
