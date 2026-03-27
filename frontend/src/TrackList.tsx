@@ -2,7 +2,7 @@ import { useContext, useState, useEffect, useRef, useCallback } from "react";
 import { Track } from "./Track";
 import { type TrackData } from "./TrackData";
 import { AppContext } from "./AppState";
-import { faMinus } from "@fortawesome/free-solid-svg-icons";
+import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./TrackList.css";
@@ -78,10 +78,18 @@ function TrackList({
   return (
     <div className="track-list">
       {canUnqueue && (
-        <button className="btn" onClick={() => c.unqueueTrack()}>
-          <FontAwesomeIcon icon={faMinus} />
-          Remove all from queue
-        </button>
+        <div className="track-list-buttons">
+          <button className="btn" onClick={() => c.unqueueTrack()}>
+            <FontAwesomeIcon icon={faMinus} />
+            Remove all from queue
+          </button>
+          <button className="btn" onClick={() => {
+            // TODO shuffle
+          }}>
+            <FontAwesomeIcon icon={faShuffle} />
+            Shuffle queue
+          </button>
+        </div>
       )}
 
       {/* Top placeholder preserves scroll position for unloaded upper tracks */}
