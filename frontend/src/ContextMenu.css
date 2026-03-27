@@ -9,6 +9,9 @@
   box-shadow: 0 0 4px var(--shadow);
 
   .context-menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
     padding: var(--s2) var(--s3);
     cursor: pointer;
     font-size: small;

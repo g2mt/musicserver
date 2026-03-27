@@ -1,15 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import "./ContextMenu.css";
 
 export function ContextMenuItem({
   onClick,
+  icon,
   children,
 }: {
   onClick: () => void;
+  icon?: IconDefinition;
   children: React.ReactNode;
 }) {
   return (
     <div className="context-menu-item" onClick={onClick}>
+      {icon && <FontAwesomeIcon icon={icon} />}
       {children}
     </div>
   );
