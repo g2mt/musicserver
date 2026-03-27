@@ -3,6 +3,7 @@
   flex-direction: column;
   gap: var(--s2);
   padding: var(--s3);
+  width: 100%;
 
   .track-list-buttons {
     display: flex;

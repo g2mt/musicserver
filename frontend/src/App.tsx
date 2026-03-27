@@ -7,11 +7,12 @@ import SearchBar from "./SearchBar";
 import React, { useEffect, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
 import { HOST } from "./apiserver";
-import { faMusic, faGear, faFolder, faArrowRight, faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { faMusic, faGear, faFolder, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
+import { PLAYER_COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -237,12 +238,17 @@ export function App() {
 
   // Scroll navigation
   const scrollToRightSide = () => {
-    document.getElementById("app-right-side")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("app-right-side")?.scrollIntoView();
   };
 
   const scrollToLeftSide = () => {
-    document.getElementById("app-left-side")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("app-left-side")?.scrollIntoView();
   };
+
+  const windowWidth = useWindowWidth();
+  useEffect(() => {
+    document.body.classList.toggle("minimized", windowWidth < PLAYER_COLLAPSE_AT_WIDTH);
+  }, [windowWidth]);
 
   return (
     <AppContext value={c}>
@@ -278,12 +284,13 @@ export function App() {
               >
                 <FontAwesomeIcon icon={faGear} />
               </button>
+              <div className="tab-separator"></div>
               <button
                 className="tab-btn"
                 onClick={scrollToRightSide}
                 title="Go to queue"
               >
-                <FontAwesomeIcon icon={faArrowRight} />
+                <FontAwesomeIcon icon={faArrowDown} />
               </button>
             </div>
             {confirmBoxes.map((b) => (
@@ -297,14 +304,16 @@ export function App() {
             id="app-right-side"
             style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
           >
-            <button
-              className="tab-btn"
-              onClick={scrollToLeftSide}
-              title="Go to tracks"
-              style={{ position: "sticky", top: 0, float: "right" }}
-            >
-              <FontAwesomeIcon icon={faArrowLeft} />
-            </button>
+            <div>
+              <button
+                className="icon-btn"
+                onClick={scrollToLeftSide}
+                title="Go to tracks"
+                style={{ position: "sticky", top: 0, float: "right" }}
+              >
+                <FontAwesomeIcon icon={faArrowUp} />
+              </button>
+            </div>
             <TrackList
               tracks={c.enqueuedTracks}
               canUnqueue={true}

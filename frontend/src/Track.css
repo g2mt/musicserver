@@ -7,6 +7,7 @@
   border-radius: var(--border-radius);
   height: 72px;
   max-height: 72px;
+  max-width: 100%;
 
   &:hover,
   &.highlighted {
@@ -36,6 +37,14 @@
   flex-direction: column;
   gap: var(--s1);
   flex: 1;
+  max-width: 100%;
+  min-width: 0;
+  &> *{
+    text-overflow: ellipsis;
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }
 
 .track-title {

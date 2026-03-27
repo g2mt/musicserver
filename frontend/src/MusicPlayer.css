@@ -47,13 +47,6 @@
       .track {
         max-width: 100%;
         min-width: 70vw;
-        .track-info > * {
-          max-width: calc(100% - var(--thumbnail-size));
-          text-overflow: ellipsis;
-          display: block;
-          overflow: hidden;
-          white-space: nowrap;
-        }
       }
     }
 
