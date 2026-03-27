@@ -4,6 +4,7 @@ import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import { HOST } from "./apiserver";
 import { AppContext } from "./AppState";
 import type { TrackData } from "./TrackData";
+
 import "./Track.css";
 
 export function getTrackCover(track: TrackData): string {

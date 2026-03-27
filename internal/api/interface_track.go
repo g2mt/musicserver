@@ -140,6 +140,11 @@ func (i *Interface) GetTrackById(id string) (schema.Track, error) {
 	if err != nil {
 		return schema.Track{}, err
 	}
+	if path, ok := strings.CutPrefix(track.Path, i.config.DataPath); ok {
+		track.Path = path
+	} else {
+		panic("track.Path stores invalid prefix")
+	}
 	return track, nil
 }
 

@@ -37,9 +37,15 @@ function useAudio(url: string | null) {
 
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
-  const audio = useAudio(
-    c.currentTrack ? `${HOST}/track/${c.currentTrack.short_id}/data` : null,
-  );
+  const audio = useAudio((() => {
+    if (!c.currentTrack)
+      return null;
+    if (c.currentTrack.short_id)
+      return `${HOST}/track/${c.currentTrack.short_id}/data`;
+    if (c.currentTrack.path)
+      return `${HOST}/file/${c.currentTrack.path}`;
+    return null;
+  })());
 
   function goNextQueue(doSetIsPlaying: boolean = true) {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
