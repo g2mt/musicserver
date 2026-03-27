@@ -1,4 +1,4 @@
-export const HOST = (() => {
+const HOST = (() => {
   if (import.meta.env.DEV) {
     return "http://localhost:8000/api";
   }
@@ -23,4 +23,8 @@ export async function fetchAPI(
     if (!res.ok) throw new Error(`API call failed: ${res.statusText}`);
     return res.json();
   });
+}
+
+export function getTrackCoverFromId(id: string) {
+  return `${HOST}/track/${id}/cover`;
 }

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faMinus, faCopy } from "@fortawesome/free-solid-svg-icons";
-import { HOST } from "./apiserver";
+import { getTrackCoverFromId } from "./apiserver";
 import { AppContext } from "./AppState";
 import { showContextMenu, ContextMenuItem } from "./ContextMenu";
 import type { TrackData } from "./TrackData";
@@ -9,7 +9,7 @@ import type { TrackData } from "./TrackData";
 import "./Track.css";
 
 export function getTrackCover(track: TrackData): string {
-  return track.thumbnail_path ?? `${HOST}/track/${track.short_id}/cover`;
+  return track.thumbnail_path ?? getTrackCoverFromId(track.short_id);
 }
 
 export function Track({
