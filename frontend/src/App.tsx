@@ -279,12 +279,8 @@ export function App() {
   );
 
   useEffect(() => {
-    // delay until everything is settled
-    const timeout = setTimeout(() => {
-      mergeConfig(c);
-    }, 0);
-    return () => clearTimeout(timeout);
-  });
+    mergeConfig(c);
+  }, []);
 
   return (
     <AppContext value={c}>
