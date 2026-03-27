@@ -165,11 +165,11 @@ export function App() {
           break;
         case "j":
           e.preventDefault();
-          c.setProgress((prev) => Math.max(0, prev - 10));
+          c.setProgress((prev) => prev - 10);
           break;
         case "l":
           e.preventDefault();
-          c.setProgress((prev) => Math.min(c.duration, prev + 10));
+          c.setProgress((prev) => prev + 10);
           break;
         case "(":
           e.preventDefault();

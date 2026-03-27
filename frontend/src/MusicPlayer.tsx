@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useContext } from "react";
+import { useEffect, useMemo, useContext, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
@@ -81,6 +81,7 @@ export function MusicPlayer() {
       return `${HOST}/file/${c.currentTrack.path}`;
     return null;
   })());
+  const didUpdatePosition = useRef(false);
 
   function goNextQueue(doSetIsPlaying: boolean = true) {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
@@ -93,6 +94,14 @@ export function MusicPlayer() {
       if (doSetIsPlaying) c.setIsPlaying(false);
     }
   }
+
+  useEffect(() => {
+    if (didUpdatePosition.current) {
+      didUpdatePosition.current = false;
+      return;
+    }
+    audio.currentTime = c.progress;
+  }, [c.progress]);
 
   useEffect(() => {
     if (c.currentTrack !== null) {
@@ -119,6 +128,7 @@ export function MusicPlayer() {
 
   useEffect(() => {
     function onTimeUpdate() {
+      didUpdatePosition.current = true;
       c.setProgress(audio.currentTime);
       c.setDuration(audio.duration || 0);
     }
@@ -129,12 +139,6 @@ export function MusicPlayer() {
       audio.removeEventListener("ended", () => goNextQueue());
     };
   }, [audio, c.enqueuedTracks, c.enqueuedTrackIndex]);
-
-  function onScrub(e: React.ChangeEvent<HTMLInputElement>) {
-    const val = Number(e.target.value);
-    audio.currentTime = val;
-    c.setProgress(val);
-  }
 
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
     useBackForward();
@@ -174,7 +178,7 @@ export function MusicPlayer() {
         max={c.duration || 0}
         step={0.1}
         value={c.progress}
-        onChange={onScrub}
+        onChange={e => c.setProgress(Number(e.target.value))}
       />
       <div className="player-controls">
         <div className="player-left">
