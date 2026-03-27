@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder, faFile, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 import { HOST } from "./apiserver";
 import { AppContext } from "./AppState";
 
@@ -76,7 +77,13 @@ export default function FileBrowserTab() {
                   e.preventDefault();
                   fetch(`${HOST}/file/:by-path/${path.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`)
                     .then((res) => res.json())
-                    .then((data) => c.setCurrentTrack(data))
+                    .then((data) => {
+                      if (data.error) {
+                        toast.error(data.error);
+                      } else {
+                        c.setCurrentTrack(data);
+                      }
+                    })
                 }}>
                   {file}
                 </a>
