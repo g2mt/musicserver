@@ -228,11 +228,14 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", errors.New("method not allowed")
 		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
 			path, err = url.QueryUnescape(path)
+			path = filepath.Clean(path)
+			path = filepath.Join(i.config.DataPath, path)
 			if err != nil {
 				return nil, "", err
 			}
 			id, err = i.resolveTrackFromPath(path)
 			if err != nil {
+				// TODO: check if path ends with an audio extension, if it does then create a temporary Track and set `response` to that
 				return nil, "", err
 			} else {
 				return &redirectHandler{path: "/track/" + id}, "text/json", nil
