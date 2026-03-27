@@ -83,7 +83,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   return (
     <div className="main-tracks-tab" ref={elRef}>
       {controls}
-      <TrackList tracks={tracks} enqueueTrack={c.enqueueTrack} />
+      <TrackList tracks={tracks} canEnqueue={true} />
       {controls}
     </div>
   );

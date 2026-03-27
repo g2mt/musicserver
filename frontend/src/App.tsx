@@ -334,7 +334,7 @@ export function App() {
           >
             <TrackList
               tracks={c.enqueuedTracks}
-              unqueueTrack={c.unqueueTrack}
+              canUnqueue={true}
             />
           </div>
         </div>

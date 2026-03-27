@@ -15,14 +15,14 @@ export function Track({
   track,
   highlighted,
   index,
-  enqueueTrack,
-  unqueueTrack,
+  canEnqueue,
+  canUnqueue,
 }: {
   track: TrackData;
   highlighted?: boolean;
   index?: number;
-  enqueueTrack?: (_: TrackData|TrackData[]) => void;
-  unqueueTrack?: (_: number) => void;
+  canEnqueue?: boolean;
+  canUnqueue?: boolean;
 }) {
   const c = useContext(AppContext)!;
   const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } =
@@ -71,18 +71,18 @@ export function Track({
           )}
         </p>
       </div>
-      {enqueueTrack && (
+      {canEnqueue && (
         <button
           className="icon-btn track-queue-btn"
-          onClick={() => enqueueTrack(track)}
+          onClick={() => c.enqueueTrack(track)}
         >
           <FontAwesomeIcon icon={faPlus} />
         </button>
       )}
-      {unqueueTrack && index !== undefined && (
+      {canUnqueue && index !== undefined && (
         <button
           className="icon-btn track-queue-btn"
-          onClick={() => unqueueTrack(index)}
+          onClick={() => c.unqueueTrack(index)}
         >
           <FontAwesomeIcon icon={faMinus} />
         </button>

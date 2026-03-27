@@ -5,26 +5,26 @@ import "./TrackList.css";
 
 function TrackList({
   tracks,
-  enqueueTrack,
-  unqueueTrack,
+  canEnqueue,
+  canUnqueue,
 }: {
   tracks: TrackData[];
-  enqueueTrack?: (_: TrackData|TrackData[]) => void;
-  unqueueTrack?: (_: number) => void;
+  canEnqueue?: boolean;
+  canUnqueue?: boolean;
 }) {
   return (
     <div className="track-list">
       {tracks.map((track, index) => (
         <Track
           key={
-            typeof unqueueTrack !== "undefined"
+            canUnqueue
               ? `${index}-${track.id}`
               : track.id
           } /* queued items have order */
           track={track}
-          index={typeof unqueueTrack !== "undefined" ? index : undefined}
-          enqueueTrack={enqueueTrack}
-          unqueueTrack={unqueueTrack}
+          index={canUnqueue ? index : undefined}
+          canEnqueue={canEnqueue}
+          canUnqueue={canUnqueue}
         />
       ))}
     </div>
