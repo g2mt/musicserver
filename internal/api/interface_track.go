@@ -104,6 +104,7 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 	return result, nil
 }
 
+// Resolves a short id to a long ID
 func (i *Interface) resolveTrackShortId(id string) (string, error) {
 	if len(id) == MaxIdLength {
 		return id, nil
@@ -111,6 +112,16 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 
 	var longID string
 	err := i.db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", id).Scan(&longID)
+	if err != nil {
+		return "", errors.New("track not found")
+	}
+	return longID, nil
+}
+
+// Resolves a path to long ID
+func (i *Interface) resolveTrackFromPath(path string) (string, error) {
+	var longID string
+	err := i.db.QueryRow("SELECT long_id FROM tracks WHERE path = ?", path).Scan(&longID)
 	if err != nil {
 		return "", errors.New("track not found")
 	}
