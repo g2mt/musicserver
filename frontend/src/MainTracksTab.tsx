@@ -35,6 +35,10 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
     updateQuery(`limit:${newLimit}`, "limit");
   };
 
+  const handleAddAllToQueue = () => {
+    c.enqueueTrack(tracks);
+  };
+
   const controls = (
     <div className="main-tracks-controls">
       <div className="main-tracks-controls-left">
@@ -71,6 +75,9 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           <option value={150}>150</option>
           <option value="unlimited">unlimited</option>
         </select>
+        <button className="btn" onClick={handleAddAllToQueue}>
+          Add all to queue
+        </button>
       </div>
     </div>
   );
