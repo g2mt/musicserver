@@ -7,12 +7,12 @@ import (
 )
 
 type FileList struct {
-	Files      []string `json:"files"`
+	Files       []string `json:"files"`
 	Directories []string `json:"directories"`
 }
 
 func (i *Interface) GetFilesInPath(path string) (FileList, error) {
-	fullPath := filepath.Join(i.config.DataDir, path)
+	fullPath := filepath.Join(i.config.DataPath, path)
 
 	entries, err := os.ReadDir(fullPath)
 	if err != nil {
@@ -31,7 +31,7 @@ func (i *Interface) GetFilesInPath(path string) (FileList, error) {
 	}
 
 	return FileList{
-		Files:      files,
+		Files:       files,
 		Directories: directories,
 	}, nil
 }
