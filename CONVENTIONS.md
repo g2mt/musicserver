@@ -19,6 +19,11 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 }
 ```
 
+- Ensure that the SQL methods of the Interface struct in `interface_*.go` are atomic by either:
+
+  a. Using only one query per method
+  b. Wrapping the entirety of the method in a transaction
+
 ## Frontend
 
 - React is used for the frontend.

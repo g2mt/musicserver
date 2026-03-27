@@ -124,10 +124,7 @@ func (i *Interface) resolveTrackShortId(id string, tx *sql.Tx) (string, error) {
 		return id, nil
 	}
 
-	db := i.db
-	if tx != nil {
-		db = tx
-	}
+	db := i.getQueryRow(tx)
 
 	var longID string
 	err := db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", id).Scan(&longID)
@@ -139,10 +136,7 @@ func (i *Interface) resolveTrackShortId(id string, tx *sql.Tx) (string, error) {
 
 // Resolves a path to long ID. Requires path to be in the data directory
 func (i *Interface) resolveTrackFromPath(path string, tx *sql.Tx) (string, error) {
-	db := i.db
-	if tx != nil {
-		db = tx
-	}
+	db := i.getQueryRow(tx)
 
 	var longID string
 	err := db.QueryRow("SELECT id FROM tracks WHERE path = ?", path).Scan(&longID)

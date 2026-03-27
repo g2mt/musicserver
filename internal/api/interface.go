@@ -148,6 +148,17 @@ func (i *Interface) Close() error {
 	return nil
 }
 
+// tx may be nil
+func (i *Interface) getQueryRow(tx *sql.Tx) interface {
+	QueryRow(query string, args ...any) *sql.Row
+} {
+	if tx == nil {
+		return i.db
+	} else {
+		return tx
+	}
+}
+
 // out is either []byte, or io.ReadCloser
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out handler, contentType string, err error) {
 	var response interface{}
@@ -239,7 +250,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				return nil, "", errors.New("unexpected path outside of data directory")
 			}
 
-			id, err = i.resolveTrackFromPath(fullPath)
+			id, err = i.resolveTrackFromPath(fullPath, nil)
 			if err != nil {
 				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
 					track := schema.Track{
