@@ -36,5 +36,15 @@ func (i *Interface) getFilesInPath(fullPath string) (FileList, error) {
 
 func (i *Interface) ReadFileInPath(path string) (interface{}, error) {
 	fullPath := filepath.Join(i.config.DataPath, path)
-	// TODO: if fullpath is file then return []byte of file, else call getFilesInPath
+
+	info, err := os.Stat(fullPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if info.IsDir() {
+		return i.getFilesInPath(fullPath)
+	}
+
+	return os.ReadFile(fullPath)
 }
