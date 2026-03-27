@@ -1,10 +1,7 @@
 package api
 
 import (
-	"bufio"
 	"encoding/json"
-	"io"
-	"log/slog"
 	"net/http"
 )
 
