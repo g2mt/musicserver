@@ -45,7 +45,7 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 		for _, op := range search.Operators {
 			switch op.Key {
 			case "after":
-				longAfterId, err := i.resolveTrackShortId(op.Value)
+				longAfterId, err := i.resolveTrackShortId(op.Value, nil)
 				if err != nil {
 					longAfterId = ""
 				}
@@ -54,7 +54,7 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 					args = append(args, longAfterId)
 				}
 			case "before":
-				longBeforeId, err = i.resolveTrackShortId(op.Value)
+				longBeforeId, err = i.resolveTrackShortId(op.Value, nil)
 				if err != nil {
 					longBeforeId = ""
 				}
@@ -119,13 +119,18 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 }
 
 // Resolves a short id to a long ID
-func (i *Interface) resolveTrackShortId(id string) (string, error) {
+func (i *Interface) resolveTrackShortId(id string, tx *sql.Tx) (string, error) {
 	if len(id) == MaxIdLength {
 		return id, nil
 	}
 
+	db := i.db
+	if tx != nil {
+		db = tx
+	}
+
 	var longID string
-	err := i.db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", id).Scan(&longID)
+	err := db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", id).Scan(&longID)
 	if err != nil {
 		return "", errors.New("track not found")
 	}
@@ -133,9 +138,14 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 }
 
 // Resolves a path to long ID. Requires path to be in the data directory
-func (i *Interface) resolveTrackFromPath(path string) (string, error) {
+func (i *Interface) resolveTrackFromPath(path string, tx *sql.Tx) (string, error) {
+	db := i.db
+	if tx != nil {
+		db = tx
+	}
+
 	var longID string
-	err := i.db.QueryRow("SELECT id FROM tracks WHERE path = ?", path).Scan(&longID)
+	err := db.QueryRow("SELECT id FROM tracks WHERE path = ?", path).Scan(&longID)
 	if err != nil {
 		return "", errors.New("track not found")
 	}
@@ -143,13 +153,23 @@ func (i *Interface) resolveTrackFromPath(path string) (string, error) {
 }
 
 func (i *Interface) GetTrackById(id string) (schema.Track, error) {
-	longID, err := i.resolveTrackShortId(id)
+	tx, err := i.db.Begin()
+	if err != nil {
+		return schema.Track{}, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	longID, err := i.resolveTrackShortId(id, tx)
 	if err != nil {
 		return schema.Track{}, err
 	}
 
 	var track schema.Track
-	err = i.db.QueryRow("SELECT id, short_id, name, path, artist, album FROM tracks WHERE id = ?", longID).
+	err = tx.QueryRow("SELECT id, short_id, name, path, artist, album FROM tracks WHERE id = ?", longID).
 		Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Artist, &track.Album)
 	if err != nil {
 		return schema.Track{}, err
@@ -159,17 +179,33 @@ func (i *Interface) GetTrackById(id string) (schema.Track, error) {
 	} else {
 		panic("track.Path stores invalid prefix")
 	}
+
+	err = tx.Commit()
+	if err != nil {
+		return schema.Track{}, err
+	}
+
 	return track, nil
 }
 
 func (i *Interface) GetTrackData(id string) ([]byte, error) {
-	longID, err := i.resolveTrackShortId(id)
+	tx, err := i.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	longID, err := i.resolveTrackShortId(id, tx)
 	if err != nil {
 		return nil, err
 	}
 
 	var path string
-	err = i.db.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
+	err = tx.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
 	if err != nil {
 		return nil, err
 	}
@@ -183,6 +219,11 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 		return nil, errors.New("unexpected path outside of data directory")
 	}
 
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -191,20 +232,35 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 }
 
 func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
-	longID, err := i.resolveTrackShortId(id)
+	tx, err := i.db.Begin()
+	if err != nil {
+		return nil, "", err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	longID, err := i.resolveTrackShortId(id, tx)
 	if err != nil {
 		return nil, "", err
 	}
 
 	var path string
-	err = i.db.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
+	err = tx.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
+	if err != nil {
+		return nil, "", err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return nil, "", err
 	}
 
 	// Check cache first
 	if i.cacheDb != nil {
-		tx, err := i.cacheDb.Begin()
+		cacheTx, err := i.cacheDb.Begin()
 		if err != nil {
 			slog.Warn("Unable to begin cache transaction", "path", path, "err", err)
 		} else {
@@ -213,16 +269,16 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 			var txErr error
 			defer func() {
 				if txErr != nil {
-					tx.Rollback()
+					cacheTx.Rollback()
 				} else {
-					tx.Commit()
+					cacheTx.Commit()
 				}
 			}()
 
-			txErr = tx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
+			txErr = cacheTx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
 			if txErr == nil {
 				// Update timestamp on cache hit
-				_, txErr = tx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+				_, txErr = cacheTx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
 				if txErr != nil {
 					slog.Warn("Unable to update cached track", "path", path, "err", txErr)
 				}
