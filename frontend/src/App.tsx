@@ -266,13 +266,18 @@ export function App() {
       c.setEnqueuedTracks([...c.enqueuedTracks, track]);
     }
   };
-  c.unqueueTrack = (index: number) => {
-    c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
-    // If we remove a track before the current index, adjust the index
-    if (c.enqueuedTrackIndex !== null && index < c.enqueuedTrackIndex) {
-      c.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
-    } else if (index === c.enqueuedTrackIndex) {
-      // If we remove the currently highlighted track, reset index
+  c.unqueueTrack = (index?: number) => {
+    if (typeof index === "number") {
+      c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
+      // If we remove a track before the current index, adjust the index
+      if (c.enqueuedTrackIndex !== null && index < c.enqueuedTrackIndex) {
+        c.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
+      } else if (index === c.enqueuedTrackIndex) {
+        // If we remove the currently highlighted track, reset index
+        c.setEnqueuedTrackIndex(null);
+      }
+    } else {
+      c.setEnqueuedTracks([]);
       c.setEnqueuedTrackIndex(null);
     }
   };

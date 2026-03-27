@@ -29,7 +29,7 @@ export interface AppState extends AppStateData {
   setMuted: Dispatch<SetStateAction<boolean>>;
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (_: TrackData|TrackData[]) => void;
-  unqueueTrack: (index: number) => void;
+  unqueueTrack: (index?: number) => void;
   addConfirmBox: (confirmBox: React.ReactNode) => void;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number | null>>;
   setSearchQuery: (_: string) => void;
