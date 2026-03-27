@@ -204,16 +204,30 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Check cache first
 	if i.cacheDb != nil {
-		var cachedData []byte
-		var mimeType string
-		err := i.cacheDb.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
-		if err == nil {
-			// Update timestamp on cache hit
-			_, err := i.cacheDb.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
-			if err != nil {
-				slog.Warn("Unable to update cached track", "path", path, "err", err)
+		tx, err := i.cacheDb.Begin()
+		if err != nil {
+			slog.Warn("Unable to begin cache transaction", "path", path, "err", err)
+		} else {
+			var cachedData []byte
+			var mimeType string
+			var txErr error
+			defer func() {
+				if txErr != nil {
+					tx.Rollback()
+				} else {
+					tx.Commit()
+				}
+			}()
+
+			txErr = tx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
+			if txErr == nil {
+				// Update timestamp on cache hit
+				_, txErr = tx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+				if txErr != nil {
+					slog.Warn("Unable to update cached track", "path", path, "err", txErr)
+				}
+				return cachedData, mimeType, nil
 			}
-			return cachedData, mimeType, nil
 		}
 	}
 
