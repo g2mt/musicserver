@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAPI } from "./apiserver";
+import { fetchAPI, listenAPI } from "./apiserver";
 
 interface ProgressEntry {
   value: number;
@@ -31,32 +31,19 @@ function ProgressTable() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    // Set up SSE for global progress events
-    const es = new EventSource(`${fetchAPI("/progress/:events").url}`);
-
-    es.onmessage = (event) => {
-      const data = JSON.parse(event.data) as ProgressEventWithSource;
-      const name = data.source;
-      if (!name) return;
-
-      if (data.type === "AddOutput") {
-        setProgresses((old) => {
-          old[name].output = (old[name].output ?? "") + data.data;
-          return old;
-        });
-      } else if (data.type === "Value" || data.type === "MaxValue") {
-        setProgresses((old) => {
-          old[name].value = data.data;
-          return old;
-        });
-      }
-    };
-
-    return () => {
-      es.close();
-    };
-  }, [progresses]);
+  useEffect(() => listenAPI("/progress/:events", (data: ProgressEventWithSource) => {
+    if (data.type === "AddOutput") {
+      setProgresses((old) => {
+        old[data.source].output = (old[data.source].output ?? "") + data.data;
+        return old;
+      });
+    } else if (data.type === "Value" || data.type === "MaxValue") {
+      setProgresses((old) => {
+        old[data.source].value = data.data;
+        return old;
+      });
+    }
+  }), [progresses]);
 
   function toggleOutput(name: string) {
     setExpanded((prev) => ({ ...prev, [name]: !prev[name] }));

@@ -5,6 +5,10 @@ const HOST = (() => {
   return `${location.origin}/api`;
 })();
 
+export function getTrackCoverFromId(id: string) {
+  return `${HOST}/track/${id}/cover`;
+}
+
 export async function fetchAPI(
   path: string,
   params?: Record<string, string>,
@@ -25,6 +29,13 @@ export async function fetchAPI(
   });
 }
 
-export function getTrackCoverFromId(id: string) {
-  return `${HOST}/track/${id}/cover`;
+export function listenAPI(path: string, onMessage: (data: any) => void): () => void {
+  if (!path.startsWith("/")) throw new Error(`"${path}" does not start with /`);
+
+  const es = new EventSource(`${HOST}${path}`);
+  es.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    onMessage(data);
+  };
+  return () => es.close();
 }
