@@ -76,7 +76,7 @@ export default function FileBrowserTab() {
                   e.preventDefault();
                   fetch(`${HOST}/file/:by-path/${path.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`)
                     .then((res) => res.json())
-                    .then((data) => c.setCurrentTrack(data));
+                    .then((data) => c.setCurrentTrack(data))
                 }}>
                   {file}
                 </a>
