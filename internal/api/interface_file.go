@@ -10,9 +10,8 @@ type FileList struct {
 	Directories []string `json:"directories"`
 }
 
-func (i *Interface) GetFilesInPath(path string) (FileList, error) {
-	fullPath := filepath.Join(i.config.DataPath, path)
-
+// Requires the path to be an absolute path prefixed by i.config.DataPath
+func (i *Interface) getFilesInPath(fullPath string) (FileList, error) {
 	entries, err := os.ReadDir(fullPath)
 	if err != nil {
 		return FileList{}, err
@@ -33,4 +32,9 @@ func (i *Interface) GetFilesInPath(path string) (FileList, error) {
 		Files:       files,
 		Directories: directories,
 	}, nil
+}
+
+func (i *Interface) ReadFileInPath(path string) (interface{}, error) {
+	fullPath := filepath.Join(i.config.DataPath, path)
+	// TODO: if fullpath is file then return []byte of file, else call getFilesInPath
 }
