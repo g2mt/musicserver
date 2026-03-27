@@ -35,13 +35,11 @@ function TrackList({
 
   const loadMore = useCallback(() => {
     setEndIndex((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
-    setStartIndex((prev) => Math.max(0, prev - PAGE_SIZE));
   }, [tracks.length]);
 
   const loadPrev = useCallback(() => {
     setStartIndex((prev) => Math.max(0, prev - PAGE_SIZE));
-    setEndIndex((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
-  }, [tracks.length]);
+  }, []);
 
   useEffect(() => {
     const bottomSentinel = bottomSentinelRef.current;
