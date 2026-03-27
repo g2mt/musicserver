@@ -86,7 +86,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       }}
     >
       <input
-        type="text"
+        type="search"
         placeholder="Search tracks..."
         value={inputValue}
         onChange={(e) => {
