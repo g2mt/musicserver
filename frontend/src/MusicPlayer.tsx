@@ -8,11 +8,10 @@ import {
   faBackwardStep,
   faForwardStep,
 } from "@fortawesome/free-solid-svg-icons";
-import { Track } from "./Track";
+import { getTrackCover, Track } from "./Track";
 import { HOST } from "./apiserver";
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext, type AppState } from "./AppState";
-import { useBackForward } from "./App";
 
 import "./MusicPlayer.css";
 
@@ -33,6 +32,42 @@ function useAudio(url: string | null) {
   }, [audio]);
 
   return audio;
+}
+
+export function useBackForward() {
+  const c = useContext(AppContext)!;
+
+  const isBackDisabled = useMemo(
+    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
+    [c.enqueuedTrackIndex],
+  );
+  const isForwardDisabled = useMemo(
+    () =>
+      c.enqueuedTrackIndex === null ||
+      c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+    [c.enqueuedTrackIndex, c.enqueuedTracks],
+  );
+
+  function handleBack() {
+    if (isBackDisabled) return;
+    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
+    c.setEnqueuedTrackIndex(prevIndex);
+    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+  }
+
+  function handleForward() {
+    if (isForwardDisabled) return;
+    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
+    c.setEnqueuedTrackIndex(nextIndex);
+    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+  }
+
+  return {
+    handleBack,
+    handleForward,
+    isBackDisabled,
+    isForwardDisabled,
+  };
 }
 
 export function MusicPlayer() {
@@ -103,6 +138,28 @@ export function MusicPlayer() {
 
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
     useBackForward(c);
+
+  useEffect(() => {
+    if ("mediaSession" in navigator && c.currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: c.currentTrack.name,
+        artist: c.currentTrack.artist,
+        album: c.currentTrack.album,
+        artwork: [{ src: getTrackCover(c.currentTrack) }],
+      });
+
+      navigator.mediaSession.setActionHandler("play", () =>
+        c.setIsPlaying(true),
+      );
+      navigator.mediaSession.setActionHandler("pause", () =>
+        c.setIsPlaying(false),
+      );
+      navigator.mediaSession.setActionHandler("previoustrack", handleBack);
+      navigator.mediaSession.setActionHandler("nexttrack", handleForward);
+      navigator.mediaSession.setActionHandler("stop", null);
+    }
+  }, [c.currentTrack]);
+
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 

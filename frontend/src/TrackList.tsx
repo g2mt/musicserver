@@ -90,7 +90,6 @@ function TrackList({
               [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
             c.setEnqueuedTracks(shuffled);
-            c.setEnqueuedTrackIndex(0);
           }}>
             <FontAwesomeIcon icon={faShuffle} />
             Shuffle queue
