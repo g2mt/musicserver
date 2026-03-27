@@ -118,10 +118,8 @@ func (i *Interface) resolveTrackShortId(id string) (string, error) {
 	return longID, nil
 }
 
-// Resolves a path to long ID
+// Resolves a path to long ID. Requires path to be in the data directory
 func (i *Interface) resolveTrackFromPath(path string) (string, error) {
-	path = filepath.Clean(path)
-	path = filepath.Join(i.config.DataPath, path)
 	var longID string
 	err := i.db.QueryRow("SELECT id FROM tracks WHERE path = ?", path).Scan(&longID)
 	if err != nil {
