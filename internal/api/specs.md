@@ -207,3 +207,16 @@ The `name` parameter is expected to be URI encoded.
 ### GET `/album/by-page/[page]`
 
 Returns a list of albums in the page `[page]`. See `/album` endpoint.
+
+## Files
+
+### GET `/file/[path]`
+
+Returns the files and directories in the `[path]` relative to the data directory of the server.
+
+```json
+{
+  "files": ["filename1", "filename2"],
+  "directories": ["directory1"],
+}
+```
