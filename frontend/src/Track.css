@@ -5,6 +5,8 @@
   gap: var(--s3);
   padding: var(--s2);
   border-radius: var(--border-radius);
+  height: 72px;
+  max-height: 72px;
 
   &:hover,
   &.highlighted {
