@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -211,21 +212,25 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return &byteHandler{b: data}, "text/json", nil
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
-		if url, ok := strings.CutPrefix(id, ":external/"); ok {
+		if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
 			if method == "POST" {
-				success, err := i.DownloadExternalTrack(url)
+				success, err := i.DownloadExternalTrack(extUrl)
 				if err != nil {
 					return nil, "", err
 				}
 				response = success
 			} else if method == "GET" {
-				response, err = i.GetExternalTrackByURL(url)
+				response, err = i.GetExternalTrackByURL(extUrl)
 			} else {
 				return nil, "", errors.New("method not allowed")
 			}
 		} else if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
+			path, err = url.QueryUnescape(path)
+			if err != nil {
+				return nil, "", err
+			}
 			id, err = i.resolveTrackFromPath(path)
 			if err != nil {
 				return nil, "", err

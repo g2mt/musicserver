@@ -24,6 +24,7 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 - React is used for the frontend.
 - Use functional components for React.
 - Each element should be in its own file. Source files storing element definition shall be in the format "TitleCase.tsx".
+- Use the `react-toastify` library for showing errors.
 
 ### CSS
 

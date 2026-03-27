@@ -176,6 +176,8 @@ Returns a JSON string containing the output captured from the media downloader.
 
 Resolves the track ID by path and redirects to `/track/[id]`.
 
+May return an error.
+
 ### DELETE `/track`
 
 Deletes (forgets) every track and album in the database. This does *NOT* remove the files corresponding to the tracks.
