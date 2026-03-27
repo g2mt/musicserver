@@ -225,17 +225,26 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", errors.New("method not allowed")
 		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
 			path, err = url.QueryUnescape(path)
-			path = filepath.Clean(path)
-			path = filepath.Join(i.config.DataPath, path)
 			if err != nil {
 				return nil, "", err
 			}
-			id, err = i.resolveTrackFromPath(path)
+			path = filepath.Clean(path)
+			fullPath := filepath.Join(i.config.DataPath, path)
+
+			relPath, err := filepath.Rel(i.config.DataPath, fullPath)
+			if err != nil {
+				return nil, "", err
+			}
+			if strings.HasPrefix(relPath, "..") {
+				return nil, "", errors.New("unexpected path outside of data directory")
+			}
+
+			id, err = i.resolveTrackFromPath(fullPath)
 			if err != nil {
 				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
 					track := schema.Track{
 						Name: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
-						Path: path,
+						Path: relPath,
 					}
 					data, err := json.Marshal(track)
 					if err != nil {
