@@ -288,6 +288,17 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	}
 	track.LongID = longID
 
+	// Start a single transaction for the entire operation
+	tx, err := i.db.Begin()
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
 	// Determine short ID according to the conflict resolution algorithm
 	// Start with first 6 characters
 	shortID := longID[:MinShortIdLength]
@@ -298,10 +309,10 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		// Try to insert the mapping shortID -> longID
 		// First, check if shortID already exists
 		var existingLongID string
-		err := i.db.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", shortID).Scan(&existingLongID)
+		err := tx.QueryRow("SELECT long_id FROM short_ids WHERE short_id = ?", shortID).Scan(&existingLongID)
 		if err == sql.ErrNoRows {
 			// No conflict, insert and break
-			_, err = i.db.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", shortID, longID)
+			_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", shortID, longID)
 			if err != nil {
 				return "", err
 			}
@@ -325,19 +336,12 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 
 		// Update the existing mapping to use the expanded short ID
 		// We need to delete the old row and insert the new one (or update)
-		// Use a transaction for consistency
-		tx, err := i.db.Begin()
-		if err != nil {
-			return "", err
-		}
 		_, err = tx.Exec("UPDATE tracks SET short_id = ? WHERE id = ?", newOldShortID, existingLongID)
 		if err != nil {
-			tx.Rollback()
 			return "", err
 		}
 		_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", newOldShortID, existingLongID)
 		if err != nil {
-			tx.Rollback()
 			return "", err
 		}
 
@@ -351,11 +355,6 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		// We'll continue the loop to check for conflicts again
 		_, err = tx.Exec("INSERT INTO short_ids (short_id, long_id) VALUES (?, ?)", shortID, longID)
 		if err != nil {
-			tx.Rollback()
-			return "", err
-		}
-		err = tx.Commit()
-		if err != nil {
 			return "", err
 		}
 		// After successful insertion, break
@@ -366,7 +365,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	track.ShortID = shortID
 
 	// Insert track into tracks table
-	_, err := i.db.Exec(
+	_, err = tx.Exec(
 		"INSERT INTO tracks (id, short_id, name, path, artist, album) VALUES (?, ?, ?, ?, ?, ?)",
 		track.LongID, track.ShortID, track.Name, track.Path, track.Artist, track.Album,
 	)
@@ -375,7 +374,13 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	}
 
 	// Ensure album exists in albums table
-	_, err = i.db.Exec("INSERT OR IGNORE INTO albums (name) VALUES (?)", track.Album)
+	_, err = tx.Exec("INSERT OR IGNORE INTO albums (name) VALUES (?)", track.Album)
+	if err != nil {
+		return "", err
+	}
+
+	// Commit the transaction
+	err = tx.Commit()
 	if err != nil {
 		return "", err
 	}
