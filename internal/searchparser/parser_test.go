@@ -107,6 +107,15 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:  "negated quoted string",
+			query: `-"hello world" abc`,
+			expected: Result{
+				Words:     []string{"abc"},
+				Negated:   []string{"hello world"},
+				Operators: []Operator{},
+			},
+		},
 	}
 
 	for _, tt := range tests {

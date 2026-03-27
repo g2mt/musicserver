@@ -74,16 +74,16 @@ func isWordChar(c byte) bool {
 }
 
 func parseNegated(s string) (string, int) {
-	if len(s) < 2 || s[0] != '-' || !isWordChar(s[1]) {
+	if len(s) < 2 || s[0] != '-' || !(isWordChar(s[1]) || s[1] == '"') {
 		return "", 0
 	}
 
-	start := 1
-	i := 1
-	for i < len(s) && isWordChar(s[i]) {
-		i++
+	s = s[1:]
+	if quoted, consumed := parseQuoted(s); consumed > 0 {
+		return quoted, 1 + consumed
 	}
-	return s[start:i], i
+	word, consumed := parseWord(s)
+	return word, 1 + consumed
 }
 
 func parseQuoted(s string) (string, int) {
