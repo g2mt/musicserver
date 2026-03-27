@@ -30,6 +30,14 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	reader, contentType, err := r.iface.handleRequest(req.URL.Path, req.Method, params)
+	for {
+		if re, ok := reader.(*redirectHandler); ok {
+			reader, contentType, err = r.iface.handleRequest(re.path, re.method, re.params)
+		} else {
+			break
+		}
+	}
+
 	if err != nil {
 		data, _ := json.Marshal(struct {
 			Error string `json:"error"`
@@ -39,29 +47,5 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	if data, ok := reader.([]byte); ok {
-		w.Write(data)
-	} else if reader, ok := reader.(io.ReadCloser); ok {
-		w.Header().Set("Cache-Control", "no-cache")
-		w.Header().Set("Connection", "keep-alive")
-
-		flusher, ok := w.(http.Flusher)
-		if !ok {
-			http.Error(w, "{error:\"Streaming not supported\"}", http.StatusInternalServerError)
-		}
-
-		scanner := bufio.NewScanner(reader)
-		for scanner.Scan() {
-			w.Write(scanner.Bytes())
-			w.Write([]byte{'\n'})
-			flusher.Flush()
-		}
-		if err := scanner.Err(); err != nil {
-			slog.Error(err.Error())
-			data, _ := json.Marshal(struct {
-				Error string `json:"error"`
-			}{Error: err.Error()})
-			w.Write(data)
-		}
-	}
+	reader.HandleHTTP(w, req)
 }

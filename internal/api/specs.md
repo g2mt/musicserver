@@ -172,6 +172,10 @@ Starts downloading the URL `url` using the media downloader specified in the con
 
 Returns a JSON string containing the output captured from the media downloader.
 
+### GET `/track/:by-path/[path]`
+
+Resolves the track ID by path and redirects to `/track/[id]`.
+
 ### DELETE `/track`
 
 Deletes (forgets) every track and album in the database. This does *NOT* remove the files corresponding to the tracks.
