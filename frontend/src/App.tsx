@@ -10,6 +10,7 @@ import { HOST } from "./apiserver";
 import { faMusic, faGear, faFolder, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
+import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
 import { PLAYER_COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
@@ -253,6 +254,7 @@ export function App() {
   return (
     <AppContext value={c}>
       <ToastContainer position="bottom-right" theme="dark" />
+      <ContextMenu />
       <div className="app-layout">
         <div className="search-bar-container">
           <SearchBar

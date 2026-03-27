@@ -1,0 +1,19 @@
+.context-menu {
+  z-index: 1000;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--s2);
+  padding: var(--s1) 0;
+  min-width: 10rem;
+  box-shadow: 0 var(--s2) var(--s4) rgba(0, 0, 0, 0.3);
+
+  .context-menu-item {
+    padding: var(--s2) var(--s3);
+    cursor: pointer;
+    font-size: small;
+
+    &:hover {
+      background: var(--color-hover);
+    }
+  }
+}
