@@ -36,16 +36,21 @@ export function Track({
         className="track-cover"
         src={getTrackCover(track)}
         onClick={(e) => {
-          showContextMenu(e.currentTarget, (
+          showContextMenu(
+            e.currentTarget,
             <>
               <ContextMenuItem
                 icon={faCopy}
-                onClick={() => navigator.clipboard.writeText(`${track.name} - ${track.album}`)}
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    `${track.name} - ${track.artist}`,
+                  )
+                }
               >
                 Copy info
               </ContextMenuItem>
-            </>
-          ));
+            </>,
+          );
         }}
       />
       <div className="track-info">
