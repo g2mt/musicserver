@@ -1,12 +1,12 @@
 .context-menu {
   position: fixed;
-  z-index: 1000;
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  z-index: 99;
+  background: var(--color-front);
+  color: var(--color-front-text);
   border-radius: var(--border-radius);
   padding: var(--s1) 0;
   min-width: 10rem;
-  box-shadow: 0 0 4px var(--shadow);
+  outline: 1px solid var(--accent-color);
 
   .context-menu-item {
     display: flex;
@@ -17,7 +17,8 @@
     font-size: small;
 
     &:hover {
-      background: var(--color-accent);
+      background: var(--accent-color-light);
+      color: var(--accent-color-light-text);
     }
   }
 }

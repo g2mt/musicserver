@@ -6,7 +6,6 @@
   flex-direction: column;
   box-shadow: 0 -2px 8px var(--shadow);
   background: var(--front-bg);
-  z-index: 100;
 
   .scrubber-bar {
     width: 100%;
