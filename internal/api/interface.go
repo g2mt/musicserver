@@ -235,7 +235,17 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			}
 			id, err = i.resolveTrackFromPath(path)
 			if err != nil {
-				// TODO: check if path ends with an audio extension, if it does then create a temporary Track and set `response` to that
+				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
+					track := schema.Track{
+						Name: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
+						Path: path,
+					}
+					data, err := json.Marshal(track)
+					if err != nil {
+						return nil, "", err
+					}
+					return &byteHandler{b: data}, "text/json", nil
+				}
 				return nil, "", err
 			} else {
 				return &redirectHandler{path: "/track/" + id}, "text/json", nil
