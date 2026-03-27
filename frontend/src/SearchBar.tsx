@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { AppContext } from "./AppState";
 import { Track } from "./Track";
-import { HOST } from "./apiserver";
+import { fetchAPI } from "./apiserver";
 import { toast } from "react-toastify";
 import ConfirmBox from "./ConfirmBox";
 import type { TrackData } from "./TrackData";
@@ -28,15 +28,11 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   }, [searchQuery]);
 
   const confirmTrackDownload = async (url: string) => {
+    const encodedUrl = encodeURIComponent(url);
     try {
-      const response = await fetch(
-        `${HOST}/track/:external/${encodeURIComponent(url)}`,
+      const trackData: TrackData = await fetchAPI(
+        `/track/:external/${encodedUrl}`,
       );
-      if (!response.ok) {
-        toast.error("Unable to get track data");
-        return;
-      }
-      const trackData: TrackData = await response.json();
       c.addConfirmBox(
         <ConfirmBox
           onAccept={() => {
@@ -45,17 +41,14 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
                 Download for <b>{url}</b> started
               </>,
             );
-            fetch(`${HOST}/track/:external/${encodeURIComponent(url)}`, {
-              method: "POST",
-            })
-              .then((res) => {
-                if (!res.ok) throw new Error();
+            fetchAPI(`/track/:external/${encodedUrl}`, undefined, "POST")
+              .then(() =>
                 toast.success(
                   <>
                     Download for <b>{url}</b> completed
                   </>,
-                );
-              })
+                ),
+              )
               .catch(() =>
                 toast.error(
                   <>
@@ -69,7 +62,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
           <Track highlighted={true} track={trackData} />
         </ConfirmBox>,
       );
-    } catch {
+    } catch (e) {
       toast.error("Unable to get track data");
     }
   };

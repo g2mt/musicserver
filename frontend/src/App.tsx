@@ -6,7 +6,7 @@ import { MusicPlayer } from "./MusicPlayer";
 import SearchBar from "./SearchBar";
 import React, { useEffect, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
-import { HOST } from "./apiserver";
+import { fetchAPI } from "./apiserver";
 import { faMusic, faGear, faFolder, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
@@ -69,9 +69,9 @@ export function App() {
   }, [c.currentTrack, c.darkMode]);
 
   useEffect(() => {
-    fetch(`${HOST}/track`)
-      .then((res) => res.json())
-      .then((data) => setFullTracksFromData(data));
+    fetchAPI("/track")
+      .then((data) => setFullTracksFromData(data))
+      .catch(() => setFullTracksFromData([]));
   }, []);
 
   // Hash params (parsed like URLSearchParams but from window.location.hash)
@@ -111,8 +111,7 @@ export function App() {
       didSetToPreviousWorkingValue.current = false;
       return;
     }
-    fetch(`${HOST}/track?q=${encodeURIComponent(c.searchQuery)}`)
-      .then((res) => res.json())
+    fetchAPI("/track", { q: c.searchQuery })
       .then((data) => {
         setFullTracksFromData(data);
         if (data === null || data.length === 0) {
@@ -123,6 +122,14 @@ export function App() {
           }
         } else {
           c.previousWorkingValue.current = c.searchQuery;
+        }
+      })
+      .catch(() => {
+        setFullTracksFromData([]);
+        if (!didSetToPreviousWorkingValue.current) {
+          didSetToPreviousWorkingValue.current = true;
+          c.setSearchQuery(c.previousWorkingValue.current);
+          c.previousWorkingValue.current = "";
         }
       });
   }, [c.searchQuery]);

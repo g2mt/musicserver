@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { HOST } from "./apiserver";
+import { fetchAPI } from "./apiserver";
 import { toast } from "react-toastify";
 import { faRotate, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,9 +12,8 @@ function SettingsTab() {
   const c = useContext(AppContext)!;
 
   function rescanMusic() {
-    fetch(`${HOST}/track`, { method: "POST" })
-      .then((res) => {
-        if (!res.ok) throw new Error();
+    fetchAPI("/track", undefined, "POST")
+      .then(() => {
         toast.success("Syncing complete");
       })
       .catch(() => toast.error("Sync failed"));

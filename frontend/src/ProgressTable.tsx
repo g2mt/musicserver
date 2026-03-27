@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { HOST } from "./apiserver";
+import { fetchAPI } from "./apiserver";
 
 interface ProgressEntry {
   value: number;
@@ -26,15 +26,14 @@ function ProgressTable() {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    fetch(`${HOST}/progress`)
-      .then((res) => res.json())
+    fetchAPI("/progress")
       .then((data) => setProgresses(data ?? {}))
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     // Set up SSE for global progress events
-    const es = new EventSource(`${HOST}/progress/:events`);
+    const es = new EventSource(`${fetchAPI("/progress/:events").url}`);
 
     es.onmessage = (event) => {
       const data = JSON.parse(event.data) as ProgressEventWithSource;

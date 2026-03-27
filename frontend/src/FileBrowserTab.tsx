@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder, faFile, faFolderOpen, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { HOST } from "./apiserver";
+import { fetchAPI } from "./apiserver";
 import { AppContext } from "./AppState";
 
 import "./FileBrowserTab.css";
@@ -19,9 +19,12 @@ export default function FileBrowserTab() {
 
   useEffect(() => {
     const encodedPath = path.map(encodeURIComponent).join("/");
-    fetch(`${HOST}/file/${encodedPath}`)
-      .then((res) => res.json())
-      .then((data) => setFileList(data));
+    fetchAPI(`/file/${encodedPath}`)
+      .then((data) => setFileList(data))
+      .catch((err) => {
+        toast.error(`Failed to load directory: ${err.message}`);
+        setFileList({ files: [], directories: [] });
+      });
   }, [path]);
 
   const crumbs = path;
@@ -84,8 +87,7 @@ export default function FileBrowserTab() {
               <td>
                 <a href="#" onClick={(e) => {
                   e.preventDefault();
-                  fetch(`${HOST}/track/:by-path/${path.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`)
-                    .then((res) => res.json())
+                  fetchAPI(`/track/:by-path/${path.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`)
                     .then((data) => {
                       if (data.error) {
                         toast.error(data.error);
@@ -93,6 +95,7 @@ export default function FileBrowserTab() {
                         c.setCurrentTrack(data);
                       }
                     })
+                    .catch((err) => toast.error(`Failed to load track: ${err.message}`));
                 }}>
                   {file}
                 </a>
