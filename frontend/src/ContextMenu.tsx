@@ -22,6 +22,16 @@ type ContextMenuState = {
 
 let setMenuState: ((state: ContextMenuState) => void) | null = null;
 
+/*
+  Usage:
+
+  showContextMenu(anchorElement, (
+    <>
+      <ContextMenuItem onClick=...>1</ContextMenuItem>
+      <ContextMenuItem onClick=...>2</ContextMenuItem>
+    </>
+  ))
+ */
 export function showContextMenu(
   anchor: HTMLElement,
   content: React.ReactNode,
@@ -69,7 +79,6 @@ export function ContextMenu() {
   const showAbove = spaceBelow < menuHeight && anchorRect.top > spaceBelow;
 
   const style: React.CSSProperties = {
-    position: "fixed",
     left: anchorRect.left,
     ...(showAbove
       ? { bottom: window.innerHeight - anchorRect.top }
