@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect, useRef, useCallback } from "react";
 import { Track } from "./Track";
 import { type TrackData } from "./TrackData";
 import { AppContext } from "./AppState";
@@ -6,6 +6,8 @@ import { faMinus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import "./TrackList.css";
+
+const PAGE_SIZE = 50;
 
 function TrackList({
   tracks,
@@ -17,6 +19,33 @@ function TrackList({
   canUnqueue?: boolean;
 }) {
   const c = useContext(AppContext)!;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  // Reset visible count when tracks array changes
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [tracks]);
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, tracks.length));
+  }, [tracks.length]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore();
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [loadMore]);
+
+  const visibleTracks = tracks.slice(0, visibleCount);
+
   return (
     <div className="track-list">
       {canUnqueue && (
@@ -25,7 +54,7 @@ function TrackList({
           Remove all from queue
         </button>
       )}
-      {tracks.map((track, index) => (
+      {visibleTracks.map((track, index) => (
         <Track
           key={
             canUnqueue
@@ -38,6 +67,7 @@ function TrackList({
           canUnqueue={canUnqueue}
         />
       ))}
+      {visibleCount < tracks.length && <div ref={sentinelRef} />}
     </div>
   );
 }
