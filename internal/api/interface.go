@@ -331,6 +331,12 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		}
 
 		response, err = i.GetAlbumByName(name)
+	} else if filePath, ok := strings.CutPrefix(path, "/file/"); ok {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
+		response, err = i.GetFilesInPath(filePath)
 	} else {
 		return nil, "", errors.New("invalid api request")
 	}
