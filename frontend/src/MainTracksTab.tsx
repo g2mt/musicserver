@@ -19,7 +19,6 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
   const elRef = useRef<HTMLDivElement | null>(null);
-  const [limit, setLimit] = useState(50);
 
   const updateQuery = (text: string, searchGroup: string = "after|before") => {
     c.setSearchQuery(
@@ -31,8 +30,8 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   };
 
   const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newLimit = e.target.value === "unlimited" ? 0 : Number(e.target.value);
-    setLimit(newLimit);
+    e.preventDefault();
+    const newLimit = e.target.value === "unlimited" ? -1 : Number(e.target.value);
     updateQuery(`limit:${newLimit}`, "limit");
   };
 
@@ -63,9 +62,10 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
       <div className="main-tracks-controls-right">
         <select
           className="limit-select"
-          value={limit === 0 ? "unlimited" : limit}
+          value=""
           onChange={handleLimitChange}
         >
+          <option value="" style={{"fontStyle": "italic"}}>limit</option>
           <option value={50}>50</option>
           <option value={100}>100</option>
           <option value={150}>150</option>

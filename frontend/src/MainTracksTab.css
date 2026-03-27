@@ -3,16 +3,17 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--s2);
+
+  .main-tracks-controls-left,
+  .main-tracks-controls-right {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+  }
+
+  .limit-select {
+    padding: var(--s1);
+    font-size: small;
+  }
 }
 
-.main-tracks-controls-left,
-.main-tracks-controls-right {
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-}
-
-.limit-select {
-  padding: var(--s1);
-  font-size: small;
-}
