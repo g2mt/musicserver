@@ -10,7 +10,7 @@ import { HOST } from "./apiserver";
 import { faMusic, faGear, faFolder } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
-import { AppContext, saveConfig, type AppState } from "./AppState";
+import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -63,16 +63,8 @@ export function App() {
   [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number | null>(
     null,
   );
-  [a.darkMode, a.setDarkMode] = useState(false);
+  [a.darkMode, a.setDarkMode] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
   [a.showBlurredCover, a.setShowBlurredCover] = useState(true);
-
-  useEffect(() => {
-    window.addEventListener("beforeunload", () => {
-      saveConfig(a);
-    });
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    a.setDarkMode(prefersDark);
-  }, []);
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", a.darkMode);
@@ -281,6 +273,14 @@ export function App() {
 
   // Left-side tab
   const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">("tracks");
+
+  useEffect(() => {
+    // delay until everything is settled
+    const timeout = setTimeout(() => {
+      mergeConfig(a);
+    }, 0);
+    return () => clearTimeout(timeout);
+  });
 
   return (
     <AppContext value={a}>
