@@ -51,52 +51,54 @@ export function useBackForward(c: AppState) {
 }
 
 export function App() {
-  const a = {} as AppState;
+  const c = {} as AppState;
 
   // State variables
-  [a.currentTrack, a.setCurrentTrack] = useState<TrackData | null>(null);
-  [a.isPlaying, a.setIsPlaying] = useState(false);
-  [a.progress, a.setProgress] = useState(0);
-  [a.duration, a.setDuration] = useState(0);
-  [a.volume, a.setVolume] = useState(1);
-  [a.muted, a.setMuted] = useState(false);
-  [a.enqueuedTrackIndex, a.setEnqueuedTrackIndex] = useState<number | null>(
+  [c.currentTrack, c.setCurrentTrack] = useState<TrackData | null>(null);
+  [c.isPlaying, c.setIsPlaying] = useState(false);
+  [c.progress, c.setProgress] = useState(0);
+  [c.duration, c.setDuration] = useState(0);
+  [c.volume, c.setVolume] = useState(1);
+  [c.muted, c.setMuted] = useState(false);
+  [c.enqueuedTrackIndex, c.setEnqueuedTrackIndex] = useState<number | null>(
     null,
   );
-  [a.darkMode, a.setDarkMode] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
-  [a.showBlurredCover, a.setShowBlurredCover] = useState(true);
+  [c.darkMode, c.setDarkMode] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
+  [c.showBlurredCover, c.setShowBlurredCover] = useState(true);
 
   useEffect(() => {
-    document.body.classList.toggle("dark-mode", a.darkMode);
-  }, [a.darkMode]);
+    document.body.classList.toggle("dark-mode", c.darkMode);
+  }, [c.darkMode]);
 
   // Media Session API
-  const { handleBack, handleForward } = useBackForward(a);
+  const { handleBack, handleForward } = useBackForward(c);
   useEffect(() => {
-    if ("mediaSession" in navigator && a.currentTrack) {
+    if ("mediaSession" in navigator && c.currentTrack) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: a.currentTrack.name,
-        artist: a.currentTrack.artist,
-        album: a.currentTrack.album,
-        artwork: [{ src: getTrackCover(a.currentTrack) }],
+        title: c.currentTrack.name,
+        artist: c.currentTrack.artist,
+        album: c.currentTrack.album,
+        artwork: [{ src: getTrackCover(c.currentTrack) }],
       });
 
       navigator.mediaSession.setActionHandler("play", () =>
-        a.setIsPlaying(true),
+        c.setIsPlaying(true),
       );
       navigator.mediaSession.setActionHandler("pause", () =>
-        a.setIsPlaying(false),
+        c.setIsPlaying(false),
       );
       navigator.mediaSession.setActionHandler("previoustrack", handleBack);
       navigator.mediaSession.setActionHandler("nexttrack", handleForward);
       navigator.mediaSession.setActionHandler("stop", null);
     }
-  }, [a.currentTrack]);
+  }, [c.currentTrack]);
 
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
-    if (a.currentTrack && a.darkMode && a.showBlurredCover) {
+    if (c.currentTrack && c.darkMode && c.showBlurredCover) {
       if (overlay.childElementCount === 0) {
         overlay.innerHTML = `
         <style>:root { fill: #000; stroke: none; }</style>
@@ -112,14 +114,14 @@ export function App() {
         <image width="100%" href="" filter="url(#blur)"/>`;
       }
       const image = overlay.querySelector("image");
-      const cover = getTrackCover(a.currentTrack);
+      const cover = getTrackCover(c.currentTrack);
       if (image && cover !== image.getAttribute("href")) {
         image.setAttribute("href", cover);
       }
     } else if (overlay.childElementCount > 0) {
       overlay.innerHTML = "";
     }
-  }, [a.currentTrack, a.darkMode]);
+  }, [c.currentTrack, c.darkMode]);
 
   useEffect(() => {
     fetch(`${HOST}/track`)
@@ -142,15 +144,15 @@ export function App() {
 
   // Search
   const initialHashParams = getHashParams();
-  [a.searchQuery, a.setSearchQuery] = useState(
+  [c.searchQuery, c.setSearchQuery] = useState(
     () => initialHashParams.get("q") ?? "",
   );
-  a.previousWorkingValue = useRef("");
+  c.previousWorkingValue = useRef("");
   const didSetToPreviousWorkingValue = useRef(false);
   useEffect(() => {
     function onHashchange() {
       const hashParams = getHashParams();
-      a.setSearchQuery(hashParams.get("q") ?? "");
+      c.setSearchQuery(hashParams.get("q") ?? "");
     }
 
     window.addEventListener("hashchange", onHashchange);
@@ -159,26 +161,26 @@ export function App() {
     };
   });
   useEffect(() => {
-    setHashParam("q", a.searchQuery);
+    setHashParam("q", c.searchQuery);
     if (didSetToPreviousWorkingValue.current) {
       didSetToPreviousWorkingValue.current = false;
       return;
     }
-    fetch(`${HOST}/track?q=${encodeURIComponent(a.searchQuery)}`)
+    fetch(`${HOST}/track?q=${encodeURIComponent(c.searchQuery)}`)
       .then((res) => res.json())
       .then((data) => {
         setFullTracksFromData(data);
         if (data === null || data.length === 0) {
           if (!didSetToPreviousWorkingValue.current) {
             didSetToPreviousWorkingValue.current = true;
-            a.setSearchQuery(a.previousWorkingValue.current);
-            a.previousWorkingValue.current = "";
+            c.setSearchQuery(c.previousWorkingValue.current);
+            c.previousWorkingValue.current = "";
           }
         } else {
-          a.previousWorkingValue.current = a.searchQuery;
+          c.previousWorkingValue.current = c.searchQuery;
         }
       });
-  }, [a.searchQuery]);
+  }, [c.searchQuery]);
 
   // Confirm boxes
   const [confirmBoxes, setConfirmBoxes] = useState<
@@ -188,7 +190,7 @@ export function App() {
     }[]
   >([]);
   let confirmBoxesCounter = useRef(0);
-  a.addConfirmBox = (confirmBox: React.ReactNode) => {
+  c.addConfirmBox = (confirmBox: React.ReactNode) => {
     setConfirmBoxes([
       { key: confirmBoxesCounter.current, el: confirmBox },
       ...confirmBoxes,
@@ -211,29 +213,29 @@ export function App() {
         case " ":
         case "k":
           e.preventDefault();
-          a.setIsPlaying((prev) => !prev);
+          c.setIsPlaying((prev) => !prev);
           break;
         case "m":
           e.preventDefault();
-          a.setMuted((prev) => !prev);
+          c.setMuted((prev) => !prev);
           break;
         case "j":
           e.preventDefault();
-          a.setProgress((prev) => Math.max(0, prev - 10));
+          c.setProgress((prev) => Math.max(0, prev - 10));
           break;
         case "l":
           e.preventDefault();
-          a.setProgress((prev) => Math.min(a.duration, prev + 10));
+          c.setProgress((prev) => Math.min(c.duration, prev + 10));
           break;
         case "(":
           e.preventDefault();
-          a.setVolume((prev) => Math.max(0, prev - 0.05));
-          a.setMuted(false);
+          c.setVolume((prev) => Math.max(0, prev - 0.05));
+          c.setMuted(false);
           break;
         case ")":
           e.preventDefault();
-          a.setVolume((prev) => Math.min(1, prev + 0.05));
-          a.setMuted(false);
+          c.setVolume((prev) => Math.min(1, prev + 0.05));
+          c.setMuted(false);
           break;
       }
     }
@@ -242,7 +244,7 @@ export function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [a.duration]);
+  }, [c.duration]);
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
@@ -256,40 +258,42 @@ export function App() {
   };
 
   // Track queue
-  [a.enqueuedTracks, a.setEnqueuedTracks] = useState<TrackData[]>([]);
-  a.enqueueTrack = (track: TrackData) => {
-    a.setEnqueuedTracks([...a.enqueuedTracks, track]);
+  [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
+  c.enqueueTrack = (track: TrackData) => {
+    c.setEnqueuedTracks([...c.enqueuedTracks, track]);
   };
-  a.unqueueTrack = (index: number) => {
-    a.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
+  c.unqueueTrack = (index: number) => {
+    c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
     // If we remove a track before the current index, adjust the index
-    if (a.enqueuedTrackIndex !== null && index < a.enqueuedTrackIndex) {
-      a.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
-    } else if (index === a.enqueuedTrackIndex) {
+    if (c.enqueuedTrackIndex !== null && index < c.enqueuedTrackIndex) {
+      c.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
+    } else if (index === c.enqueuedTrackIndex) {
       // If we remove the currently highlighted track, reset index
-      a.setEnqueuedTrackIndex(null);
+      c.setEnqueuedTrackIndex(null);
     }
   };
 
   // Left-side tab
-  const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">("tracks");
+  const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">(
+    "tracks",
+  );
 
   useEffect(() => {
     // delay until everything is settled
     const timeout = setTimeout(() => {
-      mergeConfig(a);
+      mergeConfig(c);
     }, 0);
     return () => clearTimeout(timeout);
   });
 
   return (
-    <AppContext value={a}>
+    <AppContext value={c}>
       <ToastContainer position="bottom-right" theme="dark" />
       <div className="app-layout">
         <div className="search-bar-container">
           <SearchBar
-            searchQuery={a.searchQuery}
-            setSearchQuery={a.setSearchQuery}
+            searchQuery={c.searchQuery}
+            setSearchQuery={c.setSearchQuery}
           />
         </div>
         <div className="app-main">
@@ -326,11 +330,11 @@ export function App() {
           </div>
           <div
             className="right-side"
-            style={{ display: a.enqueuedTracks.length > 0 ? "block" : "none" }}
+            style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
           >
             <TrackList
-              tracks={a.enqueuedTracks}
-              unqueueTrack={a.unqueueTrack}
+              tracks={c.enqueuedTracks}
+              unqueueTrack={c.unqueueTrack}
             />
           </div>
         </div>
