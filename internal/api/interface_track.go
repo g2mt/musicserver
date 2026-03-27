@@ -69,8 +69,9 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 				whereClauses = append(whereClauses, "(artist LIKE ?)")
 				args = append(args, "%"+op.Value+"%")
 			case "path":
+				path := filepath.Join(i.config.DataPath, op.Value)
 				whereClauses = append(whereClauses, "(path LIKE ?)")
-				args = append(args, op.Value+"%")
+				args = append(args, path+"%")
 			case "limit":
 				parsedLimit := MaxPageCount
 				if op.Value != "" {

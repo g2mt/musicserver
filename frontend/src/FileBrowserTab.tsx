@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFolder, faFile, faFolderOpen } from "@fortawesome/free-solid-svg-icons";
+import { faFolder, faFile, faFolderOpen, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import { HOST } from "./apiserver";
 import { AppContext } from "./AppState";
@@ -51,7 +51,7 @@ export default function FileBrowserTab() {
         <tbody>
           {path.length > 0 && (
             <tr>
-              <td><FontAwesomeIcon icon={faFolder} /></td>
+              <td width={15}><FontAwesomeIcon icon={faFolder} /></td>
               <td>
                 <a href="#" onClick={(e) => { e.preventDefault(); setPath(path.slice(0, -1)); }}>
                   ..
@@ -61,10 +61,18 @@ export default function FileBrowserTab() {
           )}
           {fileList.directories?.map((dir) => (
             <tr key={dir}>
-              <td><FontAwesomeIcon icon={faFolder} /></td>
+              <td width={15}><FontAwesomeIcon icon={faFolder} /></td>
               <td>
                 <a href="#" onClick={(e) => { e.preventDefault(); setPath([...path, dir]); }}>
                   {dir}
+                </a>
+              </td>
+              <td width={15}>
+                <a href="#" onClick={(e) => {
+                  e.preventDefault();
+                  c.setSearchQuery(`path:"${[...path, dir].join("/")}"`);
+                }}>
+                  <FontAwesomeIcon icon={faSearch} />
                 </a>
               </td>
             </tr>
