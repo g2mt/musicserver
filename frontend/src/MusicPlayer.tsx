@@ -137,7 +137,7 @@ export function MusicPlayer() {
   }
 
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
-    useBackForward(c);
+    useBackForward();
 
   useEffect(() => {
     if ("mediaSession" in navigator && c.currentTrack) {
@@ -158,6 +158,8 @@ export function MusicPlayer() {
       navigator.mediaSession.setActionHandler("nexttrack", handleForward);
       navigator.mediaSession.setActionHandler("stop", null);
     }
+
+    document.title = c.currentTrack?.name ?? "Music Player";
   }, [c.currentTrack]);
 
   const windowWidth = useWindowWidth();

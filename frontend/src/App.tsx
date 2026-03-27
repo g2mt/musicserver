@@ -187,7 +187,7 @@ export function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [c.duration]);
+  }, []);
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
