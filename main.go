@@ -102,12 +102,16 @@ func main() {
 
 	if *debug {
 		// Mount frontend from filesystem in debug mode
-		execPath, err := os.Executable()
+		workingPath, err := os.Getwd()
 		if err != nil {
-			slog.Error("Error getting executable path", "err", err)
+			slog.Error("Error getting working directory", "err", err)
 			os.Exit(1)
 		}
-		frontendDir := filepath.Join(filepath.Dir(execPath), "frontend", "dist")
+		frontendDir := filepath.Join(workingPath, "frontend", "dist")
+		if info, err := os.Stat(frontendDir); err != nil || !info.IsDir() {
+			slog.Error("Expected path to be a directory", "path", frontendDir)
+			os.Exit(1)
+		}
 		slog.Debug("Serving frontend from filesystem", "path", frontendDir)
 		http.Handle("/", http.FileServer(http.Dir(frontendDir)))
 	} else {

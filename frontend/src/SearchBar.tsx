@@ -89,6 +89,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       className="search-bar"
       onSubmit={(e) => {
         e.preventDefault();
+        c.previousWorkingValue.current = inputValue;
         setSearchQuery(inputValue);
       }}
     >

@@ -151,7 +151,7 @@ export function App() {
   [a.searchQuery, a.setSearchQuery] = useState(
     () => getHashParams().get("q") ?? "",
   );
-  const previousWorkingValue = useRef("");
+  a.previousWorkingValue = useRef("");
   const didSetToPreviousWorkingValue = useRef(false);
   useEffect(() => {
     setHashParam("q", a.searchQuery);
@@ -166,11 +166,11 @@ export function App() {
         if (data === null || data.length === 0) {
           if (!didSetToPreviousWorkingValue.current) {
             didSetToPreviousWorkingValue.current = true;
-            a.setSearchQuery(previousWorkingValue.current);
-            previousWorkingValue.current = "";
+            a.setSearchQuery(a.previousWorkingValue.current);
+            a.previousWorkingValue.current = "";
           }
         } else {
-          previousWorkingValue.current = a.searchQuery;
+          a.previousWorkingValue.current = a.searchQuery;
         }
       });
   }, [a.searchQuery]);

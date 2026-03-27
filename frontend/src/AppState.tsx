@@ -1,4 +1,4 @@
-import { createContext, type Dispatch, type SetStateAction } from "react";
+import { createContext, type Dispatch, type RefObject, type SetStateAction } from "react";
 import * as z from "zod";
 import type React from "react";
 import { toast } from "react-toastify";
@@ -35,6 +35,7 @@ export interface AppState extends AppStateData {
   setSearchQuery: (_: string) => void;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
+  previousWorkingValue: RefObject<string>;
 }
 
 export const AppContext = createContext<AppState | null>(null);
