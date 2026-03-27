@@ -20,6 +20,7 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 
 	var longBeforeId string
 	var err error
+	limit := MaxPageCount
 
 	// Apply search filters if search is not nil
 	if search != nil {
@@ -66,6 +67,18 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 			case "artist":
 				whereClauses = append(whereClauses, "(artist LIKE ?)")
 				args = append(args, "%"+op.Value+"%")
+			case "path":
+				whereClauses = append(whereClauses, "(path LIKE ?)")
+				args = append(args, op.Value+"%")
+			case "limit":
+				parsedLimit := MaxPageCount
+				if op.Value != "" {
+					parsedLimit, err = strconv.Atoi(op.Value)
+					if err != nil {
+						parsedLimit = MaxPageCount
+					}
+				}
+				limit = parsedLimit
 			}
 		}
 	}
@@ -81,10 +94,10 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 		query = "SELECT * FROM (" +
 			query +
 			" ORDER BY id DESC LIMIT ?) as sub ORDER BY id ASC"
-		args = append(args, MaxPageCount)
+		args = append(args, limit)
 	} else {
 		query += " ORDER BY id LIMIT ?"
-		args = append(args, MaxPageCount)
+		args = append(args, limit)
 	}
 
 	rows, err := i.db.Query(query, args...)
