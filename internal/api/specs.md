@@ -143,12 +143,16 @@ Returns a list of tracks, with a maximum of 50 items per page:
 ]
 ```
 
-If the `q` parameter is provided, then the tracks will be filtered based on the query `q`. When searching, keywords and the negation operator targets the word. The query supports the following named operators:
+If the `q` parameter is provided, then the tracks will be filtered based on the query `q`. When searching, keywords and the negation operator targets the word. The query supports the following named operators, which shows only tracks matching the filter:
 
-  - `after`: only the tracks whose ID comes after the parameter lexicographically will be shown
-  - `before`: only the tracks whose ID comes before the parameter lexicographically will be shown
-  - `album`: search for tracks whose album title contains the value specified
-  - `artist`: search for tracks whose artist name contains the value specified
+  - `after`: ID comes after the parameter lexicographically
+  - `before`: ID comes before the parameter lexicographically
+  - `album`: album title contains the value specified
+  - `artist`: artist name contains the value specified
+  - `path`: path of track file starts with the specified directory
+  - `limit`: show only this amount of tracks in the list. This defaults to the constant MaxPageCount (50) if not set. If set to a negative value (usually -1), then returns all tracks without limits.
+
+Only the `limit` operator may be specified multiple times without it being guaranteed to narrow the search results. If it is specified more than once, then the last value will be used as the limit.
 
 ### GET `/track/[id]`
 
