@@ -74,7 +74,7 @@ export default function FileBrowserTab() {
               <td>
                 <a href="#" onClick={(e) => {
                   e.preventDefault();
-                  fetch(`${HOST}/file/:by-path/${path.map(encodeURIComponent).join("/")}/${file}`)
+                  fetch(`${HOST}/file/:by-path/${path.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`)
                     .then((res) => res.json())
                     .then((data) => c.setCurrentTrack(data));
                 }}>
