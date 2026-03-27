@@ -5,7 +5,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { AppContext } from "./AppState";
 
 import "./MainTracksTab.css";
