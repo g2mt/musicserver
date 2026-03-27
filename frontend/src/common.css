@@ -40,7 +40,7 @@ body.dark-mode {
   --content-color: #ffffff;
   --accent-color: #10d0bd;
   --accent-color-text: #000000;
-  --accent-color-light: var(--front-bg);
+  --accent-color-light: rgba(0, 0, 0, 0.2);
   --accent-color-light-text: #c2fff9;
 
   --gray: #909090;
