@@ -32,7 +32,8 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
 
   const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
-    const newLimit = e.target.value === "unlimited" ? -1 : Number(e.target.value);
+    const newLimit =
+      e.target.value === "unlimited" ? -1 : Number(e.target.value);
     updateQuery(`limit:${newLimit}`, "limit");
   };
 
@@ -52,7 +53,9 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         </button>
         <button
           className="btn"
-          onClick={() => lastTrack && updateQuery(`after:${lastTrack.short_id}`)}
+          onClick={() =>
+            lastTrack && updateQuery(`after:${lastTrack.short_id}`)
+          }
           disabled={!lastTrack}
           title="Next"
         >
@@ -61,12 +64,10 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         </button>
       </div>
       <div className="main-tracks-controls-right">
-        <select
-          className="limit-select"
-          value=""
-          onChange={handleLimitChange}
-        >
-          <option value="" style={{"fontStyle": "italic"}}>limit</option>
+        <select className="limit-select" value="" onChange={handleLimitChange}>
+          <option value="" style={{ fontStyle: "italic" }}>
+            limit
+          </option>
           <option value={50}>50</option>
           <option value={100}>100</option>
           <option value={150}>150</option>

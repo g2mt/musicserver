@@ -29,7 +29,10 @@ export async function fetchAPI(
   });
 }
 
-export function listenAPI(path: string, onMessage: (data: any) => void): () => void {
+export function listenAPI(
+  path: string,
+  onMessage: (data: any) => void,
+): () => void {
   if (!path.startsWith("/")) throw new Error(`"${path}" does not start with /`);
 
   const es = new EventSource(`${HOST}${path}`);

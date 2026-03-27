@@ -31,19 +31,24 @@ function ProgressTable() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => listenAPI("/progress/:events", (data: ProgressEventWithSource) => {
-    if (data.type === "AddOutput") {
-      setProgresses((old) => {
-        old[data.source].output = (old[data.source].output ?? "") + data.data;
-        return old;
-      });
-    } else if (data.type === "Value" || data.type === "MaxValue") {
-      setProgresses((old) => {
-        old[data.source].value = data.data;
-        return old;
-      });
-    }
-  }), [progresses]);
+  useEffect(
+    () =>
+      listenAPI("/progress/:events", (data: ProgressEventWithSource) => {
+        if (data.type === "AddOutput") {
+          setProgresses((old) => {
+            old[data.source].output =
+              (old[data.source].output ?? "") + data.data;
+            return old;
+          });
+        } else if (data.type === "Value" || data.type === "MaxValue") {
+          setProgresses((old) => {
+            old[data.source].value = data.data;
+            return old;
+          });
+        }
+      }),
+    [progresses],
+  );
 
   function toggleOutput(name: string) {
     setExpanded((prev) => ({ ...prev, [name]: !prev[name] }));

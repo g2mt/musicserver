@@ -43,7 +43,7 @@ function TrackList({
           loadMore();
         }
       },
-      { rootMargin: `${TRACK_HEIGHT_PX * 2}px` }
+      { rootMargin: `${TRACK_HEIGHT_PX * 2}px` },
     );
 
     observer.observe(sentinel);
@@ -63,7 +63,9 @@ function TrackList({
     // Only react to scrolling up
     if (scrollTop < lastScrollTop.current) {
       const viewportHeight = list.clientHeight;
-      const visibleTracks = Math.floor((scrollTop + viewportHeight) / TRACK_HEIGHT_PX);
+      const visibleTracks = Math.floor(
+        (scrollTop + viewportHeight) / TRACK_HEIGHT_PX,
+      );
       const newCount = Math.max(PAGE_SIZE, visibleTracks + 1);
       setDisplayedCount((prev) => Math.min(prev, newCount));
     }
@@ -81,14 +83,17 @@ function TrackList({
             <FontAwesomeIcon icon={faMinus} />
             Remove all from queue
           </button>
-          <button className="btn" onClick={() => {
-            const shuffled = [...c.enqueuedTracks];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
-              [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            c.setEnqueuedTracks(shuffled);
-          }}>
+          <button
+            className="btn"
+            onClick={() => {
+              const shuffled = [...c.enqueuedTracks];
+              for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+              }
+              c.setEnqueuedTracks(shuffled);
+            }}
+          >
             <FontAwesomeIcon icon={faShuffle} />
             Shuffle queue
           </button>
@@ -99,11 +104,7 @@ function TrackList({
         const index = i;
         return (
           <Track
-            key={
-              canUnqueue
-                ? `${index}-${track.id}`
-                : track.id
-            }
+            key={canUnqueue ? `${index}-${track.id}` : track.id}
             track={track}
             index={canUnqueue ? index : undefined}
             canEnqueue={canEnqueue}

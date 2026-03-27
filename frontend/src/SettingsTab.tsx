@@ -33,7 +33,7 @@ function SettingsTab() {
           Show blurred album cover as background in dark mode
         </label>
       </div>
-      <button className="btn" onClick={() => c.setDarkMode(b => !b)}>
+      <button className="btn" onClick={() => c.setDarkMode((b) => !b)}>
         <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
         {c.darkMode ? "Light Mode" : "Dark Mode"}
       </button>

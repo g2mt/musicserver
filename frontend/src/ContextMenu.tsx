@@ -43,10 +43,7 @@ let setMenuState: ((state: ContextMenuState) => void) | null = null;
     </>
   ))
  */
-export function showContextMenu(
-  anchor: HTMLElement,
-  content: React.ReactNode,
-) {
+export function showContextMenu(anchor: HTMLElement, content: React.ReactNode) {
   setMenuState?.({ anchor, content });
 }
 

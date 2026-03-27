@@ -7,7 +7,13 @@ import SearchBar from "./SearchBar";
 import React, { useEffect, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
 import { fetchAPI } from "./apiserver";
-import { faMusic, faGear, faFolder, faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faMusic,
+  faGear,
+  faFolder,
+  faArrowDown,
+  faArrowUp,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
@@ -156,7 +162,10 @@ export function App() {
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement ||
-        e.ctrlKey || e.shiftKey || e.altKey || e.metaKey
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey ||
+        e.metaKey
       ) {
         return;
       }
@@ -211,7 +220,7 @@ export function App() {
 
   // Track queue
   [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
-  c.enqueueTrack = (track: TrackData|TrackData[]) => {
+  c.enqueueTrack = (track: TrackData | TrackData[]) => {
     if (Array.isArray(track)) {
       c.setEnqueuedTracks([...c.enqueuedTracks, ...track]);
     } else {
@@ -255,7 +264,10 @@ export function App() {
 
   const windowWidth = useWindowWidth();
   useEffect(() => {
-    document.body.classList.toggle("minimized", windowWidth < PLAYER_COLLAPSE_AT_WIDTH);
+    document.body.classList.toggle(
+      "minimized",
+      windowWidth < PLAYER_COLLAPSE_AT_WIDTH,
+    );
   }, [windowWidth]);
 
   return (
@@ -323,10 +335,7 @@ export function App() {
                 <FontAwesomeIcon icon={faArrowUp} />
               </button>
             </div>
-            <TrackList
-              tracks={c.enqueuedTracks}
-              canUnqueue={true}
-            />
+            <TrackList tracks={c.enqueuedTracks} canUnqueue={true} />
           </div>
         </div>
         <div className="music-player">

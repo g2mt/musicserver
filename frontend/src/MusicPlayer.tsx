@@ -72,15 +72,15 @@ export function useBackForward() {
 
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
-  const audio = useAudio((() => {
-    if (!c.currentTrack)
+  const audio = useAudio(
+    (() => {
+      if (!c.currentTrack) return null;
+      if (c.currentTrack.short_id)
+        return `${HOST}/track/${c.currentTrack.short_id}/data`;
+      if (c.currentTrack.path) return `${HOST}/file/${c.currentTrack.path}`;
       return null;
-    if (c.currentTrack.short_id)
-      return `${HOST}/track/${c.currentTrack.short_id}/data`;
-    if (c.currentTrack.path)
-      return `${HOST}/file/${c.currentTrack.path}`;
-    return null;
-  })());
+    })(),
+  );
   const didUpdatePosition = useRef(false);
 
   function goNextQueue(doSetIsPlaying: boolean = true) {
@@ -104,7 +104,7 @@ export function MusicPlayer() {
     audio.addEventListener("timeupdate", onTimeUpdate);
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
-    }
+    };
   }, [c.currentTrack]);
 
   useEffect(() => {
@@ -154,9 +154,8 @@ export function MusicPlayer() {
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
     useBackForward();
 
-
   // Media info
-  
+
   useEffect(() => {
     if ("mediaSession" in navigator && c.currentTrack) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -192,7 +191,7 @@ export function MusicPlayer() {
         max={c.duration || 0}
         step={0.1}
         value={c.progress}
-        onChange={e => c.setProgress(Number(e.target.value))}
+        onChange={(e) => c.setProgress(Number(e.target.value))}
       />
       <div className="player-controls">
         <div className="player-left">
