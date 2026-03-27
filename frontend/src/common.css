@@ -11,7 +11,7 @@
   --accent-color-light: #87cefa;
   --accent-color-light-text: #000000;
 
-  --gray: #ccc;
+  --gray: #aaa;
   --gray-text: #000;
 
   --shadow: rgba(0, 0, 0, 0.05);
@@ -73,7 +73,7 @@ body.dark-mode {
 }
 
 .btn {
-  background: var(--gray);
+  background: var(--color-disabled);
   color: var(--gray-text);
   cursor: pointer;
   padding: var(--s2);

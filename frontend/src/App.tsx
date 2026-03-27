@@ -229,6 +229,7 @@ export function App() {
   const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
+  c.showAllTracks = () => setLeftTab("tracks");
 
   useEffect(() => {
     mergeConfig(c);

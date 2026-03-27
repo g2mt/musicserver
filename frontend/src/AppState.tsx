@@ -36,6 +36,7 @@ export interface AppState extends AppStateData {
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
   previousWorkingValue: RefObject<string>;
+  showAllTracks: () => void;
 }
 
 export const AppContext = createContext<AppState | null>(null);

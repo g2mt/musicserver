@@ -71,6 +71,7 @@ export default function FileBrowserTab() {
                 <a href="#" onClick={(e) => {
                   e.preventDefault();
                   c.setSearchQuery(`path:"${[...path, dir].join("/")}"`);
+                  c.showAllTracks();
                 }}>
                   <FontAwesomeIcon icon={faSearch} />
                 </a>

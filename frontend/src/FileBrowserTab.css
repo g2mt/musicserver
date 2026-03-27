@@ -1,3 +1,6 @@
 .file-browser-tab {
   padding: var(--s4);
+  tr:hover {
+    outline: 1px solid var(--accent-color);
+  }
 }
