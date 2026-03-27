@@ -1,8 +1,9 @@
 import { useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faMinus, faCopy } from "@fortawesome/free-solid-svg-icons";
 import { HOST } from "./apiserver";
 import { AppContext } from "./AppState";
+import { showContextMenu, ContextMenuItem } from "./ContextMenu";
 import type { TrackData } from "./TrackData";
 
 import "./Track.css";
@@ -31,7 +32,22 @@ export function Track({
     highlighted || (index !== undefined && index === enqueuedTrackIndex);
   return (
     <div className={`track ${isHighlighted ? "highlighted" : ""}`}>
-      <img className="track-cover" src={getTrackCover(track)} />
+      <img
+        className="track-cover"
+        src={getTrackCover(track)}
+        onClick={(e) => {
+          showContextMenu(e.currentTarget, (
+            <>
+              <ContextMenuItem
+                icon={faCopy}
+                onClick={() => navigator.clipboard.writeText(`${track.name} - ${track.album}`)}
+              >
+                Copy info
+              </ContextMenuItem>
+            </>
+          ));
+        }}
+      />
       <div className="track-info">
         <a
           className="track-title"
