@@ -49,3 +49,7 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
   For zero spacing, use the value `0`.
 
 - Use the absolute font-size keywords instead of numeric values: xx-small, x-small, small, medium, large, x-large, xx-large, xxx-large.
+
+### Android
+
+- This application uses API 33 functionality.

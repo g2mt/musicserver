@@ -5,7 +5,8 @@
           versionName="0.1">
     <uses-sdk android:minSdkVersion="33"/>
     <application android:label="Music Server">
-        <activity android:name=".MainActivity" android:exported="true">
+        <activity android:name=".MainActivity"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
