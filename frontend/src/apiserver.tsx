@@ -1,3 +1,24 @@
+declare global {
+  interface Window {
+    _native_fetchAPI?: (path: string, params?: Record<string, string>, method?: string) => Promise<any>;
+    _native_fetchAPI_bridge?: {
+      fetchAPI(path: string, params: string, method: string): string | null;
+    };
+  }
+}
+
+if (window._native_fetchAPI_bridge) {
+  window._native_fetchAPI = async (path, params, method = "GET") => {
+    const result = window._native_fetchAPI_bridge!.fetchAPI(
+      path,
+      params ? JSON.stringify(params) : "",
+      method,
+    );
+    if (result === null) return null;
+    return JSON.parse(result);
+  };
+}
+
 const HOST = (() => {
   if (import.meta.env.DEV) {
     return "http://localhost:8000/api";
@@ -29,6 +50,10 @@ export async function fetchAPI(
     Object.entries(params).forEach(([key, value]) => {
       url.searchParams.append(key, value);
     });
+  }
+
+  if (window._native_fetchAPI) {
+    return window._native_fetchAPI(path, params, method);
   }
 
   return fetch(url.toString(), { method }).then((res) => {
