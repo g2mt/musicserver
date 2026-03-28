@@ -2,7 +2,7 @@ package org.msxrv.musicserver;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.TextView;
+import android.webkit.WebView;
 
 public class MainActivity extends Activity {
 	static {
@@ -17,7 +17,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		TextView text = (TextView)findViewById(R.id.my_text);
-		text.setText(getMessage());
+		WebView webView = (WebView)findViewById(R.id.my_webview);
+		webView.loadUrl("file:///android_asset/index.html");
 	}
-} 
+}
