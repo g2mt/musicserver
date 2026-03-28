@@ -21,10 +21,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		WebView webView = (WebView)findViewById(R.id.webview);
+		webView.getSettings().setJavaScriptEnabled(true);
 		webView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage msg) {
-				Log.d("WebView", msg.message() + " (line " + msg.lineNumber() + ", " + msg.sourceId() + ")");
+				Log.d("[msxrv] WebView", msg.message() + " (line " + msg.lineNumber() + ", " + msg.sourceId() + ")");
 				return true;
 			}
 		});
