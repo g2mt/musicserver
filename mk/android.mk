@@ -4,6 +4,9 @@ AN_JAVA_VER = 11#
 AN_NDK_VER = 27.3.13750724#
 AN_ARCH ?= x86_64#
 
+AN_JAVA_PREFIX ?= /usr/lib/jvm/java-$(AN_JAVA_VER)-openjdk
+AN_JAVAC ?= $(AN_JAVA_PREFIX)/bin/javac
+
 ifeq ($(AN_ARCH),aarch64)
 AN_GOARCH=arm64
 endif
@@ -13,6 +16,7 @@ endif
 ifeq ($(AN_ARCH),x86_64)
 AN_GOARCH=amd64
 endif
+
 
 ifeq ($(strip $(ANDROID_HOME)),)
 
