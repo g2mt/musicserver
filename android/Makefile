@@ -27,7 +27,8 @@ build_apk_stage0:
 .PHONY: build_apk_stage1
 build_apk_stage1: $(PKG_SRCS) \
 		AndroidManifest.xml \
-		build/apk/lib/x86_64 build/apk/lib/aarch64
+		build/apk/lib/x86_64 build/apk/lib/aarch64 \
+		build/keystore.jks
 	$(AN_BUILD_TOOLS)/aapt2 compile --dir res -o build/res.zip
 	$(AN_BUILD_TOOLS)/aapt2 link build/res.zip \
 		-I $(AN_PLATFORM)/android.jar \
@@ -45,21 +46,27 @@ build_apk_stage1: $(PKG_SRCS) \
 	cd build && zip -u resource.apk classes.dex
 	cd build/apk && zip -r -u ../resource.apk lib/*/*
 	"$(AN_BUILD_TOOLS)/zipalign" -f 4 build/resource.apk build/$(PKG_NAME).unsigned.apk
+	"$(AN_BUILD_TOOLS)/apksigner" sign --ks build/keystore.jks \
+		--ks-key-alias androidkey --ks-pass pass:android \
+		--key-pass pass:android --out build/$(PKG_NAME).apk \
+		build/$(PKG_NAME).unsigned.apk
 
-.PHONY: build/apk/lib/aarch64
-build/apk/lib/aarch64:
-	mkdir -p build/apk/lib/arm64-v8a
-	cd .. && make AN_ARCH=aarch64 build/musicserver.android_aarch64.so
-	cp ../build/musicserver.android_aarch64.so build/apk/lib/arm64-v8a/libmusicserver.so
+build/keystore.jks:
+	keytool -genkeypair -keystore $@ -alias androidkey \
+		-validity 10000 -keyalg RSA -keysize 2048 \
+		-storepass android -keypass android
 
-.PHONY: build/apk/lib/armv7a
-build/apk/lib/armv7a:
-	mkdir -p build/apk/lib/armeabi-v7a
-	cd .. && make AN_ARCH=armv7a build/musicserver.android_armv7a.so
-	cp ../build/musicserver.android_armv7a.so build/apk/lib/armeabi-v7a/libmusicserver.so
 
-.PHONY: build/apk/lib/x86_64
-build/apk/lib/x86_64:
-	mkdir -p build/apk/lib/x86_64
-	cd .. && make AN_ARCH=x86_64 build/musicserver.android_x86_64.so
-	cp ../build/musicserver.android_x86_64.so build/apk/lib/x86_64/libmusicserver.so
+# $(1) = NDK arch, $(2) = android apk arch
+define rule-native-lib
+.PHONY: build/apk/lib/$(1)
+build/apk/lib/$(1):
+	mkdir -p build/apk/lib/$(2)
+	cd .. && make AN_ARCH=$(1) native_lib_android
+	cp ../build/musicserverbind.android_$(1).so build/apk/lib/$(2)/libmusicserverbind.so
+	cp ../build/musicserver.android_$(1).so build/apk/lib/$(2)/libmusicserver.so
+endef
+
+$(eval $(call rule-native-lib,aarch64,arm64-v8a))
+$(eval $(call rule-native-lib,armv7a,armeabi-v7a))
+$(eval $(call rule-native-lib,x86_64,x86_64))
