@@ -1,12 +1,15 @@
 package org.msxrv.musicserver;
 
 import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Iterator;
 
 public class NativeBridge {
@@ -20,6 +23,17 @@ public class NativeBridge {
 
 	public NativeBridge(Activity activity) throws NativeBridgeException {
 		this.activity = activity;
+
+		// Request permissions for API 33+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (activity.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+					!= PackageManager.PERMISSION_GRANTED) {
+				activity.requestPermissions(
+					new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+					1);
+			}
+		}
+
 		String id = msrvIdentify();
 		if (!"musicserver".equals(id)) {
 			Log.e("[msxrv] Native", "msrvIdentify returned: " + id);
@@ -32,6 +46,11 @@ public class NativeBridge {
 				android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
 			Log.e("[msxrv] Native", "Setting musicDir = " + musicDir);
 			configJson.put("data_path", musicDir);
+
+			String dbDir = android.os.Environment.getExternalStoragePublicDirectory(
+				android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath() + "/MusicServer";
+			Log.e("[msxrv] Native", "Setting dbDir = " + dbDir);
+			configJson.put("db_dir", dbDir);
 		} catch (JSONException e) {
 			throw new NativeBridgeException("Failed to create config JSON: " + e.toString());
 		}
