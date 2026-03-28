@@ -1,7 +1,17 @@
 AN_SDK_VER = 33.0.2
 AN_JAVA_VER = 11
 AN_NDK_VER = 27.3.13750724
-AN_ARCH ?= x86_64
+AN_ARCH ?= x86_64 # x86_64, armv7a, aarch64
+
+ifeq ($(AN_ARCH),aarch64)
+AN_GOARCH=arm64
+endif
+ifeq ($(AN_ARCH),armv7a)
+AN_GOARCH=arm
+endif
+ifeq ($(AN_ARCH),x86_64)
+AN_GOARCH=amd64
+endif
 
 ifeq ($(strip $(ANDROID_HOME)),)
 
