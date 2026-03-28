@@ -47,22 +47,12 @@ public class NativeBridge {
 	/**
 	 * Creates a new interface instance with the given configuration.
 	 *
-	 * @param httpBind         the HTTP bind address
-	 * @param unixBindEnabled  whether to enable Unix socket binding
-	 * @param unixBind         the Unix socket path
-	 * @param dataPath         the data directory path
-	 * @param dbDir            the database directory path
-	 * @param mediaDownloader  the media downloader command
-	 * @param outErr           output array to store error message if any
+	 * @param configJson the configuration as a JSON string
+	 * @param outErr     output array to store error message if any
 	 * @return the interface handle, or 0 on error
 	 */
-	private native long msrvNewInterface(
-		String httpBind,
-		boolean unixBindEnabled,
-		String unixBind,
-		String dataPath,
-		String dbDir,
-		String mediaDownloader,
+	private native long msrvNewInterfaceFromConfigJson(
+		String configJson,
 		String[] outErr);
 
 	/**
@@ -158,6 +148,21 @@ public class NativeBridge {
 		msrvDeleteHandle(readerHandle);
 
 		return content.toString();
+	}
+
+	@JavascriptInterface
+	public String createInterface(String configJson) {
+		Log.d("[msxrv] Native", "configJson=" + configJson);
+
+		String[] outErr = new String[1];
+		long handle = msrvNewInterfaceFromConfigJson(configJson, outErr);
+
+		if (outErr[0] != null) {
+			Log.e("[msxrv] Native", "Create interface failed: " + outErr[0]);
+			return null;
+		}
+
+		return String.valueOf(handle);
 	}
 
 }

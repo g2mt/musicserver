@@ -11,38 +11,16 @@ Java_org_msxrv_musicserver_NativeBridge_msrvIdentify(JNIEnv *env, jobject obj)
 }
 
 JNIEXPORT jlong JNICALL
-Java_org_msxrv_musicserver_NativeBridge_msrvNewInterface(
+Java_org_msxrv_musicserver_NativeBridge_msrvNewInterfaceFromConfigJson(
 	JNIEnv *env, jobject obj,
-	jstring httpBind,
-	jboolean unixBindEnabled,
-	jstring unixBind,
-	jstring dataPath,
-	jstring dbDir,
-	jstring mediaDownloader,
+	jstring configJson,
 	jobjectArray outErr)
 {
-	const char *cHttpBind = (*env)->GetStringUTFChars(env, httpBind, NULL);
-	const char *cUnixBind = (*env)->GetStringUTFChars(env, unixBind, NULL);
-	const char *cDataPath = (*env)->GetStringUTFChars(env, dataPath, NULL);
-	const char *cDbDir = (*env)->GetStringUTFChars(env, dbDir, NULL);
-	const char *cMediaDownloader = (*env)->GetStringUTFChars(env, mediaDownloader, NULL);
+	const char *cConfigJson = (*env)->GetStringUTFChars(env, configJson, NULL);
 
-	MsrvConfig cfg = {
-		.HTTPBind        = (char *)cHttpBind,
-		.UnixBindEnabled = unixBindEnabled ? 1 : 0,
-		.UnixBind        = (char *)cUnixBind,
-		.DataPath        = (char *)cDataPath,
-		.DbDir           = (char *)cDbDir,
-		.MediaDownloader = (char *)cMediaDownloader,
-	};
+	MsrvNewInterfaceResult result = MsrvNewInterfaceFromConfigJson((char *)cConfigJson);
 
-	MsrvNewInterfaceResult result = MsrvNewInterface(cfg);
-
-	(*env)->ReleaseStringUTFChars(env, httpBind, cHttpBind);
-	(*env)->ReleaseStringUTFChars(env, unixBind, cUnixBind);
-	(*env)->ReleaseStringUTFChars(env, dataPath, cDataPath);
-	(*env)->ReleaseStringUTFChars(env, dbDir, cDbDir);
-	(*env)->ReleaseStringUTFChars(env, mediaDownloader, cMediaDownloader);
+	(*env)->ReleaseStringUTFChars(env, configJson, cConfigJson);
 
 	if (result.Err != NULL) {
 		jstring errStr = (*env)->NewStringUTF(env, result.Err);
