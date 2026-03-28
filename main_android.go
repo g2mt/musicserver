@@ -13,12 +13,12 @@ import (
 )
 
 //export MsrvNewInterface
-func NewInterface(cfg *schema.Config) (*api.Interface, error) {
+func MsrvNewInterface(cfg *schema.Config) (*api.Interface, error) {
 	return api.NewInterface(cfg)
 }
 
 //export MsrvHandleRequest
-func HandleRequest(i *api.Interface, path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
+func MsrvHandleRequest(i *api.Interface, path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
 	return i.HandleRequestByteStream(path, method, params)
 }
 
