@@ -1,8 +1,6 @@
 package org.msxrv.musicserver;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -20,12 +18,12 @@ public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
 
-	public NativeBridge(Activity activity) {
+	public NativeBridge(Activity activity) throws NativeBridgeException {
 		this.activity = activity;
 		String id = msrvIdentify();
 		if (!"musicserver".equals(id)) {
 			Log.e("[msxrv] Native", "msrvIdentify returned: " + id);
-			showErrorDialog("Failed to connect through JNI. Quit?");
+			throw new NativeBridgeException("Failed to connect through JNI.");
 		}
 
 		String[] outErr = new String[1];
@@ -37,28 +35,23 @@ public class NativeBridge {
 			configJson.put("data_path", musicDir);
 		} catch (JSONException e) {
 			Log.e("[msxrv] Native", "Failed to create config JSON", e);
-			showErrorDialog("Failed to initialize music server. Quit?");
-			return;
+			throw new NativeBridgeException("Failed to initialize music server.");
 		}
 
 		interfaceHandle = msrvNewInterfaceFromConfigJson(configJson.toString(), outErr);
 		if (interfaceHandle == 0) {
 			Log.e("[msxrv] Native", "Failed to create interface: " + outErr[0]);
-			showErrorDialog("Failed to initialize music server. Quit?");
+			throw new NativeBridgeException("Failed to initialize music server.");
 		}
 	}
 
-	private void showErrorDialog(String message) {
-		new AlertDialog.Builder(activity)
-			.setMessage(message)
-			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					activity.finish();
-				}
-			})
-			.setNegativeButton(android.R.string.no, null)
-			.show();
+	/**
+	 * Exception thrown when NativeBridge initialization fails.
+	 */
+	public static class NativeBridgeException extends Exception {
+		public NativeBridgeException(String message) {
+			super(message);
+		}
 	}
 
 	/**
