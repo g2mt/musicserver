@@ -49,17 +49,17 @@ build_apk_stage1: $(PKG_SRCS) \
 .PHONY: build/apk/lib/aarch64
 build/apk/lib/aarch64:
 	mkdir -p build/apk/lib/arm64-v8a
-	cd .. && make AN_ARCH=aarch64 build/musicserver.aarch64.so
-	cp ../build/musicserver.aarch64.so build/apk/lib/arm64-v8a/libmusicserver.so
+	cd .. && make AN_ARCH=aarch64 build/musicserver.android_aarch64.so
+	cp ../build/musicserver.android_aarch64.so build/apk/lib/arm64-v8a/libmusicserver.so
 
 .PHONY: build/apk/lib/armv7a
-#build/apk/lib/armv7a:
-#	mkdir -p build/apk/lib/armeabi-v7a
-#	cd .. && make AN_ARCH=armv7a build/musicserver.armv7a.so
-#	cp ../build/musicserver.armv7a.so build/apk/lib/armeabi-v7a/libmusicserver.so
+build/apk/lib/armv7a:
+	mkdir -p build/apk/lib/armeabi-v7a
+	cd .. && make AN_ARCH=armv7a build/musicserver.android_armv7a.so
+	cp ../build/musicserver.android_armv7a.so build/apk/lib/armeabi-v7a/libmusicserver.so
 
 .PHONY: build/apk/lib/x86_64
 build/apk/lib/x86_64:
 	mkdir -p build/apk/lib/x86_64
-	cd .. && make AN_ARCH=x86_64 build/musicserver.x86_64.so
-	cp ../build/musicserver.x86_64.so build/apk/lib/x86_64/libmusicserver.so
+	cd .. && make AN_ARCH=x86_64 build/musicserver.android_x86_64.so
+	cp ../build/musicserver.android_x86_64.so build/apk/lib/x86_64/libmusicserver.so
