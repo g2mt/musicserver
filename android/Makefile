@@ -36,7 +36,7 @@ build/$(PKG_NAME).unsigned.apk: $(PKG_SRCS) AndroidManifest.xml | init_build
 	"$(BUILD_TOOLS)/d8" $$(find build/obj -name '*.class') \
 		--lib "$(PLATFORM)/android.jar" \
 		--output build/
-	zip -u build/resource.apk build/classes.dex
+	cd build && zip -u resource.apk classes.dex
 	"$(BUILD_TOOLS)/zipalign" -f 4 build/resource.apk build/$(PKG_NAME).unsigned.apk
 
 .PHONY: init_build
