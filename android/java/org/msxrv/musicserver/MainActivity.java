@@ -17,7 +17,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		WebView webView = (WebView)findViewById(R.id.my_webview);
+		WebView webView = (WebView)findViewById(R.id.webview);
 		webView.loadUrl("file:///android_asset/index.html");
 	}
 }
