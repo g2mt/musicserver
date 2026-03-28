@@ -11,7 +11,7 @@ PKG_SRCS = $(wildcard java/$(PKG_PATH)/*.java)
 .PHONY: all
 all: build/$(PKG_NAME).unsigned.apk
 
-.classpath: .classpath.m4
+.classpath: .classpath.m4 # for lsp
 	m4 $< >$@
 
 build/$(PKG_NAME).unsigned.apk: $(PKG_SRCS) AndroidManifest.xml | init_build
