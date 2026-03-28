@@ -17,15 +17,15 @@ include ../mk/android.mk
 .PHONY: build/$(PKG_NAME).unsigned.apk
 build/$(PKG_NAME).unsigned.apk:
 	make build_apk_stage0
-	make build_apk_stage1
+	make build/$(PKG_NAME).apk
 
 .PHONY: build_apk_stage0
 build_apk_stage0:
 	@mkdir -vp build/{gen,obj,apk}
 	@rm -rf build/apk/lib
 
-.PHONY: build_apk_stage1
-build_apk_stage1: $(PKG_SRCS) \
+.PHONY: build/$(PKG_NAME).apk
+build/$(PKG_NAME).apk: $(PKG_SRCS) \
 		AndroidManifest.xml \
 		build/apk/lib/x86_64 \
 		build/keystore.jks
@@ -72,3 +72,9 @@ endef
 $(eval $(call rule-native-lib,aarch64,arm64-v8a,aarch64))
 $(eval $(call rule-native-lib,armv7a,armeabi-v7a,arm))
 $(eval $(call rule-native-lib,x86_64,x86_64,x86_64))
+
+install_adb: build/$(PKG_NAME).apk
+	adb uninstall $(PKG_NAME)
+	adb install $<
+
+
