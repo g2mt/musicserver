@@ -150,19 +150,4 @@ public class NativeBridge {
 		return content.toString();
 	}
 
-	@JavascriptInterface
-	public String createInterface(String configJson) {
-		Log.d("[msxrv] Native", "configJson=" + configJson);
-
-		String[] outErr = new String[1];
-		long handle = msrvNewInterfaceFromConfigJson(configJson, outErr);
-
-		if (outErr[0] != null) {
-			Log.e("[msxrv] Native", "Create interface failed: " + outErr[0]);
-			return null;
-		}
-
-		return String.valueOf(handle);
-	}
-
 }
