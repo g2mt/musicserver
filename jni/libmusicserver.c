@@ -1,4 +1,3 @@
-// https://www.hanshq.net/command-line-android.html
 #include <stdlib.h>
 #include <jni.h>
 
