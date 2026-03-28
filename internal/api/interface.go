@@ -349,12 +349,18 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
 	buf := &bytes.Buffer{}
 	reader, contentType, err := i.handleRequest(path, method, params)
+	if err != nil {
+		return nil, "", err
+	}
 	for {
 		if re, ok := reader.(*redirectHandler); ok {
 			reader, contentType, err = i.handleRequest(re.path, method, params)
 		} else {
 			break
 		}
+	}
+	if err != nil {
+		return nil, "", err
 	}
 	reader.HandleWriter(buf)
 	return buf, contentType, err
