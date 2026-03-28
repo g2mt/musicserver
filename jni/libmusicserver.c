@@ -38,43 +38,23 @@ Java_org_msxrv_musicserver_NativeBridge_msrvHandleRequest(
 	jlong ifaceHandle,
 	jstring path,
 	jstring method,
-	jobjectArray keys,
-	jobjectArray values,
+	jstring paramsJson,
 	jobjectArray outContentType,
 	jobjectArray outErr)
 {
-	const char *cPath   = (*env)->GetStringUTFChars(env, path, NULL);
-	const char *cMethod = (*env)->GetStringUTFChars(env, method, NULL);
-
-	jint paramsLen = (*env)->GetArrayLength(env, keys);
-	char **cKeys   = (char **)malloc(paramsLen * sizeof(char *));
-	char **cValues = (char **)malloc(paramsLen * sizeof(char *));
-
-	for (int i = 0; i < paramsLen; i++) {
-		jstring k = (jstring)(*env)->GetObjectArrayElement(env, keys, i);
-		jstring v = (jstring)(*env)->GetObjectArrayElement(env, values, i);
-		cKeys[i]   = (char *)(*env)->GetStringUTFChars(env, k, NULL);
-		cValues[i] = (char *)(*env)->GetStringUTFChars(env, v, NULL);
-	}
+	const char *cPath       = (*env)->GetStringUTFChars(env, path, NULL);
+	const char *cMethod     = (*env)->GetStringUTFChars(env, method, NULL);
+	const char *cParamsJson = (*env)->GetStringUTFChars(env, paramsJson, NULL);
 
 	MsrvHandleRequestResult result = MsrvHandleRequest(
 		(uintptr_t)ifaceHandle,
 		(char *)cPath,
 		(char *)cMethod,
-		cKeys,
-		cValues,
-		(int)paramsLen);
+		(char *)cParamsJson);
 
-	for (int i = 0; i < paramsLen; i++) {
-		jstring k = (jstring)(*env)->GetObjectArrayElement(env, keys, i);
-		jstring v = (jstring)(*env)->GetObjectArrayElement(env, values, i);
-		(*env)->ReleaseStringUTFChars(env, k, cKeys[i]);
-		(*env)->ReleaseStringUTFChars(env, v, cValues[i]);
-	}
-	free(cKeys);
-	free(cValues);
 	(*env)->ReleaseStringUTFChars(env, path, cPath);
 	(*env)->ReleaseStringUTFChars(env, method, cMethod);
+	(*env)->ReleaseStringUTFChars(env, paramsJson, cParamsJson);
 
 	if (result.Err != NULL) {
 		jstring errStr = (*env)->NewStringUTF(env, result.Err);

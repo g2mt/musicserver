@@ -95,8 +95,7 @@ public class NativeBridge {
 	 * @param ifaceHandle      the interface handle
 	 * @param path             the request path
 	 * @param method           the HTTP method (GET, POST, etc.)
-	 * @param keys             array of parameter keys
-	 * @param values           array of parameter values
+	 * @param paramsJson       the parameters as a JSON string
 	 * @param outContentType   output array to store the response content type
 	 * @param outErr           output array to store error message if any
 	 * @return the reader handle for reading the response, or 0 on error
@@ -105,8 +104,7 @@ public class NativeBridge {
 		long ifaceHandle,
 		String path,
 		String method,
-		String[] keys,
-		String[] values,
+		String paramsJson,
 		String[] outContentType,
 		String[] outErr);
 
@@ -131,28 +129,9 @@ public class NativeBridge {
 	public String fetchAPI(String path, String method, String params) {
 		Log.d("[msxrv] Native", "path=" + path + " params=" + params + " method=" + method);
 
-		// Parse params JSON
-		String[] keys = new String[0];
-		String[] values = new String[0];
-		try {
-			JSONObject jsonParams = new JSONObject(params);
-			int len = jsonParams.length();
-			keys = new String[len];
-			values = new String[len];
-			int i = 0;
-			for (Iterator<String> it = jsonParams.keys(); it.hasNext(); ) {
-				String key = it.next();
-				keys[i] = key;
-				values[i] = jsonParams.getString(key);
-				i++;
-			}
-		} catch (JSONException e) {
-			Log.e("[msxrv] Native", "Failed to parse params", e);
-		}
-
 		String[] outContentType = new String[1];
 		String[] outErr = new String[1];
-		long readerHandle = msrvHandleRequest(interfaceHandle, path, method, keys, values, outContentType, outErr);
+		long readerHandle = msrvHandleRequest(interfaceHandle, path, method, params, outContentType, outErr);
 
 		if (outErr[0] != null) {
 			Log.e("[msxrv] Native", "Request failed: " + outErr[0]);
