@@ -1,8 +1,6 @@
 package org.msxrv.musicserver;
 
 import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -23,16 +21,6 @@ public class NativeBridge {
 
 	public NativeBridge(Activity activity) throws NativeBridgeException {
 		this.activity = activity;
-
-		// Request permissions for API 33+
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			if (activity.checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO)
-					!= PackageManager.PERMISSION_GRANTED) {
-				activity.requestPermissions(
-					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
-					1);
-			}
-		}
 
 		String id = msrvIdentify();
 		if (!"musicserver".equals(id)) {
