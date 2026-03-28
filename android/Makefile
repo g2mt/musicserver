@@ -35,7 +35,8 @@ build_apk_stage1: $(PKG_SRCS) \
 		--manifest AndroidManifest.xml \
 		--java build/gen \
 		-o build/resource.apk
-	javac --release $(AN_JAVA_VER) \
+	rm -rf build/obj/*
+	$(AN_JAVAC) --release $(AN_JAVA_VER) \
  		-classpath $(AN_PLATFORM)/android.jar \
  		-d build/obj \
 		build/gen/$(PKG_PATH)/R.java \
