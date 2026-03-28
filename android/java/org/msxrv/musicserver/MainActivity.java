@@ -7,6 +7,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	static {
 		System.loadLibrary("musicserver");
+		System.loadLibrary("musicserverbind");
 	}
 
 	public native String getMessage();
