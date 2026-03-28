@@ -6,6 +6,11 @@ import android.content.DialogInterface;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
+
 public class NativeBridge {
 	static {
 		System.loadLibrary("musicserver");
