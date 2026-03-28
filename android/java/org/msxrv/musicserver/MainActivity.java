@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
 				return true;
 			}
 		});
-		webView.addJavascriptInterface(new NativeBridge(), "_native");
+		webView.addJavascriptInterface(new NativeBridge(this), "_native");
 		webView.loadUrl("file:///android_asset/index.html");
 	}
 }
