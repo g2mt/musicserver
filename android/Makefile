@@ -43,7 +43,7 @@ build_apk_stage1: $(PKG_SRCS) \
 		--lib "$(AN_PLATFORM)/android.jar" \
 		--output build/
 	cd build && zip -u resource.apk classes.dex
-	cd build/apk && zip -r -u ../resource.apk lib
+	cd build/apk && zip -r -u ../resource.apk lib/*/*
 	"$(AN_BUILD_TOOLS)/zipalign" -f 4 build/resource.apk build/$(PKG_NAME).unsigned.apk
 
 .PHONY: build/apk/lib/aarch64
