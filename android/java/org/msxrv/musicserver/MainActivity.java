@@ -8,7 +8,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.webkit.WebSettings;
 
 public class MainActivity extends Activity {
@@ -40,13 +39,6 @@ public class MainActivity extends Activity {
 			public boolean onConsoleMessage(ConsoleMessage msg) {
 				Log.d("[msxrv] WebView", msg.message() + " (line " + msg.lineNumber() + ", " + msg.sourceId() + ")");
 				return true;
-			}
-		});
-		webView.setWebViewClient(new WebViewClient() {
-			@Override
-			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-				Log.d("[msxrv] WebView", "Intercepted request: " + request.getUrl());
-				return super.shouldInterceptRequest(view, request);
 			}
 		});
 		webView.loadUrl("file:///android_asset/index.html");
