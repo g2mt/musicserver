@@ -3,7 +3,7 @@
           package="org.msxrv.musicserver"
           versionCode="1"
           versionName="0.1">
-    <uses-sdk android:minSdkVersion="34"/>
+    <uses-sdk android:minSdkVersion="33"/>
     <application android:label="Hello">
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>

@@ -9,10 +9,11 @@ native_lib_android: \
 	build/musicserverbind.android_$(AN_ARCH).so \
 	build/musicserver.android_$(AN_ARCH).so
 
-build/musicserverbind.android_$(AN_ARCH).so: jni/libmusicserver.c build/musicserverbind.android_$(AN_ARCH).so | build
-	$(AN_NDK_CC) -fpic -shared -o $@ $^
+build/musicserverbind.android_$(AN_ARCH).so: jni/libmusicserver.c build/musicserver.android_$(AN_ARCH).so | build
+	$(AN_NDK_CC) -fpic -shared -Ibuild/ -o $@ $^
 
 # c-archive is not supported
+# rule also builds corresponding .h file
 build/musicserver.android_$(AN_ARCH).so: taglib_android | build
 	PKG_CONFIG_PATH=./taglib/.pkg_$(AN_ARCH)/lib/pkgconfig/ \
 	CXX=$(AN_NDK_CXX) CC=$(AN_NDK_CC) \
