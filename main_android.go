@@ -36,6 +36,7 @@ typedef struct MsrvReadResult {
 import "C"
 
 import (
+	"encoding/json"
 	"musicserver/internal/api"
 	"musicserver/internal/schema"
 	"runtime/cgo"
@@ -47,18 +48,18 @@ func MsrvIdentify() *C.char {
 	return C.CString("musicserver")
 }
 
-//export MsrvNewInterface
-func MsrvNewInterface(cfg C.struct_MsrvConfig) C.struct_MsrvNewInterfaceResult {
-	goCfg := &schema.Config{
-		HTTPBind:        C.GoString(cfg.HTTPBind),
-		UnixBindEnabled: cfg.UnixBindEnabled != 0,
-		UnixBind:        C.GoString(cfg.UnixBind),
-		DataPath:        C.GoString(cfg.DataPath),
-		DbDir:           C.GoString(cfg.DbDir),
-		MediaDownloader: C.GoString(cfg.MediaDownloader),
+//export MsrvNewInterfaceFromConfigJson
+func MsrvNewInterfaceFromConfigJson(configJson *C.char) C.struct_MsrvNewInterfaceResult {
+	var goCfg schema.Config
+	err := json.Unmarshal([]byte(C.GoString(configJson)), &goCfg)
+	if err != nil {
+		return C.struct_MsrvNewInterfaceResult{
+			Handle: 0,
+			Err:    C.CString(err.Error()),
+		}
 	}
 
-	iface, err := api.NewInterface(goCfg)
+	iface, err := api.NewInterface(&goCfg)
 	if err != nil {
 		return C.struct_MsrvNewInterfaceResult{
 			Handle: 0,
