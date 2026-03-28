@@ -8,6 +8,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
+import android.webkit.WebSettings;
 
 public class MainActivity extends Activity {
 	static {
@@ -20,12 +21,19 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		if (getActionBar() != null) {
+			getActionBar().hide();
+		}
+
 		setContentView(R.layout.activity_main);
 
 		WebView webView = (WebView)findViewById(R.id.webview);
-		webView.getSettings().setJavaScriptEnabled(true);
-		webView.getSettings().setDomStorageEnabled(true);
-		webView.getSettings().setDatabaseEnabled(true);
+		WebSettings webSettings = webView.getSettings();
+		webSettings.setJavaScriptEnabled(true);
+		webSettings().setDomStorageEnabled(true);
+		webSettings().setDatabaseEnabled(true);
+		webSettings().setAlgorithmicDarkeningAllowed(true);
 		webView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage msg) {
