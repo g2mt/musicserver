@@ -42,6 +42,11 @@ import (
 	"unsafe"
 )
 
+//export MsrvIdentify
+func MsrvIdentify() *C.char {
+	return C.CString("musicserver")
+}
+
 //export MsrvNewInterface
 func MsrvNewInterface(cfg C.struct_MsrvConfig) C.struct_MsrvNewInterfaceResult {
 	goCfg := &schema.Config{
