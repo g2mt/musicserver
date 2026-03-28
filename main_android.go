@@ -77,22 +77,25 @@ func MsrvNewInterfaceFromConfigJson(configJson *C.char) C.struct_MsrvNewInterfac
 }
 
 //export MsrvHandleRequest
-func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, keys **C.char, values **C.char, paramsLen C.int) C.struct_MsrvHandleRequestResult {
+func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, paramsJson *C.char) C.struct_MsrvHandleRequestResult {
 	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
 
-	// Reconstruct the params map from parallel C string arrays
-	params := make(map[string]string, int(paramsLen))
-	keySlice := unsafe.Slice(keys, int(paramsLen))
-	valSlice := unsafe.Slice(values, int(paramsLen))
-	for idx := 0; idx < int(paramsLen); idx++ {
-		params[C.GoString(keySlice[idx])] = C.GoString(valSlice[idx])
+	// Parse the JSON-encoded params map
+	var params map[string]string
+	err := json.Unmarshal([]byte(C.GoString(paramsJson)), &params)
+	if err != nil {
+		return C.struct_MsrvHandleRequestResult{
+			ReaderHandle: 0,
+			ContentType: nil,
+			Err:         C.CString(err.Error()),
+		}
 	}
 
 	reader, contentType, err := iface.HandleRequestByteStream(C.GoString(path), C.GoString(method), params)
 	if err != nil {
 		return C.struct_MsrvHandleRequestResult{
 			ReaderHandle: 0,
-			ContentType:  nil,
+			ContentType: nil,
 			Err:          C.CString(err.Error()),
 		}
 	}
