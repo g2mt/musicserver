@@ -25,36 +25,40 @@ public class NativeBridge {
 		String id = msrvIdentify();
 		if (!"musicserver".equals(id)) {
 			Log.e("[msxrv] Native", "msrvIdentify returned: " + id);
-			new AlertDialog.Builder(activity)
-				.setMessage("Failed to connect through JNI. Quit?")
-				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						activity.finish();
-					}
-				})
-				.setNegativeButton(android.R.string.no, null)
-				.show();
+			showErrorDialog("Failed to connect through JNI. Quit?");
 		}
 
 		String[] outErr = new String[1];
 		String musicDir = android.os.Environment.getExternalStoragePublicDirectory(
 			android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
-		String configJson = "{\"data_path\": \"" + musicDir + "\"}";
-		interfaceHandle = msrvNewInterfaceFromConfigJson(configJson, outErr);
+
+		JSONObject configJson = new JSONObject();
+		try {
+			configJson.put("data_path", musicDir);
+		} catch (JSONException e) {
+			Log.e("[msxrv] Native", "Failed to create config JSON", e);
+			showErrorDialog("Failed to initialize music server. Quit?");
+			return;
+		}
+
+		interfaceHandle = msrvNewInterfaceFromConfigJson(configJson.toString(), outErr);
 		if (interfaceHandle == 0) {
 			Log.e("[msxrv] Native", "Failed to create interface: " + outErr[0]);
-			new AlertDialog.Builder(activity)
-				.setMessage("Failed to initialize music server. Quit?")
-				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						activity.finish();
-					}
-				})
-				.setNegativeButton(android.R.string.no, null)
-				.show();
+			showErrorDialog("Failed to initialize music server. Quit?");
 		}
+	}
+
+	private void showErrorDialog(String message) {
+		new AlertDialog.Builder(activity)
+			.setMessage(message)
+			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					activity.finish();
+				}
+			})
+			.setNegativeButton(android.R.string.no, null)
+			.show();
 	}
 
 	/**
