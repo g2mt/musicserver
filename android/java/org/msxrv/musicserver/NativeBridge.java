@@ -26,10 +26,10 @@ public class NativeBridge {
 
 		// Request permissions for API 33+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			if (activity.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+			if (activity.checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO)
 					!= PackageManager.PERMISSION_GRANTED) {
 				activity.requestPermissions(
-					new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
 					1);
 			}
 		}
