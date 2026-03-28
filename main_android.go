@@ -37,6 +37,7 @@ import "C"
 
 import (
 	"encoding/json"
+	"io"
 	"musicserver/internal/api"
 	"musicserver/internal/schema"
 	"runtime/cgo"
@@ -86,8 +87,8 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, pa
 	if err != nil {
 		return C.struct_MsrvHandleRequestResult{
 			ReaderHandle: 0,
-			ContentType: nil,
-			Err:         C.CString(err.Error()),
+			ContentType:  nil,
+			Err:          C.CString(err.Error()),
 		}
 	}
 
@@ -95,7 +96,7 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, pa
 	if err != nil {
 		return C.struct_MsrvHandleRequestResult{
 			ReaderHandle: 0,
-			ContentType: nil,
+			ContentType:  nil,
 			Err:          C.CString(err.Error()),
 		}
 	}
@@ -113,7 +114,7 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, pa
 //
 //export MsrvRead
 func MsrvRead(readerHandle C.uintptr_t, buf *C.char, bufLen C.int) C.struct_MsrvReadResult {
-	reader := cgo.Handle(readerHandle).Value().(interface{ Read([]byte) (int, error) })
+	reader := cgo.Handle(readerHandle).Value().(io.Reader)
 
 	goSlice := unsafe.Slice((*byte)(unsafe.Pointer(buf)), int(bufLen))
 	n, err := reader.Read(goSlice)
