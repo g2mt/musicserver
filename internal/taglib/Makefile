@@ -15,6 +15,11 @@ configure:
 
 .PHONY: build_static
 build_static:
-	cd taglib && \
+	cd $(MAKEFILE_DIR)/taglib && \
 	cmake --build $(BUILD_DIR) && \
 	cmake --install $(BUILD_DIR)
+
+.PHONY: clean
+clean:
+	rm -rf $(MAKEFILE_DIR)/taglib/$(BUILD_DIR)
+	rm -rf $(MAKEFILE_DIR)/taglib/$(PKG_DIR)
