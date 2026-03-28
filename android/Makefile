@@ -27,7 +27,7 @@ build_apk_stage0:
 .PHONY: build_apk_stage1
 build_apk_stage1: $(PKG_SRCS) \
 		AndroidManifest.xml \
-		build/apk/lib/x86_64 build/apk/lib/aarch64 \
+		build/apk/lib/x86_64 \
 		build/keystore.jks
 	$(AN_BUILD_TOOLS)/aapt2 compile --dir res -o build/res.zip
 	$(AN_BUILD_TOOLS)/aapt2 link build/res.zip \
@@ -57,16 +57,16 @@ build/keystore.jks:
 		-storepass android -keypass android
 
 
-# $(1) = NDK arch, $(2) = android apk arch
+# $(1) = NDK arch, $(2) = android apk arch, $(3) = sysroot arch
 define rule-native-lib
 .PHONY: build/apk/lib/$(1)
 build/apk/lib/$(1):
 	mkdir -p build/apk/lib/$(2)
 	cd .. && make AN_ARCH=$(1) native_lib_android
-	cp ../build/musicserverbind.android_$(1).so build/apk/lib/$(2)/libmusicserverbind.so
-	cp ../build/musicserver.android_$(1).so build/apk/lib/$(2)/libmusicserver.so
+	cp ../build/$(1)/*.so build/apk/lib/$(2)/
+	cp $(AN_NDK_PREFIX)/sysroot/usr/lib/$(3)-linux-android/libc++_shared.so build/apk/lib/$(2)/
 endef
 
-$(eval $(call rule-native-lib,aarch64,arm64-v8a))
-$(eval $(call rule-native-lib,armv7a,armeabi-v7a))
-$(eval $(call rule-native-lib,x86_64,x86_64))
+$(eval $(call rule-native-lib,aarch64,arm64-v8a,aarch64))
+$(eval $(call rule-native-lib,armv7a,armeabi-v7a,arm))
+$(eval $(call rule-native-lib,x86_64,x86_64,x86_64))
