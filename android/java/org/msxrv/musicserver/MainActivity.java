@@ -48,7 +48,6 @@ public class MainActivity extends Activity {
 		}
 
 		requestPermissions();
-		webView.loadUrl("file:///android_asset/index.html");
 	}
 
 	private void requestPermissions() {
@@ -58,8 +57,23 @@ public class MainActivity extends Activity {
 				requestPermissions(
 					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
 					1);
+			} else {
+				loadWebView();
 			}
+		} else {
+			loadWebView();
 		}
+	}
+
+	@Override
+	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+		loadWebView();
+	}
+
+	private void loadWebView() {
+		WebView webView = (WebView)findViewById(R.id.webview);
+		webView.loadUrl("file:///android_asset/index.html");
 	}
 
 	private void showErrorDialog(String message) {
