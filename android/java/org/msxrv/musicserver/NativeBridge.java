@@ -101,7 +101,58 @@ public class NativeBridge {
 	@JavascriptInterface
 	public String fetchAPI(String path, String params, String method) {
 		Log.d("[msxrv] Native", "path=" + path + " params=" + params + " method=" + method);
-		return null;
+
+		// Parse params JSON
+		String[] keys = new String[0];
+		String[] values = new String[0];
+		try {
+			JSONObject jsonParams = new JSONObject(params);
+			int len = jsonParams.length();
+			keys = new String[len];
+			values = new String[len];
+			int i = 0;
+			for (Iterator<String> it = jsonParams.keys(); it.hasNext(); ) {
+				String key = it.next();
+				keys[i] = key;
+				values[i] = jsonParams.getString(key);
+				i++;
+			}
+		} catch (JSONException e) {
+			Log.e("[msxrv] Native", "Failed to parse params", e);
+		}
+
+		String[] outContentType = new String[1];
+		String[] outErr = new String[1];
+		long readerHandle = msrvHandleRequest(0, path, method, keys, values, outContentType, outErr);
+
+		if (outErr[0] != null) {
+			Log.e("[msxrv] Native", "Request failed: " + outErr[0]);
+			return null;
+		}
+
+		// Read all content from the reader
+		StringBuilder content = new StringBuilder();
+		byte[] buffer = new byte[4096];
+
+		while (true) {
+			String[] readErr = new String[1];
+			int bytesRead = msrvRead(readerHandle, buffer, readErr);
+
+			if (readErr[0] != null) {
+				Log.e("[msxrv] Native", "Read failed: " + readErr[0]);
+				break;
+			}
+
+			if (bytesRead <= 0) {
+				break;
+			}
+
+			content.append(new String(buffer, 0, bytesRead));
+		}
+
+		msrvDeleteHandle(readerHandle);
+
+		return content.toString();
 	}
 
 }
