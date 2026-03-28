@@ -9,9 +9,9 @@ import {
   faForwardStep,
 } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCover, Track } from "./Track";
-import { HOST } from "./apiserver";
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
-import { AppContext, type AppState } from "./AppState";
+import { AppContext } from "./AppState";
+import { getFilePath, getTrackCoverFromId } from "./apiserver";
 
 import "./MusicPlayer.css";
 
@@ -75,9 +75,10 @@ export function MusicPlayer() {
   const audio = useAudio(
     (() => {
       if (!c.currentTrack) return null;
-      if (c.currentTrack.short_id)
-        return `${HOST}/track/${c.currentTrack.short_id}/data`;
-      if (c.currentTrack.path) return `${HOST}/file/${c.currentTrack.path}`;
+      if (c.currentTrack.id)
+        return getTrackCoverFromId(c.currentTrack.id);
+      if (c.currentTrack.path)
+        return getFilePath(c.currentTrack.id);
       return null;
     })(),
   );
