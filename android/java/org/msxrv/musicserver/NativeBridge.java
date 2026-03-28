@@ -47,8 +47,8 @@ public class NativeBridge {
 			Log.e("[msxrv] Native", "Setting musicDir = " + musicDir);
 			configJson.put("data_path", musicDir);
 
-			String dbDir = android.os.Environment.getExternalStoragePublicDirectory(
-				android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath() + "/MusicServer";
+			String dbDir = activity.getExternalFilesDir(
+				android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
 			Log.e("[msxrv] Native", "Setting dbDir = " + dbDir);
 			configJson.put("db_dir", dbDir);
 		} catch (JSONException e) {
