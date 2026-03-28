@@ -1,6 +1,8 @@
 package org.msxrv.musicserver;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -35,7 +37,27 @@ public class MainActivity extends Activity {
 				return true;
 			}
 		});
-		webView.addJavascriptInterface(new NativeBridge(this), "_native");
+
+		try {
+			NativeBridge nativeBridge = new NativeBridge(this);
+			webView.addJavascriptInterface(nativeBridge, "_native");
+		} catch (NativeBridge.NativeBridgeException e) {
+			showErrorDialog(e.getMessage() + " Quit?");
+		}
+
 		webView.loadUrl("file:///android_asset/index.html");
+	}
+
+	private void showErrorDialog(String message) {
+		new AlertDialog.Builder(this)
+			.setMessage(message)
+			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			})
+			.setNegativeButton(android.R.string.no, null)
+			.show();
 	}
 }
