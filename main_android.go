@@ -3,7 +3,36 @@
 
 package main
 
-// #include <stdlib.h>
+/*
+#include <stdlib.h>
+#include <stdint.h>
+
+typedef struct MsrvConfig {
+	char *HTTPBind;
+	int UnixBindEnabled;
+	char *UnixBind;
+	char *DataPath;
+	char *DbDir;
+	char *MediaDownloader;
+} MsrvConfig;
+
+typedef struct MsrvNewInterfaceResult {
+	uintptr_t Handle;
+	char *Err;
+} MsrvNewInterfaceResult;
+
+typedef struct MsrvHandleRequestResult {
+	uintptr_t ReaderHandle;
+	char *ContentType;
+	char *Err;
+} MsrvHandleRequestResult;
+
+typedef struct MsrvReadResult {
+	char *Data;
+	int N;
+	char *Err;
+} MsrvReadResult;
+*/
 import "C"
 
 import (
@@ -13,38 +42,8 @@ import (
 	"unsafe"
 )
 
-// MsrvConfig is a C-compatible representation of schema.Config
-type MsrvConfig struct {
-	HTTPBind        *C.char
-	UnixBindEnabled C.int
-	UnixBind        *C.char
-	DataPath        *C.char
-	DbDir           *C.char
-	MediaDownloader *C.char
-}
-
-// MsrvNewInterfaceResult holds the result of MsrvNewInterface
-type MsrvNewInterfaceResult struct {
-	Handle C.uintptr_t
-	Err    *C.char
-}
-
-// MsrvHandleRequestResult holds the result of MsrvHandleRequest
-type MsrvHandleRequestResult struct {
-	ReaderHandle C.uintptr_t
-	ContentType  *C.char
-	Err          *C.char
-}
-
-// MsrvReadResult holds the result of a MsrvRead call
-type MsrvReadResult struct {
-	Data *C.char
-	N    C.int
-	Err  *C.char
-}
-
 //export MsrvNewInterface
-func MsrvNewInterface(cfg MsrvConfig) MsrvNewInterfaceResult {
+func MsrvNewInterface(cfg C.struct_MsrvConfig) C.struct_MsrvNewInterfaceResult {
 	goCfg := &schema.Config{
 		HTTPBind:        C.GoString(cfg.HTTPBind),
 		UnixBindEnabled: cfg.UnixBindEnabled != 0,
@@ -56,21 +55,21 @@ func MsrvNewInterface(cfg MsrvConfig) MsrvNewInterfaceResult {
 
 	iface, err := api.NewInterface(goCfg)
 	if err != nil {
-		return MsrvNewInterfaceResult{
+		return C.struct_MsrvNewInterfaceResult{
 			Handle: 0,
 			Err:    C.CString(err.Error()),
 		}
 	}
 
 	handle := cgo.NewHandle(iface)
-	return MsrvNewInterfaceResult{
+	return C.struct_MsrvNewInterfaceResult{
 		Handle: C.uintptr_t(handle),
 		Err:    nil,
 	}
 }
 
 //export MsrvHandleRequest
-func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, keys **C.char, values **C.char, paramsLen C.int) MsrvHandleRequestResult {
+func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, keys **C.char, values **C.char, paramsLen C.int) C.struct_MsrvHandleRequestResult {
 	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
 
 	// Reconstruct the params map from parallel C string arrays
@@ -83,7 +82,7 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, ke
 
 	reader, contentType, err := iface.HandleRequestByteStream(C.GoString(path), C.GoString(method), params)
 	if err != nil {
-		return MsrvHandleRequestResult{
+		return C.struct_MsrvHandleRequestResult{
 			ReaderHandle: 0,
 			ContentType:  nil,
 			Err:          C.CString(err.Error()),
@@ -91,7 +90,7 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, ke
 	}
 
 	readerHandle := cgo.NewHandle(reader)
-	return MsrvHandleRequestResult{
+	return C.struct_MsrvHandleRequestResult{
 		ReaderHandle: C.uintptr_t(readerHandle),
 		ContentType:  C.CString(contentType),
 		Err:          nil,
@@ -102,19 +101,19 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, ke
 // Returns MsrvReadResult with N=-1 on EOF, N=-2 on error.
 //
 //export MsrvRead
-func MsrvRead(readerHandle C.uintptr_t, buf *C.char, bufLen C.int) MsrvReadResult {
+func MsrvRead(readerHandle C.uintptr_t, buf *C.char, bufLen C.int) C.struct_MsrvReadResult {
 	reader := cgo.Handle(readerHandle).Value().(interface{ Read([]byte) (int, error) })
 
 	goSlice := unsafe.Slice((*byte)(unsafe.Pointer(buf)), int(bufLen))
 	n, err := reader.Read(goSlice)
 	if err != nil {
 		if err.Error() == "EOF" {
-			return MsrvReadResult{Data: buf, N: -1, Err: nil}
+			return C.struct_MsrvReadResult{Data: buf, N: -1, Err: nil}
 		}
-		return MsrvReadResult{Data: buf, N: -2, Err: C.CString(err.Error())}
+		return C.struct_MsrvReadResult{Data: buf, N: -2, Err: C.CString(err.Error())}
 	}
 
-	return MsrvReadResult{Data: buf, N: C.int(n), Err: nil}
+	return C.struct_MsrvReadResult{Data: buf, N: C.int(n), Err: nil}
 }
 
 // MsrvDeleteHandle frees a cgo.Handle when C code is done with it.
