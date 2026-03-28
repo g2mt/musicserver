@@ -38,7 +38,28 @@ public class NativeBridge {
 		}
 
 		String[] outErr = new String[1];
-		interfaceHandle = 0; // TODO: call msrvNewInterfaceFromConfigJson(...);
+
+		// Get the music directory path
+		String musicDir = android.os.Environment.getExternalStoragePublicDirectory(
+			android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
+
+		// Create config JSON with data_path
+		String configJson = "{\"data_path\": \"" + musicDir + "\"}";
+
+		interfaceHandle = msrvNewInterfaceFromConfigJson(configJson, outErr);
+		if (interfaceHandle == 0) {
+			Log.e("[msxrv] Native", "Failed to create interface: " + outErr[0]);
+			new AlertDialog.Builder(activity)
+				.setMessage("Failed to initialize music server. Quit?")
+				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						activity.finish();
+					}
+				})
+				.setNegativeButton(android.R.string.no, null)
+				.show();
+		}
 	}
 
 	/**
