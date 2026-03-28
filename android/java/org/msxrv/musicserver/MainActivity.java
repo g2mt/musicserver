@@ -2,6 +2,9 @@ package org.msxrv.musicserver;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 
 public class MainActivity extends Activity {
@@ -18,6 +21,13 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		WebView webView = (WebView)findViewById(R.id.webview);
+		webView.setWebChromeClient(new WebChromeClient() {
+			@Override
+			public boolean onConsoleMessage(ConsoleMessage msg) {
+				Log.d("WebView", msg.message() + " (line " + msg.lineNumber() + ", " + msg.sourceId() + ")");
+				return true;
+			}
+		});
 		webView.loadUrl("file:///android_asset/index.html");
 	}
 }
