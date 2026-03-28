@@ -41,6 +41,8 @@ import (
 	"musicserver/internal/schema"
 	"runtime/cgo"
 	"unsafe"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 //export MsrvIdentify
