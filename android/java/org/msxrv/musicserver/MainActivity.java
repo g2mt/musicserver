@@ -3,6 +3,8 @@ package org.msxrv.musicserver;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
@@ -45,7 +47,19 @@ public class MainActivity extends Activity {
 			showErrorDialog(e.getMessage() + "\nQuit?");
 		}
 
+		requestPermissions();
 		webView.loadUrl("file:///android_asset/index.html");
+	}
+
+	private void requestPermissions() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO)
+					!= PackageManager.PERMISSION_GRANTED) {
+				requestPermissions(
+					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
+					1);
+			}
+		}
 	}
 
 	private void showErrorDialog(String message) {
