@@ -26,22 +26,19 @@ public class NativeBridge {
 			throw new NativeBridgeException("Failed to connect through JNI.");
 		}
 
-		String[] outErr = new String[1];
-		String musicDir = android.os.Environment.getExternalStoragePublicDirectory(
-			android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
-
 		JSONObject configJson = new JSONObject();
 		try {
+			String musicDir = android.os.Environment.getExternalStoragePublicDirectory(
+				android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
 			configJson.put("data_path", musicDir);
 		} catch (JSONException e) {
-			Log.e("[msxrv] Native", "Failed to create config JSON", e);
-			throw new NativeBridgeException("Failed to initialize music server.");
+			throw new NativeBridgeException("Failed to create config JSON: " + e.toString());
 		}
 
+		String[] outErr = new String[1];
 		interfaceHandle = msrvNewInterfaceFromConfigJson(configJson.toString(), outErr);
-		if (interfaceHandle == 0) {
-			Log.e("[msxrv] Native", "Failed to create interface: " + outErr[0]);
-			throw new NativeBridgeException("Failed to initialize music server.");
+		if (outErr[0] != null) {
+			throw new NativeBridgeException("Failed to create interface: " + outErr[0]);
 		}
 	}
 

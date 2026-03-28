@@ -42,7 +42,7 @@ public class MainActivity extends Activity {
 			NativeBridge nativeBridge = new NativeBridge(this);
 			webView.addJavascriptInterface(nativeBridge, "_native");
 		} catch (NativeBridge.NativeBridgeException e) {
-			showErrorDialog(e.getMessage() + " Quit?");
+			showErrorDialog(e.getMessage() + "\nQuit?");
 		}
 
 		webView.loadUrl("file:///android_asset/index.html");
