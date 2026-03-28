@@ -1,5 +1,8 @@
 package org.msxrv.musicserver;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -7,6 +10,26 @@ public class NativeBridge {
 	static {
 		System.loadLibrary("musicserver");
 		System.loadLibrary("musicserverbind");
+	}
+
+	private Activity activity;
+
+	public NativeBridge(Activity activity) {
+		this.activity = activity;
+		String id = msrvIdentify();
+		if (!"musicserver".equals(id)) {
+			Log.e("[msxrv] Native", "msrvIdentify returned: " + id);
+			new AlertDialog.Builder(activity)
+				.setMessage("Failed to connect through JNI. Quit?")
+				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						activity.finish();
+					}
+				})
+				.setNegativeButton(android.R.string.no, null)
+				.show();
+		}
 	}
 
 	/**
