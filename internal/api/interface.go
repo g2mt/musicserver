@@ -1,12 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -342,4 +344,18 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		return nil, "", err
 	}
 	return &byteHandler{b: data}, "text/json", nil
+}
+
+func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
+	buf := &bytes.Buffer{}
+	reader, contentType, err := i.handleRequest(path, method, params)
+	for {
+		if re, ok := reader.(*redirectHandler); ok {
+			reader, contentType, err = i.handleRequest(re.path, method, params)
+		} else {
+			break
+		}
+	}
+	reader.HandleWriter(buf)
+	return buf, contentType, err
 }
