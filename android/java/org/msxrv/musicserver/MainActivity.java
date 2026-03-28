@@ -12,21 +12,6 @@ import android.webkit.WebView;
 import android.webkit.WebSettings;
 
 public class MainActivity extends Activity {
-
-	public static class NativeFetchAPI {
-		@JavascriptInterface
-		public String fetchAPI(String path, String params, String method) {
-			Log.d("[msxrv] NativeFetchAPI", "path=" + path + " params=" + params + " method=" + method);
-			return null;
-		}
-	}
-	static {
-		System.loadLibrary("musicserver");
-		System.loadLibrary("musicserverbind");
-	}
-
-	public native String getMessage();
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,7 +35,7 @@ public class MainActivity extends Activity {
 				return true;
 			}
 		});
-		webView.addJavascriptInterface(new NativeFetchAPI(), "_native_fetchAPI_bridge");
+		webView.addJavascriptInterface(new NativeBridge(), "_native");
 		webView.loadUrl("file:///android_asset/index.html");
 	}
 }
