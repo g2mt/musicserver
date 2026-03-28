@@ -15,6 +15,7 @@ configure:
 
 .PHONY: build_static
 build_static:
+	-[[ ! -d "$(MAKEFILE_DIR)/taglib/$(BUILD_DIR)" ]] && make configure
 	cd $(MAKEFILE_DIR)/taglib && \
 	cmake --build $(BUILD_DIR) && \
 	cmake --install $(BUILD_DIR)
