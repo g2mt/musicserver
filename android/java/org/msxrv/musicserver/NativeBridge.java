@@ -18,6 +18,7 @@ public class NativeBridge {
 	}
 
 	private Activity activity;
+	private long interfaceHandle;
 
 	public NativeBridge(Activity activity) {
 		this.activity = activity;
@@ -35,6 +36,9 @@ public class NativeBridge {
 				.setNegativeButton(android.R.string.no, null)
 				.show();
 		}
+
+		String[] outErr = new String[1];
+		interfaceHandle = 0; // TODO: call msrvNewInterfaceFromConfigJson(...);
 	}
 
 	/**
@@ -118,7 +122,7 @@ public class NativeBridge {
 
 		String[] outContentType = new String[1];
 		String[] outErr = new String[1];
-		long readerHandle = msrvHandleRequest(0, path, method, keys, values, outContentType, outErr);
+		long readerHandle = msrvHandleRequest(interfaceHandle, path, method, keys, values, outContentType, outErr);
 
 		if (outErr[0] != null) {
 			Log.e("[msxrv] Native", "Request failed: " + outErr[0]);
