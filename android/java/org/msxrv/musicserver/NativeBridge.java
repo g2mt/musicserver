@@ -128,7 +128,7 @@ public class NativeBridge {
 	private native void msrvDeleteHandle(long handle);
 
 	@JavascriptInterface
-	public String fetchAPI(String path, String params, String method) {
+	public String fetchAPI(String path, String method, String params) {
 		Log.d("[msxrv] Native", "path=" + path + " params=" + params + " method=" + method);
 
 		// Parse params JSON
