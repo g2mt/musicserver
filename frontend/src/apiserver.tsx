@@ -9,6 +9,14 @@ export function getTrackCoverFromId(id: string) {
   return `${HOST}/track/${id}/cover`;
 }
 
+export function getTrackFileFromId(id: string) {
+  return `${HOST}/track/${id}/data`;
+}
+
+export function getFilePath(path: string) {
+  return `${HOST}/file/${path}`;
+}
+
 export async function fetchAPI(
   path: string,
   params?: Record<string, string>,

@@ -270,6 +270,17 @@ export function App() {
     );
   }, [windowWidth]);
 
+  useEffect(() => {
+    function onBeforeUnload() {
+      saveConfig(c);
+    }
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, []);
+
   return (
     <AppContext value={c}>
       <ToastContainer position="bottom-right" theme="dark" />
