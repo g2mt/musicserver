@@ -45,6 +45,7 @@ build_apk_stage1: $(PKG_SRCS) \
 		--output build/
 	cd build && zip -u resource.apk classes.dex
 	cd build/apk && zip -r -u ../resource.apk lib/*/*
+	zip -r -u build/resource.apk assets
 	"$(AN_BUILD_TOOLS)/zipalign" -f 4 build/resource.apk build/$(PKG_NAME).unsigned.apk
 	"$(AN_BUILD_TOOLS)/apksigner" sign --ks build/keystore.jks \
 		--ks-key-alias androidkey --ks-pass pass:android \
