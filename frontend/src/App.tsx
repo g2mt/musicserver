@@ -24,6 +24,12 @@ import { PLAYER_COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
+declare global {
+  interface Window {
+    _refreshSearch?: () => void;
+  }
+}
+
 export function App() {
   const c = {} as AppState;
 
@@ -111,7 +117,7 @@ export function App() {
       window.removeEventListener("hashchange", onHashchange);
     };
   });
-  useEffect(() => {
+  c.refreshSearch = () => {
     fetchAPI("/track", { q: c.searchQuery })
       .then((data) => {
         if (data === null || data.length === 0) {
@@ -133,7 +139,9 @@ export function App() {
         toast.error(<>Error loading: {e.toString()}</>);
         setHashParam("q", c.searchQuery);
       });
-  }, [c.searchQuery]);
+  };
+  window._refreshSearch = c.refreshSearch;
+  useEffect(c.refreshSearch, [c.searchQuery]);
 
   // Confirm boxes
   const [confirmBoxes, setConfirmBoxes] = useState<

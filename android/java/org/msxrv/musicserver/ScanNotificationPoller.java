@@ -28,7 +28,7 @@ public class ScanNotificationPoller {
 		this.activity = activity;
 		this.bridge = bridge;
 
-		Log.d("[msxrv] ScanTickerValues", "starting ScanNotificationPoller");
+		Log.d("[msxrv] ScanNotificationPoller", "starting poller");
 
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -39,7 +39,7 @@ public class ScanNotificationPoller {
 
 			@Override
 			public void run() {
-				Log.d("[msxrv] ScanTickerValues", "polling ticker values");
+				Log.d("[msxrv] ScanNotificationPoller", "polling ticker values");
 				NativeBridge.ScanTickerValues vals = bridge.getScanTickerValues();
 				if (!vals.present) {
 					if (wasScanning) {

@@ -43,6 +43,7 @@ export interface AppState extends AppStateData {
   showAllTracks: () => void;
   oldSearchQuery: RefObject<string | null>;
   onRescanned: () => void;
+  refreshSearch: () => void;
 }
 
 export const AppContext = createContext<AppState | null>(null);
