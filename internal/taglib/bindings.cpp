@@ -13,8 +13,8 @@ static const char *FILE_NOT_FOUND_MSG = "file not found";
 static const char *UNABLE_TO_READ_MSG = "unable to read file";
 static const char *MEMORY_ERROR_MSG = "memory allocation error";
 
-BindingResult load_track_metadata(const char *filepath,
-                                  TrackMetadata *metadata) {
+BindingResult MsrvTlLoadTrackMetadata(const char *filepath,
+                                      TrackMetadata *metadata) {
   BindingResult result = {nullptr};
 
   if (!filepath || !metadata) {
@@ -53,7 +53,7 @@ BindingResult load_track_metadata(const char *filepath,
   metadata->album = copy_str(tag->album());
 
   if (!metadata->title || !metadata->artist || !metadata->album) {
-    free_track_metadata(metadata);
+    MsrvTlFreeTrackMetadata(metadata);
     result.err = MEMORY_ERROR_MSG;
     return result;
   }
@@ -61,7 +61,7 @@ BindingResult load_track_metadata(const char *filepath,
   return result;
 }
 
-void free_track_metadata(TrackMetadata *metadata) {
+void MsrvTlFreeTrackMetadata(TrackMetadata *metadata) {
   if (!metadata)
     return;
 
@@ -73,17 +73,17 @@ void free_track_metadata(TrackMetadata *metadata) {
   metadata->album = nullptr;
 }
 
-BindingResult extract_cover_art(const char *filepath, CoverArt *cover_art) {
+BindingResult MsrvTlExtractCoverArt(const char *filepath, CoverArt *coverArt) {
   BindingResult result = {nullptr};
 
-  if (!filepath || !cover_art) {
+  if (!filepath || !coverArt) {
     result.err = UNABLE_TO_READ_MSG;
     return result;
   }
 
-  cover_art->data = nullptr;
-  cover_art->data_length = 0;
-  cover_art->mime_type = nullptr;
+  coverArt->data = nullptr;
+  coverArt->dataLength = 0;
+  coverArt->mimeType = nullptr;
 
   TagLib::FileRef file(filepath);
   if (file.isNull()) {
@@ -108,17 +108,17 @@ BindingResult extract_cover_art(const char *filepath, CoverArt *cover_art) {
   if (bytes.size() == 0)
     return result;
 
-  cover_art->data = static_cast<unsigned char *>(malloc(bytes.size()));
-  if (!cover_art->data) {
+  coverArt->data = static_cast<unsigned char *>(malloc(bytes.size()));
+  if (!coverArt->data) {
     result.err = MEMORY_ERROR_MSG;
     return result;
   }
-  memcpy(cover_art->data, bytes.data(), bytes.size());
-  cover_art->data_length = static_cast<int>(bytes.size());
-  cover_art->mime_type = strdup(mime.c_str());
-  if (!cover_art->mime_type) {
-    free(cover_art->data);
-    cover_art->data = nullptr;
+  memcpy(coverArt->data, bytes.data(), bytes.size());
+  coverArt->dataLength = static_cast<int>(bytes.size());
+  coverArt->mimeType = strdup(mime.c_str());
+  if (!coverArt->mimeType) {
+    free(coverArt->data);
+    coverArt->data = nullptr;
     result.err = MEMORY_ERROR_MSG;
     return result;
   }
@@ -126,14 +126,14 @@ BindingResult extract_cover_art(const char *filepath, CoverArt *cover_art) {
   return result;
 }
 
-void free_cover_art(CoverArt *cover_art) {
-  if (!cover_art)
+void MsrvTlFreeCoverArt(CoverArt *coverArt) {
+  if (!coverArt)
     return;
-  free(cover_art->data);
-  cover_art->data = nullptr;
-  free(cover_art->mime_type);
-  cover_art->mime_type = nullptr;
-  cover_art->data_length = 0;
+  free(coverArt->data);
+  coverArt->data = nullptr;
+  free(coverArt->mimeType);
+  coverArt->mimeType = nullptr;
+  coverArt->dataLength = 0;
 }
 
 } // extern "C"
