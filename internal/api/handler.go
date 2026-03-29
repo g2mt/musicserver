@@ -4,14 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net"
 	"net/http"
 )
 
 type handler interface {
 	io.Closer
 	HandleHTTP(w http.ResponseWriter, req *http.Request) error
-	HandleUnix(conn net.Conn) error
+	HandleWriter(w io.Writer) error
 }
 
 type byteHandler struct{ b []byte }
@@ -25,8 +24,8 @@ func (h *byteHandler) HandleHTTP(w http.ResponseWriter, req *http.Request) error
 	return err
 }
 
-func (h *byteHandler) HandleUnix(conn net.Conn) error {
-	_, err := conn.Write(h.b)
+func (h *byteHandler) HandleWriter(w io.Writer) error {
+	_, err := w.Write(h.b)
 	return err
 }
 
@@ -69,7 +68,7 @@ func (s *eventStreamer[T]) HandleHTTP(w http.ResponseWriter, req *http.Request) 
 	}
 }
 
-func (s *eventStreamer[T]) HandleUnix(conn net.Conn) error {
+func (s *eventStreamer[T]) HandleWriter(w io.Writer) error {
 	if s.ch == nil {
 		return errors.New("No new events")
 	}
@@ -87,8 +86,14 @@ func (s *eventStreamer[T]) HandleUnix(conn net.Conn) error {
 	}
 
 	// Format as SSE
-	conn.Write([]byte("event: data\n"))
-	conn.Write([]byte("data: " + string(data) + "\n\n"))
+	_, err = w.Write([]byte("event: data\n"))
+	if err != nil {
+		return err
+	}
+	_, err = w.Write([]byte("data: " + string(data) + "\n\n"))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -119,6 +124,6 @@ func (r *redirectHandler) HandleHTTP(w http.ResponseWriter, req *http.Request) e
 	return nil
 }
 
-func (r *redirectHandler) HandleUnix(conn net.Conn) error {
+func (r *redirectHandler) HandleWriter(w io.Writer) error {
 	panic("redirectHandler called")
 }

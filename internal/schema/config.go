@@ -10,17 +10,17 @@ import (
 
 type Config struct {
 	// binds the HTTP API backend to this path. defaults to localhost:8000
-	HTTPBind string `yaml:"http_bind"`
+	HTTPBind string `json:"http_bind" yaml:"http_bind"`
 	// If set, then enable the local unix socket
-	UnixBindEnabled bool `yaml:"unix_bind_enabled"`
+	UnixBindEnabled bool `json:"unix_bind_enabled" yaml:"unix_bind_enabled"`
 	// binds the Unix socket API backend to this path. By default, binds to /run/musicserver/socket for root, ~/.musicserver/socket for non-root
-	UnixBind string `yaml:"unix_bind"`
+	UnixBind string `json:"unix_bind" yaml:"unix_bind"`
 	// path where music data is stored
-	DataPath string `yaml:"data_path"`
+	DataPath string `json:"data_path" yaml:"data_path"`
 	// path where database and other info is stored. defaults to /var/lib/musicserver for root users, ~/.musicserver/db if non-root
-	DbDir string `yaml:"db_dir"`
+	DbDir string `json:"db_dir" yaml:"db_dir"`
 	// path to generic media downloader binary
-	MediaDownloader string `yaml:"media_downloader"`
+	MediaDownloader string `json:"media_downloader" yaml:"media_downloader"`
 }
 
 func LoadConfig(path string) (*Config, error) {

@@ -5,16 +5,47 @@ const HOST = (() => {
   return `${location.origin}/api`;
 })();
 
+declare global {
+  interface Native {
+    fetchAPI: (path: string, method: string, params: string) => string | null;
+  }
+  interface Window {
+    _native?: Native;
+  }
+}
+
 export function getTrackCoverFromId(id: string) {
+  if (window._native) {
+    return `track-cover://${id}`;
+  }
   return `${HOST}/track/${id}/cover`;
 }
 
-export async function fetchAPI(
+export function getTrackFileFromId(id: string) {
+  return `${HOST}/track/${id}/data`;
+}
+
+export function getFilePath(path: string) {
+  return `${HOST}/file/${path}`;
+}
+
+export function fetchAPI(
   path: string,
   params?: Record<string, string>,
   method: string = "GET",
-) {
+): Promise<any> {
   if (!path.startsWith("/")) throw new Error(`"${path}" does not start with /`);
+
+  if (window._native) {
+    const result = window._native.fetchAPI(path, method, JSON.stringify(params ?? {}));
+    return new Promise((res, rej) => {
+      try {
+        res(result === null ? null : JSON.parse(result));
+      } catch (e) {
+        rej(e);
+      }
+    });
+  }
 
   const url = new URL(`${HOST}${path}`);
   if (params) {

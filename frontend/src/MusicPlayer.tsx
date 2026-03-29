@@ -9,17 +9,19 @@ import {
   faForwardStep,
 } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCover, Track } from "./Track";
-import { HOST } from "./apiserver";
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
-import { AppContext, type AppState } from "./AppState";
+import { AppContext } from "./AppState";
+import { getFilePath, getTrackFileFromId } from "./apiserver";
+import { apiAudio, useAbsoluteAudioPath } from "./apiaudio";
 
 import "./MusicPlayer.css";
 
 function useAudio(url: string | null) {
-  const audio = useMemo(() => new Audio(), []);
+  const audio = useMemo(() => new apiAudio(), []);
 
   useEffect(() => {
     if (!url) return;
+    console.log(`Playing ${url}`);
     audio.src = url;
     audio.currentTime = 0;
     audio.play();
@@ -75,9 +77,12 @@ export function MusicPlayer() {
   const audio = useAudio(
     (() => {
       if (!c.currentTrack) return null;
-      if (c.currentTrack.short_id)
-        return `${HOST}/track/${c.currentTrack.short_id}/data`;
-      if (c.currentTrack.path) return `${HOST}/file/${c.currentTrack.path}`;
+      // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
+      // without adding additional functions, so use the absolute path directly.
+      // the path is checked in NativeAudioBridge
+      if (useAbsoluteAudioPath) return `file://${c.currentTrack.path}`;
+      if (c.currentTrack.id) return getTrackFileFromId(c.currentTrack.id);
+      if (c.currentTrack.path) return getFilePath(c.currentTrack.path);
       return null;
     })(),
   );

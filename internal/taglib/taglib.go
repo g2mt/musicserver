@@ -1,7 +1,6 @@
 package taglib
 
-// #cgo CFLAGS: -I./taglib/.pkg/include
-// #cgo LDFLAGS: -L./taglib/.pkg/lib -ltag
+// #cgo pkg-config: taglib
 // #include "bindings.h"
 // #include <stdlib.h>
 import "C"

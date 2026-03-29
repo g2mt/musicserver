@@ -1,12 +1,14 @@
 package api
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -182,6 +184,68 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
+	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
+		if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
+			if method == "POST" {
+				success, err := i.DownloadExternalTrack(extUrl)
+				if err != nil {
+					return nil, "", err
+				}
+				response = success
+			} else if method == "GET" {
+				response, err = i.GetExternalTrackByURL(extUrl)
+			} else {
+				return nil, "", errors.New("method not allowed")
+			}
+		} else if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
+			path, err = url.QueryUnescape(path)
+			if err != nil {
+				return nil, "", err
+			}
+			path = filepath.Clean(path)
+			fullPath := filepath.Join(i.config.DataPath, path)
+
+			id, err = i.resolveTrackFromPath(fullPath, nil)
+			if err != nil {
+				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
+					track := schema.Track{
+						Name: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
+						Path: fullPath,
+					}
+					data, err := json.Marshal(track)
+					if err != nil {
+						return nil, "", err
+					}
+					return &byteHandler{b: data}, "text/json", nil
+				}
+				return nil, "", err
+			} else {
+				return &redirectHandler{path: "/track/" + id}, "text/json", nil
+			}
+		} else if id, ok = strings.CutSuffix(id, "/data"); ok {
+			data, err := i.GetTrackData(id)
+			if err != nil {
+				return nil, "", err
+			}
+			return &byteHandler{b: data}, "application/octet-stream", nil
+		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
+			data, mimeType, err := i.GetTrackCover(id)
+			if err != nil {
+				return nil, "", err
+			}
+			if data == nil {
+				data, err = base64.StdEncoding.DecodeString(CoverFallback)
+				if err != nil {
+					return nil, "", err
+				}
+				mimeType = CoverFallbackMimetype
+			}
+			return &byteHandler{b: data}, mimeType, nil
+		} else {
+			response, err = i.GetTrackById(id)
+		}
 	} else if path == "/progress" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -218,76 +282,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				return nil, "", err
 			}
 			return &byteHandler{b: data}, "text/json", nil
-		}
-	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
-		if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
-			if method == "POST" {
-				success, err := i.DownloadExternalTrack(extUrl)
-				if err != nil {
-					return nil, "", err
-				}
-				response = success
-			} else if method == "GET" {
-				response, err = i.GetExternalTrackByURL(extUrl)
-			} else {
-				return nil, "", errors.New("method not allowed")
-			}
-		} else if method != "GET" {
-			return nil, "", errors.New("method not allowed")
-		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
-			path, err = url.QueryUnescape(path)
-			if err != nil {
-				return nil, "", err
-			}
-			path = filepath.Clean(path)
-			fullPath := filepath.Join(i.config.DataPath, path)
-
-			relPath, err := filepath.Rel(i.config.DataPath, fullPath)
-			if err != nil {
-				return nil, "", err
-			}
-			if strings.HasPrefix(relPath, "..") {
-				return nil, "", errors.New("unexpected path outside of data directory")
-			}
-
-			id, err = i.resolveTrackFromPath(fullPath, nil)
-			if err != nil {
-				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
-					track := schema.Track{
-						Name: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
-						Path: relPath,
-					}
-					data, err := json.Marshal(track)
-					if err != nil {
-						return nil, "", err
-					}
-					return &byteHandler{b: data}, "text/json", nil
-				}
-				return nil, "", err
-			} else {
-				return &redirectHandler{path: "/track/" + id}, "text/json", nil
-			}
-		} else if id, ok = strings.CutSuffix(id, "/data"); ok {
-			data, err := i.GetTrackData(id)
-			if err != nil {
-				return nil, "", err
-			}
-			return &byteHandler{b: data}, "application/octet-stream", nil
-		} else if id, ok = strings.CutSuffix(id, "/cover"); ok {
-			data, mimeType, err := i.GetTrackCover(id)
-			if err != nil {
-				return nil, "", err
-			}
-			if data == nil {
-				data, err = base64.StdEncoding.DecodeString(CoverFallback)
-				if err != nil {
-					return nil, "", err
-				}
-				mimeType = CoverFallbackMimetype
-			}
-			return &byteHandler{b: data}, mimeType, nil
-		} else {
-			response, err = i.GetTrackById(id)
 		}
 	} else if path == "/album" {
 		if method != "GET" {
@@ -342,4 +336,24 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		return nil, "", err
 	}
 	return &byteHandler{b: data}, "text/json", nil
+}
+
+func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
+	buf := &bytes.Buffer{}
+	reader, contentType, err := i.handleRequest(path, method, params)
+	if err != nil {
+		return nil, "", err
+	}
+	for {
+		if re, ok := reader.(*redirectHandler); ok {
+			reader, contentType, err = i.handleRequest(re.path, method, params)
+		} else {
+			break
+		}
+	}
+	if err != nil {
+		return nil, "", err
+	}
+	reader.HandleWriter(buf)
+	return buf, contentType, err
 }

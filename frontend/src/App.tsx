@@ -15,7 +15,7 @@ import {
   faArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
@@ -74,11 +74,12 @@ export function App() {
     }
   }, [c.currentTrack, c.darkMode]);
 
-  useEffect(() => {
+  c.onRescanned = () => {
     fetchAPI("/track")
-      .then((data) => setFullTracksFromData(data))
-      .catch(() => setFullTracksFromData([]));
-  }, []);
+      .then((data) => setFullTracks(data))
+      .catch(() => setFullTracks([]));
+  };
+  useEffect(() => c.onRescanned(), []);
 
   // Hash params (parsed like URLSearchParams but from window.location.hash)
   const getHashParams = () =>
@@ -119,7 +120,7 @@ export function App() {
     }
     fetchAPI("/track", { q: c.searchQuery })
       .then((data) => {
-        setFullTracksFromData(data);
+        setFullTracks(data);
         if (data === null || data.length === 0) {
           if (!didSetToPreviousWorkingValue.current) {
             didSetToPreviousWorkingValue.current = true;
@@ -131,7 +132,7 @@ export function App() {
         }
       })
       .catch(() => {
-        setFullTracksFromData([]);
+        setFullTracks([]);
         if (!didSetToPreviousWorkingValue.current) {
           didSetToPreviousWorkingValue.current = true;
           c.setSearchQuery(c.previousWorkingValue.current);
@@ -210,14 +211,6 @@ export function App() {
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
 
-  const setFullTracksFromData = (data: any) => {
-    if (data === null || data.length === 0) {
-      toast.warn("No tracks found");
-    } else {
-      setFullTracks(data);
-    }
-  };
-
   // Track queue
   [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
   c.enqueueTrack = (track: TrackData | TrackData[]) => {
@@ -269,6 +262,17 @@ export function App() {
       windowWidth < PLAYER_COLLAPSE_AT_WIDTH,
     );
   }, [windowWidth]);
+
+  useEffect(() => {
+    function onBeforeUnload() {
+      saveConfig(c);
+    }
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, []);
 
   return (
     <AppContext value={c}>

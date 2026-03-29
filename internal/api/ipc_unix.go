@@ -1,5 +1,5 @@
-//go:build unix
-// +build unix
+//go:build unix && !android
+// +build unix,!android
 
 package api
 
@@ -121,7 +121,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 			continue
 		}
 
-		reader.HandleUnix(conn)
+		reader.HandleWriter(conn)
 		reader.Close()
 	}
 }
