@@ -117,7 +117,7 @@ public class NativeAudioBridge {
 		try {
 			mediaPlayer.reset();
 			mediaPlayer.setDataSource(src);
-			mediaPlayer.prepareAsync();
+			mediaPlayer.prepare();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -126,6 +126,7 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public void play(int instanceId) {
 		if (!isActive(instanceId)) return;
+		Log.d("[msxrv] NativeAudioBridge", "play");
 		mediaPlayer.start();
 		scheduleTimeUpdates(instanceId);
 	}
