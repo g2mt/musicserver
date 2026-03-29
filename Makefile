@@ -20,15 +20,9 @@ native_lib_android_stage1: \
 	build/$(AN_ARCH)/libmusicserverbind.so \
 	build/$(AN_ARCH)/libmusicserver.so
 
-JNI_SRCS = \
-	jni/libmusicserver.c \
-	jni/libmusicserver_taglib.c
 build/$(AN_ARCH)/libmusicserverbind.so: \
-	$(JNI_SRCS) build/$(AN_ARCH)/libmusicserver.so
-	$(AN_NDK_CC) -fpic -shared \
-		-Ibuild/$(AN_ARCH) -Lbuild/$(AN_ARCH) \
-		-Iinternal/ \
-		-o $@ $(JNI_SRCS) -lmusicserver
+	jni/libmusicserver.c build/$(AN_ARCH)/libmusicserver.so
+	$(AN_NDK_CC) -fpic -shared -Ibuild/$(AN_ARCH) -Lbuild/$(AN_ARCH) -o $@ $< -lmusicserver
 
 # c-archive is not supported
 # rule also builds corresponding .h file
