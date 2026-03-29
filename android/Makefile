@@ -12,7 +12,7 @@ override AN_TARGET = aarch64 armv7a x86_64
 endif
 
 .PHONY: all | init_build
-all: build/$(PKG_NAME).unsigned.apk
+all: build/$(PKG_NAME).apk
 
 include ../mk/android.mk
 
