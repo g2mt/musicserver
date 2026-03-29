@@ -13,6 +13,8 @@ import org.json.JSONObject;
 import android.util.Log;
 
 public class NativeAudioBridge {
+	static final String fileEndpoint = "file:///api/file/";
+
 	private final Context context;
 	private final WebView webView;
 	private MediaPlayer mediaPlayer;
@@ -22,7 +24,8 @@ public class NativeAudioBridge {
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
 
-	public NativeAudioBridge(Context context, WebView webView) {
+	public NativeAudioBridge(MainActivity activity, Context context, WebView webView) {
+		this.activity = activity;
 		this.context = context;
 		this.webView = webView;
 	}
