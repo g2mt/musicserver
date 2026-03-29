@@ -7,6 +7,10 @@ PKG_PATH = $(subst .,/,$(PKG_NAME))
 PKG_SRCS = $(wildcard java/$(PKG_PATH)/*.java)
 AN_TARGET = x86_64
 
+ifeq ($(AN_TARGET),all)
+AN_TARGET = aarch64 armv7a x86_64
+endif
+
 .PHONY: all | init_build
 all: build/$(PKG_NAME).unsigned.apk
 
