@@ -3,7 +3,7 @@ GOFLAGS ?= -v -ldflags="-X musicserver/internal/api.Version=$$(git rev-parse --s
 build/musicserver:
 	go build -o $@ $(GOFLAGS) .
 
-ifeq ($(strip $(ANDROID_HOME)),)
+ifneq ($(strip $(ANDROID_HOME)),)
 include mk/android.mk
 
 .PHONY: taglib_android
