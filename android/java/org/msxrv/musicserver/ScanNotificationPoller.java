@@ -62,6 +62,15 @@ public class ScanNotificationPoller {
 		handler.post(pollRunnable);
 	}
 
+	private void postOneTimeNotification(String title, String text) {
+		Notification.Builder builder = new Notification.Builder(activity, CHANNEL_ID)
+			.setSmallIcon(android.R.drawable.ic_media_play)
+			.setContentTitle(title)
+			.setContentText(text)
+			.setAutoCancel(true);
+		notificationManager.notify(NOTIFICATION_ID + 1, builder.build());
+	}
+
 	private void postNotification(int value, int maxValue) {
 		Notification.Builder builder = new Notification.Builder(activity, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
