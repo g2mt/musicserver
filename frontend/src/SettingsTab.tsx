@@ -32,8 +32,8 @@ function SettingsTab() {
       <button className="btn" onClick={() => {
         fetchAPI("/track", undefined, "POST")
           .then(() => {
-            c.rescanned.current = true;
             toast.success("Scanning complete");
+            c.onRescanned();
           })
           .catch(() => toast.error("Sync failed"));
       }}>
