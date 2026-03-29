@@ -17,22 +17,22 @@ typedef struct {
 
 typedef struct {
   unsigned char *data;
-  int data_length;
-  char *mime_type;
+  int dataLength;
+  char *mimeType;
 } CoverArt;
 
 // Load track metadata from file
-BindingResult load_track_metadata(const char *filepath,
-                                  TrackMetadata *metadata);
+BindingResult MsrvTlLoadTrackMetadata(const char *filepath,
+                                      TrackMetadata *metadata);
 
 // Free memory allocated for track metadata
-void free_track_metadata(TrackMetadata *metadata);
+void MsrvTlFreeTrackMetadata(TrackMetadata *metadata);
 
 // Extract cover art from file
-BindingResult extract_cover_art(const char *filepath, CoverArt *cover_art);
+BindingResult MsrvTlExtractCoverArt(const char *filepath, CoverArt *coverArt);
 
 // Free memory allocated for cover art
-void free_cover_art(CoverArt *cover_art);
+void MsrvTlFreeCoverArt(CoverArt *coverArt);
 
 #ifdef __cplusplus
 }

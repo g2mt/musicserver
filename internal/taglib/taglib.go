@@ -35,8 +35,8 @@ func LoadTrack(path string) (schema.Track, error) {
 	defer C.free(unsafe.Pointer(cPath))
 
 	var cTrack C.TrackMetadata
-	result := C.load_track_metadata(cPath, &cTrack)
-	defer C.free_track_metadata(&cTrack)
+	result := C.MsrvTlLoadTrackMetadata(cPath, &cTrack)
+	defer C.MsrvTlFreeTrackMetadata(&cTrack)
 
 	if err := newTaglibError(result.err); err != nil {
 		// Return empty track and error
@@ -65,16 +65,16 @@ func ExtractCoverArt(path string) (data []byte, mimeType string, _ error) {
 	defer C.free(unsafe.Pointer(cPath))
 
 	var cArt C.CoverArt
-	result := C.extract_cover_art(cPath, &cArt)
-	defer C.free_cover_art(&cArt)
+	result := C.MsrvTlExtractCoverArt(cPath, &cArt)
+	defer C.MsrvTlFreeCoverArt(&cArt)
 
 	if err := newTaglibError(result.err); err != nil {
 		return nil, "", err
 	}
 
-	if cArt.data != nil && cArt.data_length > 0 {
-		data = C.GoBytes(unsafe.Pointer(cArt.data), cArt.data_length)
-		mimeType = C.GoString(cArt.mime_type)
+	if cArt.data != nil && cArt.dataLength > 0 {
+		data = C.GoBytes(unsafe.Pointer(cArt.data), C.int(cArt.dataLength))
+		mimeType = C.GoString(cArt.mimeType)
 		return data, mimeType, nil
 	}
 
