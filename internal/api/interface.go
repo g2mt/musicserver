@@ -347,6 +347,15 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	return &byteHandler{b: data}, "text/json", nil
 }
 
+// GetScanTicker returns the active scan ProgressTicker if a scan is running.
+func (i *Interface) GetScanTicker() (*progress.ProgressTicker, bool) {
+	t := i.scan.ticker.Load()
+	if t == nil {
+		return nil, false
+	}
+	return t, true
+}
+
 const Version = "dev"
 
 func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {

@@ -32,6 +32,12 @@ typedef struct MsrvReadAllResult {
 	int N;
 	char *Err;
 } MsrvReadAllResult;
+
+typedef struct MsrvScanTickerValuesResult {
+	int Present;
+	int Value;
+	int MaxValue;
+} MsrvScanTickerValuesResult;
 */
 import "C"
 
@@ -169,7 +175,22 @@ func (r *byteReader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
-// TODO: MsrvGetScanTickerValues(interface handle) => {present, value, maxValue}
+// MsrvGetScanTickerValues returns the current scan ticker state.
+// Present is 0 if no scan is in progress, Value and MaxValue reflect progress.
+//
+//export MsrvGetScanTickerValues
+func MsrvGetScanTickerValues(ifaceHandle C.uintptr_t) C.struct_MsrvScanTickerValuesResult {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+	ticker, ok := iface.GetScanTicker()
+	if !ok || ticker == nil {
+		return C.struct_MsrvScanTickerValuesResult{Present: 0}
+	}
+	return C.struct_MsrvScanTickerValuesResult{
+		Present:  1,
+		Value:    C.int(ticker.GetValue()),
+		MaxValue: C.int(ticker.GetMaxValue()),
+	}
+}
 
 // MsrvDeleteHandle frees a cgo.Handle when C code is done with it.
 //

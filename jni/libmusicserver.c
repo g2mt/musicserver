@@ -100,3 +100,17 @@ JNIEXPORT void JNICALL Java_org_msxrv_musicserver_NativeBridge_msrvDeleteHandle(
     JNIEnv *env, jobject obj, jlong handle) {
   MsrvDeleteHandle((uintptr_t)handle);
 }
+
+JNIEXPORT jobject JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvGetScanTickerValues(
+    JNIEnv *env, jobject obj, jlong ifaceHandle) {
+  MsrvScanTickerValuesResult result =
+      MsrvGetScanTickerValues((uintptr_t)ifaceHandle);
+
+  jclass cls = (*env)->FindClass(env, "org/msxrv/musicserver/NativeBridge$ScanTickerValues");
+  jmethodID ctor = (*env)->GetMethodID(env, cls, "<init>", "(ZII)V");
+  return (*env)->NewObject(env, cls, ctor,
+      (jboolean)(result.Present != 0),
+      (jint)result.Value,
+      (jint)result.MaxValue);
+}
