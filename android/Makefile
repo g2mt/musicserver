@@ -74,7 +74,7 @@ $(eval $(call rule-native-lib,armv7a,armeabi-v7a,arm))
 $(eval $(call rule-native-lib,x86_64,x86_64,x86_64))
 
 install_adb: build/$(PKG_NAME).apk
-	adb uninstall $(PKG_NAME)
+	-adb uninstall $(PKG_NAME)
 	adb install $<
 
 

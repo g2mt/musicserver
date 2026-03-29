@@ -7,7 +7,7 @@ const HOST = (() => {
 
 declare global {
   interface Native {
-    fetchAPI: (path: string, method: string, params: string) => Promise<string | null>;
+    fetchAPI: (path: string, method: string, params: string) => string | null;
   }
   interface Window {
     _native?: Native;
@@ -26,16 +26,22 @@ export function getFilePath(path: string) {
   return `${HOST}/file/${path}`;
 }
 
-export async function fetchAPI(
+export function fetchAPI(
   path: string,
   params?: Record<string, string>,
   method: string = "GET",
-) {
+): Promise<any> {
   if (!path.startsWith("/")) throw new Error(`"${path}" does not start with /`);
 
   if (window._native) {
-    const result = await window._native.fetchAPI(path, method, JSON.stringify(params ?? {}));
-    return result === null ? null : JSON.parse(result);
+    const result = window._native.fetchAPI(path, method, JSON.stringify(params ?? {}));
+    return new Promise((res, rej) => {
+      try {
+        res(result === null ? null : JSON.parse(result));
+      } catch (e) {
+        rej(e);
+      }
+    });
   }
 
   const url = new URL(`${HOST}${path}`);
