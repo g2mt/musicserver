@@ -17,6 +17,7 @@ public class NativeAudioBridge {
 
 	private final Context context;
 	private final WebView webView;
+	private final String musicDir;
 	private MediaPlayer mediaPlayer;
 	private WebMessagePort messagePort;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -24,10 +25,11 @@ public class NativeAudioBridge {
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
 
-	public NativeAudioBridge(MainActivity activity, Context context, WebView webView) {
+	public NativeAudioBridge(MainActivity activity, Context context, WebView webView, String musicDir) {
 		this.activity = activity;
 		this.context = context;
 		this.webView = webView;
+		this.musicDir = musicDir;
 	}
 
 	public void setMessagePort(WebMessagePort port) {
@@ -100,6 +102,14 @@ public class NativeAudioBridge {
 	public void setSrc(int instanceId, String src) {
 		if (!isActive(instanceId)) return;
 		Log.d("[msxrv] NativeAudioBridge", "src=" + src);
+
+		// If src starts with fileEndpoint, strip the prefix and prepend musicDir
+		if (src.startsWith(fileEndpoint)) {
+			String relativePath = src.substring(fileEndpoint.length());
+			src = musicDir + "/" + relativePath;
+			Log.d("[msxrv] NativeAudioBridge", "resolved src=" + src);
+		}
+
 		try {
 			mediaPlayer.reset();
 			mediaPlayer.setDataSource(src);
