@@ -12,6 +12,7 @@ AN_GOARCH=arm64
 endif
 ifeq ($(AN_ARCH),armv7a)
 AN_GOARCH=arm
+AN_SDK_EABI=eabi
 endif
 ifeq ($(AN_ARCH),x86_64)
 AN_GOARCH=amd64
@@ -32,8 +33,8 @@ AN_BUILD_TOOLS ?= $(ANDROID_HOME)/build-tools/$(AN_SDK_VER)
 AN_PLATFORM ?= $(ANDROID_HOME)/platforms/android-$(AN_SDK_VER_MAJOR)
 AN_NDK_PREFIX ?= $(ANDROID_HOME)/ndk/$(AN_NDK_VER)/toolchains/llvm/prebuilt/linux-x86_64
 AN_NDK_BIN ?= $(AN_NDK_PREFIX)/bin
-AN_NDK_CXX ?= $(AN_NDK_BIN)/$(AN_ARCH)-linux-android$(AN_SDK_VER_MAJOR)-clang++
-AN_NDK_CC ?= $(AN_NDK_BIN)/$(AN_ARCH)-linux-android$(AN_SDK_VER_MAJOR)-clang
+AN_NDK_CXX ?= $(AN_NDK_BIN)/$(AN_ARCH)-linux-android$(AN_SDK_EABI)$(AN_SDK_VER_MAJOR)-clang++
+AN_NDK_CC ?= $(AN_NDK_BIN)/$(AN_ARCH)-linux-android$(AN_SDK_EABI)$(AN_SDK_VER_MAJOR)-clang
 
 .PHONY: require_android
 require_android:
