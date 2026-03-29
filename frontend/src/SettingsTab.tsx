@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { fetchAPI } from "./apiserver";
 import { toast } from "react-toastify";
 import {
@@ -16,6 +16,11 @@ import "./SettingsTab.css";
 function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
+  const [props, setProps] = useState<{ version: string; config: any } | null>(null);
+
+  useEffect(() => {
+    fetchAPI("/props").then(setProps).catch(() => {});
+  }, []);
 
   const handleSave = () => {
     saveConfig(c);
@@ -70,6 +75,38 @@ function SettingsTab() {
 
       <h2>Server properties</h2>
       <hr />
+      {props && (
+        <>
+          <div>
+            <label>Version:</label>
+            <input type="text" readOnly value={props.version} />
+          </div>
+          <div>
+            <label>HTTP Bind:</label>
+            <input type="text" readOnly value={props.config.http_bind} />
+          </div>
+          <div>
+            <label>Unix Socket Enabled:</label>
+            <input type="checkbox" readOnly checked={props.config.unix_bind_enabled} />
+          </div>
+          <div>
+            <label>Unix Socket Path:</label>
+            <input type="text" readOnly value={props.config.unix_bind} />
+          </div>
+          <div>
+            <label>Data Path:</label>
+            <input type="text" readOnly value={props.config.data_path} />
+          </div>
+          <div>
+            <label>Database Directory:</label>
+            <input type="text" readOnly value={props.config.db_dir} />
+          </div>
+          <div>
+            <label>Media Downloader:</label>
+            <input type="text" readOnly value={props.config.media_downloader} />
+          </div>
+        </>
+      )}
 
       <h2>Ongoing processes</h2>
       <ProgressTable />
