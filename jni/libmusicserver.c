@@ -101,6 +101,12 @@ JNIEXPORT void JNICALL Java_org_msxrv_musicserver_NativeBridge_msrvDeleteHandle(
   MsrvDeleteHandle((uintptr_t)handle);
 }
 
+JNIEXPORT void JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvStartScanTracks(
+    JNIEnv *env, jobject obj, jlong ifaceHandle) {
+  MsrvStartScanTracks((uintptr_t)ifaceHandle);
+}
+
 JNIEXPORT jobject JNICALL
 Java_org_msxrv_musicserver_NativeBridge_msrvGetScanTickerValues(
     JNIEnv *env, jobject obj, jlong ifaceHandle) {

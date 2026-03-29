@@ -115,6 +115,13 @@ public class NativeBridge {
 		String[] outContentType);
 
 	/**
+	 * Starts a scan of tracks in the background.
+	 *
+	 * @param ifaceHandle the interface handle
+	 */
+	private native void msrvStartScanTracks(long ifaceHandle);
+
+	/**
 	 * Deletes a handle to free associated resources.
 	 *
 	 * @param handle the handle to delete (interface or reader handle)
@@ -160,8 +167,7 @@ public class NativeBridge {
 	@JavascriptInterface
 	public void scanTracks() {
 		ScanNotificationPoller.start(activity, this);
-		// Fire-and-forget the scan via the API
-		new Thread(() -> fetchAPI("/track", "POST", "{}")).start();
+		msrvStartScanTracks(interfaceHandle);
 	}
 
 	@JavascriptInterface
