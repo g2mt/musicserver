@@ -1,5 +1,4 @@
 #include <jni.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "libmusicserver.h"
@@ -78,32 +77,15 @@ Java_org_msxrv_musicserver_NativeBridge_msrvReadAll(JNIEnv *env, jobject obj,
   return jBuf;
 }
 
-JNIEXPORT jlong JNICALL
-Java_org_msxrv_musicserver_NativeBridge_msrvGetTrackCover(
-    JNIEnv *env, jobject obj, jlong ifaceHandle, jstring id,
-    jobjectArray outContentType) {
-  const char *cId = (*env)->GetStringUTFChars(env, id, NULL);
-
-  MsrvHandleRequestResult result =
-      MsrvGetTrackCover((uintptr_t)ifaceHandle, (char *)cId);
-
-  (*env)->ReleaseStringUTFChars(env, id, cId);
-
-  jstring contentTypeStr = (*env)->NewStringUTF(env, result.ContentType);
-  (*env)->SetObjectArrayElement(env, outContentType, 0, contentTypeStr);
-  free(result.ContentType);
-
-  return (jlong)result.ReaderHandle;
-}
-
 JNIEXPORT void JNICALL Java_org_msxrv_musicserver_NativeBridge_msrvDeleteHandle(
     JNIEnv *env, jobject obj, jlong handle) {
   MsrvDeleteHandle((uintptr_t)handle);
 }
 
 JNIEXPORT void JNICALL
-Java_org_msxrv_musicserver_NativeBridge_msrvStartScanTracks(
-    JNIEnv *env, jobject obj, jlong ifaceHandle) {
+Java_org_msxrv_musicserver_NativeBridge_msrvStartScanTracks(JNIEnv *env,
+                                                            jobject obj,
+                                                            jlong ifaceHandle) {
   MsrvStartScanTracks((uintptr_t)ifaceHandle);
 }
 
@@ -113,10 +95,9 @@ Java_org_msxrv_musicserver_NativeBridge_msrvGetScanTickerValues(
   MsrvScanTickerValuesResult result =
       MsrvGetScanTickerValues((uintptr_t)ifaceHandle);
 
-  jclass cls = (*env)->FindClass(env, "org/msxrv/musicserver/NativeBridge$ScanTickerValues");
+  jclass cls = (*env)->FindClass(
+      env, "org/msxrv/musicserver/NativeBridge$ScanTickerValues");
   jmethodID ctor = (*env)->GetMethodID(env, cls, "<init>", "(ZII)V");
-  return (*env)->NewObject(env, cls, ctor,
-      (jboolean)(result.Present != 0),
-      (jint)result.Value,
-      (jint)result.MaxValue);
+  return (*env)->NewObject(env, cls, ctor, (jboolean)(result.Present != 0),
+                           (jint)result.Value, (jint)result.MaxValue);
 }

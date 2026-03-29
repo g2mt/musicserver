@@ -98,11 +98,12 @@ public class MainActivity extends Activity {
 			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 				String url = request.getUrl().toString();
 				if (url.startsWith("track-cover://")) {
-					String id = request.getUrl().getHost();
+					// URL is track-cover:///absolute/path/to/file.mp3
+					String filepath = request.getUrl().getPath();
 					String[] outContentType = new String[1];
-					byte[] data = finalNativeBridge.getTrackCover(id, outContentType);
+					byte[] data = finalNativeBridge.getTrackCover(filepath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
-					Log.d("[msxrv] cover", "cover for id=" + id + ", mimeType=" + mimeType + ", bytes=" + data.length);
+					Log.d("[msxrv] cover", "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
 					return new WebResourceResponse(
 						mimeType,
 						"binary",

@@ -42,7 +42,6 @@ typedef struct MsrvScanTickerValuesResult {
 import "C"
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"io"
 	"musicserver/internal/api"
@@ -138,28 +137,6 @@ func MsrvReadAll(readerHandle C.uintptr_t) C.struct_MsrvReadAllResult {
 	return C.struct_MsrvReadAllResult{Data: (*C.char)(cData), N: C.int(len(data)), Err: nil}
 }
 
-// MsrvGetTrackCover resolves a track ID to its cover art bytes and MIME type.
-// Falls back to CoverFallback on error.
-//
-//export MsrvGetTrackCover
-func MsrvGetTrackCover(ifaceHandle C.uintptr_t, id *C.char) C.struct_MsrvHandleRequestResult {
-	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
-
-	data, mimeType, err := iface.GetTrackCover(C.GoString(id))
-	if err != nil || data == nil {
-		fallback, _ := base64.StdEncoding.DecodeString(api.CoverFallback)
-		data = fallback
-		mimeType = api.CoverFallbackMimetype
-	}
-
-	reader := &byteReader{data: data}
-	readerHandle := cgo.NewHandle(reader)
-	return C.struct_MsrvHandleRequestResult{
-		ReaderHandle: C.uintptr_t(readerHandle),
-		ContentType:  C.CString(mimeType),
-		Err:          nil,
-	}
-}
 
 type byteReader struct {
 	data   []byte

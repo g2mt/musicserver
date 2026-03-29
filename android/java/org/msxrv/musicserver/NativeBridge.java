@@ -100,19 +100,14 @@ public class NativeBridge {
 	private native byte[] msrvReadAll(long readerHandle, String[] outErr);
 
 	/**
-	 * Resolves a track ID to its cover art, returning a reader handle and content type.
-	 * Falls back to a built-in placeholder image on error.
+	 * Extracts cover art from a track file using TagLib.
 	 *
-	 * @param ifaceHandle    the interface handle
-	 * @param id             the track ID (short or long)
-	 * @param outContentType output array to store the response content type
-	 * @return the reader handle for reading the cover bytes
+	 * @param filepath    the absolute path to the track file
+	 * @param outMimeType output array to store the MIME type
+	 * @return the cover art bytes, or null if none found
 	 */
 	@FastNative
-	private native long msrvGetTrackCover(
-		long ifaceHandle,
-		String id,
-		String[] outContentType);
+	private native byte[] msrvTlExtractCoverArt(String filepath, String[] outMimeType);
 
 	/**
 	 * Starts a scan of tracks in the background.
@@ -148,15 +143,10 @@ public class NativeBridge {
 		}
 	}
 
-	public byte[] getTrackCover(String id, String[] outContentType) {
-		String[] contentType = new String[1];
-		long readerHandle = msrvGetTrackCover(interfaceHandle, id, contentType);
-		outContentType[0] = contentType[0];
-
-		String[] readErr = new String[1];
-		byte[] data = msrvReadAll(readerHandle, readErr);
-
-		msrvDeleteHandle(readerHandle);
+	public byte[] getTrackCover(String filepath, String[] outContentType) {
+		String[] mimeType = new String[1];
+		byte[] data = msrvTlExtractCoverArt(filepath, mimeType);
+		outContentType[0] = mimeType[0] != null ? mimeType[0] : "image/png";
 		return data != null ? data : new byte[0];
 	}
 
