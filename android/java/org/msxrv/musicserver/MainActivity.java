@@ -9,13 +9,18 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
+import android.webkit.WebMessagePort;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
+import android.webkit.WebMessage;
 
 public class MainActivity extends Activity {
+	private WebView webView;
+	private NativeAudioBridge nativeAudioBridge;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -26,7 +31,7 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.activity_main);
 
-		WebView webView = (WebView)findViewById(R.id.webview);
+		webView = (WebView)findViewById(R.id.webview);
 		WebSettings webSettings = webView.getSettings();
 		webSettings.setJavaScriptEnabled(true);
 		webSettings.setDomStorageEnabled(true);
@@ -47,7 +52,7 @@ public class MainActivity extends Activity {
 			showErrorDialog(e.getMessage() + "\nQuit?");
 		}
 
-		NativeAudioBridge nativeAudioBridge = new NativeAudioBridge(this, webView);
+		nativeAudioBridge = new NativeAudioBridge(this, webView);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 
 		requestPermissions();
@@ -75,8 +80,18 @@ public class MainActivity extends Activity {
 	}
 
 	private void loadWebView() {
-		WebView webView = (WebView)findViewById(R.id.webview);
 		webView.loadUrl("file:///android_asset/index.html");
+
+		// Create a WebMessageChannel once the WebView has started loading.
+		// channel[0] stays on the Java side (given to NativeAudioBridge),
+		// channel[1] is transferred to the JS side via postWebMessage.
+		WebMessagePort[] channel = webView.createWebMessageChannel();
+		nativeAudioBridge.setMessagePort(channel[0]);
+
+		webView.postWebMessage(
+			new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
+			android.net.Uri.parse("*")
+		);
 	}
 
 	private void showErrorDialog(String message) {
