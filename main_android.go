@@ -70,6 +70,14 @@ func MsrvNewInterfaceFromConfigJson(configJson *C.char) C.struct_MsrvNewInterfac
 		}
 	}
 
+	err = iface.InitDb()
+	if err != nil {
+		return C.struct_MsrvNewInterfaceResult{
+			Handle: 0,
+			Err:    C.CString(err.Error()),
+		}
+	}
+
 	handle := cgo.NewHandle(iface)
 	return C.struct_MsrvNewInterfaceResult{
 		Handle: C.uintptr_t(handle),
