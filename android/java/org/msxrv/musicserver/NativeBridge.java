@@ -105,6 +105,27 @@ public class NativeBridge {
 	private native byte[] msrvTlExtractCoverArt(String filepath, String[] outMimeType);
 
 	/**
+	 * Loads track metadata from a file using TagLib.
+	 *
+	 * @param filepath the absolute path to the track file
+	 * @return a TrackMetadata object, or null on error
+	 */
+	@FastNative
+	private native TrackMetadata msrvTlLoadTrackMetadata(String filepath);
+
+	public static class TrackMetadata {
+		public final String title;
+		public final String artist;
+		public final String album;
+
+		public TrackMetadata(String title, String artist, String album) {
+			this.title = title;
+			this.artist = artist;
+			this.album = album;
+		}
+	}
+
+	/**
 	 * Starts a scan of tracks in the background.
 	 *
 	 * @param ifaceHandle the interface handle
@@ -143,6 +164,10 @@ public class NativeBridge {
 		byte[] data = msrvTlExtractCoverArt(filepath, mimeType);
 		outContentType[0] = mimeType[0] != null ? mimeType[0] : "image/png";
 		return data != null ? data : new byte[0];
+	}
+
+	public TrackMetadata getTrackMetadata(String filepath) {
+		return msrvTlLoadTrackMetadata(filepath);
 	}
 
 	public ScanTickerValues getScanTickerValues() {

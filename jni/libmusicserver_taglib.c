@@ -3,6 +3,35 @@
 #include <string.h>
 
 JNIEXPORT jobject JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvTlLoadTrackMetadata(
+    JNIEnv *env, jobject obj, jstring filepath) {
+  const char *cFilepath = (*env)->GetStringUTFChars(env, filepath, NULL);
+
+  TrackMetadata metadata = {0};
+  BindingResult result = MsrvTlLoadTrackMetadata(cFilepath, &metadata);
+
+  (*env)->ReleaseStringUTFChars(env, filepath, cFilepath);
+
+  if (result.err != NULL) {
+    MsrvTlFreeTrackMetadata(&metadata);
+    return NULL;
+  }
+
+  jclass cls = (*env)->FindClass(env, "org/msxrv/musicserver/NativeBridge$TrackMetadata");
+  jmethodID ctor = (*env)->GetMethodID(env, cls, "<init>",
+    "(Lorg/msxrv/musicserver/NativeBridge;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+
+  jstring title  = metadata.title  ? (*env)->NewStringUTF(env, metadata.title)  : NULL;
+  jstring artist = metadata.artist ? (*env)->NewStringUTF(env, metadata.artist) : NULL;
+  jstring album  = metadata.album  ? (*env)->NewStringUTF(env, metadata.album)  : NULL;
+
+  jobject metadataObj = (*env)->NewObject(env, cls, ctor, obj, title, artist, album);
+
+  MsrvTlFreeTrackMetadata(&metadata);
+  return metadataObj;
+}
+
+JNIEXPORT jobject JNICALL
 Java_org_msxrv_musicserver_NativeBridge_msrvTlExtractCoverArt(
     JNIEnv *env, jobject obj, jstring filepath, jobjectArray outMimeType) {
   const char *cFilepath = (*env)->GetStringUTFChars(env, filepath, NULL);
