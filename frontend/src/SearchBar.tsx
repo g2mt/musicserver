@@ -14,18 +14,15 @@ import type { TrackData } from "./TrackData";
 
 import "./SearchBar.css";
 
-interface SearchBarProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-}
-
-function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
+function SearchBar() {
   const c = useContext(AppContext)!;
-  const [inputValue, setInputValue] = useState(searchQuery);
+  const [inputValue, setInputValue] = useState(c.searchQuery);
 
   useEffect(() => {
-    setInputValue(searchQuery);
-  }, [searchQuery]);
+    if (c.oldSearchQuery.current !== null)
+      return; // still being processed
+    setInputValue(c.searchQuery);
+  }, [c.searchQuery, c.oldSearchQuery.current]);
 
   const confirmTrackDownload = async (url: string) => {
     const encodedUrl = encodeURIComponent(url);
@@ -75,8 +72,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
       className="search-bar"
       onSubmit={(e) => {
         e.preventDefault();
-        c.previousWorkingValue.current = inputValue;
-        setSearchQuery(inputValue);
+        c.setSearchQuery(inputValue);
       }}
     >
       <div className="search-input-wrapper">
@@ -95,7 +91,7 @@ function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
             className="clear-btn"
             onClick={() => {
               setInputValue("");
-              setSearchQuery("");
+              c.setSearchQuery("");
             }}
           >
             <FontAwesomeIcon icon={faTimes} />

@@ -22,6 +22,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   const elRef = useRef<HTMLDivElement | null>(null);
 
   const updateQuery = (text: string, searchGroup: string = "after|before") => {
+    c.oldSearchQuery.current = c.searchQuery;
     c.setSearchQuery(
       c.searchQuery
         .replace(new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`), ` ${text}`)

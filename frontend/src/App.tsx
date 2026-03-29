@@ -15,7 +15,7 @@ import {
   faArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
@@ -99,8 +99,7 @@ export function App() {
   [c.searchQuery, c.setSearchQuery] = useState(
     () => initialHashParams.get("q") ?? "",
   );
-  c.previousWorkingValue = useRef("");
-  const didSetToPreviousWorkingValue = useRef(false);
+  c.oldSearchQuery = useRef(null);
   useEffect(() => {
     function onHashchange() {
       const hashParams = getHashParams();
@@ -113,31 +112,26 @@ export function App() {
     };
   });
   useEffect(() => {
-    setHashParam("q", c.searchQuery);
-    if (didSetToPreviousWorkingValue.current) {
-      didSetToPreviousWorkingValue.current = false;
-      return;
-    }
     fetchAPI("/track", { q: c.searchQuery })
       .then((data) => {
-        setFullTracks(data);
         if (data === null || data.length === 0) {
-          if (!didSetToPreviousWorkingValue.current) {
-            didSetToPreviousWorkingValue.current = true;
-            c.setSearchQuery(c.previousWorkingValue.current);
-            c.previousWorkingValue.current = "";
+          if (c.oldSearchQuery.current !== null) {
+            const oldSearchQuery = c.oldSearchQuery.current;
+            c.setSearchQuery(oldSearchQuery);
+            c.oldSearchQuery.current = null;
+            toast.warn(<>No tracks found</>);
+          } else {
+            setFullTracks([]);
           }
         } else {
-          c.previousWorkingValue.current = c.searchQuery;
+          setFullTracks(data);
+          setHashParam("q", c.searchQuery);
+          c.oldSearchQuery.current = null;
         }
       })
-      .catch(() => {
-        setFullTracks([]);
-        if (!didSetToPreviousWorkingValue.current) {
-          didSetToPreviousWorkingValue.current = true;
-          c.setSearchQuery(c.previousWorkingValue.current);
-          c.previousWorkingValue.current = "";
-        }
+      .catch(e => {
+        toast.error(<>Error loading: {e.toString()}</>);
+        setHashParam("q", c.searchQuery);
       });
   }, [c.searchQuery]);
 
@@ -280,10 +274,7 @@ export function App() {
       <ContextMenu />
       <div className="app-layout">
         <div className="search-bar-container">
-          <SearchBar
-            searchQuery={c.searchQuery}
-            setSearchQuery={c.setSearchQuery}
-          />
+          <SearchBar />
         </div>
         <div className="app-main">
           <div id="app-left-side">

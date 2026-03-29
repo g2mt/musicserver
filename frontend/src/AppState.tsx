@@ -40,8 +40,8 @@ export interface AppState extends AppStateData {
   setSearchQuery: (_: string) => void;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
-  previousWorkingValue: RefObject<string>;
   showAllTracks: () => void;
+  oldSearchQuery: RefObject<string|null>;
   onRescanned: () => void;
 }
 
