@@ -9,8 +9,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 public class ScanNotificationPoller {
 	private static final String CHANNEL_ID = "msxrv_scan";
@@ -29,10 +27,9 @@ public class ScanNotificationPoller {
 		this.activity = activity;
 		this.bridge = bridge;
 
-		if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
+		if (activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
 				!= PackageManager.PERMISSION_GRANTED) {
-			ActivityCompat.requestPermissions(
-				activity,
+			activity.requestPermissions(
 				new String[]{Manifest.permission.POST_NOTIFICATIONS},
 				PERMISSION_REQUEST_CODE
 			);
