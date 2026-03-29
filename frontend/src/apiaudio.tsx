@@ -103,7 +103,9 @@ class NativeAudio extends EventTarget {
   }
 }
 
-const apiAudio = (() => {
+export const useAbsoluteAudioPath = window._native_audio_bridge ? true : false;
+
+export const apiAudio = (() => {
   if (window._native_audio_bridge) {
     setupNativeAudioMessagePort();
     return NativeAudio;
@@ -112,4 +114,3 @@ const apiAudio = (() => {
   }
 })();
 
-export default apiAudio;

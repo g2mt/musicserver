@@ -11,10 +11,9 @@ import android.webkit.WebView;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.util.Log;
+import java.nio.file.Paths;
 
 public class NativeAudioBridge {
-	static final String fileEndpoint = "file:///api/file/";
-
 	private MainActivity activity;
 	private WebView webView;
 	private MediaPlayer mediaPlayer;
@@ -100,11 +99,19 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		Log.d("[msxrv] NativeAudioBridge", "src=" + src);
 
-		// If src starts with fileEndpoint, strip the prefix and prepend musicDir
-		if (src.startsWith(fileEndpoint)) {
-			String relativePath = src.substring(fileEndpoint.length());
-			src = activity.getMusicDir() + "/" + relativePath;
-			Log.d("[msxrv] NativeAudioBridge", "resolved src=" + src);
+		if (src.startsWith("file://")) {
+			src = src.substring("file://".length());
+			src = Paths.get(src).normalize().toString();
+			if (src.startsWith("/")) {
+				if (!src.startsWith(activity.getMusicDir())) {
+					src = null;
+				}
+			} else {
+				src = activity.getMusicDir() + "/" + src;
+			}
+			if (src != null) {
+				Log.d("[msxrv] NativeAudioBridge", "resolved src=" + src);
+			}
 		}
 
 		try {

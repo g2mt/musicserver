@@ -11,8 +11,8 @@ import {
 import { getTrackCover, Track } from "./Track";
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
-import { getFilePath } from "./apiserver";
-import apiAudio from "./apiaudio";
+import { getFilePath, getTrackFileFromId } from "./apiserver";
+import { apiAudio, useAbsoluteAudioPath } from "./apiaudio";
 
 import "./MusicPlayer.css";
 
@@ -77,6 +77,10 @@ export function MusicPlayer() {
   const audio = useAudio(
     (() => {
       if (!c.currentTrack) return null;
+      // HACK: the audio path cannot be cleanly obtained by the Android audio bridge,
+      // so use the absolute path directly. the path is checked in NativeAudioBridge
+      if (useAbsoluteAudioPath) return `file://${c.currentTrack.path}`;
+      if (c.currentTrack.id) return getTrackFileFromId(c.currentTrack.id);
       if (c.currentTrack.path) return getFilePath(c.currentTrack.path);
       return null;
     })(),
