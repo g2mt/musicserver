@@ -27,11 +27,11 @@ typedef struct MsrvHandleRequestResult {
 	char *Err;
 } MsrvHandleRequestResult;
 
-typedef struct MsrvReadResult {
+typedef struct MsrvReadAllResult {
 	char *Data;
 	int N;
 	char *Err;
-} MsrvReadResult;
+} MsrvReadAllResult;
 */
 import "C"
 
@@ -42,7 +42,6 @@ import (
 	"musicserver/internal/api"
 	"musicserver/internal/schema"
 	"runtime/cgo"
-	"unsafe"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -118,23 +117,19 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, pa
 	}
 }
 
-// MsrvRead reads up to bufLen bytes from the reader identified by readerHandle into buf.
-// Returns MsrvReadResult with N=-1 on EOF, N=-2 on error.
+// MsrvReadAll reads all bytes from the reader identified by readerHandle.
 //
-//export MsrvRead
-func MsrvRead(readerHandle C.uintptr_t, buf *C.char, bufLen C.int) C.struct_MsrvReadResult {
+//export MsrvReadAll
+func MsrvReadAll(readerHandle C.uintptr_t) C.struct_MsrvReadAllResult {
 	reader := cgo.Handle(readerHandle).Value().(io.Reader)
 
-	goSlice := unsafe.Slice((*byte)(unsafe.Pointer(buf)), int(bufLen))
-	n, err := reader.Read(goSlice)
+	data, err := io.ReadAll(reader)
 	if err != nil {
-		if err.Error() == "EOF" {
-			return C.struct_MsrvReadResult{Data: buf, N: -1, Err: nil}
-		}
-		return C.struct_MsrvReadResult{Data: buf, N: -2, Err: C.CString(err.Error())}
+		return C.struct_MsrvReadAllResult{Data: nil, N: 0, Err: C.CString(err.Error())}
 	}
 
-	return C.struct_MsrvReadResult{Data: buf, N: C.int(n), Err: nil}
+	cData := C.CBytes(data)
+	return C.struct_MsrvReadAllResult{Data: (*C.char)(cData), N: C.int(len(data)), Err: nil}
 }
 
 // MsrvGetTrackCover resolves a track ID to its cover art bytes and MIME type.

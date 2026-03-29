@@ -90,14 +90,13 @@ public class NativeBridge {
 		String[] outErr);
 
 	/**
-	 * Reads bytes from a reader handle into the provided buffer.
+	 * Reads all bytes from a reader handle.
 	 *
 	 * @param readerHandle the reader handle obtained from handleRequest
-	 * @param buf          the byte buffer to read into
 	 * @param outErr       output array to store error message if any
-	 * @return the number of bytes read, -1 on EOF, -2 on error
+	 * @return the bytes read, or null on error
 	 */
-	private native int msrvRead(long readerHandle, byte[] buf, String[] outErr);
+	private native byte[] msrvReadAll(long readerHandle, String[] outErr);
 
 	/**
 	 * Resolves a track ID to its cover art, returning a reader handle and content type.
@@ -125,19 +124,11 @@ public class NativeBridge {
 		long readerHandle = msrvGetTrackCover(interfaceHandle, id, contentType);
 		outContentType[0] = contentType[0];
 
-		byte[] result = new byte[0];
-		byte[] buffer = new byte[4096];
-		java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-
-		while (true) {
-			String[] readErr = new String[1];
-			int bytesRead = msrvRead(readerHandle, buffer, readErr);
-			if (readErr[0] != null || bytesRead <= 0) break;
-			baos.write(buffer, 0, bytesRead);
-		}
+		String[] readErr = new String[1];
+		byte[] data = msrvReadAll(readerHandle, readErr);
 
 		msrvDeleteHandle(readerHandle);
-		return baos.toByteArray();
+		return data != null ? data : new byte[0];
 	}
 
 	@JavascriptInterface
@@ -153,29 +144,17 @@ public class NativeBridge {
 			return null;
 		}
 
-		// Read all content from the reader
-		StringBuilder content = new StringBuilder();
-		byte[] buffer = new byte[4096];
-
-		while (true) {
-			String[] readErr = new String[1];
-			int bytesRead = msrvRead(readerHandle, buffer, readErr);
-
-			if (readErr[0] != null) {
-				Log.e("[msxrv] Native", "Read failed: " + readErr[0]);
-				break;
-			}
-
-			if (bytesRead <= 0) {
-				break;
-			}
-
-			content.append(new String(buffer, 0, bytesRead));
-		}
+		String[] readErr = new String[1];
+		byte[] data = msrvReadAll(readerHandle, readErr);
 
 		msrvDeleteHandle(readerHandle);
 
-		return content.toString();
+		if (readErr[0] != null) {
+			Log.e("[msxrv] Native", "Read failed: " + readErr[0]);
+			return null;
+		}
+
+		return data != null ? new String(data) : null;
 	}
 
 }
