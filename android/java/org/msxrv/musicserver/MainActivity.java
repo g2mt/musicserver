@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
+import android.webkit.WebViewClient;
 import android.webkit.WebMessagePort;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
