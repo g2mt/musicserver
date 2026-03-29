@@ -175,6 +175,14 @@ func (r *byteReader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
+// MsrvStartScanTracks starts a scan in a background goroutine and returns immediately.
+//
+//export MsrvStartScanTracks
+func MsrvStartScanTracks(ifaceHandle C.uintptr_t) {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+	go iface.ScanTracks()
+}
+
 // MsrvGetScanTickerValues returns the current scan ticker state.
 // Present is 0 if no scan is in progress, Value and MaxValue reflect progress.
 //
