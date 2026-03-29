@@ -1,6 +1,7 @@
 package org.msxrv.musicserver;
 
 import android.app.Activity;
+import android.media.MediaMetadataRetriever;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -8,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
-import dalvik.annotation.optimization.FastNative;
 
 public class NativeBridge {
 	private Activity activity;
@@ -94,25 +94,6 @@ public class NativeBridge {
 	@FastNative
 	private native byte[] msrvReadAll(long readerHandle, String[] outErr);
 
-	/**
-	 * Extracts cover art from a track file using TagLib.
-	 *
-	 * @param filepath    the absolute path to the track file
-	 * @param outMimeType output array to store the MIME type
-	 * @return the cover art bytes, or null if none found
-	 */
-	@FastNative
-	private native byte[] msrvTlExtractCoverArt(String filepath, String[] outMimeType);
-
-	/**
-	 * Loads track metadata from a file using TagLib.
-	 *
-	 * @param filepath the absolute path to the track file
-	 * @return a TrackMetadata object, or null on error
-	 */
-	@FastNative
-	private native TrackMetadata msrvTlLoadTrackMetadata(String filepath);
-
 	public static class TrackMetadata {
 		public final String title;
 		public final String artist;
@@ -160,14 +141,35 @@ public class NativeBridge {
 	}
 
 	public byte[] getTrackCover(String filepath, String[] outContentType) {
-		String[] mimeType = new String[1];
-		byte[] data = msrvTlExtractCoverArt(filepath, mimeType);
-		outContentType[0] = mimeType[0] != null ? mimeType[0] : "image/png";
-		return data != null ? data : new byte[0];
+		MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+		try {
+			mmr.setDataSource(filepath);
+			byte[] data = mmr.getEmbeddedPicture();
+			outContentType[0] = "image/jpeg";
+			return data != null ? data : new byte[0];
+		} catch (Exception e) {
+			e.printStackTrace();
+			outContentType[0] = "image/jpeg";
+			return new byte[0];
+		} finally {
+			mmr.release();
+		}
 	}
 
 	public TrackMetadata getTrackMetadata(String filepath) {
-		return msrvTlLoadTrackMetadata(filepath);
+		MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+		try {
+			mmr.setDataSource(filepath);
+			String title  = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
+			String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
+			String album  = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);
+			return new TrackMetadata(title, artist, album);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			mmr.release();
+		}
 	}
 
 	public ScanTickerValues getScanTickerValues() {
