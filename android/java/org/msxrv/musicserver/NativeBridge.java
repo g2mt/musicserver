@@ -11,11 +11,6 @@ import java.util.Iterator;
 import dalvik.annotation.optimization.FastNative;
 
 public class NativeBridge {
-	static {
-		System.loadLibrary("musicserver");
-		System.loadLibrary("musicserverbind");
-	}
-
 	private Activity activity;
 	private long interfaceHandle;
 
