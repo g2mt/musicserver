@@ -19,14 +19,20 @@ public class ScanNotificationPoller {
 	private final Handler handler;
 	private final Runnable pollRunnable;
 
-	private ScanNotificationPoller(Activity activity, NativeBridge bridge) {
+	public ScanNotificationPoller(Activity activity, NativeBridge bridge) {
 		this.activity = activity;
 		this.bridge = bridge;
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.handler = new Handler(Looper.getMainLooper());
 
-		ensureChannel();
+		NotificationChannel channel = new NotificationChannel(
+			CHANNEL_ID,
+			"Music Scan",
+			NotificationManager.IMPORTANCE_LOW
+		);
+		channel.setDescription("Shows progress while scanning for music");
+		notificationManager.createNotificationChannel(channel);
 
 		pollRunnable = new Runnable() {
 			@Override
@@ -40,24 +46,7 @@ public class ScanNotificationPoller {
 				handler.postDelayed(this, POLL_INTERVAL_MS);
 			}
 		};
-	}
-
-	public static void start(Activity activity, NativeBridge bridge) {
-		new ScanNotificationPoller(activity, bridge).begin();
-	}
-
-	private void begin() {
 		handler.post(pollRunnable);
-	}
-
-	private void ensureChannel() {
-		NotificationChannel channel = new NotificationChannel(
-			CHANNEL_ID,
-			"Music Scan",
-			NotificationManager.IMPORTANCE_LOW
-		);
-		channel.setDescription("Shows progress while scanning for music");
-		notificationManager.createNotificationChannel(channel);
 	}
 
 	private void postNotification(int value, int maxValue) {
