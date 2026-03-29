@@ -333,11 +333,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
 	// Get the first track's ID to use as afterId
-	var firstID string
-	for id := range allTracks {
-		firstID = id
-		break
-	}
+	firstID := allTracks[0].LongID
 
 	search7 := &searchparser.Result{
 		Words:     []string{"Rock"},
