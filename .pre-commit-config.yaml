@@ -12,7 +12,7 @@ repos:
       - id: clang-format
         name: run clang-format
         language: system
-        files: ^internal/.*$
+        files: ^(internal|jni|android/java)/.*$
         types_or: [c++, c]
         entry: |
           clang-format -i --

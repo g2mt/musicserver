@@ -108,8 +108,7 @@ BindingResult extract_cover_art(const char *filepath, CoverArt *cover_art) {
   if (bytes.size() == 0)
     return result;
 
-  cover_art->data =
-      static_cast<unsigned char *>(malloc(bytes.size()));
+  cover_art->data = static_cast<unsigned char *>(malloc(bytes.size()));
   if (!cover_art->data) {
     result.err = MEMORY_ERROR_MSG;
     return result;
