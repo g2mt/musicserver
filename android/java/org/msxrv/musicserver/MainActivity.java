@@ -195,7 +195,7 @@ public class MainActivity extends Activity {
 				0);
 		});
 		addPermissionRequest(result -> {
-			loadWebView();
+			getApp().loadWebView();
 		});
 	}
 
@@ -210,12 +210,6 @@ public class MainActivity extends Activity {
 			c.accept(new RequestPermissionResult(requestCode, permissions, grantResults));
 			enqueuedPermissionRequests.remove(0);
 		}
-	}
-
-	// Web view
-
-	private void loadWebView() {
-		getApp().getWebView().loadUrl("file:///android_asset/index.html");
 	}
 
 	// Dialogs

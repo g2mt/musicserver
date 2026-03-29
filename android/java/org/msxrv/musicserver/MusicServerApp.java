@@ -14,6 +14,10 @@ public class MusicServerApp extends Application {
 		return webView;
 	}
 
+	public void loadWebView() {
+		webView.loadUrl("file:///android_asset/index.html");
+	}
+
 	public NativeBridge getNativeBridge() {
 		return nativeBridge;
 	}
