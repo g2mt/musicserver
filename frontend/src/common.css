@@ -101,6 +101,25 @@ body.dark-mode {
 
 input {
   color: var(--content-color);
+
+  &[type="text"], &[type="search"] {
+    display: block;
+    width: 100%;
+    padding: var(--s2) var(--s3);
+    border: 1px solid var(--gray);
+    border-radius: var(--border-radius);
+    font-size: medium;
+    outline: none;
+    transition: border-color 0.2s;
+
+    &:focus {
+      border-color: var(--accent-color);
+    }
+  }
+
+  &[type="checkbox"] {
+    margin: 0 var(--s1);
+  }
 }
 
 table {

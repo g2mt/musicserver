@@ -14,17 +14,7 @@
 
     .search-input {
       flex: 1;
-      padding: var(--s2) var(--s3);
       padding-right: var(--s4);
-      border: 1px solid var(--gray);
-      border-radius: var(--border-radius);
-      font-size: medium;
-      outline: none;
-      transition: border-color 0.2s;
-
-      &:focus {
-        border-color: var(--accent-color);
-      }
     }
 
     .clear-btn {

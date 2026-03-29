@@ -74,9 +74,8 @@ function SettingsTab() {
       <hr />
 
       <h2>Server properties</h2>
-      <hr />
       {props && (
-        <>
+        <form>
           <div>
             <label>Version:</label>
             <input type="text" readOnly value={props.version} />
@@ -105,8 +104,9 @@ function SettingsTab() {
             <label>Media Downloader:</label>
             <input type="text" readOnly value={props.config.media_downloader} />
           </div>
-        </>
+        </form>
       )}
+      <hr />
 
       <h2>Ongoing processes</h2>
       <ProgressTable />
