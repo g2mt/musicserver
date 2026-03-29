@@ -8,6 +8,8 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebMessage;
 import android.webkit.WebMessagePort;
 import android.webkit.WebView;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class NativeAudioBridge {
 	private final Context context;
@@ -70,7 +72,15 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		if (messagePort == null) return;
 
-		String payload = "{\"instanceId\":" + instanceId + ",\"event\":\"" + eventName + "\"}";
+		JSONObject payloadObject = new JSONObject();
+		try {
+			payloadObject.put("instanceId", instanceId);
+			payloadObject.put("event", eventName);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return;
+		}
+		String payload = payloadObject.toString();
 
 		// WebMessagePort.postMessage must be called on the main thread
 		mainHandler.post(() -> {
