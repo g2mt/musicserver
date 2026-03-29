@@ -23,5 +23,5 @@ build/$(AN_ARCH)/libmusicserver.so: taglib_android
 	PKG_CONFIG_PATH=./taglib/.pkg_$(AN_ARCH)/lib/pkgconfig/ \
 		CXX=$(AN_NDK_CXX) CC=$(AN_NDK_CC) \
 		CGO_ENABLED=1 GOOS=android GOARCH=$(AN_GOARCH) \
-		go build -v -buildmode=c-shared -o $@ musicserver
+		go build -v -buildmode=c-shared -o $@ -ldflags="-X musicserver/internal/api.Version=$$(git rev-parse --short HEAD)" musicserver
 
