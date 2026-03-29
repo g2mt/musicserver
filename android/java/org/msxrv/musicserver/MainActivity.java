@@ -3,21 +3,19 @@ package org.msxrv.musicserver;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
-import android.os.Build;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebViewClient;
 import android.webkit.WebMessagePort;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
-import android.webkit.WebSettings;
 import android.webkit.WebMessage;
-import android.util.Base64;
+import android.widget.LinearLayout;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -27,18 +25,6 @@ public class MainActivity extends Activity {
 		System.loadLibrary("musicserverbind");
 	}
 
-	private WebView webView;
-	public WebView getWebView() {
-		return webView;
-	}
-
-	private NativeBridge nativeBridge;
-	public NativeBridge getNativeBridge() {
-		return nativeBridge;
-	}
-
-	private NativeAudioBridge nativeAudioBridge;
-
 	private String musicDir;
 	public String getMusicDir() {
 		return musicDir;
@@ -47,6 +33,10 @@ public class MainActivity extends Activity {
 	private String dbDir;
 	public String getDbDir() {
 		return dbDir;
+	}
+
+	private MusicServerApp getApp() {
+		return (MusicServerApp) getApplication();
 	}
 
 	@Override
@@ -68,12 +58,24 @@ public class MainActivity extends Activity {
 			android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
 		Log.e("[msxrv] Native", "Setting dbDir = " + dbDir);
 
-		webView = (WebView)findViewById(R.id.webview);
-		WebSettings webSettings = webView.getSettings();
-		webSettings.setJavaScriptEnabled(true);
-		webSettings.setDomStorageEnabled(true);
-		webSettings.setDatabaseEnabled(true);
-		webSettings.setAlgorithmicDarkeningAllowed(true);
+		// Finish initializing bridges now that we have an Activity context for paths
+		getApp().initBridges(this);
+
+		NativeBridge nativeBridge = getApp().getNativeBridge();
+		if (nativeBridge == null) {
+			showErrorDialog("Failed to initialize native bridge.\nQuit?");
+			return;
+		}
+
+		NativeAudioBridge nativeAudioBridge = getApp().getNativeAudioBridge();
+
+		nativeBridge.setScanCompleteListener(() -> {
+			WebView wv = getApp().getWebView();
+			wv.post(() -> wv.evaluateJavascript("window._refreshSearch()", null));
+		});
+
+		WebView webView = getApp().getWebView();
+
 		webView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage msg) {
@@ -82,31 +84,14 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		try {
-			nativeBridge = new NativeBridge(this);
-			webView.addJavascriptInterface(nativeBridge, "_native");
-		} catch (NativeBridge.NativeBridgeException e) {
-			showErrorDialog(e.getMessage() + "\nQuit?");
-			return;
-		}
-		final NativeBridge finalNativeBridge = nativeBridge;
-
-		nativeBridge.setScanCompleteListener(() ->
-			webView.post(() ->
-				webView.evaluateJavascript("window._refreshSearch()", null)));
-
-		nativeAudioBridge = new NativeAudioBridge(this);
-		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
-
 		webView.setWebViewClient(new WebViewClient() {
 			@Override
 			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 				String url = request.getUrl().toString();
 				if (url.startsWith("track-cover://")) {
-					// URL is track-cover:///absolute/path/to/file.mp3
 					String filepath = request.getUrl().getPath();
 					String[] outContentType = new String[1];
-					byte[] data = finalNativeBridge.getTrackCover(filepath, outContentType);
+					byte[] data = nativeBridge.getTrackCover(filepath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
 					Log.d("[msxrv] cover", "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
 					return new WebResourceResponse(
@@ -120,12 +105,8 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onPageFinished(WebView view, String url) {
-				// Create a WebMessageChannel once the WebView has started loading.
-				// channel[0] stays on the Java side (given to NativeAudioBridge),
-				// channel[1] is transferred to the JS side via postWebMessage.
 				WebMessagePort[] channel = webView.createWebMessageChannel();
 				nativeAudioBridge.setMessagePort(channel[0]);
-
 				webView.postWebMessage(
 					new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
 					android.net.Uri.parse("*")
@@ -133,25 +114,70 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		// Start the background service to keep the WebView alive
+		startForegroundService(new Intent(this, WebViewService.class));
+
 		requestAllPermissions();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		attachWebView();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		detachWebView();
+	}
+
+	// Attaches the shared WebView into this Activity's container
+	private void attachWebView() {
+		WebView webView = getApp().getWebView();
+		if (webView == null) return;
+
+		ViewGroup parent = (ViewGroup) webView.getParent();
+		if (parent != null) {
+			parent.removeView(webView);
+		}
+
+		LinearLayout container = findViewById(R.id.webview_container);
+		if (container != null) {
+			container.addView(webView, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.MATCH_PARENT
+			));
+		}
+	}
+
+	// Detaches the shared WebView from this Activity's layout so it can survive in the service
+	private void detachWebView() {
+		WebView webView = getApp().getWebView();
+		if (webView == null) return;
+
+		ViewGroup parent = (ViewGroup) webView.getParent();
+		if (parent != null) {
+			parent.removeView(webView);
+		}
 	}
 
 	// Permissions
 
 	public class RequestPermissionResult {
-			public int requestCode;
-			public String[] permissions;
-			public int[] grantResults;
+		public int requestCode;
+		public String[] permissions;
+		public int[] grantResults;
 
-			public RequestPermissionResult(
-					int requestCode,
-					String[] permissions,
-					int[] grantResults
-			) {
-					this.requestCode = requestCode;
-					this.permissions = permissions;
-					this.grantResults = grantResults;
-			}
+		public RequestPermissionResult(
+			int requestCode,
+			String[] permissions,
+			int[] grantResults
+		) {
+			this.requestCode = requestCode;
+			this.permissions = permissions;
+			this.grantResults = grantResults;
+		}
 	}
 
 	private ArrayList<Consumer<RequestPermissionResult>> enqueuedPermissionRequests = new ArrayList<>();
@@ -189,7 +215,7 @@ public class MainActivity extends Activity {
 	// Web view
 
 	private void loadWebView() {
-		webView.loadUrl("file:///android_asset/index.html");
+		getApp().getWebView().loadUrl("file:///android_asset/index.html");
 	}
 
 	// Dialogs

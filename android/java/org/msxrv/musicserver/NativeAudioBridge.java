@@ -38,20 +38,19 @@ public class NativeAudioBridge {
 	private MediaSession mediaSession;
 	private PlaybackState playbackState;
 
-
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
 	private boolean isActive(int instanceId) {
 		return instanceId == currentInstanceId;
 	}
 
-	public NativeAudioBridge(MainActivity activity) {
+	public NativeAudioBridge(MainActivity activity, WebView webView) {
 		this.activity = activity;
-		this.webView = activity.getWebView();
+		this.webView = webView;
 
 		mediaSession = new MediaSession(activity, "NativeAudioBridge");
 		mediaSession.setActive(true);
-		
+
 		PlaybackState state = new PlaybackState.Builder()
 			.setState(PlaybackState.STATE_PLAYING, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0f)
 			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
@@ -208,7 +207,6 @@ public class NativeAudioBridge {
 			}
 		});
 	}
-
 
 	// JS interface
 
