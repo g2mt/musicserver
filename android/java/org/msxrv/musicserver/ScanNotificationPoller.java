@@ -71,7 +71,7 @@ public class ScanNotificationPoller {
             builder.setContentText(value + " / " + maxValue)
                    .setProgress(maxValue, value, false);
         } else {
-            builder.setContentText("Scanning…")
+            builder.setContentText("Scanning...")
                    .setProgress(0, 0, true);
         }
 

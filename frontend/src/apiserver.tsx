@@ -8,6 +8,7 @@ const HOST = (() => {
 declare global {
   interface Native {
     fetchAPI: (path: string, method: string, params: string) => string | null;
+    scanTracks: () => void;
   }
   interface Window {
     _native?: Native;
@@ -77,3 +78,5 @@ export function listenAPI(
   };
   return () => es.close();
 }
+
+export const nativeScanTracks = window._native?.scanTracks;

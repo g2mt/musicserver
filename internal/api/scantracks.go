@@ -14,8 +14,8 @@ import (
 const WatchDirInterval = 1 * time.Second
 
 func (i *Interface) ScanTracks() (map[string]string, error) {
-	i.scanMu.Lock()
-	defer i.scanMu.Unlock()
+	i.scan.mu.Lock()
+	defer i.scan.mu.Unlock()
 
 	slog.Debug("full scan started")
 
@@ -35,12 +35,16 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 	}
 
 	// Bind progress ticker
-	ticker, err := i.prog.Bind("scanTracks")
-	if err != nil {
+	if ticker, err := i.prog.Bind("scanTracks"); err == nil {
+		i.scan.ticker.Store(ticker)
+	} else {
 		return nil, err
 	}
-	defer i.prog.Unbind("scanTracks")
-	ticker.SetMaxValue(totalFiles)
+	defer func() {
+		i.scan.ticker.Store(nil)
+		i.prog.Unbind("scanTracks")
+	}()
+	i.scan.ticker.Load().SetMaxValue(totalFiles)
 
 	added := make(map[string]string)
 	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
@@ -71,7 +75,7 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 		added[shortID] = track.Name
 
 		// Update progress
-		ticker.AddValue(1)
+		i.scan.ticker.Load().AddValue(1)
 		return nil
 	})
 
@@ -114,16 +118,16 @@ eventLoop:
 		for {
 
 			// If ScanTracks is running, discard collected events and wait for it to finish.
-			if locked := i.scanMu.TryLock(); !locked {
+			if locked := i.scan.mu.TryLock(); !locked {
 				slog.Debug("WatchDataDir paused, waiting for full scan to complete")
-				i.scanMu.Lock()
-				i.scanMu.Unlock()
+				i.scan.mu.Lock()
+				i.scan.mu.Unlock()
 
 				slog.Debug("skipping current WatchDataDir iteration")
 				time.Sleep(WatchDirInterval)
 				continue eventLoop
 			} else {
-				i.scanMu.Unlock()
+				i.scan.mu.Unlock()
 			}
 
 			select {
