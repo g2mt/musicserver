@@ -1,12 +1,16 @@
 package org.msxrv.musicserver;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class ScanNotificationPoller {
 	private static final String CHANNEL_ID = "msxrv_scan";
@@ -19,9 +23,21 @@ public class ScanNotificationPoller {
 	private final Handler handler;
 	private final Runnable pollRunnable;
 
+	private static final int PERMISSION_REQUEST_CODE = 1001;
+
 	public ScanNotificationPoller(Activity activity, NativeBridge bridge) {
 		this.activity = activity;
 		this.bridge = bridge;
+
+		if (ContextCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS)
+				!= PackageManager.PERMISSION_GRANTED) {
+			ActivityCompat.requestPermissions(
+				activity,
+				new String[]{Manifest.permission.POST_NOTIFICATIONS},
+				PERMISSION_REQUEST_CODE
+			);
+		}
+
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.handler = new Handler(Looper.getMainLooper());
