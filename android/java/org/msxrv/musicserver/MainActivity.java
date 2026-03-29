@@ -20,6 +20,10 @@ import android.webkit.WebMessage;
 
 public class MainActivity extends Activity {
 	private WebView webView;
+	public WebView getWebView() {
+		return webView;
+	}
+
 	private NativeAudioBridge nativeAudioBridge;
 	private String musicDir;
 	private String dbDir;
@@ -71,7 +75,7 @@ public class MainActivity extends Activity {
 			showErrorDialog(e.getMessage() + "\nQuit?");
 		}
 
-		nativeAudioBridge = new NativeAudioBridge(this, webView);
+		nativeAudioBridge = new NativeAudioBridge(this);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 
 		webView.setWebViewClient(new WebViewClient() {

@@ -24,9 +24,9 @@ public class NativeAudioBridge {
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
 
-	public NativeAudioBridge(MainActivity activity, WebView webView) {
+	public NativeAudioBridge(MainActivity activity) {
 		this.activity = activity;
-		this.webView = webView;
+		this.webView = activity.getWebView();
 	}
 
 	public void setMessagePort(WebMessagePort port) {
