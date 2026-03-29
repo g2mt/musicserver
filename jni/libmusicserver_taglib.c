@@ -17,15 +17,20 @@ Java_org_msxrv_musicserver_NativeBridge_msrvTlLoadTrackMetadata(
     return NULL;
   }
 
-  jclass cls = (*env)->FindClass(env, "org/msxrv/musicserver/NativeBridge$TrackMetadata");
-  jmethodID ctor = (*env)->GetMethodID(env, cls, "<init>",
-    "(Lorg/msxrv/musicserver/NativeBridge;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+  jclass cls = (*env)->FindClass(
+      env, "org/msxrv/musicserver/NativeBridge$TrackMetadata");
+  jmethodID ctor = (*env)->GetMethodID(
+      env, cls, "<init>",
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
 
-  jstring title  = metadata.title  ? (*env)->NewStringUTF(env, metadata.title)  : NULL;
-  jstring artist = metadata.artist ? (*env)->NewStringUTF(env, metadata.artist) : NULL;
-  jstring album  = metadata.album  ? (*env)->NewStringUTF(env, metadata.album)  : NULL;
+  jstring title =
+      metadata.title ? (*env)->NewStringUTF(env, metadata.title) : NULL;
+  jstring artist =
+      metadata.artist ? (*env)->NewStringUTF(env, metadata.artist) : NULL;
+  jstring album =
+      metadata.album ? (*env)->NewStringUTF(env, metadata.album) : NULL;
 
-  jobject metadataObj = (*env)->NewObject(env, cls, ctor, obj, title, artist, album);
+  jobject metadataObj = (*env)->NewObject(env, cls, ctor, title, artist, album);
 
   MsrvTlFreeTrackMetadata(&metadata);
   return metadataObj;
