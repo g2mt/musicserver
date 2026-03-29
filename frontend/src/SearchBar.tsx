@@ -19,8 +19,7 @@ function SearchBar() {
   const [inputValue, setInputValue] = useState(c.searchQuery);
 
   useEffect(() => {
-    if (c.oldSearchQuery.current !== null)
-      return; // still being processed
+    if (c.oldSearchQuery.current !== null) return; // still being processed
     setInputValue(c.searchQuery);
   }, [c.searchQuery, c.oldSearchQuery.current]);
 

@@ -129,7 +129,7 @@ export function App() {
           c.oldSearchQuery.current = null;
         }
       })
-      .catch(e => {
+      .catch((e) => {
         toast.error(<>Error loading: {e.toString()}</>);
         setHashParam("q", c.searchQuery);
       });

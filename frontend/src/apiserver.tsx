@@ -37,7 +37,11 @@ export function fetchAPI(
   if (!path.startsWith("/")) throw new Error(`"${path}" does not start with /`);
 
   if (window._native) {
-    const result = window._native.fetchAPI(path, method, JSON.stringify(params ?? {}));
+    const result = window._native.fetchAPI(
+      path,
+      method,
+      JSON.stringify(params ?? {}),
+    );
     return new Promise((res, rej) => {
       try {
         res(result === null ? null : JSON.parse(result));
