@@ -35,15 +35,15 @@ function SettingsTab() {
           Show blurred album cover as background in dark mode
         </label>
       </div>
+      <button className="btn" disabled={!unsaved} onClick={handleSave}>
+        <FontAwesomeIcon icon={faSave} /> Save
+      </button>
       <button className="btn" onClick={() => {
         c.setDarkMode((b) => !b);
         setUnsaved(true);
       }}>
         <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
         {c.darkMode ? "Light Mode" : "Dark Mode"}
-      </button>
-      <button className="btn" disabled={!unsaved} onClick={handleSave}>
-        <FontAwesomeIcon icon={faSave} /> Save
       </button>
       <button className="btn" onClick={() => {
         fetchAPI("/track", undefined, "POST")
