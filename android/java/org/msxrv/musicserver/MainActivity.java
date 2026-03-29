@@ -91,7 +91,7 @@ public class MainActivity extends Activity {
 				if (url.startsWith("track-cover://")) {
 					String filepath = request.getUrl().getPath();
 					String[] outContentType = new String[1];
-					byte[] data = nativeBridge.getTrackCover(filepath, outContentType);
+					byte[] data = TrackUtils.getTrackCover(filepath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
 					Log.d("[msxrv] cover", "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
 					return new WebResourceResponse(
