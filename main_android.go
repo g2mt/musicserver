@@ -181,8 +181,8 @@ func (r *byteReader) Read(p []byte) (int, error) {
 //export MsrvGetScanTickerValues
 func MsrvGetScanTickerValues(ifaceHandle C.uintptr_t) C.struct_MsrvScanTickerValuesResult {
 	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
-	ticker, ok := iface.GetScanTicker()
-	if !ok || ticker == nil {
+	ticker := iface.GetScanTicker()
+	if ticker == nil {
 		return C.struct_MsrvScanTickerValuesResult{Present: 0}
 	}
 	return C.struct_MsrvScanTickerValuesResult{
