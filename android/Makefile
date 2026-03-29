@@ -9,7 +9,6 @@ AN_TARGET := x86_64
 
 ifeq ($(AN_TARGET),all)
 override AN_TARGET = aarch64 armv7a x86_64
-$(info $(AN_TARGET))
 endif
 
 .PHONY: all | init_build
