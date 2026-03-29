@@ -10,6 +10,7 @@ import android.webkit.WebMessagePort;
 import android.webkit.WebView;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.util.Log;
 
 public class NativeAudioBridge {
 	private final Context context;
@@ -95,6 +96,7 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public void setSrc(int instanceId, String src) {
 		if (!isActive(instanceId)) return;
+		Log.d("[msxrv] NativeAudioBridge", "src=" + src);
 		try {
 			mediaPlayer.reset();
 			mediaPlayer.setDataSource(src);

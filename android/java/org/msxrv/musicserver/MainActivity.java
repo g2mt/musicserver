@@ -24,6 +24,14 @@ public class MainActivity extends Activity {
 	private String musicDir;
 	private String dbDir;
 
+	public String getMusicDir() {
+		return musicDir;
+	}
+
+	public String getDbDir() {
+		return dbDir;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -121,13 +129,5 @@ public class MainActivity extends Activity {
 			})
 			.setNegativeButton(android.R.string.no, null)
 			.show();
-	}
-
-	public String getMusicDir() {
-		return musicDir;
-	}
-
-	public String getDbDir() {
-		return dbDir;
 	}
 }
