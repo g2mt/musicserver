@@ -15,6 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"musicserver/internal/progress"
 	"musicserver/internal/schema"
@@ -33,8 +34,11 @@ type Interface struct {
 
 	LongIdGen func(track *schema.Track) string
 
-	// scanMu is held during a full ScanTracks call, causing WatchDataDir to pause.
-	scanMu  sync.Mutex
+	scan struct {
+		// mu is held during a full ScanTracks call, causing WatchDataDir to pause.
+		mu     sync.Mutex
+		ticker atomic.Pointer[progress.ProgressTicker] // may be nil
+	}
 	watcher *fsnotify.Watcher
 
 	trackCache *lru.Cache[string, schema.Track]

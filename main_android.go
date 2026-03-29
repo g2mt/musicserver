@@ -169,6 +169,8 @@ func (r *byteReader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
+// TODO: MsrvGetScanTickerValues(interface handle) => {present, value, maxValue}
+
 // MsrvDeleteHandle frees a cgo.Handle when C code is done with it.
 //
 //export MsrvDeleteHandle
