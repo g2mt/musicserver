@@ -22,6 +22,11 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
+	static {
+		System.loadLibrary("musicserver");
+		System.loadLibrary("musicserverbind");
+	}
+
 	private WebView webView;
 	public WebView getWebView() {
 		return webView;
