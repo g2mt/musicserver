@@ -79,4 +79,6 @@ export function listenAPI(
   return () => es.close();
 }
 
-export const nativeScanTracks = window._native ? (() => window._native!.scanTracks) : null;
+export const nativeScanTracks = (() =>
+  typeof window._native !== "undefined" ? (() => window._native!.scanTracks()) : null
+)();
