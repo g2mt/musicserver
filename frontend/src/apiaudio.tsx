@@ -14,10 +14,30 @@ declare global {
   }
 }
 
+// Receives the MessagePort from the Android side and routes events to the
+// active NativeAudio instance.
+function setupNativeAudioMessagePort() {
+  window.addEventListener("message", (e: MessageEvent) => {
+    if (e.data !== "_audio_port") return;
+    const port = e.ports[0];
+    port.onmessage = (ev: MessageEvent) => {
+      const { instanceId, event } = JSON.parse(ev.data) as {
+        instanceId: number;
+        event: string;
+      };
+      const instance = NativeAudio.instance;
+      if (instance && instance.instanceId === instanceId) {
+        instance.dispatchEvent(new Event(event));
+      }
+    };
+    port.start();
+  });
+}
+
 class NativeAudio extends EventTarget {
   static instance: NativeAudio | null = null;
 
-  private instanceId: number;
+  instanceId: number;
   private bridge: NativeAudioBridge;
   private _volume: number = 1;
 
@@ -82,6 +102,7 @@ class NativeAudio extends EventTarget {
 
 const apiAudio = (() => {
   if (window._native_audio_bridge) {
+    setupNativeAudioMessagePort();
     return NativeAudio;
   } else {
     return Audio;

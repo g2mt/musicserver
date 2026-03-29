@@ -2,13 +2,19 @@ package org.msxrv.musicserver;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Handler;
+import android.os.Looper;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebMessage;
+import android.webkit.WebMessagePort;
 import android.webkit.WebView;
 
 public class NativeAudioBridge {
     private final Context context;
     private final WebView webView;
     private MediaPlayer mediaPlayer;
+    private WebMessagePort messagePort;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     // Each NativeAudio instance has an ID. Only the latest one is active.
     private int currentInstanceId = 0;
@@ -16,6 +22,10 @@ public class NativeAudioBridge {
     public NativeAudioBridge(Context context, WebView webView) {
         this.context = context;
         this.webView = webView;
+    }
+
+    public void setMessagePort(WebMessagePort port) {
+        this.messagePort = port;
     }
 
     // Called by NativeAudio constructor. Returns the instance ID.
@@ -42,6 +52,11 @@ public class NativeAudioBridge {
             return true;
         });
 
+        // Fire timeupdate periodically while playing
+        mediaPlayer.setOnPreparedListener(mp -> {
+            fireEvent(instanceId, "canplay");
+        });
+
         return instanceId;
     }
 
@@ -49,9 +64,22 @@ public class NativeAudioBridge {
         return instanceId == currentInstanceId;
     }
 
+    // Posts a JSON message of the form {"instanceId": N, "event": "eventName"}
+    // to the JS MessagePort. Must be called on the main thread.
     private void fireEvent(int instanceId, String eventName) {
         if (!isActive(instanceId)) return;
-        // TODO: implement event firing
+        if (messagePort == null) return;
+
+        String payload = "{\"instanceId\":" + instanceId + ",\"event\":\"" + eventName + "\"}";
+
+        // WebMessagePort.postMessage must be called on the main thread
+        mainHandler.post(() -> {
+            try {
+                messagePort.postMessage(new WebMessage(payload));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @JavascriptInterface
@@ -70,6 +98,7 @@ public class NativeAudioBridge {
     public void play(int instanceId) {
         if (!isActive(instanceId)) return;
         mediaPlayer.start();
+        scheduleTimeUpdates(instanceId);
     }
 
     @JavascriptInterface
@@ -102,5 +131,19 @@ public class NativeAudioBridge {
     public void setVolume(int instanceId, float volume) {
         if (!isActive(instanceId)) return;
         mediaPlayer.setVolume(volume, volume);
+    }
+
+    // Schedules periodic timeupdate events (~4x per second) while the player is active and playing.
+    private void scheduleTimeUpdates(int instanceId) {
+        mainHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isActive(instanceId)) return;
+                if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                    fireEvent(instanceId, "timeupdate");
+                    mainHandler.postDelayed(this, 250);
+                }
+            }
+        }, 250);
     }
 }
