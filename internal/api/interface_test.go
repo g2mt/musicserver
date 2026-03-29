@@ -207,7 +207,7 @@ func TestInterface_GetTracks(t *testing.T) {
 	}
 
 	// Verify result ids maps to correct track metadata
-	for id, track := range result {
+	for _, track := range result {
 		found := false
 		for _, t := range tracks {
 			if t.Name == track.Name && t.Path == track.Path && t.Album == track.Album {
@@ -216,7 +216,7 @@ func TestInterface_GetTracks(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("Track with ID %s not found in original tracks", id)
+			t.Errorf("Track with ID %s not found in original tracks", track.LongID)
 		}
 	}
 }
