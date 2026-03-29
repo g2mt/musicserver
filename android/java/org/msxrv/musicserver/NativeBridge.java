@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Iterator;
+import dalvik.annotation.optimization.FastNative;
 
 public class NativeBridge {
 	static {
@@ -96,6 +97,7 @@ public class NativeBridge {
 	 * @param outErr       output array to store error message if any
 	 * @return the bytes read, or null on error
 	 */
+	@FastNative
 	private native byte[] msrvReadAll(long readerHandle, String[] outErr);
 
 	/**
@@ -107,6 +109,7 @@ public class NativeBridge {
 	 * @param outContentType output array to store the response content type
 	 * @return the reader handle for reading the cover bytes
 	 */
+	@FastNative
 	private native long msrvGetTrackCover(
 		long ifaceHandle,
 		String id,

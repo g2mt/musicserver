@@ -4,7 +4,7 @@
 
 PKG_NAME = org.msxrv.musicserver
 PKG_PATH = $(subst .,/,$(PKG_NAME))
-PKG_SRCS = $(wildcard java/$(PKG_PATH)/*.java)
+PKG_SRCS = $(shell find java/ -iname '*.java')
 AN_TARGET := x86_64
 
 ifeq ($(AN_TARGET),all)
