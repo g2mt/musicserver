@@ -94,6 +94,14 @@ public class NativeAudioBridge {
 	private void updateMediaSession(String filepath) {
 		if (filepath == null) return;
 
+		try {
+			mediaPlayer.reset();
+			mediaPlayer.setDataSource(src);
+			mediaPlayer.prepare();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		NativeBridge bridge = activity.getNativeBridge();
 
 		NativeBridge.TrackMetadata metadata = bridge.getTrackMetadata(filepath);
@@ -262,16 +270,7 @@ public class NativeAudioBridge {
 			}
 		}
 
-		final String resolvedSrc = src;
-		try {
-			mediaPlayer.reset();
-			mediaPlayer.setDataSource(resolvedSrc);
-			mediaPlayer.prepare();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		updateMediaSession(resolvedSrc);
+		updateMediaSession(src);
 	}
 
 	@JavascriptInterface
