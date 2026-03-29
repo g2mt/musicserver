@@ -11,7 +11,7 @@ import {
 import { getTrackCover, Track } from "./Track";
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
-import { getFilePath, getTrackCoverFromId } from "./apiserver";
+import { getFilePath, getTrackFileFromId } from "./apiserver";
 import apiAudio from "./apiaudio";
 
 import "./MusicPlayer.css";
@@ -77,10 +77,8 @@ export function MusicPlayer() {
   const audio = useAudio(
     (() => {
       if (!c.currentTrack) return null;
-      if (c.currentTrack.id)
-        return getTrackCoverFromId(c.currentTrack.id);
-      if (c.currentTrack.path)
-        return getFilePath(c.currentTrack.path);
+      if (c.currentTrack.id) return getTrackFileFromId(c.currentTrack.id);
+      if (c.currentTrack.path) return getFilePath(c.currentTrack.path);
       return null;
     })(),
   );
