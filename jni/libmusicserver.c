@@ -98,6 +98,28 @@ Java_org_msxrv_musicserver_NativeBridge_msrvRead(
 	return result.N;
 }
 
+JNIEXPORT jlong JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvGetTrackCover(
+	JNIEnv *env, jobject obj,
+	jlong ifaceHandle,
+	jstring id,
+	jobjectArray outContentType)
+{
+	const char *cId = (*env)->GetStringUTFChars(env, id, NULL);
+
+	MsrvHandleRequestResult result = MsrvGetTrackCover(
+		(uintptr_t)ifaceHandle,
+		(char *)cId);
+
+	(*env)->ReleaseStringUTFChars(env, id, cId);
+
+	jstring contentTypeStr = (*env)->NewStringUTF(env, result.ContentType);
+	(*env)->SetObjectArrayElement(env, outContentType, 0, contentTypeStr);
+	free(result.ContentType);
+
+	return (jlong)result.ReaderHandle;
+}
+
 JNIEXPORT void JNICALL
 Java_org_msxrv_musicserver_NativeBridge_msrvDeleteHandle(
 	JNIEnv *env, jobject obj,

@@ -17,6 +17,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
 import android.webkit.WebMessage;
+import android.util.Base64;
 
 public class MainActivity extends Activity {
 	private WebView webView;
@@ -68,17 +69,37 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		NativeBridge nativeBridge;
 		try {
-			NativeBridge nativeBridge = new NativeBridge(this);
+			nativeBridge = new NativeBridge(this);
 			webView.addJavascriptInterface(nativeBridge, "_native");
 		} catch (NativeBridge.NativeBridgeException e) {
 			showErrorDialog(e.getMessage() + "\nQuit?");
+			return;
 		}
+		final NativeBridge finalNativeBridge = nativeBridge;
 
 		nativeAudioBridge = new NativeAudioBridge(this);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 
 		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+				String url = request.getUrl().toString();
+				if (url.startsWith("track-cover://")) {
+					String id = request.getUrl().getHost();
+					String[] outContentType = new String[1];
+					byte[] data = finalNativeBridge.getTrackCover(id, outContentType);
+					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
+					return new WebResourceResponse(
+						mimeType,
+						"binary",
+						new java.io.ByteArrayInputStream(data)
+					);
+				}
+				return super.shouldInterceptRequest(view, request);
+			}
+
 			@Override
 			public void onPageFinished(WebView view, String url) {
 				// Create a WebMessageChannel once the WebView has started loading.

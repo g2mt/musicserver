@@ -100,11 +100,45 @@ public class NativeBridge {
 	private native int msrvRead(long readerHandle, byte[] buf, String[] outErr);
 
 	/**
+	 * Resolves a track ID to its cover art, returning a reader handle and content type.
+	 * Falls back to a built-in placeholder image on error.
+	 *
+	 * @param ifaceHandle    the interface handle
+	 * @param id             the track ID (short or long)
+	 * @param outContentType output array to store the response content type
+	 * @return the reader handle for reading the cover bytes
+	 */
+	private native long msrvGetTrackCover(
+		long ifaceHandle,
+		String id,
+		String[] outContentType);
+
+	/**
 	 * Deletes a handle to free associated resources.
 	 *
 	 * @param handle the handle to delete (interface or reader handle)
 	 */
 	private native void msrvDeleteHandle(long handle);
+
+	public byte[] getTrackCover(String id, String[] outContentType) {
+		String[] contentType = new String[1];
+		long readerHandle = msrvGetTrackCover(interfaceHandle, id, contentType);
+		outContentType[0] = contentType[0];
+
+		byte[] result = new byte[0];
+		byte[] buffer = new byte[4096];
+		java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+
+		while (true) {
+			String[] readErr = new String[1];
+			int bytesRead = msrvRead(readerHandle, buffer, readErr);
+			if (readErr[0] != null || bytesRead <= 0) break;
+			baos.write(buffer, 0, bytesRead);
+		}
+
+		msrvDeleteHandle(readerHandle);
+		return baos.toByteArray();
+	}
 
 	@JavascriptInterface
 	public String fetchAPI(String path, String method, String paramsJson) {
