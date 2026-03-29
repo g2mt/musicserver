@@ -78,23 +78,19 @@ Java_org_msxrv_musicserver_NativeBridge_msrvRead(
 	jobjectArray outErr)
 {
 	jsize bufLen = (*env)->GetArrayLength(env, buf);
-	char *cBuf = (char *)malloc(bufLen);
+	char *cBuf = (char *)(*env)->GetPrimitiveArrayCritical(env, buf, NULL);
 
 	MsrvReadResult result = MsrvRead((uintptr_t)readerHandle, cBuf, (int)bufLen);
+
+	(*env)->ReleasePrimitiveArrayCritical(env, buf, cBuf, 0);
 
 	if (result.Err != NULL) {
 		jstring errStr = (*env)->NewStringUTF(env, result.Err);
 		(*env)->SetObjectArrayElement(env, outErr, 0, errStr);
 		free(result.Err);
-		free(cBuf);
 		return result.N;
 	}
 
-	if (result.N > 0) {
-		(*env)->SetByteArrayRegion(env, buf, 0, result.N, (jbyte *)cBuf);
-	}
-
-	free(cBuf);
 	return result.N;
 }
 
