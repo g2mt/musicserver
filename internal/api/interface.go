@@ -295,21 +295,20 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		}
 
 		response, err = i.GetAlbums()
-	} else if pageStr, ok := strings.CutPrefix(path, "/album/by-page/"); ok && len(pageStr) > 0 {
-		if method != "GET" {
-			return nil, "", errors.New("method not allowed")
-		}
-		page, err := strconv.Atoi(pageStr)
-		if err != nil {
-			return nil, "", err
-		}
-		response, err = i.GetAlbumsByPage(page)
 	} else if name, ok := strings.CutPrefix(path, "/album/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		}
 
-		response, err = i.GetAlbumByName(name)
+		if pageStr, ok := strings.CutPrefix(path, "by-page/"); ok && len(pageStr) > 0 {
+			page, err := strconv.Atoi(pageStr)
+			if err != nil {
+				return nil, "", err
+			}
+			response, err = i.GetAlbumsByPage(page)
+		} else {
+			response, err = i.GetAlbumByName(name)
+		}
 	} else if path, ok := strings.CutPrefix(path, "/file/"); ok {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
