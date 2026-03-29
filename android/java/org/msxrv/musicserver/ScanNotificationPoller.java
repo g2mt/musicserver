@@ -48,12 +48,22 @@ public class ScanNotificationPoller {
 		notificationManager.createNotificationChannel(channel);
 
 		pollRunnable = new Runnable() {
+			private boolean wasScanning = false;
+
 			@Override
 			public void run() {
 				NativeBridge.ScanTickerValues vals = bridge.getScanTickerValues();
 				if (!vals.present) {
+					if (wasScanning) {
+						postOneTimeNotification("Scan complete", "Music library scan has finished.");
+						wasScanning = false;
+					}
 					notificationManager.cancel(NOTIFICATION_ID);
 					return;
+				}
+				if (!wasScanning) {
+					postOneTimeNotification("Scan started", "Scanning your music library...");
+					wasScanning = true;
 				}
 				postNotification(vals.value, vals.maxValue);
 				handler.postDelayed(this, POLL_INTERVAL_MS);
