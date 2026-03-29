@@ -15,9 +15,8 @@ import android.util.Log;
 public class NativeAudioBridge {
 	static final String fileEndpoint = "file:///api/file/";
 
-	private final Context context;
-	private final WebView webView;
-	private final String musicDir;
+	private MainActivity activity;
+	private WebView webView;
 	private MediaPlayer mediaPlayer;
 	private WebMessagePort messagePort;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -25,11 +24,9 @@ public class NativeAudioBridge {
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
 
-	public NativeAudioBridge(MainActivity activity, Context context, WebView webView, String musicDir) {
+	public NativeAudioBridge(MainActivity activity, WebView webView) {
 		this.activity = activity;
-		this.context = context;
 		this.webView = webView;
-		this.musicDir = musicDir;
 	}
 
 	public void setMessagePort(WebMessagePort port) {
@@ -106,7 +103,7 @@ public class NativeAudioBridge {
 		// If src starts with fileEndpoint, strip the prefix and prepend musicDir
 		if (src.startsWith(fileEndpoint)) {
 			String relativePath = src.substring(fileEndpoint.length());
-			src = musicDir + "/" + relativePath;
+			src = activity.getMusicDir() + "/" + relativePath;
 			Log.d("[msxrv] NativeAudioBridge", "resolved src=" + src);
 		}
 
