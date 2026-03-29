@@ -13,7 +13,7 @@ import (
 
 const WatchDirInterval = 1 * time.Second
 
-func (i *Interface) ScanTracks() (map[string]string, error) {
+func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string, error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
@@ -45,6 +45,9 @@ func (i *Interface) ScanTracks() (map[string]string, error) {
 		i.prog.Unbind("scanTracks")
 	}()
 	i.scan.ticker.Load().SetMaxValue(totalFiles)
+	if tickerBounded != nil {
+		tickerBounded <- struct{}{}
+	}
 
 	added := make(map[string]string)
 	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {

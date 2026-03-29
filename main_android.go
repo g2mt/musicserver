@@ -180,7 +180,9 @@ func (r *byteReader) Read(p []byte) (int, error) {
 //export MsrvStartScanTracks
 func MsrvStartScanTracks(ifaceHandle C.uintptr_t) {
 	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
-	go iface.ScanTracks()
+	ch := make(chan struct{})
+	go iface.ScanTracks(ch)
+	<-ch
 }
 
 // MsrvGetScanTickerValues returns the current scan ticker state.
