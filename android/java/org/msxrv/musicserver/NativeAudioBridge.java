@@ -28,6 +28,7 @@ public class NativeAudioBridge {
 	private WebMessagePort messagePort;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 	private MediaSession mediaSession;
+	private PlaybackState playbackState;
 	private static final String NOTIFICATION_CHANNEL_ID = "playback";
 	private static final int NOTIFICATION_ID = 1;
 
@@ -97,10 +98,6 @@ public class NativeAudioBridge {
 
 		final int instanceId = currentInstanceId;
 
-		mediaPlayer.setOnCompletionListener(mp -> {
-			fireEvent(instanceId, "ended");
-		});
-
 		mediaPlayer.setOnInfoListener((mp, what, extra) -> {
 			fireEvent(instanceId, "timeupdate");
 			return true;
@@ -109,6 +106,11 @@ public class NativeAudioBridge {
 		// Fire timeupdate periodically while playing
 		mediaPlayer.setOnPreparedListener(mp -> {
 			fireEvent(instanceId, "canplay");
+		});
+
+		mediaPlayer.setOnCompletionListener(mp -> {
+			updatePlaybackState(PlaybackState.STATE_STOPPED, PlaybackState.PLAYBACK_POSITION_UNKNOWN);
+			fireEvent(instanceId, "ended");
 		});
 
 		return instanceId;
@@ -233,6 +235,7 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		Log.d("[msxrv] NativeAudioBridge", "play");
 		mediaPlayer.start();
+		updatePlaybackState(PlaybackState.STATE_PLAYING, mediaPlayer.getCurrentPosition());
 		scheduleTimeUpdates(instanceId);
 	}
 
@@ -241,6 +244,7 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		if (mediaPlayer.isPlaying()) {
 			mediaPlayer.pause();
+			updatePlaybackState(PlaybackState.STATE_PAUSED, mediaPlayer.getCurrentPosition());
 		}
 	}
 
@@ -275,10 +279,21 @@ public class NativeAudioBridge {
 			public void run() {
 				if (!isActive(instanceId)) return;
 				if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+					updatePlaybackState(PlaybackState.STATE_PLAYING, mediaPlayer.getCurrentPosition());
 					fireEvent(instanceId, "timeupdate");
 					mainHandler.postDelayed(this, 250);
 				}
 			}
 		}, 250);
+	}
+
+	private void updatePlaybackState(int state, long position) {
+		float speed = (state == PlaybackState.STATE_PLAYING) ? 1.0f : 0.0f;
+		playbackState = new PlaybackState.Builder()
+			.setState(state, position, speed)
+			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
+				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
+			.build();
+		mediaSession.setPlaybackState(playbackState);
 	}
 }
