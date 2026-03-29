@@ -1,7 +1,12 @@
 package org.msxrv.musicserver;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
@@ -19,6 +24,7 @@ public class NativeAudioBridge {
 	private MediaPlayer mediaPlayer;
 	private WebMessagePort messagePort;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
+	private MediaSession mediaSession;
 
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
@@ -26,6 +32,9 @@ public class NativeAudioBridge {
 	public NativeAudioBridge(MainActivity activity) {
 		this.activity = activity;
 		this.webView = activity.getWebView();
+
+		mediaSession = new MediaSession(activity, "NativeAudioBridge");
+		mediaSession.setActive(true);
 	}
 
 	public void setMessagePort(WebMessagePort port) {
@@ -114,13 +123,49 @@ public class NativeAudioBridge {
 			}
 		}
 
+		final String resolvedSrc = src;
 		try {
 			mediaPlayer.reset();
-			mediaPlayer.setDataSource(src);
+			mediaPlayer.setDataSource(resolvedSrc);
 			mediaPlayer.prepare();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		updateMediaSession(resolvedSrc);
+	}
+
+	private void updateMediaSession(String filepath) {
+		if (filepath == null) return;
+
+		NativeBridge bridge = activity.getNativeBridge();
+
+		NativeBridge.TrackMetadata metadata = bridge.getTrackMetadata(filepath);
+		String title  = (metadata != null && metadata.title  != null) ? metadata.title  : "";
+		String artist = (metadata != null && metadata.artist != null) ? metadata.artist : "";
+		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
+
+		String[] outContentType = new String[1];
+		byte[] coverBytes = bridge.getTrackCover(filepath, outContentType);
+		Bitmap coverBitmap = null;
+		if (coverBytes != null && coverBytes.length > 0) {
+			coverBitmap = BitmapFactory.decodeByteArray(coverBytes, 0, coverBytes.length);
+		}
+
+		MediaMetadata.Builder metaBuilder = new MediaMetadata.Builder()
+			.putString(MediaMetadata.METADATA_KEY_TITLE, title)
+			.putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+			.putString(MediaMetadata.METADATA_KEY_ALBUM, album);
+		if (coverBitmap != null) {
+			metaBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, coverBitmap);
+		}
+		mediaSession.setMetadata(metaBuilder.build());
+
+		PlaybackState state = new PlaybackState.Builder()
+			.setState(PlaybackState.STATE_PLAYING, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE)
+			.build();
+		mediaSession.setPlaybackState(state);
 	}
 
 	@JavascriptInterface
