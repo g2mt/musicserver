@@ -34,6 +34,7 @@ build/$(PKG_NAME).apk: $(PKG_SRCS) \
 		AndroidManifest.xml \
 		$(foreach arch,$(AN_TARGET),build/apk/lib/$(arch)) \
 		build/keystore.jks
+	cd ../frontend && npm run build-android
 	$(AN_BUILD_TOOLS)/aapt2 compile --dir res -o build/res.zip
 	$(AN_BUILD_TOOLS)/aapt2 link build/res.zip \
 		-I $(AN_PLATFORM)/android.jar \
@@ -79,7 +80,6 @@ $(eval $(call rule-native-lib,armv7a,armeabi-v7a,arm))
 $(eval $(call rule-native-lib,x86_64,x86_64,x86_64))
 
 install_adb: build/$(PKG_NAME).apk
-	-adb uninstall $(PKG_NAME)
-	adb install $<
+	adb install -r $<
 
 
