@@ -36,6 +36,7 @@ typedef struct MsrvReadResult {
 import "C"
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"musicserver/internal/api"
@@ -134,6 +135,43 @@ func MsrvRead(readerHandle C.uintptr_t, buf *C.char, bufLen C.int) C.struct_Msrv
 	}
 
 	return C.struct_MsrvReadResult{Data: buf, N: C.int(n), Err: nil}
+}
+
+// MsrvGetTrackCover resolves a track ID to its cover art bytes and MIME type.
+// Falls back to CoverFallback on error.
+//
+//export MsrvGetTrackCover
+func MsrvGetTrackCover(ifaceHandle C.uintptr_t, id *C.char) C.struct_MsrvHandleRequestResult {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+
+	data, mimeType, err := iface.GetTrackCover(C.GoString(id))
+	if err != nil || data == nil {
+		fallback, _ := base64.StdEncoding.DecodeString(api.CoverFallback)
+		data = fallback
+		mimeType = api.CoverFallbackMimetype
+	}
+
+	reader := &byteReader{data: data}
+	readerHandle := cgo.NewHandle(reader)
+	return C.struct_MsrvHandleRequestResult{
+		ReaderHandle: C.uintptr_t(readerHandle),
+		ContentType:  C.CString(mimeType),
+		Err:          nil,
+	}
+}
+
+type byteReader struct {
+	data   []byte
+	offset int
+}
+
+func (r *byteReader) Read(p []byte) (int, error) {
+	if r.offset >= len(r.data) {
+		return 0, io.EOF
+	}
+	n := copy(p, r.data[r.offset:])
+	r.offset += n
+	return n, nil
 }
 
 // MsrvDeleteHandle frees a cgo.Handle when C code is done with it.
