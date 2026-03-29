@@ -50,6 +50,15 @@ Under the UNIX endpoint, the response will be transferred as a stream of bytes w
 >       - additional methods for handling each API request: `getTracks`, `getTrackById(id)`,...
 >   - `external.go`: external interface code with methods for handling each API request involving external resources
 
+## General
+
+### GET `/props`
+
+Returns a JSON object containing the keys:
+
+  - `version`: the version number, or Git commit of the compiled binary
+  - `config`: a JSON object containing the server configuration
+
 ## Progress
 
 ### GET `/progress`
