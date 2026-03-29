@@ -175,11 +175,38 @@ public class NativeAudioBridge {
 
 		PlaybackState state = new PlaybackState.Builder()
 			.setState(PlaybackState.STATE_PLAYING, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0f)
-			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE)
+			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
+				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
 			.build();
 		mediaSession.setPlaybackState(state);
 
+		mediaSession.setCallback(new MediaSession.Callback() {
+			@Override
+			public void onPlay() {
+				evaluateJavascript("window._setIsPlaying && window._setIsPlaying(true)");
+			}
+
+			@Override
+			public void onPause() {
+				evaluateJavascript("window._setIsPlaying && window._setIsPlaying(false)");
+			}
+
+			@Override
+			public void onSkipToPrevious() {
+				evaluateJavascript("window._handleBack && window._handleBack()");
+			}
+
+			@Override
+			public void onSkipToNext() {
+				evaluateJavascript("window._handleForward && window._handleForward()");
+			}
+		});
+
 		showNotification(title, artist, coverBitmap);
+	}
+
+	private void evaluateJavascript(String script) {
+		mainHandler.post(() -> webView.evaluateJavascript(script, null));
 	}
 
 	private void showNotification(String title, String artist, Bitmap cover) {
