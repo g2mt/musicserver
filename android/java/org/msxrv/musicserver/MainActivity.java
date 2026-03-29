@@ -104,7 +104,14 @@ public class MainActivity extends Activity {
 				loadWebView();
 			}
 		} else {
-			loadWebView();
+			if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+					!= PackageManager.PERMISSION_GRANTED) {
+				requestPermissions(
+					new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
+					1);
+			} else {
+				loadWebView();
+			}
 		}
 	}
 
