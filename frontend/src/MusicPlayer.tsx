@@ -191,7 +191,7 @@ export function MusicPlayer() {
       }
 
       document.title = c.currentTrack?.name ?? "Music Player";
-    }, [c.currentTrack]);
+    }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
   }
 
   useEffect(() => {
@@ -203,7 +203,7 @@ export function MusicPlayer() {
       window._handleBack = undefined;
       window._handleForward = undefined;
     };
-  }, []);
+  }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
