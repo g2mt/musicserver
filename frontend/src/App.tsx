@@ -74,15 +74,12 @@ export function App() {
     }
   }, [c.currentTrack, c.darkMode]);
 
-  c.rescanned = useRef(true);
-  useEffect(() => {
-    if (!c.rescanned.current)
-      return;
-    c.rescanned.current = false;
+  c.onRescanned = () => {
     fetchAPI("/track")
       .then((data) => setFullTracksFromData(data))
       .catch(() => setFullTracksFromData([]));
-  }, [c.rescanned]);
+  };
+  useEffect(() => c.onRescanned(), []);
 
   // Hash params (parsed like URLSearchParams but from window.location.hash)
   const getHashParams = () =>

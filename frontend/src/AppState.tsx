@@ -42,7 +42,7 @@ export interface AppState extends AppStateData {
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
   previousWorkingValue: RefObject<string>;
   showAllTracks: () => void;
-  rescanned: RefObject<boolean>;
+  onRescanned: () => void;
 }
 
 export const AppContext = createContext<AppState | null>(null);
