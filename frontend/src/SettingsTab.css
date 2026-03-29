@@ -1,14 +1,21 @@
 .settings-tab {
   padding: var(--s3);
 
-  & h2 {
-    margin-bottom: var(--s2);
+  h2 {
+    margin: var(--s2);
     text-align: center;
   }
 
-  & hr {
+  hr {
     border: none;
     border-top: 1px solid var(--gray);
-    margin: var(--s3) 0;
+    margin: var(--s4) auto;
+    width: 40%;
+  }
+
+  form {
+    div {
+      margin: var(--s2) 0;
+    }
   }
 }
