@@ -10,6 +10,8 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
+import dalvik.annotation.optimization.FastNative;
+
 public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
@@ -141,8 +143,7 @@ public class NativeBridge {
 	}
 
 	public byte[] getTrackCover(String filepath, String[] outContentType) {
-		MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-		try {
+		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
 			mmr.setDataSource(filepath);
 			byte[] data = mmr.getEmbeddedPicture();
 			outContentType[0] = "image/jpeg";
@@ -151,14 +152,11 @@ public class NativeBridge {
 			e.printStackTrace();
 			outContentType[0] = "image/jpeg";
 			return new byte[0];
-		} finally {
-			mmr.release();
 		}
 	}
 
 	public TrackMetadata getTrackMetadata(String filepath) {
-		MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-		try {
+		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
 			mmr.setDataSource(filepath);
 			String title  = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE);
 			String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);
@@ -167,8 +165,6 @@ public class NativeBridge {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
-		} finally {
-			mmr.release();
 		}
 	}
 
