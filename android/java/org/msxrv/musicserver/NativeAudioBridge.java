@@ -96,7 +96,7 @@ public class NativeAudioBridge {
 
 		try {
 			mediaPlayer.reset();
-			mediaPlayer.setDataSource(src);
+			mediaPlayer.setDataSource(filepath);
 			mediaPlayer.prepare();
 		} catch (Exception e) {
 			e.printStackTrace();
