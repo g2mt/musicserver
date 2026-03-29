@@ -17,8 +17,9 @@ declare global {
 // Receives the MessagePort from the Android side and routes events to the
 // active NativeAudio instance.
 function setupNativeAudioMessagePort() {
-  window.addEventListener("message", (e: MessageEvent) => {
+  function onMessage(e: MessageEvent) {
     if (e.data !== "_audio_port") return;
+    console.log("Received audio port");
     const port = e.ports[0];
     port.onmessage = (ev: MessageEvent) => {
       const { instanceId, event } = JSON.parse(ev.data) as {
@@ -31,7 +32,9 @@ function setupNativeAudioMessagePort() {
       }
     };
     port.start();
-  });
+    window.removeEventListener("message", onMessage);
+  }
+  window.addEventListener("message", onMessage);
 }
 
 class NativeAudio extends EventTarget {

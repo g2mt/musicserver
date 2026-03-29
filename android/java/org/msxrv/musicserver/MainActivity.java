@@ -55,6 +55,22 @@ public class MainActivity extends Activity {
 		nativeAudioBridge = new NativeAudioBridge(this, webView);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 
+		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				// Create a WebMessageChannel once the WebView has started loading.
+				// channel[0] stays on the Java side (given to NativeAudioBridge),
+				// channel[1] is transferred to the JS side via postWebMessage.
+				WebMessagePort[] channel = webView.createWebMessageChannel();
+				nativeAudioBridge.setMessagePort(channel[0]);
+
+				webView.postWebMessage(
+					new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
+					android.net.Uri.parse("*")
+				);
+			}
+		});
+
 		requestPermissions();
 	}
 
@@ -81,17 +97,6 @@ public class MainActivity extends Activity {
 
 	private void loadWebView() {
 		webView.loadUrl("file:///android_asset/index.html");
-
-		// Create a WebMessageChannel once the WebView has started loading.
-		// channel[0] stays on the Java side (given to NativeAudioBridge),
-		// channel[1] is transferred to the JS side via postWebMessage.
-		WebMessagePort[] channel = webView.createWebMessageChannel();
-		nativeAudioBridge.setMessagePort(channel[0]);
-
-		webView.postWebMessage(
-			new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
-			android.net.Uri.parse("*")
-		);
 	}
 
 	private void showErrorDialog(String message) {
