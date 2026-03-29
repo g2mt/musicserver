@@ -11,14 +11,6 @@ import "./SettingsTab.css";
 function SettingsTab() {
   const c = useContext(AppContext)!;
 
-  function rescanMusic() {
-    fetchAPI("/track", undefined, "POST")
-      .then(() => {
-        toast.success("Syncing complete");
-      })
-      .catch(() => toast.error("Sync failed"));
-  }
-
   return (
     <div className="settings-tab">
       <h2>Settings</h2>
@@ -37,7 +29,14 @@ function SettingsTab() {
         <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
         {c.darkMode ? "Light Mode" : "Dark Mode"}
       </button>
-      <button className="btn" onClick={rescanMusic}>
+      <button className="btn" onClick={() => {
+        fetchAPI("/track", undefined, "POST")
+          .then(() => {
+            c.rescanned.current = true;
+            toast.success("Scanning complete");
+          })
+          .catch(() => toast.error("Sync failed"));
+      }}>
         <FontAwesomeIcon icon={faRotate} /> Rescan Music
       </button>
       <hr />
