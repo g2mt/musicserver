@@ -6,7 +6,8 @@
     <uses-sdk android:minSdkVersion="33"/>
     <application android:label="Music Server"
                  android:icon="@mipmap/ic_launcher"
-                 android:roundIcon="@mipmap/ic_launcher_round">
+                 android:roundIcon="@mipmap/ic_launcher_round"
+                 android:name=".MusicServerApp">
         <activity android:name=".MainActivity"
                   android:exported="true">
             <intent-filter>
@@ -14,10 +15,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service android:name=".WebViewService"
+                 android:foregroundServiceType="mediaPlayback"
+                 android:exported="false"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
 </manifest>
