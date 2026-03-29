@@ -22,18 +22,28 @@ import android.util.Log;
 import java.nio.file.Paths;
 
 public class NativeAudioBridge {
-	private MainActivity activity;
-	private WebView webView;
-	private MediaPlayer mediaPlayer;
-	private WebMessagePort messagePort;
-	private final Handler mainHandler = new Handler(Looper.getMainLooper());
-	private MediaSession mediaSession;
-	private PlaybackState playbackState;
 	private static final String NOTIFICATION_CHANNEL_ID = "playback";
 	private static final int NOTIFICATION_ID = 1;
 
+	private MainActivity activity;
+	private WebView webView;
+	private MediaPlayer mediaPlayer;
+
+	private WebMessagePort messagePort;
+	public void setMessagePort(WebMessagePort port) {
+		this.messagePort = port;
+	}
+
+	private final Handler mainHandler = new Handler(Looper.getMainLooper());
+	private MediaSession mediaSession;
+	private PlaybackState playbackState;
+
+
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
+	private boolean isActive(int instanceId) {
+		return instanceId == currentInstanceId;
+	}
 
 	public NativeAudioBridge(MainActivity activity) {
 		this.activity = activity;
@@ -79,9 +89,117 @@ public class NativeAudioBridge {
 		nm.createNotificationChannel(channel);
 	}
 
-	public void setMessagePort(WebMessagePort port) {
-		this.messagePort = port;
+	// Media session
+
+	private void updateMediaSession(String filepath) {
+		if (filepath == null) return;
+
+		NativeBridge bridge = activity.getNativeBridge();
+
+		NativeBridge.TrackMetadata metadata = bridge.getTrackMetadata(filepath);
+		String title  = (metadata != null && metadata.title  != null) ? metadata.title  : "";
+		String artist = (metadata != null && metadata.artist != null) ? metadata.artist : "";
+		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
+
+		String[] outContentType = new String[1];
+		byte[] coverBytes = bridge.getTrackCover(filepath, outContentType);
+		Bitmap coverBitmap = null;
+		if (coverBytes != null && coverBytes.length > 0) {
+			coverBitmap = BitmapFactory.decodeByteArray(coverBytes, 0, coverBytes.length);
+		}
+
+		MediaMetadata.Builder metaBuilder = new MediaMetadata.Builder()
+			.putString(MediaMetadata.METADATA_KEY_TITLE, title)
+			.putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+			.putString(MediaMetadata.METADATA_KEY_ALBUM, album);
+		if (coverBitmap != null) {
+			metaBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, coverBitmap);
+		}
+		mediaSession.setMetadata(metaBuilder.build());
+
+		showNotification(title, artist, coverBitmap);
 	}
+
+	private void showNotification(String title, String artist, Bitmap cover) {
+		Notification.MediaStyle style = new Notification.MediaStyle()
+			.setMediaSession(mediaSession.getSessionToken());
+
+		Notification.Builder builder = new Notification.Builder(activity, NOTIFICATION_CHANNEL_ID)
+			.setStyle(style)
+			.setContentTitle(title)
+			.setContentText(artist)
+			.setSmallIcon(android.R.drawable.ic_media_play)
+			.setOngoing(true);
+
+		if (cover != null) {
+			builder.setLargeIcon(cover);
+		}
+
+		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.notify(NOTIFICATION_ID, builder.build());
+	}
+
+	// Update functions
+
+	private void updatePlaybackState(int state, long position) {
+		float speed = (state == PlaybackState.STATE_PLAYING) ? 1.0f : 0.0f;
+		playbackState = new PlaybackState.Builder()
+			.setState(state, position, speed)
+			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
+				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
+			.build();
+		mediaSession.setPlaybackState(playbackState);
+	}
+
+	// Schedules periodic timeupdate events (~4x per second) while the player is active and playing.
+	private void scheduleTimeUpdates(int instanceId) {
+		mainHandler.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				if (!isActive(instanceId)) return;
+				if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+					updatePlaybackState(PlaybackState.STATE_PLAYING, mediaPlayer.getCurrentPosition());
+					fireEvent(instanceId, "timeupdate");
+					mainHandler.postDelayed(this, 250);
+				}
+			}
+		}, 250);
+	}
+
+	// JS utils
+
+	private void evaluateJavascript(String script) {
+		mainHandler.post(() -> webView.evaluateJavascript(script, null));
+	}
+
+	// Posts a JSON message of the form {"instanceId": N, "event": "eventName"}
+	// to the JS MessagePort. Must be called on the main thread.
+	private void fireEvent(int instanceId, String eventName) {
+		if (!isActive(instanceId)) return;
+		if (messagePort == null) return;
+
+		JSONObject payloadObject = new JSONObject();
+		try {
+			payloadObject.put("instanceId", instanceId);
+			payloadObject.put("event", eventName);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return;
+		}
+		String payload = payloadObject.toString();
+
+		// WebMessagePort.postMessage must be called on the main thread
+		mainHandler.post(() -> {
+			try {
+				messagePort.postMessage(new WebMessage(payload));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
+
+	// JS interface
 
 	// Called by NativeAudio constructor. Returns the instance ID.
 	@JavascriptInterface
@@ -116,36 +234,6 @@ public class NativeAudioBridge {
 		return instanceId;
 	}
 
-	private boolean isActive(int instanceId) {
-		return instanceId == currentInstanceId;
-	}
-
-	// Posts a JSON message of the form {"instanceId": N, "event": "eventName"}
-	// to the JS MessagePort. Must be called on the main thread.
-	private void fireEvent(int instanceId, String eventName) {
-		if (!isActive(instanceId)) return;
-		if (messagePort == null) return;
-
-		JSONObject payloadObject = new JSONObject();
-		try {
-			payloadObject.put("instanceId", instanceId);
-			payloadObject.put("event", eventName);
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return;
-		}
-		String payload = payloadObject.toString();
-
-		// WebMessagePort.postMessage must be called on the main thread
-		mainHandler.post(() -> {
-			try {
-				messagePort.postMessage(new WebMessage(payload));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
-	}
-
 	@JavascriptInterface
 	public void setSrc(int instanceId, String src) {
 		if (!isActive(instanceId)) return;
@@ -176,58 +264,6 @@ public class NativeAudioBridge {
 		}
 
 		updateMediaSession(resolvedSrc);
-	}
-
-	private void updateMediaSession(String filepath) {
-		if (filepath == null) return;
-
-		NativeBridge bridge = activity.getNativeBridge();
-
-		NativeBridge.TrackMetadata metadata = bridge.getTrackMetadata(filepath);
-		String title  = (metadata != null && metadata.title  != null) ? metadata.title  : "";
-		String artist = (metadata != null && metadata.artist != null) ? metadata.artist : "";
-		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
-
-		String[] outContentType = new String[1];
-		byte[] coverBytes = bridge.getTrackCover(filepath, outContentType);
-		Bitmap coverBitmap = null;
-		if (coverBytes != null && coverBytes.length > 0) {
-			coverBitmap = BitmapFactory.decodeByteArray(coverBytes, 0, coverBytes.length);
-		}
-
-		MediaMetadata.Builder metaBuilder = new MediaMetadata.Builder()
-			.putString(MediaMetadata.METADATA_KEY_TITLE, title)
-			.putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
-			.putString(MediaMetadata.METADATA_KEY_ALBUM, album);
-		if (coverBitmap != null) {
-			metaBuilder.putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, coverBitmap);
-		}
-		mediaSession.setMetadata(metaBuilder.build());
-
-		showNotification(title, artist, coverBitmap);
-	}
-
-	private void evaluateJavascript(String script) {
-		mainHandler.post(() -> webView.evaluateJavascript(script, null));
-	}
-
-	private void showNotification(String title, String artist, Bitmap cover) {
-		Notification.MediaStyle style = new Notification.MediaStyle()
-			.setMediaSession(mediaSession.getSessionToken());
-
-		Notification.Builder builder = new Notification.Builder(activity, NOTIFICATION_CHANNEL_ID)
-			.setStyle(style)
-			.setContentTitle(title)
-			.setContentText(artist)
-			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setOngoing(true);
-
-		if (cover != null) {
-			builder.setLargeIcon(cover);
-		}
-
-		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(NOTIFICATION_ID, builder.build());
 	}
 
 	@JavascriptInterface
@@ -270,30 +306,5 @@ public class NativeAudioBridge {
 	public void setVolume(int instanceId, float volume) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.setVolume(volume, volume);
-	}
-
-	// Schedules periodic timeupdate events (~4x per second) while the player is active and playing.
-	private void scheduleTimeUpdates(int instanceId) {
-		mainHandler.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (!isActive(instanceId)) return;
-				if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-					updatePlaybackState(PlaybackState.STATE_PLAYING, mediaPlayer.getCurrentPosition());
-					fireEvent(instanceId, "timeupdate");
-					mainHandler.postDelayed(this, 250);
-				}
-			}
-		}, 250);
-	}
-
-	private void updatePlaybackState(int state, long position) {
-		float speed = (state == PlaybackState.STATE_PLAYING) ? 1.0f : 0.0f;
-		playbackState = new PlaybackState.Builder()
-			.setState(state, position, speed)
-			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
-				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
-			.build();
-		mediaSession.setPlaybackState(playbackState);
 	}
 }
