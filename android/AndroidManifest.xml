@@ -4,7 +4,9 @@
           versionCode="1"
           versionName="0.1">
     <uses-sdk android:minSdkVersion="33"/>
-    <application android:label="Music Server">
+    <application android:label="Music Server"
+                 android:icon="@mipmap/ic_launcher"
+                 android:roundIcon="@mipmap/ic_launcher_round">
         <activity android:name=".MainActivity"
                   android:exported="true">
             <intent-filter>
