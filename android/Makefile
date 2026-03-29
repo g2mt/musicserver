@@ -72,7 +72,7 @@ build/apk/lib/$(1):
 	mkdir -p build/apk/lib/$(2)
 	cd .. && make AN_ARCH=$(1) native_lib_android
 	cp ../build/$(1)/*.so build/apk/lib/$(2)/
-	cp $(AN_NDK_PREFIX)/sysroot/usr/lib/$(3)-linux-android/libc++_shared.so build/apk/lib/$(2)/
+	cp $(AN_NDK_PREFIX)/sysroot/usr/lib/$(3)-linux-android*/libc++_shared.so build/apk/lib/$(2)/
 endef
 
 $(eval $(call rule-native-lib,aarch64,arm64-v8a,aarch64))
