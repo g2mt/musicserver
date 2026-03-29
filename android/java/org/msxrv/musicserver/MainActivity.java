@@ -43,12 +43,12 @@ public class MainActivity extends Activity {
 		try {
 			NativeBridge nativeBridge = new NativeBridge(this);
 			webView.addJavascriptInterface(nativeBridge, "_native");
-
-			NativeAudioBridge nativeAudioBridge = new NativeAudioBridge(this, webView);
-			webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 		} catch (NativeBridge.NativeBridgeException e) {
 			showErrorDialog(e.getMessage() + "\nQuit?");
 		}
+
+		NativeAudioBridge nativeAudioBridge = new NativeAudioBridge(this, webView);
+		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 
 		requestPermissions();
 	}

@@ -12,11 +12,12 @@ import { getTrackCover, Track } from "./Track";
 import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
 import { getFilePath, getTrackCoverFromId } from "./apiserver";
+import apiAudio from "./apiaudio";
 
 import "./MusicPlayer.css";
 
 function useAudio(url: string | null) {
-  const audio = useMemo(() => new Audio(), []);
+  const audio = useMemo(() => new apiAudio(), []);
 
   useEffect(() => {
     if (!url) return;
