@@ -1,5 +1,5 @@
 import { useContext, useState, useEffect } from "react";
-import { fetchAPI } from "./apiserver";
+import { fetchAPI, nativeScanTracks } from "./apiserver";
 import { toast } from "react-toastify";
 import {
   faRotate,
@@ -22,12 +22,6 @@ function SettingsTab() {
     fetchAPI("/props").then(setProps).catch(() => {});
   }, []);
 
-  const handleSave = () => {
-    saveConfig(c);
-    setUnsaved(false);
-    toast.success("Settings saved");
-  };
-
   return (
     <div className="settings-tab">
       <h2>Settings</h2>
@@ -45,7 +39,11 @@ function SettingsTab() {
           Show blurred album cover as background in dark mode
         </label>
       </div>
-      <button className="btn" disabled={!unsaved} onClick={handleSave}>
+      <button className="btn" disabled={!unsaved} onClick={() => {
+        saveConfig(c);
+        setUnsaved(false);
+        toast.success("Settings saved");
+      }}>
         <FontAwesomeIcon icon={faSave} /> Save
       </button>
       <button
@@ -61,12 +59,16 @@ function SettingsTab() {
       <button
         className="btn"
         onClick={() => {
-          fetchAPI("/track", undefined, "POST")
-            .then(() => {
-              toast.success("Scanning complete");
-              c.onRescanned();
-            })
-            .catch(() => toast.error("Sync failed"));
+          if (nativeScanTracks) {
+            nativeScanTracks();
+          } else {
+            fetchAPI("/track", undefined, "POST")
+              .then(() => {
+                toast.success("Scanning complete");
+                c.onRescanned();
+              })
+              .catch(() => toast.error("Sync failed"));
+          }
         }}
       >
         <FontAwesomeIcon icon={faRotate} /> Rescan Music
