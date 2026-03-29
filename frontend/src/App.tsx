@@ -76,8 +76,8 @@ export function App() {
 
   c.onRescanned = () => {
     fetchAPI("/track")
-      .then((data) => setFullTracksFromData(data))
-      .catch(() => setFullTracksFromData([]));
+      .then((data) => setFullTracks(data))
+      .catch(() => setFullTracks([]));
   };
   useEffect(() => c.onRescanned(), []);
 
@@ -120,7 +120,7 @@ export function App() {
     }
     fetchAPI("/track", { q: c.searchQuery })
       .then((data) => {
-        setFullTracksFromData(data);
+        setFullTracks(data);
         if (data === null || data.length === 0) {
           if (!didSetToPreviousWorkingValue.current) {
             didSetToPreviousWorkingValue.current = true;
@@ -132,7 +132,7 @@ export function App() {
         }
       })
       .catch(() => {
-        setFullTracksFromData([]);
+        setFullTracks([]);
         if (!didSetToPreviousWorkingValue.current) {
           didSetToPreviousWorkingValue.current = true;
           c.setSearchQuery(c.previousWorkingValue.current);
@@ -210,14 +210,6 @@ export function App() {
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
-
-  const setFullTracksFromData = (data: any) => {
-    if (data === null || data.length === 0) {
-      toast.warn("No tracks found");
-    } else {
-      setFullTracks(data);
-    }
-  };
 
   // Track queue
   [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
