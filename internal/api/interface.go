@@ -184,43 +184,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
-	} else if path == "/progress" {
-		if method != "GET" {
-			return nil, "", errors.New("method not allowed")
-		}
-		data, err := i.GetProgress()
-		if err != nil {
-			return nil, "", err
-		}
-		return &byteHandler{b: data}, "text/json", nil
-	} else if path == "/progress/:events" {
-		if method != "GET" {
-			return nil, "", errors.New("method not allowed")
-		}
-		return streamEvents(i, i.prog.ListenEvents(), i.prog.UnlistenEvents)
-	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
-		if method != "GET" {
-			return nil, "", errors.New("method not allowed")
-		}
-		if id, ok = strings.CutSuffix(id, "/events"); ok {
-			t, ok := i.prog.GetTicker(id)
-			if !ok {
-				return nil, "", errors.New("ticker not found")
-			}
-			return streamEvents(i, t.ListenEvents(), t.UnlistenEvents)
-		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
-			t, ok := i.prog.GetTicker(id)
-			if !ok {
-				return nil, "", errors.New("ticker not found")
-			}
-			response = t.GetOutput()
-		} else {
-			data, err := i.GetProgress()
-			if err != nil {
-				return nil, "", err
-			}
-			return &byteHandler{b: data}, "text/json", nil
-		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
 			if method == "POST" {
@@ -290,6 +253,43 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return &byteHandler{b: data}, mimeType, nil
 		} else {
 			response, err = i.GetTrackById(id)
+		}
+	} else if path == "/progress" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		data, err := i.GetProgress()
+		if err != nil {
+			return nil, "", err
+		}
+		return &byteHandler{b: data}, "text/json", nil
+	} else if path == "/progress/:events" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		return streamEvents(i, i.prog.ListenEvents(), i.prog.UnlistenEvents)
+	} else if id, ok := strings.CutPrefix(path, "/progress/"); ok {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		if id, ok = strings.CutSuffix(id, "/events"); ok {
+			t, ok := i.prog.GetTicker(id)
+			if !ok {
+				return nil, "", errors.New("ticker not found")
+			}
+			return streamEvents(i, t.ListenEvents(), t.UnlistenEvents)
+		} else if id, ok = strings.CutSuffix(id, "/output"); ok {
+			t, ok := i.prog.GetTicker(id)
+			if !ok {
+				return nil, "", errors.New("ticker not found")
+			}
+			response = t.GetOutput()
+		} else {
+			data, err := i.GetProgress()
+			if err != nil {
+				return nil, "", err
+			}
+			return &byteHandler{b: data}, "text/json", nil
 		}
 	} else if path == "/album" {
 		if method != "GET" {
