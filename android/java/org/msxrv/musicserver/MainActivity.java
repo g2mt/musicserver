@@ -18,6 +18,8 @@ import android.webkit.WebView;
 import android.webkit.WebSettings;
 import android.webkit.WebMessage;
 import android.util.Base64;
+import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
 	private WebView webView;
@@ -121,46 +123,63 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		requestPermissions();
+		requestAllPermissions();
 	}
 
-	private void requestPermissions() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			if (checkSelfPermission(android.Manifest.permission.READ_MEDIA_AUDIO)
-					!= PackageManager.PERMISSION_GRANTED) {
-				requestPermissions(
-					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
-					1);
-			} else {
-				loadWebView();
-			}
-		} else {
-			if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
-					!= PackageManager.PERMISSION_GRANTED) {
-				requestPermissions(
-					new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
-					1);
-			} else {
-				loadWebView();
-			}
-		}
+	// Permissions
 
+	public class RequestPermissionResult {
+			public int requestCode;
+			public String[] permissions;
+			public int[] grantResults;
+
+			public RequestPermissionResult(
+					int requestCode,
+					String[] permissions,
+					int[] grantResults
+			) {
+					this.requestCode = requestCode;
+					this.permissions = permissions;
+					this.grantResults = grantResults;
+			}
+	}
+
+	private ArrayList<Consumer<RequestPermissionResult>> enqueuedPermissionRequests = new ArrayList<>();
+	private void addPermissionRequest(Consumer<RequestPermissionResult> c) {
+		enqueuedPermissionRequests.add(c);
+	}
+
+	private void requestAllPermissions() {
 		requestPermissions(
-			new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
-			2);
+			new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
+			0);
+		addPermissionRequest(result -> {
+			requestPermissions(
+				new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
+				0);
+		});
 	}
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 		super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-		if (requestCode == 1) {
-			loadWebView();
+		if (requestCode != 0) {
+			throw new Error("Unexpected requestCode=" + requestCode);
+		}
+		if (enqueuedPermissionRequests.size() > 0) {
+			Consumer<RequestPermissionResult> c = enqueuedPermissionRequests.get(0);
+			c.accept(new RequestPermissionResult(requestCode, permissions, grantResults));
+			enqueuedPermissionRequests.remove(0);
 		}
 	}
+
+	// Web view
 
 	private void loadWebView() {
 		webView.loadUrl("file:///android_asset/index.html");
 	}
+
+	// Dialogs
 
 	private void showErrorDialog(String message) {
 		new AlertDialog.Builder(this)
