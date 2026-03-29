@@ -1,5 +1,8 @@
 package org.msxrv.musicserver;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -25,6 +28,8 @@ public class NativeAudioBridge {
 	private WebMessagePort messagePort;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 	private MediaSession mediaSession;
+	private static final String NOTIFICATION_CHANNEL_ID = "playback";
+	private static final int NOTIFICATION_ID = 1;
 
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
@@ -35,6 +40,13 @@ public class NativeAudioBridge {
 
 		mediaSession = new MediaSession(activity, "NativeAudioBridge");
 		mediaSession.setActive(true);
+
+		NotificationChannel channel = new NotificationChannel(
+			NOTIFICATION_CHANNEL_ID,
+			"Playback",
+			NotificationManager.IMPORTANCE_LOW);
+		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.createNotificationChannel(channel);
 	}
 
 	public void setMessagePort(WebMessagePort port) {
@@ -166,6 +178,27 @@ public class NativeAudioBridge {
 			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE)
 			.build();
 		mediaSession.setPlaybackState(state);
+
+		showNotification(title, artist, coverBitmap);
+	}
+
+	private void showNotification(String title, String artist, Bitmap cover) {
+		Notification.MediaStyle style = new Notification.MediaStyle()
+			.setMediaSession(mediaSession.getSessionToken());
+
+		Notification.Builder builder = new Notification.Builder(activity, NOTIFICATION_CHANNEL_ID)
+			.setStyle(style)
+			.setContentTitle(title)
+			.setContentText(artist)
+			.setSmallIcon(android.R.drawable.ic_media_play)
+			.setOngoing(true);
+
+		if (cover != null) {
+			builder.setLargeIcon(cover);
+		}
+
+		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.notify(NOTIFICATION_ID, builder.build());
 	}
 
 	@JavascriptInterface
