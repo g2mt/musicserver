@@ -30,15 +30,8 @@ public class NativeBridge {
 
 		JSONObject configJson = new JSONObject();
 		try {
-			String musicDir = android.os.Environment.getExternalStoragePublicDirectory(
-				android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
-			Log.e("[msxrv] Native", "Setting musicDir = " + musicDir);
-			configJson.put("data_path", musicDir);
-
-			String dbDir = activity.getExternalFilesDir(
-				android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
-			Log.e("[msxrv] Native", "Setting dbDir = " + dbDir);
-			configJson.put("db_dir", dbDir);
+			configJson.put("data_path", activity.getMusicDir());
+			configJson.put("db_dir", activity.getDbDir());
 		} catch (JSONException e) {
 			throw new NativeBridgeException("Failed to create config JSON: " + e.toString());
 		}

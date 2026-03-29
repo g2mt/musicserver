@@ -21,6 +21,8 @@ import android.webkit.WebMessage;
 public class MainActivity extends Activity {
 	private WebView webView;
 	private NativeAudioBridge nativeAudioBridge;
+	private String musicDir;
+	private String dbDir;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,14 @@ public class MainActivity extends Activity {
 		}
 
 		setContentView(R.layout.activity_main);
+
+		musicDir = android.os.Environment.getExternalStoragePublicDirectory(
+			android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
+		Log.e("[msxrv] Native", "Setting musicDir = " + musicDir);
+
+		dbDir = getExternalFilesDir(
+			android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+		Log.e("[msxrv] Native", "Setting dbDir = " + dbDir);
 
 		webView = (WebView)findViewById(R.id.webview);
 		WebSettings webSettings = webView.getSettings();
@@ -111,5 +121,13 @@ public class MainActivity extends Activity {
 			})
 			.setNegativeButton(android.R.string.no, null)
 			.show();
+	}
+
+	public String getMusicDir() {
+		return musicDir;
+	}
+
+	public String getDbDir() {
+		return dbDir;
 	}
 }
