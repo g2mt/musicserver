@@ -166,8 +166,8 @@ public class NativeBridge {
 
 	@JavascriptInterface
 	public void scanTracks() {
-		ScanNotificationPoller.start(activity, this);
 		msrvStartScanTracks(interfaceHandle);
+		new ScanNotificationPoller(activity, this);
 	}
 
 	@JavascriptInterface
