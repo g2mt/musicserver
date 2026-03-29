@@ -283,6 +283,12 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			}
 			return &byteHandler{b: data}, "text/json", nil
 		}
+	} else if path == "/props" {
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+
+		response = i.GetProps()
 	} else if path == "/album" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -337,6 +343,8 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	}
 	return &byteHandler{b: data}, "text/json", nil
 }
+
+const Version = "dev"
 
 func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
 	buf := &bytes.Buffer{}
