@@ -7,7 +7,6 @@ import android.webkit.JavascriptInterface;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.Iterator;
 import dalvik.annotation.optimization.FastNative;
 
@@ -122,6 +121,26 @@ public class NativeBridge {
 	 */
 	private native void msrvDeleteHandle(long handle);
 
+	/**
+	 * Returns the current scan ticker state.
+	 *
+	 * @param ifaceHandle the interface handle
+	 * @return a ScanTickerValues object
+	 */
+	private native ScanTickerValues msrvGetScanTickerValues(long ifaceHandle);
+
+	public static class ScanTickerValues {
+		public final boolean present;
+		public final int value;
+		public final int maxValue;
+
+		public ScanTickerValues(boolean present, int value, int maxValue) {
+			this.present = present;
+			this.value = value;
+			this.maxValue = maxValue;
+		}
+	}
+
 	public byte[] getTrackCover(String id, String[] outContentType) {
 		String[] contentType = new String[1];
 		long readerHandle = msrvGetTrackCover(interfaceHandle, id, contentType);
@@ -132,6 +151,17 @@ public class NativeBridge {
 
 		msrvDeleteHandle(readerHandle);
 		return data != null ? data : new byte[0];
+	}
+
+	public ScanTickerValues getScanTickerValues() {
+		return msrvGetScanTickerValues(interfaceHandle);
+	}
+
+	@JavascriptInterface
+	public void scanTracks() {
+		ScanNotificationPoller.start(activity, this);
+		// Fire-and-forget the scan via the API
+		new Thread(() -> fetchAPI("/track", "POST", "{}")).start();
 	}
 
 	@JavascriptInterface
