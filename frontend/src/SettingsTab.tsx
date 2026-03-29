@@ -67,7 +67,11 @@ function SettingsTab() {
         <FontAwesomeIcon icon={faRotate} /> Rescan Music
       </button>
       <hr />
-      <h2>Ongoing tasks</h2>
+
+      <h2>Server properties</h2>
+      <hr />
+
+      <h2>Ongoing processes</h2>
       <ProgressTable />
     </div>
   );
