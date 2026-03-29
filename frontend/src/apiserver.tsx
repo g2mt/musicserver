@@ -15,10 +15,11 @@ declare global {
   }
 }
 
+export function getTrackCoverFromPath(path: string) {
+  return `track-cover://${path}`;
+}
+
 export function getTrackCoverFromId(id: string) {
-  if (window._native) {
-    return `track-cover://${id}`;
-  }
   return `${HOST}/track/${id}/cover`;
 }
 
