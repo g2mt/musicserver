@@ -20,6 +20,7 @@ function useAudio(url: string | null) {
 
   useEffect(() => {
     if (!url) return;
+    console.log(`Playing ${url}`);
     audio.src = url;
     audio.currentTime = 0;
     audio.play();
@@ -78,7 +79,7 @@ export function MusicPlayer() {
       if (c.currentTrack.id)
         return getTrackCoverFromId(c.currentTrack.id);
       if (c.currentTrack.path)
-        return getFilePath(c.currentTrack.id);
+        return getFilePath(c.currentTrack.path);
       return null;
     })(),
   );
