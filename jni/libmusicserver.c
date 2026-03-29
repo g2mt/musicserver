@@ -70,28 +70,25 @@ Java_org_msxrv_musicserver_NativeBridge_msrvHandleRequest(
 	return (jlong)result.ReaderHandle;
 }
 
-JNIEXPORT jint JNICALL
-Java_org_msxrv_musicserver_NativeBridge_msrvRead(
+JNIEXPORT jbyteArray JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvReadAll(
 	JNIEnv *env, jobject obj,
 	jlong readerHandle,
-	jbyteArray buf,
 	jobjectArray outErr)
 {
-	jsize bufLen = (*env)->GetArrayLength(env, buf);
-	char *cBuf = (char *)(*env)->GetPrimitiveArrayCritical(env, buf, NULL);
-
-	MsrvReadResult result = MsrvRead((uintptr_t)readerHandle, cBuf, (int)bufLen);
-
-	(*env)->ReleasePrimitiveArrayCritical(env, buf, cBuf, 0);
+	MsrvReadAllResult result = MsrvReadAll((uintptr_t)readerHandle);
 
 	if (result.Err != NULL) {
 		jstring errStr = (*env)->NewStringUTF(env, result.Err);
 		(*env)->SetObjectArrayElement(env, outErr, 0, errStr);
 		free(result.Err);
-		return result.N;
+		return NULL;
 	}
 
-	return result.N;
+	jbyteArray jBuf = (*env)->NewByteArray(env, result.N);
+	(*env)->SetByteArrayRegion(env, jBuf, 0, result.N, (jbyte *)result.Data);
+	free(result.Data);
+	return jBuf;
 }
 
 JNIEXPORT jlong JNICALL
