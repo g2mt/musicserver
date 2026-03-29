@@ -158,6 +158,9 @@ public class MainActivity extends Activity {
 				new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
 				0);
 		});
+		addPermissionRequest(result -> {
+			loadWebView();
+		});
 	}
 
 	@Override
