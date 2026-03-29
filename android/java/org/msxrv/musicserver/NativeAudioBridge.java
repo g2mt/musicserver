@@ -44,6 +44,10 @@ public class NativeAudioBridge {
 		return instanceId == currentInstanceId;
 	}
 
+	private MusicServerApp getApp() {
+		return (MusicServerApp) activity.getApplication();
+	}
+
 	public NativeAudioBridge(MainActivity activity, WebView webView) {
 		this.activity = activity;
 		this.webView = webView;
@@ -101,7 +105,7 @@ public class NativeAudioBridge {
 			e.printStackTrace();
 		}
 
-		NativeBridge bridge = activity.getNativeBridge();
+		NativeBridge bridge = getApp().getNativeBridge();
 
 		NativeBridge.TrackMetadata metadata = bridge.getTrackMetadata(filepath);
 		String title  = (metadata != null && metadata.title  != null) ? metadata.title  : "";
