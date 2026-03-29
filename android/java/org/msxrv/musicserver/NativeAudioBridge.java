@@ -141,8 +141,11 @@ public class NativeAudioBridge {
 
 	// Update functions
 
-	private void updatePlaybackState(int state, long position) {
-		float speed = (state == PlaybackState.STATE_PLAYING) ? 1.0f : 0.0f;
+	private void updatePlaybackState() {
+		boolean playing = mediaPlayer != null && mediaPlayer.isPlaying();
+		int state = playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED;
+		long position = mediaPlayer != null ? mediaPlayer.getCurrentPosition() : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
+		float speed = playing ? 1.0f : 0.0f;
 		playbackState = new PlaybackState.Builder()
 			.setState(state, position, speed)
 			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
@@ -158,7 +161,7 @@ public class NativeAudioBridge {
 			public void run() {
 				if (!isActive(instanceId)) return;
 				if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-					updatePlaybackState(PlaybackState.STATE_PLAYING, mediaPlayer.getCurrentPosition());
+					updatePlaybackState();
 					fireEvent(instanceId, "timeupdate");
 					mainHandler.postDelayed(this, 250);
 				}
@@ -221,13 +224,18 @@ public class NativeAudioBridge {
 			return true;
 		});
 
-		// Fire timeupdate periodically while playing
 		mediaPlayer.setOnPreparedListener(mp -> {
+			MediaMetadata current = mediaSession.getController().getMetadata();
+			if (current != null) {
+				mediaSession.setMetadata(new MediaMetadata.Builder(current)
+					.putLong(MediaMetadata.METADATA_KEY_DURATION, mp.getDuration())
+					.build());
+			}
 			fireEvent(instanceId, "canplay");
 		});
 
 		mediaPlayer.setOnCompletionListener(mp -> {
-			updatePlaybackState(PlaybackState.STATE_STOPPED, PlaybackState.PLAYBACK_POSITION_UNKNOWN);
+			updatePlaybackState();
 			fireEvent(instanceId, "ended");
 		});
 
@@ -271,7 +279,7 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		Log.d("[msxrv] NativeAudioBridge", "play");
 		mediaPlayer.start();
-		updatePlaybackState(PlaybackState.STATE_PLAYING, mediaPlayer.getCurrentPosition());
+		updatePlaybackState();
 		scheduleTimeUpdates(instanceId);
 	}
 
@@ -280,7 +288,7 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		if (mediaPlayer.isPlaying()) {
 			mediaPlayer.pause();
-			updatePlaybackState(PlaybackState.STATE_PAUSED, mediaPlayer.getCurrentPosition());
+			updatePlaybackState();
 		}
 	}
 
