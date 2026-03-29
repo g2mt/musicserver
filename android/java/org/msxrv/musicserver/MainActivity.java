@@ -27,14 +27,19 @@ public class MainActivity extends Activity {
 		return webView;
 	}
 
-	private NativeAudioBridge nativeAudioBridge;
-	private String musicDir;
-	private String dbDir;
+	private NativeBridge nativeBridge;
+	public NativeBridge getNativeBridge() {
+		return nativeBridge;
+	}
 
+	private NativeAudioBridge nativeAudioBridge;
+
+	private String musicDir;
 	public String getMusicDir() {
 		return musicDir;
 	}
 
+	private String dbDir;
 	public String getDbDir() {
 		return dbDir;
 	}
@@ -72,7 +77,6 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		NativeBridge nativeBridge;
 		try {
 			nativeBridge = new NativeBridge(this);
 			webView.addJavascriptInterface(nativeBridge, "_native");
