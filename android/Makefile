@@ -5,6 +5,7 @@
 PKG_NAME = org.msxrv.musicserver
 PKG_PATH = $(subst .,/,$(PKG_NAME))
 PKG_SRCS = $(wildcard java/$(PKG_PATH)/*.java)
+AN_TARGET = x86_64
 
 .PHONY: all | init_build
 all: build/$(PKG_NAME).unsigned.apk
@@ -27,7 +28,7 @@ build_apk_stage0:
 .PHONY: build/$(PKG_NAME).apk
 build/$(PKG_NAME).apk: $(PKG_SRCS) \
 		AndroidManifest.xml \
-		build/apk/lib/x86_64 \
+		$(foreach arch,$(AN_TARGET),build/apk/lib/$(arch)) \
 		build/keystore.jks
 	$(AN_BUILD_TOOLS)/aapt2 compile --dir res -o build/res.zip
 	$(AN_BUILD_TOOLS)/aapt2 link build/res.zip \
