@@ -207,14 +207,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			path = filepath.Clean(path)
 			fullPath := filepath.Join(i.config.DataPath, path)
 
-			relPath, err := filepath.Rel(i.config.DataPath, fullPath)
-			if err != nil {
-				return nil, "", err
-			}
-			if strings.HasPrefix(relPath, "..") {
-				return nil, "", errors.New("unexpected path outside of data directory")
-			}
-
 			id, err = i.resolveTrackFromPath(fullPath, nil)
 			if err != nil {
 				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
