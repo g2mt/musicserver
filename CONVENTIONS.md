@@ -53,3 +53,4 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 ### Android
 
 - This application uses API 33 functionality.
+- Use ONLY the native Java `android` library. Libraries like `androidx`, etc. are unavailable.
