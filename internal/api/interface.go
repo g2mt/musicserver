@@ -220,7 +220,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
 					track := schema.Track{
 						Name: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
-						Path: relPath,
+						Path: fullPath,
 					}
 					data, err := json.Marshal(track)
 					if err != nil {
