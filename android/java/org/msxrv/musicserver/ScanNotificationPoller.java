@@ -16,13 +16,22 @@ public class ScanNotificationPoller {
 	private static final int NOTIFICATION_ID = 1;
 	private static final long POLL_INTERVAL_MS = 1000;
 
+	public interface OnScanCompleteListener {
+		void onScanComplete();
+	}
+
 	private final Activity activity;
 	private final NativeBridge bridge;
+	private OnScanCompleteListener onScanCompleteListener;
 	private final NotificationManager notificationManager;
 	private final Handler handler;
 	private final Runnable pollRunnable;
 
 	private static final int PERMISSION_REQUEST_CODE = 1001;
+
+	public void setOnScanCompleteListener(OnScanCompleteListener listener) {
+		this.onScanCompleteListener = listener;
+	}
 
 	public ScanNotificationPoller(Activity activity, NativeBridge bridge) {
 		this.activity = activity;
@@ -45,6 +54,9 @@ public class ScanNotificationPoller {
 					if (wasScanning) {
 						postOneTimeNotification("Scan complete", "Music library scan has finished.");
 						wasScanning = false;
+						if (onScanCompleteListener != null) {
+							onScanCompleteListener.onScanComplete();
+						}
 					}
 					notificationManager.cancel(NOTIFICATION_ID);
 					return;

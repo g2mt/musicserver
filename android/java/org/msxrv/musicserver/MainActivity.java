@@ -80,6 +80,10 @@ public class MainActivity extends Activity {
 		}
 		final NativeBridge finalNativeBridge = nativeBridge;
 
+		nativeBridge.setScanCompleteListener(() ->
+			webView.post(() ->
+				webView.evaluateJavascript("window._refreshSearch()", null)));
+
 		nativeAudioBridge = new NativeAudioBridge(this);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 
