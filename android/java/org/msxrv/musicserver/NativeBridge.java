@@ -166,6 +166,7 @@ public class NativeBridge {
 
 	@JavascriptInterface
 	public void scanTracks() {
+		Log.d("[msxrv] Native", "scanTracks called");
 		msrvStartScanTracks(interfaceHandle);
 		new ScanNotificationPoller(activity, this);
 	}

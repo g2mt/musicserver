@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 public class ScanNotificationPoller {
 	private static final String CHANNEL_ID = "msxrv_scan";
@@ -27,31 +28,18 @@ public class ScanNotificationPoller {
 		this.activity = activity;
 		this.bridge = bridge;
 
-		if (activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
-				!= PackageManager.PERMISSION_GRANTED) {
-			activity.requestPermissions(
-				new String[]{Manifest.permission.POST_NOTIFICATIONS},
-				PERMISSION_REQUEST_CODE
-			);
-		}
+		Log.d("[msxrv] ScanTickerValues", "starting ScanNotificationPoller");
 
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.handler = new Handler(Looper.getMainLooper());
-
-		NotificationChannel channel = new NotificationChannel(
-			CHANNEL_ID,
-			"Music Scan",
-			NotificationManager.IMPORTANCE_LOW
-		);
-		channel.setDescription("Shows progress while scanning for music");
-		notificationManager.createNotificationChannel(channel);
 
 		pollRunnable = new Runnable() {
 			private boolean wasScanning = false;
 
 			@Override
 			public void run() {
+				Log.d("[msxrv] ScanTickerValues", "polling ticker values");
 				NativeBridge.ScanTickerValues vals = bridge.getScanTickerValues();
 				if (!vals.present) {
 					if (wasScanning) {
@@ -70,6 +58,18 @@ public class ScanNotificationPoller {
 			}
 		};
 		handler.post(pollRunnable);
+	}
+
+	public static void createNotificationChannel(Activity activity) {
+		NotificationManager notificationManager =
+			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationChannel channel = new NotificationChannel(
+			CHANNEL_ID,
+			"Music Scan",
+			NotificationManager.IMPORTANCE_DEFAULT
+		);
+		channel.setDescription("Shows progress while scanning for music");
+		notificationManager.createNotificationChannel(channel);
 	}
 
 	private void postOneTimeNotification(String title, String text) {

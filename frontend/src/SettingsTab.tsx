@@ -59,7 +59,7 @@ function SettingsTab() {
       <button
         className="btn"
         onClick={() => {
-          if (nativeScanTracks) {
+          if (nativeScanTracks !== null) {
             nativeScanTracks();
           } else {
             fetchAPI("/track", undefined, "POST")
