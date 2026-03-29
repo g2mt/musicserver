@@ -16,6 +16,14 @@ import { apiAudio, useAbsoluteAudioPath } from "./apiaudio";
 
 import "./MusicPlayer.css";
 
+declare global {
+  interface Window {
+    _setIsPlaying?: (_: boolean) => void;
+    _handleBack?: () => void;
+    _handleForward?: () => void;
+  }
+}
+
 function useAudio(url: string | null) {
   const audio = useMemo(() => new apiAudio(), []);
 
@@ -161,28 +169,41 @@ export function MusicPlayer() {
 
   // Media info
 
+  if ("mediaSession" in navigator) {
+    useEffect(() => {
+      if (c.currentTrack) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: c.currentTrack.name,
+          artist: c.currentTrack.artist,
+          album: c.currentTrack.album,
+          artwork: [{ src: getTrackCover(c.currentTrack) }],
+        });
+
+        navigator.mediaSession.setActionHandler("play", () =>
+          c.setIsPlaying(true),
+        );
+        navigator.mediaSession.setActionHandler("pause", () =>
+          c.setIsPlaying(false),
+        );
+        navigator.mediaSession.setActionHandler("previoustrack", handleBack);
+        navigator.mediaSession.setActionHandler("nexttrack", handleForward);
+        navigator.mediaSession.setActionHandler("stop", null);
+      }
+
+      document.title = c.currentTrack?.name ?? "Music Player";
+    }, [c.currentTrack]);
+  }
+
   useEffect(() => {
-    if ("mediaSession" in navigator && c.currentTrack) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: c.currentTrack.name,
-        artist: c.currentTrack.artist,
-        album: c.currentTrack.album,
-        artwork: [{ src: getTrackCover(c.currentTrack) }],
-      });
-
-      navigator.mediaSession.setActionHandler("play", () =>
-        c.setIsPlaying(true),
-      );
-      navigator.mediaSession.setActionHandler("pause", () =>
-        c.setIsPlaying(false),
-      );
-      navigator.mediaSession.setActionHandler("previoustrack", handleBack);
-      navigator.mediaSession.setActionHandler("nexttrack", handleForward);
-      navigator.mediaSession.setActionHandler("stop", null);
-    }
-
-    document.title = c.currentTrack?.name ?? "Music Player";
-  }, [c.currentTrack]);
+    window._setIsPlaying = c.setIsPlaying;
+    window._handleBack = handleBack;
+    window._handleForward = handleForward;
+    return () => {
+      window._setIsPlaying = undefined;
+      window._handleBack = undefined;
+      window._handleForward = undefined;
+    };
+  }, []);
 
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;

@@ -140,7 +140,10 @@ export function App() {
         setHashParam("q", c.searchQuery);
       });
   };
-  window._refreshSearch = c.refreshSearch;
+  useEffect(() => {
+    window._refreshSearch = c.refreshSearch;
+    return () => { window._refreshSearch = undefined; };
+  }, []);
   useEffect(c.refreshSearch, [c.searchQuery]);
 
   // Confirm boxes
