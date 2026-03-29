@@ -19,7 +19,7 @@ public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
 
-	public NativeBridge(Activity activity) throws NativeBridgeException {
+	public NativeBridge(MainActivity activity) throws NativeBridgeException {
 		this.activity = activity;
 
 		String id = msrvIdentify();
