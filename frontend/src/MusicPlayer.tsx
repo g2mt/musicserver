@@ -77,8 +77,9 @@ export function MusicPlayer() {
   const audio = useAudio(
     (() => {
       if (!c.currentTrack) return null;
-      // HACK: the audio path cannot be cleanly obtained by the Android audio bridge,
-      // so use the absolute path directly. the path is checked in NativeAudioBridge
+      // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
+      // without adding additional functions, so use the absolute path directly.
+      // the path is checked in NativeAudioBridge
       if (useAbsoluteAudioPath) return `file://${c.currentTrack.path}`;
       if (c.currentTrack.id) return getTrackFileFromId(c.currentTrack.id);
       if (c.currentTrack.path) return getFilePath(c.currentTrack.path);
