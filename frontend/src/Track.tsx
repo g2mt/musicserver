@@ -44,11 +44,11 @@ export function Track({
             <>
               <ContextMenuItem
                 icon={faCopy}
-                onClick={() =>
+                onClick={() => {
                   navigator.clipboard.writeText(
                     `${track.name} - ${track.artist}`,
-                  )
-                }
+                  );
+                }}
               >
                 Copy info
               </ContextMenuItem>
