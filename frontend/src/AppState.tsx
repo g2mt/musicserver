@@ -9,6 +9,16 @@ import type React from "react";
 import { toast } from "react-toastify";
 import { TrackDataSchema, type TrackData } from "./TrackData";
 
+declare global {
+  interface NativeSettings {
+    getItem(key: string): string;
+    setItem(key: string, value: string): void;
+  }
+  interface Window {
+    _native_settings?: NativeSettings;
+  }
+}
+
 export const AppStateSchema = z.object({
   currentTrack: TrackDataSchema.nullable().default(null),
   isPlaying: z.boolean().default(false),
@@ -51,7 +61,7 @@ export const AppContext = createContext<AppState | null>(null);
 const CONFIG_KEY = "_config";
 
 export function mergeConfig(dest: AppState) {
-  const saved = localStorage.getItem(CONFIG_KEY);
+  const saved = (window._native_settings ?? localStorage).getItem(CONFIG_KEY);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
@@ -95,5 +105,5 @@ export function saveConfig(state: AppState) {
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,
   };
-  localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+  (window._native_settings ?? localStorage).setItem(CONFIG_KEY, JSON.stringify(config));
 }
