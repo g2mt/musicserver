@@ -29,12 +29,21 @@ build_apk_stage0:
 	@mkdir -vp build/{gen,obj,apk}
 	@rm -rf build/apk/lib
 
-.PHONY: build/$(PKG_NAME).apk
-build/$(PKG_NAME).apk: $(PKG_SRCS) \
-		AndroidManifest.xml \
-		$(foreach arch,$(AN_TARGET),build/apk/lib/$(arch)) \
-		build/keystore.jks
+APK_DEPS = $(PKG_SRCS) AndroidManifest.xml build/keystore.jks build_apk_frontend
+ifeq ($(strip $(APK_SKIP_DLL)),)
+APK_DEPS += $(foreach arch,$(AN_TARGET),build/apk/lib/$(arch))
+endif
+
+.PHONY: build_apk_frontend
+ifeq ($(strip $(APK_SKIP_FRONTEND)),)
+build_apk_frontend:
 	cd ../frontend && npm run build-android
+else
+build_apk_frontend:
+endif
+
+.PHONY: build/$(PKG_NAME).apk
+build/$(PKG_NAME).apk: $(APK_DEPS)
 	$(AN_BUILD_TOOLS)/aapt2 compile --dir res -o build/res.zip
 	$(AN_BUILD_TOOLS)/aapt2 link build/res.zip \
 		-I $(AN_PLATFORM)/android.jar \
