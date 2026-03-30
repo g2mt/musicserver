@@ -36,6 +36,7 @@ public class NativeBridge {
 		try {
 			configJson.put("data_path", activity.getMusicDir());
 			configJson.put("db_dir", activity.getDbDir());
+			configJson.put("cache_db_enabled", false);
 		} catch (JSONException e) {
 			throw new NativeBridgeException("Failed to create config JSON: " + e.toString());
 		}
