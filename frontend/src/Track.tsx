@@ -1,6 +1,12 @@
 import { useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faMinus, faCopy, faCompactDisc, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlus,
+  faMinus,
+  faCopy,
+  faCompactDisc,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiserver";
 import { AppContext } from "./AppState";
 import { showContextMenu, ContextMenuItem } from "./ContextMenu";

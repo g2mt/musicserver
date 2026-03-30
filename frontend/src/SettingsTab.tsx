@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState } from "react";
 import { fetchAPI, nativeScanTracks } from "./apiserver";
 import { toast } from "react-toastify";
 import {
@@ -115,7 +115,11 @@ export function SettingsTab() {
           </div>
           <div>
             <label>Media Downloader:</label>
-            <input type="text" readOnly value={c.props.config.media_downloader} />
+            <input
+              type="text"
+              readOnly
+              value={c.props.config.media_downloader}
+            />
           </div>
         </form>
       )}
