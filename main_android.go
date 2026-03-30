@@ -38,6 +38,11 @@ typedef struct MsrvScanTickerValuesResult {
 	int Value;
 	int MaxValue;
 } MsrvScanTickerValuesResult;
+
+typedef struct MsrvLoadTrackByPathResult {
+	char *ShortId;
+	char *Err;
+} MsrvLoadTrackByPathResult;
 */
 import "C"
 
@@ -46,6 +51,7 @@ import (
 	"io"
 	"musicserver/internal/api"
 	"musicserver/internal/schema"
+	"musicserver/internal/taglib"
 	"runtime/cgo"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -135,6 +141,25 @@ func MsrvReadAll(readerHandle C.uintptr_t) C.struct_MsrvReadAllResult {
 
 	cData := C.CBytes(data)
 	return C.struct_MsrvReadAllResult{Data: (*C.char)(cData), N: C.int(len(data)), Err: nil}
+}
+
+// MsrvLoadTrackByPath loads a track from the given path and adds it to the interface.
+//
+//export MsrvLoadTrackByPath
+func MsrvLoadTrackByPath(ifaceHandle C.uintptr_t, path *C.char) C.struct_MsrvLoadTrackByPathResult {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+
+	track, err := taglib.LoadTrack(C.GoString(path))
+	if err != nil {
+		return C.struct_MsrvLoadTrackByPathResult{ShortId: nil, Err: C.CString(err.Error())}
+	}
+
+	shortId, err := iface.AddTrack(&track)
+	if err != nil {
+		return C.struct_MsrvLoadTrackByPathResult{ShortId: nil, Err: C.CString(err.Error())}
+	}
+
+	return C.struct_MsrvLoadTrackByPathResult{ShortId: C.CString(shortId), Err: nil}
 }
 
 type byteReader struct {

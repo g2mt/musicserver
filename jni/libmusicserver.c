@@ -82,3 +82,25 @@ JNIEXPORT void JNICALL Java_org_msxrv_musicserver_NativeBridge_msrvDeleteHandle(
   MsrvDeleteHandle((uintptr_t)handle);
 }
 
+JNIEXPORT jstring JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvLoadTrackByPath(
+    JNIEnv *env, jobject obj, jlong ifaceHandle, jstring path,
+    jobjectArray outErr) {
+  const char *cPath = (*env)->GetStringUTFChars(env, path, NULL);
+
+  MsrvLoadTrackByPathResult result =
+      MsrvLoadTrackByPath((uintptr_t)ifaceHandle, (char *)cPath);
+
+  (*env)->ReleaseStringUTFChars(env, path, cPath);
+
+  if (result.Err != NULL) {
+    jstring errStr = (*env)->NewStringUTF(env, result.Err);
+    (*env)->SetObjectArrayElement(env, outErr, 0, errStr);
+    free(result.Err);
+    return NULL;
+  }
+
+  jstring shortIdStr = (*env)->NewStringUTF(env, result.ShortId);
+  free(result.ShortId);
+  return shortIdStr;
+}

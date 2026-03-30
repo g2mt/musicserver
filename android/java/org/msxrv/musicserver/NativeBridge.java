@@ -108,6 +108,16 @@ public class NativeBridge {
 	 */
 	private native void msrvDeleteHandle(long handle);
 
+	/**
+	 * Loads a track from the given path and adds it to the library.
+	 *
+	 * @param ifaceHandle the interface handle
+	 * @param path        the absolute path to the track file
+	 * @param outErr      output array to store error message if any
+	 * @return the short ID of the added track, or null on error
+	 */
+	private native String msrvLoadTrackByPath(long ifaceHandle, String path, String[] outErr);
+
 	private String decodeURI(String encodedURI) {
 		if (encodedURI == null) {
 			return null;
@@ -200,6 +210,21 @@ public class NativeBridge {
 	@JavascriptInterface
 	public void scanTracks() {
 		// TODO
+	}
+
+	@JavascriptInterface
+	public String loadTrackByPath(String path) {
+		Log.d("[msxrv] Native", "loadTrackByPath path=" + path);
+
+		String[] outErr = new String[1];
+		String shortId = msrvLoadTrackByPath(interfaceHandle, path, outErr);
+
+		if (outErr[0] != null) {
+			Log.e("[msxrv] Native", "loadTrackByPath failed: " + outErr[0]);
+			return null;
+		}
+
+		return shortId;
 	}
 
 	@JavascriptInterface
