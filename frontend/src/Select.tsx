@@ -7,7 +7,7 @@ type OptionProps = {
   children: React.ReactNode;
 };
 
-export function Option({ value, onClick, children }: OptionProps) {
+export function Option({ onClick, children }: OptionProps) {
   return (
     <ContextMenuItem onClick={onClick}>
       {children}
@@ -50,11 +50,10 @@ type SelectProps = {
 };
 
 export function Select({ value, onChange, children }: SelectProps) {
-  const selectRef = useRef<HTMLDivElement>(null);
+  const selectRef = useRef<HTMLButtonElement|null>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
-    const target = e.currentTarget;
-    showContextMenu(target, <SelectMenu value={value} onChange={(val) => {
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
+    showContextMenu(e.currentTarget, <SelectMenu value={value} onChange={(val) => {
       const syntheticEvent = {
         target: { value: String(val) },
         preventDefault: () => {},
