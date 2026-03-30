@@ -11,8 +11,8 @@ import {
   faMusic,
   faGear,
   faFolder,
-  faArrowDown,
-  faArrowUp,
+  faPlus,
+  faMinus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
@@ -55,10 +55,23 @@ export function App() {
     document.body.classList.toggle("dark-mode", c.darkMode);
   }, [c.darkMode]);
 
+  // Config
+
   useEffect(() => {
     fetchAPI("/props")
       .then(c.setProps)
       .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    function onBeforeUnload() {
+      saveConfig(c);
+    }
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
   }, []);
 
   // Update body background when current track changes
@@ -281,17 +294,6 @@ export function App() {
     );
   }, [windowWidth]);
 
-  useEffect(() => {
-    function onBeforeUnload() {
-      saveConfig(c);
-    }
-
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", onBeforeUnload);
-    };
-  }, []);
-
   return (
     <AppContext value={c}>
       <ToastContainer
@@ -334,7 +336,7 @@ export function App() {
                 onClick={() => setTracksListCollapsed(!tracksListCollapsed)}
                 title="Collapse tracks list"
               >
-                <FontAwesomeIcon icon={tracksListCollapsed ? faArrowUp : faArrowDown} />
+                <FontAwesomeIcon icon={tracksListCollapsed ? faPlus : faMinus} />
               </button>
             </div>
             {!tracksListCollapsed && (
@@ -359,7 +361,7 @@ export function App() {
                 onClick={() => setQueueCollapsed(!queueCollapsed)}
                 title="Collapse queue"
               >
-                <FontAwesomeIcon icon={queueCollapsed ? faArrowDown : faArrowUp} />
+                <FontAwesomeIcon icon={queueCollapsed ? faPlus : faMinus} />
               </button>
             </div>
             {!queueCollapsed && (
