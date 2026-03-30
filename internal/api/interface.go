@@ -25,6 +25,8 @@ import (
 	lru "github.com/hashicorp/golang-lru/v2"
 )
 
+var Version string
+
 type Interface struct {
 	db      *sql.DB
 	cacheDb *sql.DB // nullable
@@ -351,8 +353,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	}
 	return &byteHandler{b: data}, "text/json", nil
 }
-
-const Version = "dev"
 
 func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
 	buf := &bytes.Buffer{}
