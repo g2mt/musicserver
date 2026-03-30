@@ -209,39 +209,39 @@ export function MusicPlayer() {
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
-  function handleContextMenu(e: React.MouseEvent) {
-    e.preventDefault();
-    showContextMenu(
-      e.currentTarget,
-      <>
-        <ContextMenuItem
-          onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
-          icon={c.isPlaying ? faPause : faPlay}
-        >
-          {c.isPlaying ? "Pause" : "Play"}
-        </ContextMenuItem>
-        <ContextMenuItem
-          onClick={handleForward}
-          disabled={isForwardDisabled}
-          icon={faForwardStep}
-        >
-          Forward
-        </ContextMenuItem>
-        <ContextMenuItem
-          onClick={handleBack}
-          disabled={isBackDisabled}
-          icon={faBackwardStep}
-        >
-          Backward
-        </ContextMenuItem>
-      </>,
-    );
-  }
-
   return (
     <div
       className={`music-player${collapsed ? " collapsed" : ""}`}
-      onContextMenu={handleContextMenu}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        showContextMenu(
+          e.currentTarget,
+          <>
+            <ContextMenuItem
+              onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
+              icon={c.isPlaying ? faPause : faPlay}
+            >
+              {c.isPlaying ? "Pause" : "Play"}
+            </ContextMenuItem>
+            {isForwardDisabled && (
+              <ContextMenuItem
+                onClick={handleForward}
+                icon={faForwardStep}
+              >
+                Forward
+              </ContextMenuItem>
+            )}
+            {isBackDisabled && (
+              <ContextMenuItem
+                onClick={handleBack}
+                icon={faBackwardStep}
+              >
+                Backward
+              </ContextMenuItem>
+            )}
+          </>,
+        );
+      }}
     >
       <input
         className="scrubber-bar"
