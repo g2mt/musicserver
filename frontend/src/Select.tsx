@@ -50,7 +50,7 @@ export function Select({ value, onChange, children }: SelectProps) {
     );
   };
 
-  const displayValue = value || "limit";
+  const displayValue = value || (options[0] ? (options[0] as React.ReactElement<OptionProps>).props.children : "limit");
 
   return (
     <button
