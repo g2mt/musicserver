@@ -13,6 +13,7 @@ import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
 import { getFilePath, getTrackFileFromId } from "./apiserver";
 import { apiAudio, useAbsoluteAudioPath } from "./apiaudio";
+import { ContextMenuItem, showContextMenu } from "./ContextMenu";
 
 import "./MusicPlayer.css";
 
@@ -208,8 +209,37 @@ export function MusicPlayer() {
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
+  function handleContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    showContextMenu(
+      e.currentTarget,
+      <>
+        <ContextMenuItem
+          onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
+        >
+          {c.isPlaying ? "Pause" : "Play"}
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={handleForward}
+          disabled={isForwardDisabled}
+        >
+          Forward
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={handleBack}
+          disabled={isBackDisabled}
+        >
+          Backward
+        </ContextMenuItem>
+      </>,
+    );
+  }
+
   return (
-    <div className={`music-player${collapsed ? " collapsed" : ""}`}>
+    <div
+      className={`music-player${collapsed ? " collapsed" : ""}`}
+      onContextMenu={handleContextMenu}
+    >
       <input
         className="scrubber-bar"
         type="range"
