@@ -3,11 +3,15 @@ package org.msxrv.musicserver;
 import android.app.Activity;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+import android.os.Handler;
+import android.os.Looper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.lang.Thread;
+import java.util.concurrent.atomic.AtomicReference;
 
 import dalvik.annotation.optimization.FastNative;
 
@@ -15,6 +19,8 @@ public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
 	private ScanTracksPoller poller;
+	private AtomicReference<Thread> scanTracksThread = new AtomicReference<>();
+	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	public NativeBridge(MainActivity activity) throws NativeBridgeException {
 		this.activity = activity;
@@ -141,8 +147,18 @@ public class NativeBridge {
 	@JavascriptInterface
 	public void scanTracks() {
 		Log.d("[msxrv] Native", "scanTracks called");
-		msrvStartScanTracks(interfaceHandle);
-		poller.run();
+		if (scanTracksThread.get() != null)
+			return;
+		Thread thread = new Thread(() -> {
+			Log.d("[msxrv] Native", "scanTracks: new thread spawned");
+			msrvStartScanTracks(interfaceHandle);
+			mainHandler.post(() -> {
+				poller.run();
+			});
+			scanTracksThread.set(null);
+		});
+		scanTracksThread.set(thread);
+		thread.start();
 	}
 
 	@JavascriptInterface
