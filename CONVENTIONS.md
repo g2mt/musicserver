@@ -39,8 +39,8 @@ import { ContextMenuItem, showContextMenu } from "./ContextMenu";
 
 showContextMenu(anchorElement, (
   <>
-    <ContextMenuItem onClick=...>1</ContextMenuItem>
-    <ContextMenuItem onClick=...>2</ContextMenuItem>
+    <ContextMenuItem onClick={() => ...}>1</ContextMenuItem>
+    <ContextMenuItem onClick={() => ...}>2</ContextMenuItem>
   </>
 ))
 ```
