@@ -55,15 +55,6 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
       });
   };
 
-  const handleContextMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    showContextMenu(e.currentTarget, (
-      <>
-        <ContextMenuItem onClick={handleAddAllToQueue}>Add all to queue</ContextMenuItem>
-      </>
-    ));
-  };
-
   const controls = (
     <div className="main-tracks-controls">
       <div className="main-tracks-controls-left">
@@ -103,7 +94,14 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         <button
           className="btn"
           onClick={() => c.enqueueTrack(tracks)}
-          onContextMenu={handleContextMenu}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            showContextMenu(e.currentTarget, (
+              <>
+                <ContextMenuItem onClick={handleAddAllToQueue}>Add all to queue</ContextMenuItem>
+              </>
+            ));
+          }}
         >
           <FontAwesomeIcon icon={faPlus} />
           Add visible to queue
