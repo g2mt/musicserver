@@ -5,6 +5,67 @@ import (
 	"testing"
 )
 
+// testConcurrentModify runs a concurrent test with the given modify function.
+// It spawns numGoroutines, each running iterations times, calling modify each iteration.
+// Then it asserts that the final value matches the expected value using getValue.
+func testConcurrentModify(
+	t *testing.T,
+	modify func(int32),
+	getValue func() int32,
+	expected int32,
+	numGoroutines int,
+	iterations int,
+) {
+	var wg sync.WaitGroup
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < iterations; j++ {
+				modify(int32(j))
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	actual := getValue()
+	if actual != expected {
+		t.Errorf("expected %d, got %d", expected, actual)
+	}
+}
+
+// testConcurrentAdd runs a concurrent test that adds a fixed increment.
+// It spawns numGoroutines, each running iterations times, adding increment each iteration.
+// Then it asserts that the final value matches the expected value using getValue.
+func testConcurrentAdd(
+	t *testing.T,
+	add func(int32),
+	getValue func() int32,
+	increment int32,
+	expected int32,
+	numGoroutines int,
+	iterations int,
+) {
+	var wg sync.WaitGroup
+	for i := 0; i < numGoroutines; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < iterations; j++ {
+				add(increment)
+			}
+		}()
+	}
+
+	wg.Wait()
+
+	actual := getValue()
+	if actual != expected {
+		t.Errorf("expected %d, got %d", expected, actual)
+	}
+}
+
 func TestSetValueConcurrent(t *testing.T) {
 	p := NewProgress()
 	ticker, err := p.Bind("test")
@@ -12,26 +73,19 @@ func TestSetValueConcurrent(t *testing.T) {
 		t.Fatalf("failed to bind: %v", err)
 	}
 
-	var wg sync.WaitGroup
 	numGoroutines := 10
 	iterations := 1000
 
-	// Set value from multiple goroutines
-	for i := 0; i < numGoroutines; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < iterations; j++ {
-				ticker.SetValue(int32(j))
-			}
-		}()
-	}
-
-	wg.Wait()
-
-	// The final value should be one of the set values (last iteration from some goroutine)
-	// We just verify it's a valid int32 and the operation completed without panic
-	_ = ticker.GetValue()
+	// Set value from multiple goroutines - final value is unpredictable,
+	// but we verify it completed without panic
+	testConcurrentModify(
+		t,
+		func(v int32) { ticker.SetValue(v) },
+		ticker.GetValue,
+		0, // expected value not meaningful for Set, just verify no panic
+		numGoroutines,
+		iterations,
+	)
 }
 
 func TestAddValueConcurrent(t *testing.T) {
@@ -41,30 +95,20 @@ func TestAddValueConcurrent(t *testing.T) {
 		t.Fatalf("failed to bind: %v", err)
 	}
 
-	var wg sync.WaitGroup
 	numGoroutines := 10
 	iterations := 1000
 	increment := int32(1)
-
-	// Add value from multiple goroutines
-	for i := 0; i < numGoroutines; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < iterations; j++ {
-				ticker.AddValue(increment)
-			}
-		}()
-	}
-
-	wg.Wait()
-
-	// The final value should be numGoroutines * iterations
 	expected := int32(numGoroutines * iterations)
-	actual := ticker.GetValue()
-	if actual != expected {
-		t.Errorf("expected %d, got %d", expected, actual)
-	}
+
+	testConcurrentAdd(
+		t,
+		ticker.AddValue,
+		ticker.GetValue,
+		increment,
+		expected,
+		numGoroutines,
+		iterations,
+	)
 }
 
 func TestSetMaxValueConcurrent(t *testing.T) {
@@ -74,25 +118,19 @@ func TestSetMaxValueConcurrent(t *testing.T) {
 		t.Fatalf("failed to bind: %v", err)
 	}
 
-	var wg sync.WaitGroup
 	numGoroutines := 10
 	iterations := 1000
 
-	// Set max value from multiple goroutines
-	for i := 0; i < numGoroutines; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < iterations; j++ {
-				ticker.SetMaxValue(int32(j))
-			}
-		}()
-	}
-
-	wg.Wait()
-
-	// Verify it completed without panic
-	_ = ticker.GetMaxValue()
+	// Set max value from multiple goroutines - final value is unpredictable,
+	// but we verify it completed without panic
+	testConcurrentModify(
+		t,
+		func(v int32) { ticker.SetMaxValue(v) },
+		ticker.GetMaxValue,
+		0, // expected value not meaningful for Set, just verify no panic
+		numGoroutines,
+		iterations,
+	)
 }
 
 func TestAddMaxValueConcurrent(t *testing.T) {
@@ -102,28 +140,18 @@ func TestAddMaxValueConcurrent(t *testing.T) {
 		t.Fatalf("failed to bind: %v", err)
 	}
 
-	var wg sync.WaitGroup
 	numGoroutines := 10
 	iterations := 1000
 	increment := int32(1)
-
-	// Add max value from multiple goroutines
-	for i := 0; i < numGoroutines; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < iterations; j++ {
-				ticker.AddMaxValue(increment)
-			}
-		}()
-	}
-
-	wg.Wait()
-
-	// The final max value should be numGoroutines * iterations
 	expected := int32(numGoroutines * iterations)
-	actual := ticker.GetMaxValue()
-	if actual != expected {
-		t.Errorf("expected %d, got %d", expected, actual)
-	}
+
+	testConcurrentAdd(
+		t,
+		ticker.AddMaxValue,
+		ticker.GetMaxValue,
+		increment,
+		expected,
+		numGoroutines,
+		iterations,
+	)
 }
