@@ -4,7 +4,6 @@
   color: var(--content-color);
 
   --music-player-height: 100px;
-  --toastify-toast-bottom: max(var(--music-player-height), env(safe-area-inset-bottom));
 
   --front-bg: #ffffff;
   --content-bg: #fff;
@@ -33,6 +32,11 @@
   --color-info: #90ee90;
   --color-front: var(--color-disabled);
   --color-front-text: #000;
+}
+
+.toast-container {
+  position: absolute;
+  bottom: calc(var(--music-player-height) + 10px) !important;
 }
 
 body.dark-mode {
