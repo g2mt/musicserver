@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ViewGroup;
+import android.content.pm.PackageManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebViewClient;
@@ -69,7 +70,16 @@ public class MainActivity extends Activity {
 		NativeBridge nativeBridge = getApp().getNativeBridge();
 		NativeAudioBridge nativeAudioBridge = getApp().getNativeAudioBridge();
 		if (nativeBridge == null || nativeAudioBridge == null) {
-			showErrorDialog("Failed to initialize native bridge.\nQuit?");
+			new AlertDialog.Builder(this)
+				.setMessage("Failed to initialize native bridge.\nQuit?")
+				.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+					}
+				})
+				.setNegativeButton(android.R.string.no, null)
+				.show();
 			return;
 		}
 
@@ -185,23 +195,40 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	private ArrayList<Consumer<RequestPermissionResult>> enqueuedPermissionRequests = new ArrayList<>();
-	private void addPermissionRequest(Consumer<RequestPermissionResult> c) {
-		enqueuedPermissionRequests.add(c);
+	private ArrayList<Consumer<RequestPermissionResult>> enqueuedPermissionHandlers = new ArrayList<>();
+	private void addPermissionHandler(Consumer<RequestPermissionResult> c) {
+		enqueuedPermissionHandlers.add(c);
 	}
 
 	private void requestAllPermissions() {
 		requestPermissions(
-			new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
+			new String[]{android.Manifest.permission.MANAGE_EXTERNAL_STORAGE},
 			0);
-		addPermissionRequest(result -> {
+		addPermissionHandler(result -> {
+			if (result.grantResults[0] == PackageManager.PERMISSION_DENIED) {
+				requestPermissions(
+					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
+					0);
+			} else {
+				runNextPermissionHandler(result);
+			}
+		});
+		addPermissionHandler(result -> {
 			requestPermissions(
 				new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
 				0);
 		});
-		addPermissionRequest(result -> {
+		addPermissionHandler(result -> {
 			getApp().loadWebView();
 		});
+	}
+
+	private void runNextPermissionHandler(RequestPermissionResult result) {
+		if (enqueuedPermissionHandlers.size() > 0) {
+			Consumer<RequestPermissionResult> c = enqueuedPermissionHandlers.get(0);
+			c.accept(result);
+			enqueuedPermissionHandlers.remove(0);
+		}
 	}
 
 	@Override
@@ -210,25 +237,6 @@ public class MainActivity extends Activity {
 		if (requestCode != 0) {
 			throw new Error("Unexpected requestCode=" + requestCode);
 		}
-		if (enqueuedPermissionRequests.size() > 0) {
-			Consumer<RequestPermissionResult> c = enqueuedPermissionRequests.get(0);
-			c.accept(new RequestPermissionResult(requestCode, permissions, grantResults));
-			enqueuedPermissionRequests.remove(0);
-		}
-	}
-
-	// Dialogs
-
-	private void showErrorDialog(String message) {
-		new AlertDialog.Builder(this)
-			.setMessage(message)
-			.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					finish();
-				}
-			})
-			.setNegativeButton(android.R.string.no, null)
-			.show();
+		runNextPermissionHandler(new RequestPermissionResult(requestCode, permissions, grantResults));
 	}
 }
