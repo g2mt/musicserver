@@ -50,6 +50,8 @@ export interface AppState extends AppStateData {
   setSearchQuery: (_: string) => void;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
+  props: { version: string; config: any } | null;
+  setProps: Dispatch<SetStateAction<{ version: string; config: any } | null>>;
   showAllTracks: () => void;
   oldSearchQuery: RefObject<string | null>;
   onRescanned: () => void;

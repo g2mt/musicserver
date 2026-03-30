@@ -47,12 +47,19 @@ export function App() {
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   [c.showBlurredCover, c.setShowBlurredCover] = useState(true);
+  [c.props, c.setProps] = useState<{ version: string; config: any } | null>(
+    null,
+  );
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", c.darkMode);
   }, [c.darkMode]);
 
-  // TODO: load props here
+  useEffect(() => {
+    fetchAPI("/props")
+      .then(c.setProps)
+      .catch(() => {});
+  }, []);
 
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
