@@ -142,7 +142,9 @@ export function App() {
   };
   useEffect(() => {
     window._refreshSearch = c.refreshSearch;
-    return () => { window._refreshSearch = undefined; };
+    return () => {
+      window._refreshSearch = undefined;
+    };
   }, []);
   useEffect(c.refreshSearch, [c.searchQuery]);
 
@@ -281,7 +283,11 @@ export function App() {
 
   return (
     <AppContext value={c}>
-      <ToastContainer position="bottom-right" theme="dark" />
+      <ToastContainer
+        className="toast-container"
+        position="bottom-right"
+        theme="dark"
+      />
       <ContextMenu />
       <div className="app-layout">
         <div className="search-bar-container">
