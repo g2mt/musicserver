@@ -172,6 +172,10 @@ a {
     cursor: pointer;
     font-size: small;
 
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--gray);
+    }
+
     &:hover {
       background: var(--accent-color-light);
       color: var(--accent-color-light-text);
