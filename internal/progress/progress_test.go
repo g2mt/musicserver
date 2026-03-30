@@ -76,13 +76,11 @@ func TestSetValueConcurrent(t *testing.T) {
 	numGoroutines := 10
 	iterations := 1000
 
-	// Set value from multiple goroutines - final value is unpredictable,
-	// but we verify it completed without panic
 	testConcurrentModify(
 		t,
-		func(v int32) { ticker.SetValue(v) },
+		func(v int32) { ticker.SetValue(1234) },
 		ticker.GetValue,
-		0, // expected value not meaningful for Set, just verify no panic
+		1234,
 		numGoroutines,
 		iterations,
 	)
@@ -121,13 +119,11 @@ func TestSetMaxValueConcurrent(t *testing.T) {
 	numGoroutines := 10
 	iterations := 1000
 
-	// Set max value from multiple goroutines - final value is unpredictable,
-	// but we verify it completed without panic
 	testConcurrentModify(
 		t,
-		func(v int32) { ticker.SetMaxValue(v) },
+		func(v int32) { ticker.SetMaxValue(1234) },
 		ticker.GetMaxValue,
-		0, // expected value not meaningful for Set, just verify no panic
+		1234,
 		numGoroutines,
 		iterations,
 	)
