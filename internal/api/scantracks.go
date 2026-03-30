@@ -1,3 +1,6 @@
+//go:build !android
+// +build !android
+
 package api
 
 import (
@@ -13,7 +16,7 @@ import (
 
 const WatchDirInterval = 1 * time.Second
 
-func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string, error) {
+func (i *Interface) ScanTracks() (addedFiles int, err error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
@@ -25,7 +28,7 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 			panic("Expected old ticker to be nil")
 		}
 	} else {
-		return nil, err
+		return 0, err
 	}
 	defer func() {
 		if i.scan.ticker.Swap(nil) == nil {
@@ -33,13 +36,10 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 		}
 		i.prog.Unbind("scanTracks")
 	}()
-	if tickerBounded != nil {
-		tickerBounded <- struct{}{}
-	}
 
-	// First, count total files for progress tracking
+	// Count total files for progress tracking
 	totalFiles := int32(0)
-	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
+	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -50,11 +50,10 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 		return nil
 	})
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	// Scan all files
-	added := make(map[string]string)
 	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -73,25 +72,20 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 			return nil
 		}
 
-		// Add track to database (ignore duplicate errors)
-		shortID, err := i.AddTrack(&track)
+		_, err = i.AddTrack(&track)
 		if err != nil {
 			return nil
 		}
 
-		// Successfully added, record in result map
-		added[shortID] = track.Name
-
-		// Update progress
+		addedFiles += 1
 		i.scan.ticker.Load().AddValue(1)
 		return nil
 	})
 
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-
-	return added, nil
+	return addedFiles, nil
 }
 
 func (i *Interface) WatchDataDir() error {
