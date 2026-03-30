@@ -91,6 +91,21 @@ public class NativeAudioBridge {
 		nm.createNotificationChannel(channel);
 	}
 
+	public void terminate() {
+		if (mediaPlayer != null) {
+			mediaPlayer.stop();
+			mediaPlayer.release();
+			mediaPlayer = null;
+		}
+		if (mediaSession != null) {
+			mediaSession.setActive(false);
+			mediaSession.release();
+			mediaSession = null;
+		}
+		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancel(NOTIFICATION_ID);
+	}
+
 	// Media session
 
 	private void updateMediaSession(String filepath) {
@@ -310,20 +325,5 @@ public class NativeAudioBridge {
 	public void setVolume(int instanceId, float volume) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.setVolume(volume, volume);
-	}
-
-	public void terminate() {
-		if (mediaPlayer != null) {
-			mediaPlayer.stop();
-			mediaPlayer.release();
-			mediaPlayer = null;
-		}
-		if (mediaSession != null) {
-			mediaSession.setActive(false);
-			mediaSession.release();
-			mediaSession = null;
-		}
-		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancel(NOTIFICATION_ID);
 	}
 }
