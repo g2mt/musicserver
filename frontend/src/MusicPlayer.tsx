@@ -118,7 +118,7 @@ export function MusicPlayer() {
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, [c.currentTrack]);
+  }, [c.currentTrack?.id]);
 
   useEffect(() => {
     audio.addEventListener("ended", () => goNextQueue());
@@ -164,9 +164,6 @@ export function MusicPlayer() {
     audio.volume = c.muted ? 0 : c.volume;
   }, [c.volume, c.muted]);
 
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
-    useBackForward();
-
   // Media info
 
   if ("mediaSession" in navigator) {
@@ -193,6 +190,9 @@ export function MusicPlayer() {
       document.title = c.currentTrack?.name ?? "Music Player";
     }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
   }
+
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
+    useBackForward();
 
   useEffect(() => {
     window._setIsPlaying = c.setIsPlaying;
