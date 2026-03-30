@@ -12,6 +12,8 @@ import android.content.IntentFilter;
 import android.util.Log;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.os.Handler;
+import android.os.Looper;
 
 public class MusicServerApp extends Application {
 	private static final String CHANNEL_ID = "musicserver_service";
@@ -134,5 +136,13 @@ public class MusicServerApp extends Application {
 		quitIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 		quitIntent.putExtra("quit", true);
 		startActivity(quitIntent);
+
+		new Handler(Looper.getMainLooper()).postDelayed(
+			new Runnable() {
+				public void run() {
+					System.exit(1);
+				}
+			}, 
+		1000);
 	}
 }
