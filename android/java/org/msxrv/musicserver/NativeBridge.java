@@ -140,9 +140,11 @@ public class NativeBridge {
 		}
 	}
 
-
 	public ScanTickerValues getScanTickerValues() {
 		return msrvGetScanTickerValues(interfaceHandle);
+	}
+
+	private String decodeURI(String encodedURI) {
 	}
 
 	@JavascriptInterface
@@ -164,7 +166,8 @@ public class NativeBridge {
 	}
 
 	@JavascriptInterface
-	public String fetchAPI(String path, String method, String paramsJson) {
+	public String fetchAPI(String encodedPath, String method, String paramsJson) {
+		final String path = decodeURI(encodedPath);
 		Log.d("[msxrv] Native", "path=" + path + " paramsJson=" + paramsJson + " method=" + method);
 
 		String[] outContentType = new String[1];
