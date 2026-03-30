@@ -110,6 +110,13 @@ public class NativeBridge {
 	 */
 	private native void msrvDeleteHandle(long handle);
 
+	public void terminate() {
+		if (interfaceHandle != 0) {
+			msrvDeleteHandle(interfaceHandle);
+			interfaceHandle = 0;
+		}
+	}
+
 	/**
 	 * Loads a track from the given path and adds it to the library.
 	 *

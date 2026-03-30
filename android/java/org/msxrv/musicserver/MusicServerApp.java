@@ -53,6 +53,13 @@ public class MusicServerApp extends Application {
 	};
 
 	public void quit() {
+		if (nativeAudioBridge != null) {
+			nativeAudioBridge.terminate();
+		}
+		if (nativeBridge != null) {
+			nativeBridge.terminate();
+		}
+
 		stopService(new Intent(this, WebViewService.class));
 		stopService(new Intent(this, ScanTracksService.class));
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
