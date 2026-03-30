@@ -33,6 +33,7 @@ public class ScanTracksService extends Service {
 	
 	private final AtomicInteger scannedCount = new AtomicInteger(0);
 	private final AtomicInteger totalCount = new AtomicInteger(0);
+	private final AtomicBoolean isDiscovering = new AtomicBoolean(true);
 	private final AtomicReference<String> currentFileName = new AtomicReference<>("");
 
 	private class ScanThread extends Thread {
@@ -54,12 +55,14 @@ public class ScanTracksService extends Service {
 				}
 
 				// First pass: collect all files (discovery)
+				isDiscovering.set(true);
 				List<File> files = new ArrayList<>();
 				collectFiles(new File(musicDir), files);
 				totalCount.set(files.size());
 				Log.d(TAG, "Found " + totalCount.get() + " files to scan.");
 
 				// Second pass: load each file
+				isDiscovering.set(false);
 				for (File file : files) {
 					currentFileName.set(file.getName());
 
@@ -171,7 +174,6 @@ public class ScanTracksService extends Service {
 	private Notification buildNotification() {
 		Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setContentTitle("Scanning music library")
 			.setOngoing(true)
 			.setOnlyAlertOnce(true);
 
@@ -179,12 +181,19 @@ public class ScanTracksService extends Service {
 		int maxValue = totalCount.get();
 		String currentFile = currentFileName.get();
 
-		if (maxValue > 0) {
-			builder.setContentText(value + " / " + maxValue + " — " + currentFile)
-				   .setProgress(maxValue, value, false);
-		} else {
-			builder.setContentText(currentFile)
+		if (isDiscovering.get()) {
+			builder.setContentTitle("Discovering music library")
+				   .setContentText("Found " + maxValue + " files...")
 				   .setProgress(0, 0, true);
+		} else {
+			builder.setContentTitle("Scanning music library");
+			if (maxValue > 0) {
+				builder.setContentText(value + " / " + maxValue + " — " + currentFile)
+					   .setProgress(maxValue, value, false);
+			} else {
+				builder.setContentText(currentFile)
+					   .setProgress(0, 0, true);
+			}
 		}
 
 		return builder.build();
