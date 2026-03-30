@@ -16,24 +16,12 @@ public class ScanTracksPoller {
 	private static final int NOTIFICATION_ID = 1;
 	private static final long POLL_INTERVAL_MS = 1000;
 
-	public interface OnScanCompleteListener {
-		void onScanComplete();
-	}
-
-	private final Activity activity;
+	private final MainActivity activity;
 	private final NativeBridge bridge;
-	private OnScanCompleteListener onScanCompleteListener;
 	private final NotificationManager notificationManager;
 	private final Handler handler;
-	private final Runnable pollRunnable;
 
-	private static final int PERMISSION_REQUEST_CODE = 1001;
-
-	public void setOnScanCompleteListener(OnScanCompleteListener listener) {
-		this.onScanCompleteListener = listener;
-	}
-
-	public ScanTracksPoller(Activity activity, NativeBridge bridge) {
+	public ScanTracksPoller(MainActivity activity, NativeBridge bridge) {
 		this.activity = activity;
 		this.bridge = bridge;
 
@@ -43,7 +31,7 @@ public class ScanTracksPoller {
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.handler = new Handler(Looper.getMainLooper());
 
-		pollRunnable = new Runnable() {
+		handler.post(new Runnable() {
 			private boolean wasScanning = false;
 
 			@Override
@@ -54,9 +42,9 @@ public class ScanTracksPoller {
 					if (wasScanning) {
 						postOneTimeNotification("Scan complete", "Music library scan has finished.");
 						wasScanning = false;
-						if (onScanCompleteListener != null) {
-							onScanCompleteListener.onScanComplete();
-						}
+
+						WebView wv = activity.getApp().getWebView();
+						wv.post(() -> wv.evaluateJavascript("window._refreshSearch()", null));
 					}
 					notificationManager.cancel(NOTIFICATION_ID);
 					return;
@@ -68,8 +56,7 @@ public class ScanTracksPoller {
 				postNotification(vals.value, vals.maxValue);
 				handler.postDelayed(this, POLL_INTERVAL_MS);
 			}
-		};
-		handler.post(pollRunnable);
+		});
 	}
 
 	public static void createNotificationChannel(Activity activity) {
