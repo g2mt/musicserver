@@ -50,7 +50,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           title="Previous"
         >
           <FontAwesomeIcon icon={faChevronLeft} />
-          Back
+          <span>Back</span>
         </button>
         <button
           className="btn"
@@ -61,7 +61,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           title="Next"
         >
           <FontAwesomeIcon icon={faChevronRight} />
-          Forward
+          <span>Forward</span>
         </button>
       </div>
       <div className="main-tracks-controls-right">
