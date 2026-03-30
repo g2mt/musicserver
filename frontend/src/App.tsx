@@ -68,11 +68,18 @@ export function App() {
             <feFuncA type="linear" slope="1"/>
           </feComponentTransfer>
         </filter>
-        <image width="100%" href="" filter="url(#blur)"/>`;
+        <image href="" filter="url(#blur)"/>`;
       }
       const image = overlay.querySelector("image");
       const cover = getTrackCover(c.currentTrack);
       if (image && cover !== image.getAttribute("href")) {
+        if (screen.width > screen.height) {
+          image.setAttribute("width", "100%");
+          image.setAttribute("height", "");
+        } else {
+          image.setAttribute("width", "");
+          image.setAttribute("height", "100%");
+        }
         image.setAttribute("href", cover);
       }
     } else if (overlay.childElementCount > 0) {
