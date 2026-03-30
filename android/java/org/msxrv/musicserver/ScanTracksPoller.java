@@ -28,8 +28,6 @@ public class ScanTracksPoller {
 		this.activity = activity;
 		this.bridge = bridge;
 
-		Log.d("[msxrv] ScanTracksPoller", "starting poller");
-
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.handler = new Handler(Looper.getMainLooper());
@@ -39,11 +37,12 @@ public class ScanTracksPoller {
 		if (wasScanning) {
 			return;
 		}
+		Log.d("[msxrv] ScanTracksPoller", "run poller called");
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
-				Log.d("[msxrv] ScanTracksPoller", "polling ticker values");
 				NativeBridge.ScanTickerValues vals = bridge.getScanTickerValues();
+				Log.d("[msxrv] ScanTracksPoller", "polling ticker values: value=" + vals.value + " maxValue=" + vals.maxValue);
 				if (!vals.present) {
 					if (wasScanning) {
 						postOneTimeNotification("Scan complete", "Music library scan has finished.");

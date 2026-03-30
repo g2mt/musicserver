@@ -137,7 +137,6 @@ func MsrvReadAll(readerHandle C.uintptr_t) C.struct_MsrvReadAllResult {
 	return C.struct_MsrvReadAllResult{Data: (*C.char)(cData), N: C.int(len(data)), Err: nil}
 }
 
-
 type byteReader struct {
 	data   []byte
 	offset int
