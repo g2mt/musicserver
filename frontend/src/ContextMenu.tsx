@@ -90,8 +90,8 @@ export function ContextMenu() {
   const style: React.CSSProperties = {
     left: anchorRect.left,
     ...(showAbove
-      ? { bottom: window.innerHeight - anchorRect.top }
-      : { top: anchorRect.bottom }),
+      ? { bottom: window.innerHeight - anchorRect.top, marginBottom: "var(--s2)", }
+      : { top: anchorRect.bottom, marginTop: "var(--s2)", }),
   };
 
   return (
