@@ -55,17 +55,7 @@ public class NativeAudioBridge {
 
 		mediaSession = new MediaSession(activity, "NativeAudioBridge");
 		mediaSession.setActive(true);
-
-		PlaybackState.CustomAction quitAction = new PlaybackState.CustomAction.Builder(
-			MusicServerApp.ACTION_QUIT, "Quit", android.R.drawable.ic_delete).build();
-
-		PlaybackState state = new PlaybackState.Builder()
-			.setState(PlaybackState.STATE_PLAYING, PlaybackState.PLAYBACK_POSITION_UNKNOWN, 1.0f)
-			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
-				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
-			.addCustomAction(quitAction)
-			.build();
-		mediaSession.setPlaybackState(state);
+		updatePlaybackState();
 
 		mediaSession.setCallback(new MediaSession.Callback() {
 			@Override
@@ -149,7 +139,7 @@ public class NativeAudioBridge {
 		activity.getApp().updateNotification(title, artist, coverBitmap);
 	}
 
-	// Update functions
+	// Playback state
 
 	private void updatePlaybackState() {
 		boolean playing = mediaPlayer != null && mediaPlayer.isPlaying();
