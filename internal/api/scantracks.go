@@ -19,21 +19,6 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 
 	slog.Debug("full scan started")
 
-	// First, count total files for progress tracking
-	totalFiles := int32(0)
-	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() {
-			totalFiles++
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	// Bind progress ticker
 	if ticker, err := i.prog.Bind("scanTracks"); err == nil {
 		if i.scan.ticker.Swap(ticker) != nil {
@@ -48,11 +33,27 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 		}
 		i.prog.Unbind("scanTracks")
 	}()
-	i.scan.ticker.Load().SetMaxValue(totalFiles)
 	if tickerBounded != nil {
 		tickerBounded <- struct{}{}
 	}
 
+	// First, count total files for progress tracking
+	totalFiles := int32(0)
+	err := filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			totalFiles++
+			i.scan.ticker.Load().AddMaxValue(1)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Scan all files
 	added := make(map[string]string)
 	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
