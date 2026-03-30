@@ -7,7 +7,7 @@ export function ContextMenuItem({
   icon,
   children,
 }: {
-  onClick: () => boolean|void;
+  onClick: () => boolean | void;
   icon?: IconDefinition;
   children: React.ReactNode;
 }) {
