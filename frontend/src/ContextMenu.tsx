@@ -7,7 +7,7 @@ export function ContextMenuItem({
   icon,
   children,
 }: {
-  onClick: () => void;
+  onClick: () => boolean|void;
   icon?: IconDefinition;
   children: React.ReactNode;
 }) {
@@ -15,8 +15,10 @@ export function ContextMenuItem({
     <div
       className="menu-item"
       onClick={() => {
-        onClick();
-        setMenuState?.(null);
+        const result = onClick();
+        if (result === undefined || result === true) {
+          setMenuState?.(null);
+        }
       }}
     >
       {icon && <FontAwesomeIcon icon={icon} />}

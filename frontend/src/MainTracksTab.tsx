@@ -66,6 +66,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
       </div>
       <div className="main-tracks-controls-right">
         <Select value="" onChange={handleLimitChange}>
+          <Option value="" disabled={true}>limit</Option>
           <Option value={50}>50</Option>
           <Option value={100}>100</Option>
           <Option value={150}>150</Option>
