@@ -1,7 +1,7 @@
-import React, { useMemo, useRef } from "react";
+import React from "react";
 import { ContextMenuItem, showContextMenu } from "./ContextMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 type OptionProps = {
   value: any;
@@ -48,7 +48,7 @@ export function Select({ onChange, children }: SelectProps) {
         );
       }}
     >
-      <FontAwesomeIcon icon={faArrowDown} />
+      <FontAwesomeIcon icon={faChevronDown} />
       {children.length > 0 ? children[0].props.children : ""}
     </button>
   );
