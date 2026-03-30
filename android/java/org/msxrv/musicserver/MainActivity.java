@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
 		return dbDir;
 	}
 
-	private MusicServerApp getApp() {
+	public MusicServerApp getApp() {
 		return (MusicServerApp) getApplication();
 	}
 
@@ -62,20 +62,13 @@ public class MainActivity extends Activity {
 		getApp().initBridges(this);
 
 		NativeBridge nativeBridge = getApp().getNativeBridge();
-		if (nativeBridge == null) {
+		NativeAudioBridge nativeAudioBridge = getApp().getNativeAudioBridge();
+		if (nativeBridge == null || nativeAudioBridge == null) {
 			showErrorDialog("Failed to initialize native bridge.\nQuit?");
 			return;
 		}
 
-		NativeAudioBridge nativeAudioBridge = getApp().getNativeAudioBridge();
-
-		nativeBridge.setScanCompleteListener(() -> {
-			WebView wv = getApp().getWebView();
-			wv.post(() -> wv.evaluateJavascript("window._refreshSearch()", null));
-		});
-
 		WebView webView = getApp().getWebView();
-
 		webView.setWebChromeClient(new WebChromeClient() {
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage msg) {
@@ -83,7 +76,6 @@ public class MainActivity extends Activity {
 				return true;
 			}
 		});
-
 		webView.setWebViewClient(new WebViewClient() {
 			@Override
 			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {

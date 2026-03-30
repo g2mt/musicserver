@@ -65,22 +65,22 @@ public class NativeAudioBridge {
 		mediaSession.setCallback(new MediaSession.Callback() {
 			@Override
 			public void onPlay() {
-				evaluateJavascript("window._setIsPlaying && window._setIsPlaying(true)");
+				wv.evaluateJavascript("window._setIsPlaying(true)", null);
 			}
 
 			@Override
 			public void onPause() {
-				evaluateJavascript("window._setIsPlaying && window._setIsPlaying(false)");
+				wv.evaluateJavascript("window._setIsPlaying(false)", null);
 			}
 
 			@Override
 			public void onSkipToPrevious() {
-				evaluateJavascript("window._handleBack && window._handleBack()");
+				wv.evaluateJavascript("window._handleBack()", null);
 			}
 
 			@Override
 			public void onSkipToNext() {
-				evaluateJavascript("window._handleForward && window._handleForward()");
+				wv.evaluateJavascript("window._handleForward()", null);
 			}
 		});
 
@@ -181,10 +181,6 @@ public class NativeAudioBridge {
 	}
 
 	// JS utils
-
-	private void evaluateJavascript(String script) {
-		mainHandler.post(() -> webView.evaluateJavascript(script, null));
-	}
 
 	// Posts a JSON message of the form {"instanceId": N, "event": "eventName"}
 	// to the JS MessagePort. Must be called on the main thread.
