@@ -78,6 +78,8 @@ public class MusicServerApp extends Application {
 		webView.addJavascriptInterface(settingsBridge, "_native_settings");
 	}
 
+	// Notifications
+
 	private void createNotificationChannel() {
 		NotificationChannel channel = new NotificationChannel(
 			CHANNEL_ID,
@@ -130,6 +132,8 @@ public class MusicServerApp extends Application {
 		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		nm.notify(NOTIFICATION_ID, buildNotification(title, artist, cover));
 	}
+
+	// Quitting
 
 	public static final String ACTION_QUIT = "org.msxrv.musicserver.ACTION_QUIT";
 	private final BroadcastReceiver quitReceiver = new BroadcastReceiver() {
