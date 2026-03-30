@@ -43,6 +43,11 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		if (getIntent().getBooleanExtra("quit", false)) {
+			finish();
+			return;
+		}
+
 		if (getActionBar() != null) {
 			getActionBar().hide();
 		}
@@ -110,6 +115,14 @@ public class MainActivity extends Activity {
 		startForegroundService(new Intent(this, WebViewService.class));
 
 		requestAllPermissions();
+	}
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		if (intent.getBooleanExtra("quit", false)) {
+			finish();
+		}
 	}
 
 	@Override
