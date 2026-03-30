@@ -103,6 +103,10 @@ function SettingsTab() {
             <input type="text" readOnly value={props.config.db_dir} />
           </div>
           <div>
+            <label>Cache database enabled:</label>
+            <input type="checkbox" readOnly checked={props.config.cache_db_enabled} />
+          </div>
+          <div>
             <label>Media Downloader:</label>
             <input type="text" readOnly value={props.config.media_downloader} />
           </div>
