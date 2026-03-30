@@ -30,7 +30,13 @@ public class ScanTracksService extends Service {
 	public void onCreate() {
 		super.onCreate();
 		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		createNotificationChannel();
+		NotificationChannel channel = new NotificationChannel(
+			CHANNEL_ID,
+			"Music Scan",
+			NotificationManager.IMPORTANCE_LOW
+		);
+		channel.setDescription("Shows progress while scanning for music");
+		notificationManager.createNotificationChannel(channel);
 	}
 
 	@Override
@@ -145,16 +151,6 @@ public class ScanTracksService extends Service {
 			.setAutoCancel(true)
 			.build();
 		notificationManager.notify(COMPLETE_NOTIFICATION_ID, notification);
-	}
-
-	private void createNotificationChannel() {
-		NotificationChannel channel = new NotificationChannel(
-			CHANNEL_ID,
-			"Music Scan",
-			NotificationManager.IMPORTANCE_LOW
-		);
-		channel.setDescription("Shows progress while scanning for music");
-		notificationManager.createNotificationChannel(channel);
 	}
 
 	@Override
