@@ -8,6 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useRef } from "react";
 import { AppContext } from "./AppState";
+import { Select, Option } from "./Select";
 
 import "./MainTracksTab.css";
 
@@ -64,15 +65,12 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         </button>
       </div>
       <div className="main-tracks-controls-right">
-        <select className="limit-select" value="" onChange={handleLimitChange}>
-          <option value="" style={{ fontStyle: "italic" }}>
-            limit
-          </option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-          <option value={150}>150</option>
-          <option value={-1}>unlimited</option>
-        </select>
+        <Select value="" onChange={handleLimitChange}>
+          <Option value={50} onClick={() => {}}>50</Option>
+          <Option value={100} onClick={() => {}}>100</Option>
+          <Option value={150} onClick={() => {}}>150</Option>
+          <Option value={-1} onClick={() => {}}>unlimited</Option>
+        </Select>
         <button className="btn" onClick={() => c.enqueueTrack(tracks)}>
           <FontAwesomeIcon icon={faPlus} />
           Add all to queue
