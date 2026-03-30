@@ -9,6 +9,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -17,7 +18,7 @@ import android.os.Looper;
 
 public class MusicServerApp extends Application {
 	private static final String CHANNEL_ID = "musicserver_service";
-	private static final int NOTIFICATION_ID = 100;
+	public static final int NOTIFICATION_ID = 100;
 	private static final String TAG = "[msxrv] MusicServerApp";
 	private WebView webView;
 	public WebView getWebView() {
@@ -51,7 +52,7 @@ public class MusicServerApp extends Application {
 
 		// WebView must be created on the main thread with an Application context
 		webView = new WebView(this);
-		WebSettings webSettings = webView.getSettings();
+		WebSettings webSettings = webSettings = webView.getSettings();
 		webSettings.setJavaScriptEnabled(true);
 		webSettings.setDomStorageEnabled(true);
 		webSettings.setDatabaseEnabled(true);
@@ -88,7 +89,7 @@ public class MusicServerApp extends Application {
 		nm.createNotificationChannel(channel);
 	}
 
-	public Notification buildForegroundNotification() {
+	public Notification buildNotification(String title, String artist, Bitmap cover) {
 		Intent launchIntent = new Intent(this, MainActivity.class);
 		launchIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -99,14 +100,35 @@ public class MusicServerApp extends Application {
 		PendingIntent quitPendingIntent = PendingIntent.getBroadcast(
 			this, 0, quitIntent, PendingIntent.FLAG_IMMUTABLE);
 
-		return new Notification.Builder(this, CHANNEL_ID)
-			.setContentTitle("Music Server")
-			.setContentText("Running in background")
+		Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
 			.setContentIntent(pendingIntent)
 			.setOngoing(true)
-			.addAction(android.R.drawable.ic_delete, "Quit", quitPendingIntent)
-			.build();
+			.addAction(android.R.drawable.ic_delete, "Quit", quitPendingIntent);
+
+		if (title != null && !title.isEmpty()) {
+			builder.setContentTitle(title);
+			builder.setContentText(artist != null ? artist : "");
+			if (nativeAudioBridge != null && nativeAudioBridge.getMediaSession() != null) {
+				Notification.MediaStyle style = new Notification.MediaStyle()
+					.setMediaSession(nativeAudioBridge.getMediaSession().getSessionToken());
+				builder.setStyle(style);
+			}
+		} else {
+			builder.setContentTitle("Music Server");
+			builder.setContentText("Running in background");
+		}
+
+		if (cover != null) {
+			builder.setLargeIcon(cover);
+		}
+
+		return builder.build();
+	}
+
+	public void updateNotification(String title, String artist, Bitmap cover) {
+		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.notify(NOTIFICATION_ID, buildNotification(title, artist, cover));
 	}
 
 	public static final String ACTION_QUIT = "org.msxrv.musicserver.ACTION_QUIT";

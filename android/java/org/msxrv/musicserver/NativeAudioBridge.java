@@ -23,8 +23,6 @@ import java.nio.file.Paths;
 
 public class NativeAudioBridge {
 	private static final String TAG = "[msxrv] NativeAudioBridge";
-	private static final String NOTIFICATION_CHANNEL_ID = "playback";
-	private static final int NOTIFICATION_ID = 1;
 
 	private MainActivity activity;
 	private WebView webView;
@@ -38,6 +36,10 @@ public class NativeAudioBridge {
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 	private MediaSession mediaSession;
 	private PlaybackState playbackState;
+
+	public MediaSession getMediaSession() {
+		return mediaSession;
+	}
 
 	// Each NativeAudio instance has an ID. Only the latest one is active.
 	private int currentInstanceId = 0;
@@ -82,13 +84,6 @@ public class NativeAudioBridge {
 				wv.evaluateJavascript("window._handleForward()", null);
 			}
 		});
-
-		NotificationChannel channel = new NotificationChannel(
-			NOTIFICATION_CHANNEL_ID,
-			"Playback",
-			NotificationManager.IMPORTANCE_LOW);
-		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.createNotificationChannel(channel);
 	}
 
 	public void terminate() {
@@ -102,8 +97,6 @@ public class NativeAudioBridge {
 			mediaSession.release();
 			mediaSession = null;
 		}
-		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancel(NOTIFICATION_ID);
 	}
 
 	// Media session
@@ -142,26 +135,7 @@ public class NativeAudioBridge {
 		}
 		mediaSession.setMetadata(metaBuilder.build());
 
-		showNotification(title, artist, coverBitmap);
-	}
-
-	private void showNotification(String title, String artist, Bitmap cover) {
-		Notification.MediaStyle style = new Notification.MediaStyle()
-			.setMediaSession(mediaSession.getSessionToken());
-
-		Notification.Builder builder = new Notification.Builder(activity, NOTIFICATION_CHANNEL_ID)
-			.setStyle(style)
-			.setContentTitle(title)
-			.setContentText(artist)
-			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setOngoing(true);
-
-		if (cover != null) {
-			builder.setLargeIcon(cover);
-		}
-
-		NotificationManager nm = (NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.notify(NOTIFICATION_ID, builder.build());
+		activity.getApp().updateNotification(title, artist, coverBitmap);
 	}
 
 	// Update functions

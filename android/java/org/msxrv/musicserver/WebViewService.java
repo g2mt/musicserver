@@ -8,14 +8,13 @@ import android.util.Log;
 // Keeps the WebView alive in the background as a foreground service.
 public class WebViewService extends Service {
 	private static final String TAG = "[msxrv] WebViewService";
-	private static final int NOTIFICATION_ID = 100;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		Log.d(TAG, "onCreate");
 		MusicServerApp app = (MusicServerApp) getApplication();
-		startForeground(NOTIFICATION_ID, app.buildForegroundNotification());
+		startForeground(MusicServerApp.NOTIFICATION_ID, app.buildNotification(null, null, null));
 	}
 
 	@Override
