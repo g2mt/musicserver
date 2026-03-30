@@ -108,10 +108,13 @@ function SettingsTab() {
           </div>
         </form>
       )}
-      <hr />
-
-      <h2>Ongoing processes</h2>
-      <ProgressTable />
+      {!import.meta.env.VITE_NO_PROGRESS_SUPPORT && (
+        <>
+          <hr />
+          <h2>Ongoing processes</h2>
+          <ProgressTable />
+        </>
+      )}
     </div>
   );
 }
