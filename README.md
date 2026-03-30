@@ -1,3 +1,3 @@
-# musicserver
+# ![Icon](branding/logo-circle.png) musicserver
 
-work in progress music server
+work in progress Cross-platform music server
