@@ -19,7 +19,6 @@ import dalvik.annotation.optimization.FastNative;
 public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
-	private ScanTracksPoller poller;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	public NativeBridge(MainActivity activity) throws NativeBridgeException {
@@ -44,8 +43,6 @@ public class NativeBridge {
 		if (outErr[0] != null) {
 			throw new NativeBridgeException("Failed to create interface: " + outErr[0]);
 		}
-
-		poller = new ScanTracksPoller(activity, this);
 	}
 
 	/**
@@ -104,44 +101,12 @@ public class NativeBridge {
 	@FastNative
 	private native byte[] msrvReadAll(long readerHandle, String[] outErr);
 
-
-	/**
-	 * Starts a scan of tracks in the background.
-	 *
-	 * @param ifaceHandle the interface handle
-	 */
-	private native void msrvStartScanTracks(long ifaceHandle);
-
 	/**
 	 * Deletes a handle to free associated resources.
 	 *
 	 * @param handle the handle to delete (interface or reader handle)
 	 */
 	private native void msrvDeleteHandle(long handle);
-
-	/**
-	 * Returns the current scan ticker state.
-	 *
-	 * @param ifaceHandle the interface handle
-	 * @return a ScanTickerValues object
-	 */
-	private native ScanTickerValues msrvGetScanTickerValues(long ifaceHandle);
-
-	public static class ScanTickerValues {
-		public final boolean present;
-		public final int value;
-		public final int maxValue;
-
-		public ScanTickerValues(boolean present, int value, int maxValue) {
-			this.present = present;
-			this.value = value;
-			this.maxValue = maxValue;
-		}
-	}
-
-	public ScanTickerValues getScanTickerValues() {
-		return msrvGetScanTickerValues(interfaceHandle);
-	}
 
 	private String decodeURI(String encodedURI) {
 		if (encodedURI == null) {
