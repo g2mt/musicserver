@@ -118,6 +118,8 @@ public class NativeBridge {
 	 */
 	private native String msrvLoadTrackByPath(long ifaceHandle, String path, String[] outErr);
 
+	// Utilities
+
 	private String decodeURI(String encodedURI) {
 		if (encodedURI == null) {
 			return null;
@@ -206,13 +208,7 @@ public class NativeBridge {
 
 		return result.toString();
 	}
-
-	@JavascriptInterface
-	public void scanTracks() {
-		// TODO
-	}
-
-	@JavascriptInterface
+	
 	public String loadTrackByPath(String path) {
 		Log.d("[msxrv] Native", "loadTrackByPath path=" + path);
 
@@ -225,6 +221,13 @@ public class NativeBridge {
 		}
 
 		return shortId;
+	}
+
+	// Javascript interface
+
+	@JavascriptInterface
+	public void scanTracks() {
+		// TODO
 	}
 
 	@JavascriptInterface
