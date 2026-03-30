@@ -75,37 +75,46 @@ export function App() {
   }, []);
 
   // Update body background when current track changes
-  const overlay = document.getElementById("background-overlay")!;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     if (c.currentTrack && c.darkMode && c.showBlurredCover) {
-      if (overlay.childElementCount === 0) {
-        overlay.innerHTML = `
-        <style>:root { fill: #000; stroke: none; }</style>
-        <filter id="blur">
-          <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
-          <feComponentTransfer>
-            <feFuncR type="linear" slope="0.1"/>
-            <feFuncG type="linear" slope="0.1"/>
-            <feFuncB type="linear" slope="0.1"/>
-            <feFuncA type="linear" slope="1"/>
-          </feComponentTransfer>
-        </filter>
-        <image href="" filter="url(#blur)"/>`;
-      }
-      const image = overlay.querySelector("image");
       const cover = getTrackCover(c.currentTrack);
-      if (image && cover !== image.getAttribute("href")) {
-        if (screen.width > screen.height) {
-          image.setAttribute("width", "100%");
-          image.setAttribute("height", "");
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const screenAspect = screen.width / screen.height;
+        const imgAspect = img.width / img.height;
+
+        let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height;
+
+        if (imgAspect > screenAspect) {
+          srcW = img.height * screenAspect;
+          srcX = (img.width - srcW) / 2;
         } else {
-          image.setAttribute("width", "");
-          image.setAttribute("height", "100%");
+          srcH = img.width / screenAspect;
+          srcY = (img.height - srcH) / 2;
         }
-        image.setAttribute("href", cover);
-      }
-    } else if (overlay.childElementCount > 0) {
-      overlay.innerHTML = "";
+
+        ctx.filter = "blur(30px) brightness(0.1)";
+        ctx.drawImage(
+          img,
+          srcX, srcY, srcW, srcH,
+          0, 0, canvas.width, canvas.height
+        );
+      };
+      img.src = cover;
+      canvas.style.display = "block";
+    } else {
+      canvas.style.display = "none";
     }
   }, [c.currentTrack, c.darkMode]);
 
