@@ -1,6 +1,6 @@
 import TrackList from "./TrackList";
 import { MainTracksTab } from "./MainTracksTab";
-import SettingsTab from "./SettingsTab";
+import { SettingsTab } from "./SettingsTab";
 import FileBrowserTab from "./FileBrowserTab";
 import { MusicPlayer } from "./MusicPlayer";
 import SearchBar from "./SearchBar";

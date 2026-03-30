@@ -3,12 +3,16 @@ import { ContextMenuItem, showContextMenu } from "./ContextMenu";
 
 type OptionProps = {
   value: string | number;
-  onClick: () => void;
+  onClick?: () => void;
   children: React.ReactNode;
 };
 
 export function Option({ onClick, children }: OptionProps) {
-  return <ContextMenuItem onClick={onClick}>{children}</ContextMenuItem>;
+  return (
+    <ContextMenuItem onClick={onClick ?? (() => {})}>
+      {children}
+    </ContextMenuItem>
+  );
 }
 
 type SelectProps = {
