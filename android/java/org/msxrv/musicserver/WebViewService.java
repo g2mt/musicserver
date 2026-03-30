@@ -19,18 +19,6 @@ public class WebViewService extends Service {
 	}
 
 	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d(TAG, "onStartCommand");
-		return START_STICKY;
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		Log.d(TAG, "onDestroy");
-	}
-
-	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
