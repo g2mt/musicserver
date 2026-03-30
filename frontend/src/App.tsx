@@ -52,6 +52,8 @@ export function App() {
     document.body.classList.toggle("dark-mode", c.darkMode);
   }, [c.darkMode]);
 
+  // TODO: load props here
+
   // Update body background when current track changes
   const overlay = document.getElementById("background-overlay")!;
   useEffect(() => {
