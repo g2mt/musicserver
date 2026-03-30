@@ -34,61 +34,6 @@ public class ScanTracksService extends Service {
 	private final AtomicInteger totalCount = new AtomicInteger(0);
 	private volatile String currentFileName = "";
 
-	private final Runnable notificationUpdater = new Runnable() {
-		@Override
-		public void run() {
-			if (isRunning.get()) {
-				notificationManager.notify(NOTIFICATION_ID,
-					buildNotification(scannedCount.get(), totalCount.get(), currentFileName));
-				mainHandler.postDelayed(this, 1000);
-			}
-		}
-	};
-
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		NotificationChannel channel = new NotificationChannel(
-			CHANNEL_ID,
-			"Music Scan",
-			NotificationManager.IMPORTANCE_LOW
-		);
-		channel.setDescription("Shows progress while scanning for music");
-		notificationManager.createNotificationChannel(channel);
-	}
-
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		String musicDir = intent != null ? intent.getStringExtra(EXTRA_MUSIC_DIR) : null;
-		if (musicDir == null) {
-			Log.e(TAG, "No music dir provided, stopping.");
-			stopSelf();
-			return START_NOT_STICKY;
-		}
-
-		if (!isRunning.compareAndSet(false, true)) {
-			Log.d(TAG, "Scan already in progress, ignoring request.");
-			stopSelf();
-			return START_NOT_STICKY;
-		}
-
-		scannedCount.set(0);
-		totalCount.set(0);
-		currentFileName = "Starting scan...";
-
-		// Start foreground immediately with an indeterminate notification
-		startForeground(NOTIFICATION_ID, buildNotification(0, 0, currentFileName));
-
-		mainHandler.postDelayed(notificationUpdater, 1000);
-
-		ScanThread scanThread = new ScanThread(musicDir);
-		scanThread.setDaemon(true);
-		scanThread.start();
-
-		return START_NOT_STICKY;
-	}
-
 	private class ScanThread extends Thread {
 		private final String musicDir;
 
@@ -158,6 +103,70 @@ public class ScanTracksService extends Service {
 		}
 	}
 
+	// Events
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		NotificationChannel channel = new NotificationChannel(
+			CHANNEL_ID,
+			"Music Scan",
+			NotificationManager.IMPORTANCE_LOW
+		);
+		channel.setDescription("Shows progress while scanning for music");
+		notificationManager.createNotificationChannel(channel);
+	}
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		String musicDir = intent != null ? intent.getStringExtra(EXTRA_MUSIC_DIR) : null;
+		if (musicDir == null) {
+			Log.e(TAG, "No music dir provided, stopping.");
+			stopSelf();
+			return START_NOT_STICKY;
+		}
+
+		if (!isRunning.compareAndSet(false, true)) {
+			Log.d(TAG, "Scan already in progress, ignoring request.");
+			stopSelf();
+			return START_NOT_STICKY;
+		}
+
+		scannedCount.set(0);
+		totalCount.set(0);
+		currentFileName = "Starting scan...";
+
+		// Start foreground immediately with an indeterminate notification
+		startForeground(NOTIFICATION_ID, buildNotification(0, 0, currentFileName));
+
+		mainHandler.postDelayed(notificationUpdater, 1000);
+
+		ScanThread scanThread = new ScanThread(musicDir);
+		scanThread.setDaemon(true);
+		scanThread.start();
+
+		return START_NOT_STICKY;
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+
+	// Notification
+
+	private final Runnable notificationUpdater = new Runnable() {
+		@Override
+		public void run() {
+			if (isRunning.get()) {
+				notificationManager.notify(NOTIFICATION_ID,
+					buildNotification(scannedCount.get(), totalCount.get(), currentFileName));
+				mainHandler.postDelayed(this, 1000);
+			}
+		}
+	};
+
 	private Notification buildNotification(int value, int maxValue, String currentFile) {
 		Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
@@ -174,10 +183,5 @@ public class ScanTracksService extends Service {
 		}
 
 		return builder.build();
-	}
-
-	@Override
-	public IBinder onBind(Intent intent) {
-		return null;
 	}
 }
