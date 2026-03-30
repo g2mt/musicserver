@@ -12,6 +12,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScanTracksService extends Service {
 	private static final String TAG = "[msxrv] ScanTracksService";
@@ -20,6 +21,8 @@ public class ScanTracksService extends Service {
 	private static final int COMPLETE_NOTIFICATION_ID = 2;
 
 	public static final String EXTRA_MUSIC_DIR = "music_dir";
+
+	private static final AtomicBoolean isRunning = new AtomicBoolean(false);
 
 	private NotificationManager notificationManager;
 
@@ -39,10 +42,22 @@ public class ScanTracksService extends Service {
 			return START_NOT_STICKY;
 		}
 
+		if (!isRunning.compareAndSet(false, true)) {
+			Log.d(TAG, "Scan already in progress, ignoring request.");
+			stopSelf();
+			return START_NOT_STICKY;
+		}
+
 		// Start foreground immediately with an indeterminate notification
 		startForeground(NOTIFICATION_ID, buildNotification(0, 0, "Starting scan..."));
 
-		Thread scanThread = new Thread(() -> runScan(musicDir));
+		Thread scanThread = new Thread(() -> {
+			try {
+				runScan(musicDir);
+			} finally {
+				isRunning.set(false);
+			}
+		});
 		scanThread.setDaemon(true);
 		scanThread.start();
 
