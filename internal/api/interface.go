@@ -76,13 +76,16 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	}
 	db.SetMaxOpenConns(1)
 
-	// Open cache database
-	cacheDbDir := filepath.Join(config.DbDir, CacheDbPath)
-	cacheDb, err := sql.Open("sqlite3", cacheDbDir)
-	if err != nil {
-		return nil, err
+	var cacheDb *sql.DB
+	if config.CacheDbEnabled != nil && *config.CacheDbEnabled {
+		// Open cache database
+		cacheDbDir := filepath.Join(config.DbDir, CacheDbPath)
+		cacheDb, err = sql.Open("sqlite3", cacheDbDir)
+		if err != nil {
+			return nil, err
+		}
+		cacheDb.SetMaxOpenConns(1)
 	}
-	cacheDb.SetMaxOpenConns(1)
 
 	trackCache, _ := lru.New[string, schema.Track](32)
 
