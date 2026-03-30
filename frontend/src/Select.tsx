@@ -51,7 +51,7 @@ export function Select({ value, onChange, children }: SelectProps) {
     value ||
     (options[0]
       ? (options[0] as React.ReactElement<OptionProps>).props.children
-      : "limit");
+      : "");
 
   return (
     <button className="btn menu-select" onClick={handleClick} ref={selectRef}>
