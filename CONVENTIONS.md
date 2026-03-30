@@ -1,5 +1,6 @@
 # Coding conventions
 
+- Use 2 spaces for indenting.
 - Prioritize simple code with minimal dependencies.
 - Add comments ONLY if it's not immediately obvious from a cursory glance of the code.
 
@@ -29,7 +30,35 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 - React is used for the frontend.
 - Use functional components for React.
 - Each element should be in its own file. Source files storing element definition shall be in the format "TitleCase.tsx".
+
 - Use the `react-toastify` library for showing errors.
+
+- Use the custom context menu element instead of the native one by importing the `./ContextMenu` file and using `showContextMenu`:
+```ts
+import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+
+showContextMenu(anchorElement, (
+  <>
+    <ContextMenuItem onClick=...>1</ContextMenuItem>
+    <ContextMenuItem onClick=...>2</ContextMenuItem>
+  </>
+))
+```
+
+- Use the custom Select and Option elements from `./Select`:
+```ts
+import { Select, Option } from "./Select";
+
+<Select onChange={handleLimitChange}>
+  <Option value="" disabled={true}>
+    limit
+  </Option>
+  <Option value={50}>50</Option>
+  <Option value={100}>100</Option>
+  <Option value={150}>150</Option>
+  <Option value={-1}>unlimited</Option>
+</Select>
+```
 
 ### CSS
 
@@ -53,4 +82,5 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 ### Android
 
 - This application uses API 33 functionality.
+- Only for **Java code**: use tabs for indenting.
 - Use ONLY the native Java `android` library. Libraries like `androidx`, etc. are unavailable.
