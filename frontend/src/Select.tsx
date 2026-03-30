@@ -12,15 +12,10 @@ type OptionProps = {
 
 export function Option({ onClick, children, disabled }: OptionProps) {
   const itemOnClick = (() => {
-    if (disabled)
-      return (() => false);
+    if (disabled) return () => false;
     return onClick ?? (() => {});
   })();
-  return (
-    <ContextMenuItem onClick={itemOnClick}>
-      {children}
-    </ContextMenuItem>
-  );
+  return <ContextMenuItem onClick={itemOnClick}>{children}</ContextMenuItem>;
 }
 
 type SelectProps = {
@@ -30,26 +25,29 @@ type SelectProps = {
 
 export function Select({ onChange, children }: SelectProps) {
   return (
-    <button className="btn" onClick={e => {
-      showContextMenu(
-        e.currentTarget,
-        <>
-          {children.map((option, index) => {
-            return React.cloneElement(option, {
-              key: index,
-              onClick: () => {
-                const optionValue = option.props.value;
-                const syntheticEvent = {
-                  target: { value: String(optionValue) },
-                  preventDefault: () => {},
-                } as React.ChangeEvent<HTMLSelectElement>;
-                onChange(syntheticEvent);
-              },
-            });
-          })}
-        </>,
-      );
-    }}>
+    <button
+      className="btn"
+      onClick={(e) => {
+        showContextMenu(
+          e.currentTarget,
+          <>
+            {children.map((option, index) => {
+              return React.cloneElement(option, {
+                key: index,
+                onClick: () => {
+                  const optionValue = option.props.value;
+                  const syntheticEvent = {
+                    target: { value: String(optionValue) },
+                    preventDefault: () => {},
+                  } as React.ChangeEvent<HTMLSelectElement>;
+                  onChange(syntheticEvent);
+                },
+              });
+            })}
+          </>,
+        );
+      }}
+    >
       <FontAwesomeIcon icon={faArrowDown} />
       {children.length > 0 ? children[0].props.children : ""}
     </button>
