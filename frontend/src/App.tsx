@@ -359,7 +359,6 @@ export function App() {
                 className="tab-btn"
                 onClick={scrollToLeftSide}
                 title="Go to tracks"
-                style={{ position: "sticky", top: 0, float: "right" }}
               >
                 <FontAwesomeIcon icon={faArrowUp} />
               </button>
