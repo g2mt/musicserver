@@ -16,10 +16,14 @@ import "./SettingsTab.css";
 function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
-  const [props, setProps] = useState<{ version: string; config: any } | null>(null);
+  const [props, setProps] = useState<{ version: string; config: any } | null>(
+    null,
+  );
 
   useEffect(() => {
-    fetchAPI("/props").then(setProps).catch(() => {});
+    fetchAPI("/props")
+      .then(setProps)
+      .catch(() => {});
   }, []);
 
   return (
@@ -39,11 +43,15 @@ function SettingsTab() {
           Show blurred album cover as background in dark mode
         </label>
       </div>
-      <button className="btn" disabled={!unsaved} onClick={() => {
-        saveConfig(c);
-        setUnsaved(false);
-        toast.success("Settings saved");
-      }}>
+      <button
+        className="btn"
+        disabled={!unsaved}
+        onClick={() => {
+          saveConfig(c);
+          setUnsaved(false);
+          toast.success("Settings saved");
+        }}
+      >
         <FontAwesomeIcon icon={faSave} /> Save
       </button>
       <button
@@ -88,7 +96,11 @@ function SettingsTab() {
           </div>
           <div>
             <label>Unix Socket Enabled:</label>
-            <input type="checkbox" readOnly checked={props.config.unix_bind_enabled} />
+            <input
+              type="checkbox"
+              readOnly
+              checked={props.config.unix_bind_enabled}
+            />
           </div>
           <div>
             <label>Unix Socket Path:</label>
@@ -104,7 +116,11 @@ function SettingsTab() {
           </div>
           <div>
             <label>Cache database enabled:</label>
-            <input type="checkbox" readOnly checked={props.config.cache_db_enabled} />
+            <input
+              type="checkbox"
+              readOnly
+              checked={props.config.cache_db_enabled}
+            />
           </div>
           <div>
             <label>Media Downloader:</label>

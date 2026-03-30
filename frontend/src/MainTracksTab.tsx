@@ -66,10 +66,18 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
       </div>
       <div className="main-tracks-controls-right">
         <Select value="" onChange={handleLimitChange}>
-          <Option value={50} onClick={() => {}}>50</Option>
-          <Option value={100} onClick={() => {}}>100</Option>
-          <Option value={150} onClick={() => {}}>150</Option>
-          <Option value={-1} onClick={() => {}}>unlimited</Option>
+          <Option value={50} onClick={() => {}}>
+            50
+          </Option>
+          <Option value={100} onClick={() => {}}>
+            100
+          </Option>
+          <Option value={150} onClick={() => {}}>
+            150
+          </Option>
+          <Option value={-1} onClick={() => {}}>
+            unlimited
+          </Option>
         </Select>
         <button className="btn" onClick={() => c.enqueueTrack(tracks)}>
           <FontAwesomeIcon icon={faPlus} />
