@@ -76,7 +76,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         </Select>
         <button className="btn" onClick={() => c.enqueueTrack(tracks)}>
           <FontAwesomeIcon icon={faPlus} />
-          Add all to queue
+          Add visible to queue
         </button>
       </div>
     </div>
