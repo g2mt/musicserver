@@ -33,8 +33,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
 
   const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
-    const newLimit =
-      e.target.value === "unlimited" ? -1 : Number(e.target.value);
+    const newLimit = Number(e.target.value);
     updateQuery(`limit:${newLimit}`, "limit");
   };
 
@@ -72,7 +71,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           <option value={50}>50</option>
           <option value={100}>100</option>
           <option value={150}>150</option>
-          <option value="unlimited">unlimited</option>
+          <option value={-1}>unlimited</option>
         </select>
         <button className="btn" onClick={() => c.enqueueTrack(tracks)}>
           <FontAwesomeIcon icon={faPlus} />
