@@ -1,5 +1,6 @@
 GOFLAGS ?= -v -ldflags="-X musicserver/internal/api.Version=$$(git rev-parse --short HEAD)"
 
+.PHONY: build/musicserver
 build/musicserver:
 	go build -o $@ $(GOFLAGS) .
 
