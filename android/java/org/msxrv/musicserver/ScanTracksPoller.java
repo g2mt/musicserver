@@ -55,7 +55,6 @@ public class ScanTracksPoller {
 					return;
 				}
 				if (!wasScanning) {
-					postOneTimeNotification("Scan started", "Scanning your music library...");
 					wasScanning = true;
 				}
 				postNotification(vals.value, vals.maxValue);

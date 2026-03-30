@@ -5,6 +5,7 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -149,6 +150,7 @@ public class NativeBridge {
 		Log.d("[msxrv] Native", "scanTracks called");
 		if (scanTracksThread.get() != null)
 			return;
+		Toast.makeText(activity, "Scan tracks started...", Toast.LENGTH_SHORT).show();
 		Thread thread = new Thread(() -> {
 			Log.d("[msxrv] Native", "scanTracks: new thread spawned");
 			msrvStartScanTracks(interfaceHandle);
