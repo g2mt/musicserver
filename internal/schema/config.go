@@ -19,6 +19,8 @@ type Config struct {
 	DataPath string `json:"data_path" yaml:"data_path"`
 	// path where database and other info is stored. defaults to /var/lib/musicserver for root users, ~/.musicserver/db if non-root
 	DbDir string `json:"db_dir" yaml:"db_dir"`
+	// If set, enables the cache database. defaults to true
+	CacheDbEnabled *bool `json:"cache_db_enabled" yaml:"cache_db_enabled"`
 	// path to generic media downloader binary
 	MediaDownloader string `json:"media_downloader" yaml:"media_downloader"`
 }
@@ -60,6 +62,11 @@ func LoadConfig(path string) (*Config, error) {
 		} else {
 			config.DbDir = currentUser.HomeDir + "/.musicserver/db"
 		}
+	}
+
+	if config.CacheDbEnabled == nil {
+		defaultVal := true
+		config.CacheDbEnabled = &defaultVal
 	}
 
 	return &config, nil
