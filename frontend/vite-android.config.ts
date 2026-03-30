@@ -7,6 +7,6 @@ export default defineConfig({
   plugins: [react(), viteSingleFile()],
   build: { outDir: 'dist-android' },
   define: {
-    'import.meta.env.VITE_NO_PROGRESS_SUPPORT': true,
+    'import.meta.env.NO_PROGRESS_SUPPORT': true,
   },
 });

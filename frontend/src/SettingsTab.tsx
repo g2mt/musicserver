@@ -108,7 +108,7 @@ function SettingsTab() {
           </div>
         </form>
       )}
-      {!import.meta.env.VITE_NO_PROGRESS_SUPPORT && (
+      {!import.meta.env.NO_PROGRESS_SUPPORT && (
         <>
           <hr />
           <h2>Ongoing processes</h2>
