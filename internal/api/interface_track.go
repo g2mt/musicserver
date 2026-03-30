@@ -362,7 +362,27 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		}
 	}()
 
-	// TODO: check if long id already exists in tracks table. this implies that the track already exists and has a short id. If it does then update the track and return early. also set the track.ShortID to the one in the table
+	// Check if long id already exists in tracks table
+	var existingShortID string
+	err = tx.QueryRow("SELECT short_id FROM tracks WHERE id = ?", longID).Scan(&existingShortID)
+	if err == nil {
+		// Track already exists, update it
+		_, err = tx.Exec(
+			"UPDATE tracks SET name = ?, path = ?, artist = ?, album = ? WHERE id = ?",
+			track.Name, track.Path, track.Artist, track.Album, longID,
+		)
+		if err != nil {
+			return "", err
+		}
+		track.ShortID = existingShortID
+		err = tx.Commit()
+		if err != nil {
+			return "", err
+		}
+		return track.ShortID, nil
+	} else if err != sql.ErrNoRows {
+		return "", err
+	}
 
 	// Track doesn't exist, create a short ID
 
