@@ -15,6 +15,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScanTracksService extends Service {
 	private static final String TAG = "[msxrv] ScanTracksService";
@@ -27,6 +28,22 @@ public class ScanTracksService extends Service {
 	private static final AtomicBoolean isRunning = new AtomicBoolean(false);
 
 	private NotificationManager notificationManager;
+	private final Handler mainHandler = new Handler(Looper.getMainLooper());
+	
+	private final AtomicInteger scannedCount = new AtomicInteger(0);
+	private final AtomicInteger totalCount = new AtomicInteger(0);
+	private volatile String currentFileName = "";
+
+	private final Runnable notificationUpdater = new Runnable() {
+		@Override
+		public void run() {
+			if (isRunning.get()) {
+				notificationManager.notify(NOTIFICATION_ID,
+					buildNotification(scannedCount.get(), totalCount.get(), currentFileName));
+				mainHandler.postDelayed(this, 1000);
+			}
+		}
+	};
 
 	@Override
 	public void onCreate() {
@@ -56,79 +73,87 @@ public class ScanTracksService extends Service {
 			return START_NOT_STICKY;
 		}
 
-		// Start foreground immediately with an indeterminate notification
-		startForeground(NOTIFICATION_ID, buildNotification(0, 0, "Starting scan..."));
+		scannedCount.set(0);
+		totalCount.set(0);
+		currentFileName = "Starting scan...";
 
-		Thread scanThread = new Thread(() -> {
-			try {
-				runScan(musicDir);
-			} finally {
-				isRunning.set(false);
-			}
-		});
+		// Start foreground immediately with an indeterminate notification
+		startForeground(NOTIFICATION_ID, buildNotification(0, 0, currentFileName));
+
+		mainHandler.postDelayed(notificationUpdater, 1000);
+
+		ScanThread scanThread = new ScanThread(musicDir);
 		scanThread.setDaemon(true);
 		scanThread.start();
 
 		return START_NOT_STICKY;
 	}
 
-	private void runScan(String musicDir) {
-		MusicServerApp app = (MusicServerApp) getApplication();
-		NativeBridge bridge = app.getNativeBridge();
+	private class ScanThread extends Thread {
+		private final String musicDir;
 
-		if (bridge == null) {
-			Log.e(TAG, "NativeBridge is null, aborting scan.");
-			stopSelf();
-			return;
+		ScanThread(String musicDir) {
+			this.musicDir = musicDir;
 		}
 
-		// First pass: collect all files
-		List<File> files = new ArrayList<>();
-		collectFiles(new File(musicDir), files);
-		int total = files.size();
-		Log.d(TAG, "Found " + total + " files to scan.");
+		@Override
+		public void run() {
+			try {
+				MusicServerApp app = (MusicServerApp) getApplication();
+				NativeBridge bridge = app.getNativeBridge();
 
-		// Second pass: load each file
-		int scanned = 0;
-		for (File file : files) {
-			String path = file.getAbsolutePath();
-			String filename = file.getName();
+				if (bridge == null) {
+					Log.e(TAG, "NativeBridge is null, aborting scan.");
+					return;
+				}
 
-			notificationManager.notify(NOTIFICATION_ID,
-				buildNotification(scanned, total, filename));
+				// First pass: collect all files
+				List<File> files = new ArrayList<>();
+				collectFiles(new File(musicDir), files);
+				totalCount.set(files.size());
+				Log.d(TAG, "Found " + totalCount.get() + " files to scan.");
 
-			Log.d(TAG, "Loading track: " + path);
-			bridge.loadTrackByPath(path);
+				// Second pass: load each file
+				for (File file : files) {
+					currentFileName = file.getName();
 
-			scanned++;
+					Log.d(TAG, "Loading track: " + file.getAbsolutePath());
+					bridge.loadTrackByPath(file.getAbsolutePath());
+
+					scannedCount.incrementAndGet();
+				}
+
+				notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(ScanTracksService.this, CHANNEL_ID)
+					.setSmallIcon(android.R.drawable.ic_media_play)
+					.setContentTitle("Scan complete")
+					.setContentText("Scanned " + scannedCount.get() + " files.")
+					.setAutoCancel(true)
+					.build());
+
+				mainHandler.post(() ->
+					app.getWebView().evaluateJavascript("window._refreshSearch()", null));
+
+			} finally {
+				isRunning.set(false);
+				mainHandler.removeCallbacks(notificationUpdater);
+				stopSelf();
+			}
 		}
 
-		notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(this, CHANNEL_ID)
-			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setContentTitle("Scan complete")
-			.setContentText("Scanned " + scanned + " files.")
-			.setAutoCancel(true)
-			.build());
-
-		new Handler(Looper.getMainLooper()).post(() ->
-			app.getWebView().evaluateJavascript("window._refreshSearch()", null));
-
-		stopSelf();
-	}
-
-	private void collectFiles(File dir, List<File> result) {
-		if (!dir.exists() || !dir.isDirectory()) {
-			return;
-		}
-		File[] entries = dir.listFiles();
-		if (entries == null) {
-			return;
-		}
-		for (File entry : entries) {
-			if (entry.isDirectory()) {
-				collectFiles(entry, result);
-			} else {
-				result.add(entry);
+		private void collectFiles(File dir, List<File> result) {
+			if (!dir.exists() || !dir.isDirectory()) {
+				return;
+			}
+			File[] entries = dir.listFiles();
+			if (entries == null) {
+				return;
+			}
+			for (File entry : entries) {
+				if (entry.isDirectory()) {
+					collectFiles(entry, result);
+				} else {
+					result.add(entry);
+				}
 			}
 		}
 	}
@@ -144,7 +169,7 @@ public class ScanTracksService extends Service {
 			builder.setContentText(value + " / " + maxValue + " — " + currentFile)
 				   .setProgress(maxValue, value, false);
 		} else {
-			builder.setContentText("Scanning...")
+			builder.setContentText(currentFile)
 				   .setProgress(0, 0, true);
 		}
 
