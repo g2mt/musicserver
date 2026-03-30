@@ -8,7 +8,12 @@
   .main-tracks-controls-right {
     display: flex;
     align-items: center;
-    gap: var(--s2);
+  }
+}
+
+.minimized .main-tracks-controls {
+  .main-tracks-controls-left .btn span {
+    display: none;
   }
 }
 
