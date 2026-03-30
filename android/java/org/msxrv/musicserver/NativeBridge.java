@@ -20,7 +20,6 @@ public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
 	private ScanTracksPoller poller;
-	private AtomicReference<Thread> scanTracksThread = new AtomicReference<>();
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	public NativeBridge(MainActivity activity) throws NativeBridgeException {
@@ -235,20 +234,7 @@ public class NativeBridge {
 
 	@JavascriptInterface
 	public void scanTracks() {
-		Log.d("[msxrv] Native", "scanTracks called");
-		if (scanTracksThread.get() != null)
-			return;
-		Toast.makeText(activity, "Scan tracks started...", Toast.LENGTH_SHORT).show();
-		Thread thread = new Thread(() -> {
-			Log.d("[msxrv] Native", "scanTracks: new thread spawned");
-			msrvStartScanTracks(interfaceHandle);
-			mainHandler.post(() -> {
-				poller.run();
-			});
-			scanTracksThread.set(null);
-		});
-		scanTracksThread.set(thread);
-		thread.start();
+		// TODO
 	}
 
 	@JavascriptInterface
