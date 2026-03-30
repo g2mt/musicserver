@@ -101,10 +101,13 @@ public class ScanTracksService extends Service {
 			scanned++;
 		}
 
-		notificationManager.notify(NOTIFICATION_ID,
-			buildNotification(total, total, "Done"));
-
-		postCompleteNotification(scanned);
+		notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(this, CHANNEL_ID)
+			.setSmallIcon(android.R.drawable.ic_media_play)
+			.setContentTitle("Scan complete")
+			.setContentText("Scanned " + count + " files.")
+			.setAutoCancel(true)
+			.build());
+		// TODO: call the app's webview js: "window._refreshSearch()"
 		stopSelf();
 	}
 
@@ -141,16 +144,6 @@ public class ScanTracksService extends Service {
 		}
 
 		return builder.build();
-	}
-
-	private void postCompleteNotification(int count) {
-		Notification notification = new Notification.Builder(this, CHANNEL_ID)
-			.setSmallIcon(android.R.drawable.ic_media_play)
-			.setContentTitle("Scan complete")
-			.setContentText("Scanned " + count + " files.")
-			.setAutoCancel(true)
-			.build();
-		notificationManager.notify(COMPLETE_NOTIFICATION_ID, notification);
 	}
 
 	@Override
