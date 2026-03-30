@@ -362,6 +362,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		}
 	}()
 
+	// TODO: check if long id already exists in tracks table. If it does then update the track and return early. also set the ShortID to the one in the table
+
 	// Determine short ID according to the conflict resolution algorithm
 	// Start with first 6 characters
 	shortID := longID[:MinShortIdLength]
