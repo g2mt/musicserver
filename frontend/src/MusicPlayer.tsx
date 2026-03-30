@@ -216,18 +216,21 @@ export function MusicPlayer() {
       <>
         <ContextMenuItem
           onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
+          icon={c.isPlaying ? faPause : faPlay}
         >
           {c.isPlaying ? "Pause" : "Play"}
         </ContextMenuItem>
         <ContextMenuItem
           onClick={handleForward}
           disabled={isForwardDisabled}
+          icon={faForwardStep}
         >
           Forward
         </ContextMenuItem>
         <ContextMenuItem
           onClick={handleBack}
           disabled={isBackDisabled}
+          icon={faBackwardStep}
         >
           Backward
         </ContextMenuItem>
