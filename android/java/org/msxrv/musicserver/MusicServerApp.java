@@ -51,7 +51,7 @@ public class MusicServerApp extends Application {
 			return;
 		}
 
-		nativeAudioBridge = new NativeAudioBridge(activity, webView);
+		nativeAudioBridge = new NativeAudioBridge(activity);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
 	}
 }

@@ -14,6 +14,7 @@ import dalvik.annotation.optimization.FastNative;
 public class NativeBridge {
 	private Activity activity;
 	private long interfaceHandle;
+	private ScanTracksPoller poller;
 
 	public NativeBridge(MainActivity activity) throws NativeBridgeException {
 		this.activity = activity;
@@ -37,6 +38,8 @@ public class NativeBridge {
 		if (outErr[0] != null) {
 			throw new NativeBridgeException("Failed to create interface: " + outErr[0]);
 		}
+
+		poller = new ScanTracksPoller(activity, this);
 	}
 
 	/**
@@ -139,7 +142,7 @@ public class NativeBridge {
 	public void scanTracks() {
 		Log.d("[msxrv] Native", "scanTracks called");
 		msrvStartScanTracks(interfaceHandle);
-		new ScanTracksPoller(activity, this);
+		poller.run();
 	}
 
 	@JavascriptInterface

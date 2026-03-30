@@ -48,9 +48,11 @@ public class NativeAudioBridge {
 		return (MusicServerApp) activity.getApplication();
 	}
 
-	public NativeAudioBridge(MainActivity activity, WebView webView) {
+	public NativeAudioBridge(MainActivity activity) {
 		this.activity = activity;
-		this.webView = webView;
+
+		WebView wv = activity.getApp().getWebView();
+		this.webView = wv;
 
 		mediaSession = new MediaSession(activity, "NativeAudioBridge");
 		mediaSession.setActive(true);
