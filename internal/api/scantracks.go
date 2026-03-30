@@ -36,12 +36,16 @@ func (i *Interface) ScanTracks(tickerBounded chan<- struct{}) (map[string]string
 
 	// Bind progress ticker
 	if ticker, err := i.prog.Bind("scanTracks"); err == nil {
-		i.scan.ticker.Store(ticker)
+		if i.scan.ticker.Swap(ticker) != nil {
+			panic("Expected old ticker to be nil")
+		}
 	} else {
 		return nil, err
 	}
 	defer func() {
-		i.scan.ticker.Store(nil)
+		if i.scan.ticker.Swap(nil) == nil {
+			panic("Expected old ticker to not be nil")
+		}
 		i.prog.Unbind("scanTracks")
 	}()
 	i.scan.ticker.Load().SetMaxValue(totalFiles)
