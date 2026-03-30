@@ -47,6 +47,15 @@ public class NativeBridge {
 		}
 	}
 
+	public void terminate() {
+		if (interfaceHandle != 0) {
+			msrvDeleteHandle(interfaceHandle);
+			interfaceHandle = 0;
+		}
+	}
+
+	// Native function handlers
+
 	/**
 	 * Exception thrown when NativeBridge initialization fails.
 	 */
@@ -109,13 +118,6 @@ public class NativeBridge {
 	 * @param handle the handle to delete (interface or reader handle)
 	 */
 	private native void msrvDeleteHandle(long handle);
-
-	public void terminate() {
-		if (interfaceHandle != 0) {
-			msrvDeleteHandle(interfaceHandle);
-			interfaceHandle = 0;
-		}
-	}
 
 	/**
 	 * Loads a track from the given path and adds it to the library.
