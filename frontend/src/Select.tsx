@@ -1,5 +1,7 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
 
 type OptionProps = {
   value: any;
@@ -11,7 +13,7 @@ type OptionProps = {
 export function Option({ onClick, children, disabled }: OptionProps) {
   const itemOnClick = (() => {
     if (disabled)
-      return (() => true);
+      return (() => false);
     return onClick ?? (() => {});
   })();
   return (
@@ -22,50 +24,34 @@ export function Option({ onClick, children, disabled }: OptionProps) {
 }
 
 type SelectProps = {
-  value: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  children: React.ReactNode;
+  children: React.ReactElement<OptionProps>[];
 };
 
-export function Select({ value, onChange, children }: SelectProps) {
-  const selectRef = useRef<HTMLButtonElement | null>(null);
-
-  const options = React.Children.toArray(children).filter(
-    (child) => React.isValidElement(child) && child.type === Option,
-  );
-
-  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
-    showContextMenu(
-      e.currentTarget,
-      <>
-        {options.map((option, index) => {
-          if (!React.isValidElement(option)) return null;
-          return React.cloneElement(option as React.ReactElement<OptionProps>, {
-            key: index,
-            onClick: () => {
-              const optionValue = (option as React.ReactElement<OptionProps>)
-                .props.value;
-              const syntheticEvent = {
-                target: { value: String(optionValue) },
-                preventDefault: () => {},
-              } as unknown as React.ChangeEvent<HTMLSelectElement>;
-              onChange(syntheticEvent);
-            },
-          });
-        })}
-      </>,
-    );
-  };
-
-  const displayValue =
-    value ||
-    (options[0]
-      ? (options[0] as React.ReactElement<OptionProps>).props.children
-      : "");
-
+export function Select({ onChange, children }: SelectProps) {
   return (
-    <button className="btn menu-select" onClick={handleClick} ref={selectRef}>
-      {displayValue}
+    <button className="btn" onClick={e => {
+      showContextMenu(
+        e.currentTarget,
+        <>
+          {children.map((option, index) => {
+            return React.cloneElement(option, {
+              key: index,
+              onClick: () => {
+                const optionValue = option.props.value;
+                const syntheticEvent = {
+                  target: { value: String(optionValue) },
+                  preventDefault: () => {},
+                } as React.ChangeEvent<HTMLSelectElement>;
+                onChange(syntheticEvent);
+              },
+            });
+          })}
+        </>,
+      );
+    }}>
+      <FontAwesomeIcon icon={faArrowDown} />
+      {children.length > 0 ? children[0].props.children : ""}
     </button>
   );
 }
