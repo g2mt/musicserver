@@ -140,7 +140,7 @@ public class ScanTracksService extends Service {
 		currentFileName.set(initialFileName);
 
 		// Start foreground immediately with an indeterminate notification
-		startForeground(NOTIFICATION_ID, buildNotification(0, 0, initialFileName));
+		startForeground(NOTIFICATION_ID, buildNotification());
 
 		mainHandler.postDelayed(notificationUpdater, 1000);
 
@@ -162,19 +162,22 @@ public class ScanTracksService extends Service {
 		@Override
 		public void run() {
 			if (isRunning.get()) {
-				notificationManager.notify(NOTIFICATION_ID,
-					buildNotification(scannedCount.get(), totalCount.get(), currentFileName.get()));
+				notificationManager.notify(NOTIFICATION_ID, buildNotification());
 				mainHandler.postDelayed(this, 1000);
 			}
 		}
 	};
 
-	private Notification buildNotification(int value, int maxValue, String currentFile) {
+	private Notification buildNotification() {
 		Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
 			.setContentTitle("Scanning music library")
 			.setOngoing(true)
 			.setOnlyAlertOnce(true);
+
+		int value = scannedCount.get();
+		int maxValue = totalCount.get();
+		String currentFile = currentFileName.get();
 
 		if (maxValue > 0) {
 			builder.setContentText(value + " / " + maxValue + " — " + currentFile)
