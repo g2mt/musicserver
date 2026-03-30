@@ -9,6 +9,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useRef } from "react";
 import { AppContext } from "./AppState";
 import { Select, Option } from "./Select";
+import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+import { fetchAPI } from "./apiserver";
+import { toast } from "react-toastify";
 
 import "./MainTracksTab.css";
 
@@ -36,6 +39,29 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
     e.preventDefault();
     const newLimit = Number(e.target.value);
     updateQuery(`limit:${newLimit}`, "limit");
+  };
+
+  const handleAddAllToQueue = () => {
+    fetchAPI("/track", { q: `${c.searchQuery} limit:-1` })
+      .then((data) => {
+        if (data === null || data.length === 0) {
+          toast.warn(<>No tracks found</>);
+        } else {
+          c.enqueueTrack(data);
+        }
+      })
+      .catch((e) => {
+        toast.error(<>Error loading: {e.toString()}</>);
+      });
+  };
+
+  const handleContextMenu = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    showContextMenu(e.currentTarget, (
+      <>
+        <ContextMenuItem onClick={handleAddAllToQueue}>Add all to queue</ContextMenuItem>
+      </>
+    ));
   };
 
   const controls = (
@@ -74,7 +100,11 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           <Option value={150}>150</Option>
           <Option value={-1}>unlimited</Option>
         </Select>
-        <button className="btn" onClick={() => c.enqueueTrack(tracks)}>
+        <button
+          className="btn"
+          onClick={() => c.enqueueTrack(tracks)}
+          onContextMenu={handleContextMenu}
+        >
           <FontAwesomeIcon icon={faPlus} />
           Add visible to queue
         </button>
