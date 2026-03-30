@@ -24,6 +24,11 @@ public class MusicServerApp extends Application {
 		return nativeAudioBridge;
 	}
 
+	private SettingsBridge settingsBridge;
+	public SettingsBridge getSettingsBridge() {
+		return settingsBridge;
+	}
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -51,5 +56,8 @@ public class MusicServerApp extends Application {
 
 		nativeAudioBridge = new NativeAudioBridge(activity);
 		webView.addJavascriptInterface(nativeAudioBridge, "_native_audio_bridge");
+
+		settingsBridge = new SettingsBridge(activity);
+		webView.addJavascriptInterface(settingsBridge, "_native_settings");
 	}
 }
