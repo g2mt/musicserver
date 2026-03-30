@@ -7,21 +7,19 @@ import android.webkit.WebView;
 
 public class MusicServerApp extends Application {
 	private WebView webView;
-	private NativeBridge nativeBridge;
-	private NativeAudioBridge nativeAudioBridge;
-
 	public WebView getWebView() {
 		return webView;
 	}
-
 	public void loadWebView() {
 		webView.loadUrl("file:///android_asset/index.html");
 	}
 
+	private NativeBridge nativeBridge;
 	public NativeBridge getNativeBridge() {
 		return nativeBridge;
 	}
 
+	private NativeAudioBridge nativeAudioBridge;
 	public NativeAudioBridge getNativeAudioBridge() {
 		return nativeAudioBridge;
 	}
