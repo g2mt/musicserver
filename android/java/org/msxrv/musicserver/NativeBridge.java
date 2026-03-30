@@ -1,6 +1,7 @@
 package org.msxrv.musicserver;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.os.Handler;
@@ -208,7 +209,7 @@ public class NativeBridge {
 
 		return result.toString();
 	}
-	
+
 	public String loadTrackByPath(String path) {
 		Log.d("[msxrv] Native", "loadTrackByPath path=" + path);
 
@@ -227,7 +228,10 @@ public class NativeBridge {
 
 	@JavascriptInterface
 	public void scanTracks() {
-		// TODO
+		String musicDir = ((MainActivity) activity).getMusicDir();
+		Intent intent = new Intent(activity, ScanTracksService.class);
+		intent.putExtra(ScanTracksService.EXTRA_MUSIC_DIR, musicDir);
+		activity.startForegroundService(intent);
 	}
 
 	@JavascriptInterface
@@ -256,5 +260,4 @@ public class NativeBridge {
 
 		return data != null ? new String(data) : null;
 	}
-
 }
