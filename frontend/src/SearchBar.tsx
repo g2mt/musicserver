@@ -100,15 +100,17 @@ function SearchBar() {
       <button type="submit" className="icon-btn">
         <FontAwesomeIcon icon={faSearch} />
       </button>
-      <button
-        type="button"
-        className="icon-btn btn-download"
-        title='Paste a URL beginning with "http:" or "https:" to download it.'
-        onClick={() => confirmTrackDownload(inputValue)}
-        disabled={!isValidUrl}
-      >
-        <FontAwesomeIcon icon={faDownload} />
-      </button>
+      {c.props && c.props.config.media_downloader && (
+        <button
+          type="button"
+          className="icon-btn btn-download"
+          title='Paste a URL beginning with "http:" or "https:" to download it.'
+          onClick={() => confirmTrackDownload(inputValue)}
+          disabled={!isValidUrl}
+        >
+          <FontAwesomeIcon icon={faDownload} />
+        </button>
+      )}
     </form>
   );
 }
