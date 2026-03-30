@@ -6,6 +6,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 public class MusicServerApp extends Application {
+	private static final String TAG = "[msxrv] MusicServerApp";
 	private WebView webView;
 	public WebView getWebView() {
 		return webView;
@@ -50,7 +51,7 @@ public class MusicServerApp extends Application {
 			nativeBridge = new NativeBridge(activity);
 			webView.addJavascriptInterface(nativeBridge, "_native");
 		} catch (NativeBridge.NativeBridgeException e) {
-			Log.e("[msxrv] App", "NativeBridge init failed: " + e.getMessage());
+			Log.e(TAG, "NativeBridge init failed: " + e.getMessage());
 			return;
 		}
 

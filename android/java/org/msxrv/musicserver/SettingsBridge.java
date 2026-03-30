@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.webkit.JavascriptInterface;
 
 public class SettingsBridge {
+	private static final String TAG = "[msxrv] SettingsBridge";
 	private static final String PREFS_NAME = "musicserver_settings";
 	private final SharedPreferences sharedPreferences;
 

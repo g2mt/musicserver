@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
+	private static final String TAG = "[msxrv] MainActivity";
 	static {
 		System.loadLibrary("musicserver");
 		System.loadLibrary("musicserverbind");
@@ -57,11 +58,11 @@ public class MainActivity extends Activity {
 
 		musicDir = android.os.Environment.getExternalStoragePublicDirectory(
 			android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
-		Log.e("[msxrv] Native", "Setting musicDir = " + musicDir);
+		Log.e(TAG, "Setting musicDir = " + musicDir);
 
 		dbDir = getExternalFilesDir(
 			android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
-		Log.e("[msxrv] Native", "Setting dbDir = " + dbDir);
+		Log.e(TAG, "Setting dbDir = " + dbDir);
 
 		// Finish initializing bridges now that we have an Activity context for paths
 		getApp().initBridges(this);

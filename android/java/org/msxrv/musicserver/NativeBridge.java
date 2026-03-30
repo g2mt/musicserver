@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import dalvik.annotation.optimization.FastNative;
 
 public class NativeBridge {
+	private static final String TAG = "[msxrv] NativeBridge";
 	private Activity activity;
 	private long interfaceHandle;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -27,7 +28,7 @@ public class NativeBridge {
 
 		String id = msrvIdentify();
 		if (!"musicserver".equals(id)) {
-			Log.e("[msxrv] Native", "msrvIdentify returned: " + id);
+			Log.e(TAG, "msrvIdentify returned: " + id);
 			throw new NativeBridgeException("Failed to connect through JNI.");
 		}
 
@@ -211,13 +212,13 @@ public class NativeBridge {
 	}
 
 	public String loadTrackByPath(String path) {
-		Log.d("[msxrv] Native", "loadTrackByPath path=" + path);
+		Log.d(TAG, "loadTrackByPath path=" + path);
 
 		String[] outErr = new String[1];
 		String shortId = msrvLoadTrackByPath(interfaceHandle, path, outErr);
 
 		if (outErr[0] != null) {
-			Log.e("[msxrv] Native", "loadTrackByPath failed: " + outErr[0]);
+			Log.e(TAG, "loadTrackByPath failed: " + outErr[0]);
 			return null;
 		}
 
@@ -238,14 +239,14 @@ public class NativeBridge {
 	@JavascriptInterface
 	public String fetchAPI(String encodedPath, String method, String paramsJson) {
 		final String path = decodeURI(encodedPath);
-		Log.d("[msxrv] Native", "path=" + path + " paramsJson=" + paramsJson + " method=" + method);
+		Log.d(TAG, "path=" + path + " paramsJson=" + paramsJson + " method=" + method);
 
 		String[] outContentType = new String[1];
 		String[] outErr = new String[1];
 		long readerHandle = msrvHandleRequest(interfaceHandle, path, method, paramsJson, outContentType, outErr);
 
 		if (outErr[0] != null) {
-			Log.e("[msxrv] Native", "Request failed: " + outErr[0]);
+			Log.e(TAG, "Request failed: " + outErr[0]);
 			return null;
 		}
 
@@ -255,7 +256,7 @@ public class NativeBridge {
 		msrvDeleteHandle(readerHandle);
 
 		if (readErr[0] != null) {
-			Log.e("[msxrv] Native", "Read failed: " + readErr[0]);
+			Log.e(TAG, "Read failed: " + readErr[0]);
 			return null;
 		}
 
