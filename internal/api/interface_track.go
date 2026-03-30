@@ -362,7 +362,9 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		}
 	}()
 
-	// TODO: check if long id already exists in tracks table. If it does then update the track and return early. also set the ShortID to the one in the table
+	// TODO: check if long id already exists in tracks table. this implies that the track already exists and has a short id. If it does then update the track and return early. also set the track.ShortID to the one in the table
+
+	// Track doesn't exist, create a short ID
 
 	// Determine short ID according to the conflict resolution algorithm
 	// Start with first 6 characters
