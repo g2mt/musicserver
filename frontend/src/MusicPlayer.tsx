@@ -206,6 +206,19 @@ export function MusicPlayer() {
     };
   }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (c.isPlaying) {
+        e.preventDefault();
+        return "A track is playing. Are you sure you want to leave?";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [c.isPlaying]);
+
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
