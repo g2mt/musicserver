@@ -8,11 +8,7 @@ type OptionProps = {
 };
 
 export function Option({ onClick, children }: OptionProps) {
-  return (
-    <ContextMenuItem onClick={onClick}>
-      {children}
-    </ContextMenuItem>
-  );
+  return <ContextMenuItem onClick={onClick}>{children}</ContextMenuItem>;
 }
 
 type SelectProps = {
@@ -37,7 +33,8 @@ export function Select({ value, onChange, children }: SelectProps) {
           return React.cloneElement(option as React.ReactElement<OptionProps>, {
             key: index,
             onClick: () => {
-              const optionValue = (option as React.ReactElement<OptionProps>).props.value;
+              const optionValue = (option as React.ReactElement<OptionProps>)
+                .props.value;
               const syntheticEvent = {
                 target: { value: String(optionValue) },
                 preventDefault: () => {},
@@ -50,14 +47,14 @@ export function Select({ value, onChange, children }: SelectProps) {
     );
   };
 
-  const displayValue = value || (options[0] ? (options[0] as React.ReactElement<OptionProps>).props.children : "limit");
+  const displayValue =
+    value ||
+    (options[0]
+      ? (options[0] as React.ReactElement<OptionProps>).props.children
+      : "limit");
 
   return (
-    <button
-      className="btn menu-select"
-      onClick={handleClick}
-      ref={selectRef}
-    >
+    <button className="btn menu-select" onClick={handleClick} ref={selectRef}>
       {displayValue}
     </button>
   );

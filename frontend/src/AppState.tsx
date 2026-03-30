@@ -105,5 +105,8 @@ export function saveConfig(state: AppState) {
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,
   };
-  (window._native_settings ?? localStorage).setItem(CONFIG_KEY, JSON.stringify(config));
+  (window._native_settings ?? localStorage).setItem(
+    CONFIG_KEY,
+    JSON.stringify(config),
+  );
 }
