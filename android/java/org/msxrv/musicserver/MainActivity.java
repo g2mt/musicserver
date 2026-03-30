@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		if (getIntent().getBooleanExtra("quit", false)) {
-			finish();
+			finishAndRemoveTask();
 			return;
 		}
 
@@ -131,7 +131,7 @@ public class MainActivity extends Activity {
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		if (intent.getBooleanExtra("quit", false)) {
-			finish();
+			finishAndRemoveTask();
 		}
 	}
 
