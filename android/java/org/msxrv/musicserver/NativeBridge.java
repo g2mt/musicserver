@@ -135,9 +135,9 @@ public class NativeBridge {
 		return msrvGetScanTickerValues(interfaceHandle);
 	}
 
-	private ScanNotificationPoller.OnScanCompleteListener scanCompleteListener;
+	private ScanTracksPoller.OnScanCompleteListener scanCompleteListener;
 
-	public void setScanCompleteListener(ScanNotificationPoller.OnScanCompleteListener listener) {
+	public void setScanCompleteListener(ScanTracksPoller.OnScanCompleteListener listener) {
 		this.scanCompleteListener = listener;
 	}
 
@@ -145,7 +145,7 @@ public class NativeBridge {
 	public void scanTracks() {
 		Log.d("[msxrv] Native", "scanTracks called");
 		msrvStartScanTracks(interfaceHandle);
-		ScanNotificationPoller poller = new ScanNotificationPoller(activity, this);
+		ScanTracksPoller poller = new ScanTracksPoller(activity, this);
 		poller.setOnScanCompleteListener(scanCompleteListener);
 	}
 

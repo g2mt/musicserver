@@ -11,7 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-public class ScanNotificationPoller {
+public class ScanTracksPoller {
 	private static final String CHANNEL_ID = "msxrv_scan";
 	private static final int NOTIFICATION_ID = 1;
 	private static final long POLL_INTERVAL_MS = 1000;
@@ -33,11 +33,11 @@ public class ScanNotificationPoller {
 		this.onScanCompleteListener = listener;
 	}
 
-	public ScanNotificationPoller(Activity activity, NativeBridge bridge) {
+	public ScanTracksPoller(Activity activity, NativeBridge bridge) {
 		this.activity = activity;
 		this.bridge = bridge;
 
-		Log.d("[msxrv] ScanNotificationPoller", "starting poller");
+		Log.d("[msxrv] ScanTracksPoller", "starting poller");
 
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -48,7 +48,7 @@ public class ScanNotificationPoller {
 
 			@Override
 			public void run() {
-				Log.d("[msxrv] ScanNotificationPoller", "polling ticker values");
+				Log.d("[msxrv] ScanTracksPoller", "polling ticker values");
 				NativeBridge.ScanTickerValues vals = bridge.getScanTickerValues();
 				if (!vals.present) {
 					if (wasScanning) {
