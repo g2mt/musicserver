@@ -10,10 +10,5 @@
     align-items: center;
     gap: var(--s2);
   }
-
-  .limit-select {
-    padding: var(--s1);
-    font-size: small;
-  }
 }
 

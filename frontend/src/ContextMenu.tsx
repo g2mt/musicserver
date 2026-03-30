@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type IconDefinition } from "@fortawesome/fontawesome-svg-core";
-import "./ContextMenu.css";
 
 export function ContextMenuItem({
   onClick,
@@ -14,7 +13,7 @@ export function ContextMenuItem({
 }) {
   return (
     <div
-      className="context-menu-item"
+      className="menu-item"
       onClick={() => {
         onClick();
         setMenuState?.(null);
@@ -94,7 +93,7 @@ export function ContextMenu() {
   };
 
   return (
-    <div className="context-menu" style={style} ref={menuRef}>
+    <div className="menu" style={style} ref={menuRef}>
       {state.content}
     </div>
   );
