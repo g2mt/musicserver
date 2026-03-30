@@ -2,14 +2,20 @@ import React, { useRef } from "react";
 import { ContextMenuItem, showContextMenu } from "./ContextMenu";
 
 type OptionProps = {
-  value: string | number;
+  value: any;
   onClick?: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  disabled?: boolean;
 };
 
-export function Option({ onClick, children }: OptionProps) {
+export function Option({ onClick, children, disabled }: OptionProps) {
+  const itemOnClick = (() => {
+    if (disabled)
+      return (() => true);
+    return onClick ?? (() => {});
+  })();
   return (
-    <ContextMenuItem onClick={onClick ?? (() => {})}>
+    <ContextMenuItem onClick={itemOnClick}>
       {children}
     </ContextMenuItem>
   );
