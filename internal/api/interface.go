@@ -72,11 +72,11 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		return nil, err
 	}
 
-	db, err := sql.Open("sqlite3", dbDir)
+	// sqlite dsn from: https://stackoverflow.com/a/79652616
+	db, err := sql.Open("sqlite3", "file:"+dbDir+"?_journal_mode=WAL&_busy_timeout=3000&_synchronous=NORMAL&_txlock=deferred")
 	if err != nil {
 		return nil, err
 	}
-	db.SetMaxOpenConns(1)
 
 	var cacheDb *sql.DB
 	if config.CacheDbEnabled != nil && *config.CacheDbEnabled {
@@ -86,7 +86,6 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		if err != nil {
 			return nil, err
 		}
-		cacheDb.SetMaxOpenConns(1)
 	}
 
 	trackCache, _ := lru.New[string, schema.Track](32)
