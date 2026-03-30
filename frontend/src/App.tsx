@@ -353,9 +353,10 @@ export function App() {
             id="app-right-side"
             style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
           >
-            <div>
+            <div className="tab-bar">
+              <div className="tab-separator"></div>
               <button
-                className="icon-btn"
+                className="tab-btn"
                 onClick={scrollToLeftSide}
                 title="Go to tracks"
                 style={{ position: "sticky", top: 0, float: "right" }}
