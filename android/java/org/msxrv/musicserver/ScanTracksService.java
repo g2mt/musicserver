@@ -136,10 +136,11 @@ public class ScanTracksService extends Service {
 
 		scannedCount.set(0);
 		totalCount.set(0);
-		currentFileName.set("Starting scan...");
+		final String initialFileName = "Starting scan...";
+		currentFileName.set(initialFileName);
 
 		// Start foreground immediately with an indeterminate notification
-		startForeground(NOTIFICATION_ID, buildNotification(0, 0, currentFileName));
+		startForeground(NOTIFICATION_ID, buildNotification(0, 0, initialFileName));
 
 		mainHandler.postDelayed(notificationUpdater, 1000);
 
