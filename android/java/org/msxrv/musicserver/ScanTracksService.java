@@ -53,7 +53,7 @@ public class ScanTracksService extends Service {
 					return;
 				}
 
-				// First pass: collect all files
+				// First pass: collect all files (discovery)
 				List<File> files = new ArrayList<>();
 				collectFiles(new File(musicDir), files);
 				totalCount.set(files.size());
