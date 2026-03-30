@@ -223,7 +223,7 @@ export function MusicPlayer() {
             >
               {c.isPlaying ? "Pause" : "Play"}
             </ContextMenuItem>
-            {isForwardDisabled && (
+            {!isForwardDisabled && (
               <ContextMenuItem
                 onClick={handleForward}
                 icon={faForwardStep}
@@ -231,7 +231,7 @@ export function MusicPlayer() {
                 Forward
               </ContextMenuItem>
             )}
-            {isBackDisabled && (
+            {!isBackDisabled && (
               <ContextMenuItem
                 onClick={handleBack}
                 icon={faBackwardStep}
