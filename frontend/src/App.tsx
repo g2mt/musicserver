@@ -269,14 +269,9 @@ export function App() {
     mergeConfig(c);
   }, []);
 
-  // Scroll navigation
-  const scrollToRightSide = () => {
-    document.getElementById("app-right-side")?.scrollIntoView();
-  };
-
-  const scrollToLeftSide = () => {
-    document.getElementById("app-left-side")?.scrollIntoView();
-  };
+  // Collapse state
+  const [tracksListCollapsed, setTracksListCollapsed] = useState(false);
+  const [queueCollapsed, setQueueCollapsed] = useState(false);
 
   const windowWidth = useWindowWidth();
   useEffect(() => {
@@ -336,18 +331,22 @@ export function App() {
               <div className="tab-separator"></div>
               <button
                 className="tab-btn"
-                onClick={scrollToRightSide}
-                title="Go to queue"
+                onClick={() => setTracksListCollapsed(!tracksListCollapsed)}
+                title="Collapse tracks list"
               >
-                <FontAwesomeIcon icon={faArrowDown} />
+                <FontAwesomeIcon icon={tracksListCollapsed ? faArrowUp : faArrowDown} />
               </button>
             </div>
-            {confirmBoxes.map((b) => (
-              <div key={b.key}>{b.el}</div>
-            ))}
-            {leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
-            {leftTab === "settings" && <SettingsTab />}
-            {leftTab === "files" && <FileBrowserTab />}
+            {!tracksListCollapsed && (
+              <>
+                {confirmBoxes.map((b) => (
+                  <div key={b.key}>{b.el}</div>
+                ))}
+                {leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
+                {leftTab === "settings" && <SettingsTab />}
+                {leftTab === "files" && <FileBrowserTab />}
+              </>
+            )}
           </div>
           <div
             id="app-right-side"
@@ -357,13 +356,15 @@ export function App() {
               <div className="tab-separator"></div>
               <button
                 className="tab-btn"
-                onClick={scrollToLeftSide}
-                title="Go to tracks"
+                onClick={() => setQueueCollapsed(!queueCollapsed)}
+                title="Collapse queue"
               >
-                <FontAwesomeIcon icon={faArrowUp} />
+                <FontAwesomeIcon icon={queueCollapsed ? faArrowDown : faArrowUp} />
               </button>
             </div>
-            <TrackList tracks={c.enqueuedTracks} canUnqueue={true} />
+            {!queueCollapsed && (
+              <TrackList tracks={c.enqueuedTracks} canUnqueue={true} />
+            )}
           </div>
         </div>
         <div className="music-player">
