@@ -16,29 +16,6 @@ import android.webkit.WebView;
 public class MusicServerApp extends Application {
 	private static final String CHANNEL_ID = "musicserver_service";
 	private static final int NOTIFICATION_ID = 100;
-	public static final String ACTION_QUIT = "org.msxrv.musicserver.ACTION_QUIT";
-
-	private final BroadcastReceiver quitReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			if (ACTION_QUIT.equals(intent.getAction())) {
-				Log.d(TAG, "Quit action received");
-				quit();
-			}
-		}
-	};
-
-	public void quit() {
-		stopService(new Intent(this, WebViewService.class));
-		stopService(new Intent(this, ScanTracksService.class));
-		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		nm.cancelAll();
-
-		Intent quitIntent = new Intent(this, MainActivity.class);
-		quitIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		quitIntent.putExtra("quit", true);
-		startActivity(quitIntent);
-	}
 	private static final String TAG = "[msxrv] MusicServerApp";
 	private WebView webView;
 	public WebView getWebView() {
@@ -61,6 +38,30 @@ public class MusicServerApp extends Application {
 	private SettingsBridge settingsBridge;
 	public SettingsBridge getSettingsBridge() {
 		return settingsBridge;
+	}
+
+	public static final String ACTION_QUIT = "org.msxrv.musicserver.ACTION_QUIT";
+
+	private final BroadcastReceiver quitReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (ACTION_QUIT.equals(intent.getAction())) {
+				Log.d(TAG, "Quit action received");
+				quit();
+			}
+		}
+	};
+
+	public void quit() {
+		stopService(new Intent(this, WebViewService.class));
+		stopService(new Intent(this, ScanTracksService.class));
+		NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		nm.cancelAll();
+
+		Intent quitIntent = new Intent(this, MainActivity.class);
+		quitIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+		quitIntent.putExtra("quit", true);
+		startActivity(quitIntent);
 	}
 
 	@Override
