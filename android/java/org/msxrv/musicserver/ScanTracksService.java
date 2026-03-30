@@ -6,7 +6,9 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import java.io.File;
@@ -104,10 +106,13 @@ public class ScanTracksService extends Service {
 		notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
 			.setContentTitle("Scan complete")
-			.setContentText("Scanned " + count + " files.")
+			.setContentText("Scanned " + scanned + " files.")
 			.setAutoCancel(true)
 			.build());
-		// TODO: call the app's webview js: "window._refreshSearch()"
+
+		new Handler(Looper.getMainLooper()).post(() ->
+			app.getWebView().evaluateJavascript("window._refreshSearch()", null));
+
 		stopSelf();
 	}
 
