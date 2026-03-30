@@ -22,6 +22,7 @@ import android.util.Log;
 import java.nio.file.Paths;
 
 public class NativeAudioBridge {
+	private static final String TAG = "[msxrv] NativeAudioBridge";
 	private static final String NOTIFICATION_CHANNEL_ID = "playback";
 	private static final int NOTIFICATION_ID = 1;
 
@@ -249,7 +250,7 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public void setSrc(int instanceId, String src) {
 		if (!isActive(instanceId)) return;
-		Log.d("[msxrv] NativeAudioBridge", "src=" + src);
+		Log.d(TAG, "src=" + src);
 
 		if (src.startsWith("file://")) {
 			src = src.substring("file://".length());
@@ -262,7 +263,7 @@ public class NativeAudioBridge {
 				src = activity.getMusicDir() + "/" + src;
 			}
 			if (src != null) {
-				Log.d("[msxrv] NativeAudioBridge", "resolved src=" + src);
+				Log.d(TAG, "resolved src=" + src);
 			}
 		}
 
@@ -272,7 +273,7 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public void play(int instanceId) {
 		if (!isActive(instanceId)) return;
-		Log.d("[msxrv] NativeAudioBridge", "play");
+		Log.d(TAG, "play");
 		mediaPlayer.start();
 		updatePlaybackState();
 		scheduleTimeUpdates(instanceId);

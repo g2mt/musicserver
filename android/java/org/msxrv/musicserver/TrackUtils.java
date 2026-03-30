@@ -1,8 +1,10 @@
 package org.msxrv.musicserver;
 
 import android.media.MediaMetadataRetriever;
+import android.util.Log;
 
 public class TrackUtils {
+	private static final String TAG = "[msxrv] TrackUtils";
 
     public static class TrackMetadata {
         public final String title;

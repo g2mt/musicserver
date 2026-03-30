@@ -14,6 +14,7 @@ import android.util.Log;
 
 // Keeps the WebView alive in the background as a foreground service.
 public class WebViewService extends Service {
+	private static final String TAG = "[msxrv] WebViewService";
 	private static final String CHANNEL_ID = "webview_service";
 	private static final int NOTIFICATION_ID = 100;
 	private static final String ACTION_QUIT = "org.msxrv.musicserver.ACTION_QUIT";
@@ -22,7 +23,7 @@ public class WebViewService extends Service {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (ACTION_QUIT.equals(intent.getAction())) {
-				Log.d("[msxrv] WebViewService", "Quit action received");
+				Log.d(TAG, "Quit action received");
 				stopSelf();
 				Intent quitIntent = new Intent(context, MainActivity.class);
 				quitIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -35,7 +36,7 @@ public class WebViewService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.d("[msxrv] WebViewService", "onCreate");
+		Log.d(TAG, "onCreate");
 		registerReceiver(quitReceiver, new IntentFilter(ACTION_QUIT), Context.RECEIVER_NOT_EXPORTED);
 		createNotificationChannel();
 		startForeground(NOTIFICATION_ID, buildNotification());
@@ -43,14 +44,14 @@ public class WebViewService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d("[msxrv] WebViewService", "onStartCommand");
+		Log.d(TAG, "onStartCommand");
 		return START_STICKY;
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		Log.d("[msxrv] WebViewService", "onDestroy");
+		Log.d(TAG, "onDestroy");
 		unregisterReceiver(quitReceiver);
 	}
 
