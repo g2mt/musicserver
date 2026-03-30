@@ -26,6 +26,7 @@ build/$(AN_ARCH)/libmusicserverbind.so: \
 
 # c-archive is not supported
 # rule also builds corresponding .h file
+.PHONY: build/$(AN_ARCH)/libmusicserver.so
 build/$(AN_ARCH)/libmusicserver.so: taglib_android
 	PKG_CONFIG_PATH=./taglib/.pkg_$(AN_ARCH)/lib/pkgconfig/ \
 		CXX=$(AN_NDK_CXX) CC=$(AN_NDK_CC) \
