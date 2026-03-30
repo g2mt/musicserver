@@ -13,7 +13,7 @@ import { AppContext, saveConfig } from "./AppState";
 
 import "./SettingsTab.css";
 
-function SettingsTab() {
+export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
   const [props, setProps] = useState<{ version: string; config: any } | null>(
@@ -139,4 +139,3 @@ function SettingsTab() {
   );
 }
 
-export default SettingsTab;
