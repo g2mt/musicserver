@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faMinus, faCopy } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faMinus, faCopy, faCompactDisc, faUser } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiserver";
 import { AppContext } from "./AppState";
 import { showContextMenu, ContextMenuItem } from "./ContextMenu";
@@ -52,6 +52,26 @@ export function Track({
               >
                 Copy info
               </ContextMenuItem>
+              {track.album !== "" && (
+                <ContextMenuItem
+                  icon={faCompactDisc}
+                  onClick={() => {
+                    c.setSearchQuery(`album:"${track.album}"`);
+                  }}
+                >
+                  Album
+                </ContextMenuItem>
+              )}
+              {track.artist !== "" && (
+                <ContextMenuItem
+                  icon={faUser}
+                  onClick={() => {
+                    c.setSearchQuery(`artist:"${track.artist}"`);
+                  }}
+                >
+                  Artist
+                </ContextMenuItem>
+              )}
             </>,
           );
         }}
