@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.webkit.WebView;
 
 public class ScanTracksPoller {
 	private static final String CHANNEL_ID = "msxrv_scan";
@@ -21,6 +22,8 @@ public class ScanTracksPoller {
 	private final NotificationManager notificationManager;
 	private final Handler handler;
 
+	private boolean wasScanning = false;
+
 	public ScanTracksPoller(MainActivity activity, NativeBridge bridge) {
 		this.activity = activity;
 		this.bridge = bridge;
@@ -30,10 +33,13 @@ public class ScanTracksPoller {
 		this.notificationManager =
 			(NotificationManager) activity.getSystemService(Context.NOTIFICATION_SERVICE);
 		this.handler = new Handler(Looper.getMainLooper());
+	}
 
+	public void run() {
+		if (wasScanning) {
+			return;
+		}
 		handler.post(new Runnable() {
-			private boolean wasScanning = false;
-
 			@Override
 			public void run() {
 				Log.d("[msxrv] ScanTracksPoller", "polling ticker values");
