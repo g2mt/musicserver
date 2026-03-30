@@ -113,7 +113,7 @@ public class NativeAudioBridge {
 		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
 
 		String[] outContentType = new String[1];
-		byte[] coverBytes = bridge.getTrackCover(filepath, outContentType);
+		byte[] coverBytes = TrackUtils.getTrackCover(filepath, outContentType);
 		Bitmap coverBitmap = null;
 		if (coverBytes != null && coverBytes.length > 0) {
 			coverBitmap = BitmapFactory.decodeByteArray(coverBytes, 0, coverBytes.length);
