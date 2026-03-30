@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ScanTracksService extends Service {
 	private static final String TAG = "[msxrv] ScanTracksService";
@@ -32,7 +33,7 @@ public class ScanTracksService extends Service {
 	
 	private final AtomicInteger scannedCount = new AtomicInteger(0);
 	private final AtomicInteger totalCount = new AtomicInteger(0);
-	private volatile String currentFileName = "";
+	private final AtomicReference<String> currentFileName = new AtomicReference<>("");
 
 	private class ScanThread extends Thread {
 		private final String musicDir;
@@ -60,7 +61,7 @@ public class ScanTracksService extends Service {
 
 				// Second pass: load each file
 				for (File file : files) {
-					currentFileName = file.getName();
+					currentFileName.set(file.getName());
 
 					Log.d(TAG, "Loading track: " + file.getAbsolutePath());
 					bridge.loadTrackByPath(file.getAbsolutePath());
@@ -135,7 +136,7 @@ public class ScanTracksService extends Service {
 
 		scannedCount.set(0);
 		totalCount.set(0);
-		currentFileName = "Starting scan...";
+		currentFileName.set("Starting scan...");
 
 		// Start foreground immediately with an indeterminate notification
 		startForeground(NOTIFICATION_ID, buildNotification(0, 0, currentFileName));
@@ -161,7 +162,7 @@ public class ScanTracksService extends Service {
 		public void run() {
 			if (isRunning.get()) {
 				notificationManager.notify(NOTIFICATION_ID,
-					buildNotification(scannedCount.get(), totalCount.get(), currentFileName));
+					buildNotification(scannedCount.get(), totalCount.get(), currentFileName.get()));
 				mainHandler.postDelayed(this, 1000);
 			}
 		}
