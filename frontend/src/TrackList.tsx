@@ -32,9 +32,30 @@ export function useTrackList({
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
+  // Scrolling functions
+
+  const [trackScrolled, scrollToTrack] = useState(0);
+  const trackScrollChanged = useRef(false);
+
+  useEffect(() => {
+    if (trackScrolled > displayedCount) {
+      setDisplayedCount(trackScrolled + PAGE_SIZE);
+      trackScrollChanged.current = true; // delay scrollIntoView until next render
+    } else {
+      trackRefs.current[trackScrolled]?.scrollIntoView();
+    }
+  }, [trackScrolled]);
+
+  useEffect(() => {
+    if (trackRefs.current[trackScrolled]) {
+      trackScrollChanged.current = false;
+      trackRefs.current[trackScrolled]?.scrollIntoView();
+    }
+  }, [trackScrollChanged.current, trackRefs.current[trackScrolled]]);
+
   // Displayed count
 
-  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
+  const [displayedCount, setDisplayedCount] = useState(trackScrolled + PAGE_SIZE);
 
   useEffect(() => {
     setDisplayedCount(PAGE_SIZE);
@@ -54,14 +75,17 @@ export function useTrackList({
       const scrollTop = pe.scrollTop;
       if (scrollTop < lastScrollTop.current) {
         const visibleStart = Math.floor(scrollTop / TRACK_HEIGHT_PX);
-        setDisplayedCount(Math.max(visibleStart + PAGE_SIZE, PAGE_SIZE));
+        setDisplayedCount(Math.max(
+          visibleStart + PAGE_SIZE,
+          trackScrolled + PAGE_SIZE,
+        ));
       }
       lastScrollTop.current = scrollTop;
     };
 
     pe.addEventListener("scroll", handleScroll);
     return () => pe.removeEventListener("scroll", handleScroll);
-  }, [parentElement.current]);
+  }, [parentElement.current, trackScrolled]);
 
   // Sentinel for scrolling down
 
@@ -91,12 +115,6 @@ export function useTrackList({
     return () => observer.disconnect();
   }, [loadMore]);
 
-  // Scrolling functions
-
-  const scrollToTrack = (index: number) => {
-    trackRefs.current[index]?.scrollIntoView();
-  };
-
   const el = (
     <div className="track-list" ref={listRef}>
       {canUnqueue && (
@@ -122,19 +140,16 @@ export function useTrackList({
         </div>
       )}
 
-      {displayedTracks.map((track, i) => {
-        const index = i;
-        return (
-          <div key={canUnqueue ? `${index}-${track.id}` : track.id} ref={(el) => { trackRefs.current[index] = el; }}>
-            <Track
-              track={track}
-              index={canUnqueue ? index : undefined}
-              canEnqueue={canEnqueue}
-              canUnqueue={canUnqueue}
-            />
-          </div>
-        );
-      })}
+      {displayedTracks.map((track, index) => (
+        <div key={canUnqueue ? `${index}-${track.id}` : track.id} ref={(el) => { trackRefs.current[index] = el; }}>
+          <Track
+            track={track}
+            index={canUnqueue ? index : undefined}
+            canEnqueue={canEnqueue}
+            canUnqueue={canUnqueue}
+          />
+        </div>
+      ))}
 
       {hasMore && <div ref={sentinelRef} style={{ height: "1px" }} />}
     </div>
