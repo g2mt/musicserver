@@ -34,6 +34,20 @@ export function SettingsTab() {
           Show blurred album cover as background in dark mode
         </label>
       </div>
+      <div>
+        <input
+          type="checkbox"
+          id="setting-show-only-queue-after-enqueue"
+          checked={c.showOnlyQueueAfterEnqueue}
+          onChange={() => {
+            c.setShowOnlyQueueAfterEnqueue(!c.showOnlyQueueAfterEnqueue);
+            setUnsaved(true);
+          }}
+        />
+        <label htmlFor="setting-show-only-queue-after-enqueue">
+          Show only queue after adding tracks
+        </label>
+      </div>
       <button
         className="btn"
         disabled={!unsaved}
