@@ -35,10 +35,8 @@ export function Track({
   canUnqueue?: boolean;
 }) {
   const c = useContext(AppContext)!;
-  const { setCurrentTrack, enqueuedTrackIndex, setEnqueuedTrackIndex } =
-    useContext(AppContext)!;
   const isHighlighted =
-    highlighted || (index !== undefined && index === enqueuedTrackIndex);
+    highlighted || (index !== undefined && index === c.enqueuedTrackIndex);
   return (
     <div className={`track ${isHighlighted ? "highlighted" : ""}`}>
       <img
@@ -89,8 +87,8 @@ export function Track({
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            if (index !== undefined) setEnqueuedTrackIndex(index);
-            setCurrentTrack(track);
+            if (index !== undefined) c.setEnqueuedTrackIndex(index);
+            c.setCurrentTrack(track);
           }}
         >
           {track.name}
