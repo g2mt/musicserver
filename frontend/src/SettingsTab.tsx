@@ -73,7 +73,7 @@ export function SettingsTab() {
         className="btn"
         onClick={() => {
           if (nativeScanTracks !== null) {
-            nativeScanTracks();
+            nativeScanTracks("");
           } else {
             fetchAPI("/track", undefined, "POST")
               .then(() => {
