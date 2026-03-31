@@ -1,8 +1,12 @@
 GOFLAGS ?= -v -ldflags="-X musicserver/internal/api.Version=$$(git rev-parse --short HEAD)"
 
 .PHONY: build/musicserver
-build/musicserver:
+build/musicserver: frontend
 	go build -o $@ $(GOFLAGS) .
+
+.PHONY: frontend
+frontend:
+	cd frontend && npm run build
 
 ifneq ($(strip $(ANDROID_HOME)),)
 include mk/android.mk
