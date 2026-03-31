@@ -243,6 +243,7 @@ export function App() {
         tracks: c.enqueuedTracks,
         canUnqueue: true,
         parentElement: appRightSide,
+        // context variables
         enqueuedTracks: c.enqueuedTracks,
         setEnqueuedTracks: c.setEnqueuedTracks,
         unqueueTrack: c.unqueueTrack,

@@ -20,6 +20,8 @@ export function useTrackList({
   canEnqueue,
   canUnqueue,
   parentElement,
+
+  // workaround since context cannot be passed as argument
   enqueuedTracks,
   setEnqueuedTracks,
   unqueueTrack,
@@ -28,6 +30,7 @@ export function useTrackList({
   canEnqueue?: boolean;
   canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
+
   enqueuedTracks: TrackData[];
   setEnqueuedTracks: React.Dispatch<React.SetStateAction<TrackData[]>>;
   unqueueTrack: (index?: number) => void;
