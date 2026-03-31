@@ -110,11 +110,22 @@ export function App() {
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        let dx, dw, dh;
+        if (canvas.width > canvas.height) {
+          dw = canvas.width;
+          dh = canvas.width*(img.height/img.width);
+          dx = 0;
+        } else {
+          dh = canvas.height;
+          dw = canvas.height*(img.width/img.height);
+          dx = -(dw-canvas.width)/2;
+        }
+
         ctx.filter = "blur(30px) brightness(0.3)";
         ctx.drawImage(
           img,
           0, 0, img.width, img.height,
-          0, 0, canvas.width, canvas.height
+          dx, 0, dw, dh
         );
       });
     }
