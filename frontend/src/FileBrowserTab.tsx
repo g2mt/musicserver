@@ -26,7 +26,7 @@ export default function FileBrowserTab() {
   });
 
   useEffect(() => {
-    const encodedPath = c.fbPath.map(encodeURIComponent).join("/");
+    const encodedPath = [c.props?.config.data_path ?? "", ...c.fbPath].map(encodeURIComponent).join("/");
     fetchAPI(`/file/${encodedPath}`)
       .then((data) => setFileList(data))
       .catch((err) => {

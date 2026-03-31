@@ -341,7 +341,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", err
 		}
 		fullPath := filepath.Join("/", path)
-		if !strings.HasPrefix(fullPath, i.config.DataPath) {
+		if relPath, err := filepath.Rel(i.config.DataPath, fullPath); err != nil || relPath == ".." || strings.HasPrefix(relPath, "../") {
 			return nil, "", errors.New("permission denied")
 		}
 		info, err := os.Stat(fullPath)
