@@ -114,20 +114,34 @@ public class ScanTracksService extends Service {
 				.build());
 		}
 
-		private void collectFiles(File dir, List<File> result) {
-			if (isCancelled.get() || !dir.exists() || !dir.isDirectory()) {
+		private void collectFiles(File rootDir, List<File> result) {
+			if (rootDir == null || !rootDir.exists() || !rootDir.isDirectory()) {
 				return;
 			}
-			File[] entries = dir.listFiles();
-			if (entries == null) {
-				return;
-			}
-			for (File entry : entries) {
-				if (isCancelled.get()) return;
-				if (entry.isDirectory()) {
-					collectFiles(entry, result);
-				} else {
-					result.add(entry);
+
+			ArrayList<File> stack = new ArrayList<>();
+			stack.add(rootDir);
+
+			while (!stack.isEmpty()) {
+				if (isCancelled.get()) {
+					return;
+				}
+
+				File currentDir = stack.remove(stack.size() - 1);
+				File[] entries = currentDir.listFiles();
+				if (entries == null) {
+					continue;
+				}
+
+				for (File entry : entries) {
+					if (isCancelled.get()) {
+						return;
+					}
+					if (entry.isDirectory()) {
+						stack.add(entry);
+					} else {
+						result.add(entry);
+					}
 				}
 			}
 		}
