@@ -71,7 +71,12 @@ public class TrackUtils {
 			for (String ext : extensions) {
 				if (name.endsWith(ext)) {
 					try {
-						byte[] imageData = readFile(f);
+						byte[] imageData;
+						try (FileInputStream fis = new FileInputStream(f)) {
+							int size = (int) f.length();
+							imageData = new byte[size];
+							fis.read(imageData);
+						}
 						String mimeType;
 						if (ext.equals(".png")) {
 							mimeType = "image/png";
@@ -91,14 +96,5 @@ public class TrackUtils {
 
 		outContentType[0] = "image/jpeg";
 		return new byte[0];
-	}
-
-	private static byte[] readFile(File file) throws IOException {
-		try (FileInputStream fis = new FileInputStream(file)) {
-			int size = (int) file.length();
-			byte[] data = new byte[size];
-			fis.read(data);
-			return data;
-		}
 	}
 }
