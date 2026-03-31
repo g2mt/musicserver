@@ -213,9 +213,13 @@ export function App() {
   [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
+  const appMain = useRef<HTMLDivElement>(null);
   const appLeftSide = useRef<HTMLDivElement>(null);
   const appRightSide = useRef<HTMLDivElement>(null);
   c.scrollToTop = () => {
+    if (appMain.current) {
+      appMain.current.scrollTop = 0;
+    }
     if (appLeftSide.current) {
       appLeftSide.current.scrollTop = 0;
     }
@@ -368,7 +372,7 @@ export function App() {
         <div className="search-bar-container">
           <SearchBar />
         </div>
-        <div className="app-main">
+        <div className="app-main" ref={appMain}>
           <div id="app-left-side" ref={appLeftSide}>
             <div className="tab-bar">
               <button
