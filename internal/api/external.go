@@ -28,7 +28,7 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 	}
 
 	// Check cache first
-	if track, ok := i.trackCache.Get(u); ok {
+	if track, ok := i.exTrackCache.Get(u); ok {
 		return track, nil
 	}
 
@@ -51,7 +51,7 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 	}
 
 	// Add to cache
-	i.trackCache.Add(u, track)
+	i.exTrackCache.Add(u, track)
 
 	return track, nil
 }
