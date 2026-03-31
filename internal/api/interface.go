@@ -184,7 +184,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				response, err = i.GetTracks(nil)
 			}
 		} else if method == "POST" {
-			response, err = i.ScanTracks()
+			response, err = i.ScanTracks(params["path"])
 		} else if method == "DELETE" {
 			success, err := i.ForgetAllTracks()
 			if err != nil {
