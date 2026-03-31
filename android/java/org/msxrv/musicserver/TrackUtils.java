@@ -3,6 +3,10 @@ package org.msxrv.musicserver;
 import android.media.MediaMetadataRetriever;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
 public class TrackUtils {
 	private static final String TAG = "[msxrv] TrackUtils";
 
@@ -35,12 +39,66 @@ public class TrackUtils {
 		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
 			mmr.setDataSource(filepath);
 			byte[] data = mmr.getEmbeddedPicture();
-			outContentType[0] = "image/jpeg";
-			return data != null ? data : new byte[0];
+			if (data != null && data.length > 0) {
+				outContentType[0] = "image/jpeg";
+				return data;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+
+		// Fallback: look for image file in parent directory
+		File file = new File(filepath);
+		String parentDir = file.getParent();
+		if (parentDir == null) {
 			outContentType[0] = "image/jpeg";
 			return new byte[0];
+		}
+
+		File dir = new File(parentDir);
+		File[] files = dir.listFiles();
+		if (files == null) {
+			outContentType[0] = "image/jpeg";
+			return new byte[0];
+		}
+
+		String[] extensions = {".png", ".jpg", ".webp"};
+		for (File f : files) {
+			if (f.isDirectory()) {
+				continue;
+			}
+			String name = f.getName().toLowerCase();
+			for (String ext : extensions) {
+				if (name.endsWith(ext)) {
+					try {
+						byte[] imageData = readFile(f);
+						String mimeType;
+						if (ext.equals(".png")) {
+							mimeType = "image/png";
+						} else if (ext.equals(".jpg")) {
+							mimeType = "image/jpeg";
+						} else {
+							mimeType = "image/webp";
+						}
+						outContentType[0] = mimeType;
+						return imageData;
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
+		outContentType[0] = "image/jpeg";
+		return new byte[0];
+	}
+
+	private static byte[] readFile(File file) throws IOException {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			int size = (int) file.length();
+			byte[] data = new byte[size];
+			fis.read(data);
+			return data;
 		}
 	}
 }
