@@ -32,6 +32,7 @@ export const AppStateSchema = z.object({
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
   showOnlyQueueAfterEnqueue: z.boolean().default(false),
+  fbPath: z.array(z.string()).default([]),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
@@ -64,6 +65,8 @@ export interface AppState extends AppStateData {
   setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
   showOnlyQueueAfterEnqueue: boolean;
   setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
+  fbPath: string[];
+  setFbPath: Dispatch<SetStateAction<string[]>>;
 }
 
 export const AppContext = createContext<AppState | null>(null);

@@ -20,23 +20,22 @@ interface FileList {
 
 export default function FileBrowserTab() {
   const c = useContext(AppContext)!;
-  const [path, setPath] = useState<string[]>([]);
   const [fileList, setFileList] = useState<FileList>({
     files: [],
     directories: [],
   });
 
   useEffect(() => {
-    const encodedPath = path.map(encodeURIComponent).join("/");
+    const encodedPath = c.fbPath.map(encodeURIComponent).join("/");
     fetchAPI(`/file/${encodedPath}`)
       .then((data) => setFileList(data))
       .catch((err) => {
         toast.error(`Failed to load directory: ${err.message}`);
         setFileList({ files: [], directories: [] });
       });
-  }, [path]);
+  }, [c.fbPath]);
 
-  const crumbs = path;
+  const crumbs = c.fbPath;
 
   return (
     <div className="file-browser-tab">
@@ -46,7 +45,7 @@ export default function FileBrowserTab() {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            setPath([]);
+            c.setFbPath([]);
           }}
         >
           root
@@ -58,7 +57,7 @@ export default function FileBrowserTab() {
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                setPath(path.slice(0, i + 1));
+                c.setFbPath(c.fbPath.slice(0, i + 1));
               }}
             >
               {crumb}
@@ -83,7 +82,7 @@ export default function FileBrowserTab() {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setPath(path.slice(0, -1));
+                    c.setFbPath(c.fbPath.slice(0, -1));
                   }}
                 >
                   ..
@@ -101,7 +100,7 @@ export default function FileBrowserTab() {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    setPath([...path, dir]);
+                    c.setFbPath([...c.fbPath, dir]);
                   }}
                 >
                   {dir}
