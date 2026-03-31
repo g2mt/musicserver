@@ -9,7 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiserver";
 import { AppContext } from "./AppState";
-import { showContextMenu, ContextMenuItem } from "./ContextMenu";
+import { toggleContextMenu, ContextMenuItem } from "./ContextMenu";
 import type { TrackData } from "./TrackData";
 
 import "./Track.css";
@@ -45,7 +45,7 @@ export function Track({
         className="track-cover"
         src={getTrackCover(track)}
         onClick={(e) => {
-          showContextMenu(
+          toggleContextMenu(
             e.currentTarget,
             <>
               <ContextMenuItem

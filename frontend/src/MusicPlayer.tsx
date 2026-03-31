@@ -13,7 +13,7 @@ import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
 import { getFilePath, getTrackFileFromId } from "./apiserver";
 import { apiAudio, useAbsoluteAudioPath } from "./apiaudio";
-import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 
 import "./MusicPlayer.css";
 
@@ -236,7 +236,7 @@ export function MusicPlayer() {
       className={`music-player ${collapsed ? "collapsed" : ""}`}
       onContextMenu={(e) => {
         e.preventDefault();
-        showContextMenu(
+        toggleContextMenu(
           e.currentTarget,
           <>
             <ContextMenuItem

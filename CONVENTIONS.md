@@ -33,11 +33,11 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 
 - Use the `react-toastify` library for showing errors.
 
-- Use the custom context menu element instead of the native one by importing the `./ContextMenu` file and using `showContextMenu`:
+- Use the custom context menu element instead of the native one by importing the `./ContextMenu` file and using `toggleContextMenu`:
 ```ts
-import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 
-showContextMenu(anchorElement, (
+toggleContextMenu(anchorElement, (
   <>
     <ContextMenuItem onClick={() => ...} icon={faIcon}>1</ContextMenuItem>
     <ContextMenuItem onClick={() => ...}>2</ContextMenuItem>
