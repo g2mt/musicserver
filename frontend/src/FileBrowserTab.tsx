@@ -35,6 +35,24 @@ export default function FileBrowserTab() {
       });
   }, [c.fbPath]);
 
+  const handleSearchCurrentPath = () => {
+    c.setSearchQuery(`path:"${c.fbPath.join("/")}"`);
+    c.setLeftTab("tracks");
+  };
+
+  const handleScanCurrentPath = () => {
+    if (nativeScanTracks !== null) {
+      nativeScanTracks(c.fbPath.join("/"));
+    } else {
+      fetchAPI("/track", { path: c.fbPath.join("/") }, "POST")
+        .then(() => {
+          toast.success("Scanning complete");
+          c.onRescanned();
+        })
+        .catch(() => toast.error("Sync failed"));
+    }
+  };
+
   return (
     <div className="file-browser-tab">
       <table className="file-browser-location-bar">
@@ -78,6 +96,8 @@ export default function FileBrowserTab() {
                 href="#"
                 title="Show tracks in this path"
                 onClick={(e) => {
+                  e.preventDefault();
+                  handleSearchCurrentPath();
                 }}
               >
                 <FontAwesomeIcon icon={faSearch} />
@@ -86,6 +106,8 @@ export default function FileBrowserTab() {
                 href="#"
                 title="Scan only this path"
                 onClick={(e) => {
+                  e.preventDefault();
+                  handleScanCurrentPath();
                 }}
               >
                 <FontAwesomeIcon icon={faReceipt} />
