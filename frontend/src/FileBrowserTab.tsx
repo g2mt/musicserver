@@ -102,7 +102,6 @@ function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
   }
 
   const dirName = path[path.length - 1];
-  const parentPath = path.slice(0, -1);
 
   return (
     <tr>
