@@ -30,6 +30,7 @@ export function useTrackList({
 }) {
   const c = useContext(AppContext)!;
   const listRef = useRef<HTMLDivElement>(null);
+  const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Displayed count
 
@@ -92,7 +93,9 @@ export function useTrackList({
 
   // Scrolling functions
 
-  const scrollToTrack = (index: number) => {};
+  const scrollToTrack = (index: number) => {
+    trackRefs.current[index]?.scrollIntoView();
+  };
 
   const el = (
     <div className="track-list" ref={listRef}>
@@ -122,13 +125,14 @@ export function useTrackList({
       {displayedTracks.map((track, i) => {
         const index = i;
         return (
-          <Track
-            key={canUnqueue ? `${index}-${track.id}` : track.id}
-            track={track}
-            index={canUnqueue ? index : undefined}
-            canEnqueue={canEnqueue}
-            canUnqueue={canUnqueue}
-          />
+          <div key={canUnqueue ? `${index}-${track.id}` : track.id} ref={(el) => { trackRefs.current[index] = el; }}>
+            <Track
+              track={track}
+              index={canUnqueue ? index : undefined}
+              canEnqueue={canEnqueue}
+              canUnqueue={canUnqueue}
+            />
+          </div>
         );
       })}
 
