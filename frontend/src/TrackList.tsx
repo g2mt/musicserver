@@ -22,8 +22,6 @@ function TrackList({
   const c = useContext(AppContext)!;
   const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-  const lastScrollTop = useRef(0);
 
   const hasMore = displayedCount < tracks.length;
 
@@ -54,29 +52,10 @@ function TrackList({
     setDisplayedCount(PAGE_SIZE);
   }, [tracks.length]);
 
-  const handleScroll = useCallback(() => {
-    const list = listRef.current;
-    if (!list) return;
-
-    const scrollTop = list.scrollTop;
-
-    // Only react to scrolling up
-    if (scrollTop < lastScrollTop.current) {
-      const viewportHeight = list.clientHeight;
-      const visibleTracks = Math.floor(
-        (scrollTop + viewportHeight) / TRACK_HEIGHT_PX,
-      );
-      const newCount = Math.max(PAGE_SIZE, visibleTracks + 1);
-      setDisplayedCount((prev) => Math.min(prev, newCount));
-    }
-
-    lastScrollTop.current = scrollTop;
-  }, []);
-
   const displayedTracks = tracks.slice(0, displayedCount);
 
   return (
-    <div className="track-list" ref={listRef} onScroll={handleScroll}>
+    <div className="track-list">
       {canUnqueue && (
         <div className="track-list-buttons">
           <button className="btn" onClick={() => c.unqueueTrack()}>
