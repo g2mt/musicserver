@@ -198,11 +198,14 @@ export function App() {
   [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
-  const appLeftSide = useRef(null);
-  const appRightSide = useRef(null);
+  const appLeftSide = useRef<HTMLDivElement>(null);
+  const appRightSide = useRef<HTMLDivElement>(null);
   c.scrollToTop = () => {
     if (appLeftSide.current) {
       appLeftSide.current.scrollTop = 0;
+    }
+    if (appRightSide.current) {
+      appRightSide.current.scrollTop = 0;
     }
   };
 
