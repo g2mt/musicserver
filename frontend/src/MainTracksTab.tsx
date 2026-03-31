@@ -6,7 +6,7 @@ import {
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useRef } from "react";
+import { useContext, useRef, type RefObject } from "react";
 import { AppContext } from "./AppState";
 import { Select, Option } from "./Select";
 import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
@@ -15,7 +15,13 @@ import { toast } from "react-toastify";
 
 import "./MainTracksTab.css";
 
-export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
+export function MainTracksTab({
+  tracks,
+  parentElement,
+}: {
+  tracks: TrackData[] | null;
+  parentElement: RefObject<HTMLElement | null>;
+}) {
   if (tracks === null || tracks.length === 0) {
     return <div className="main-tracks-controls">No tracks found</div>;
   }
@@ -126,7 +132,7 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
   return (
     <div className="main-tracks-tab" ref={elRef}>
       {controls}
-      <TrackList tracks={tracks} canEnqueue={true} />
+      <TrackList tracks={tracks} canEnqueue={true} parentElement={parentElement} />
       {controls}
     </div>
   );

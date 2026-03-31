@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef, useCallback } from "react";
+import { useContext, useState, useEffect, useRef, useCallback, type RefObject } from "react";
 import { Track } from "./Track";
 import { type TrackData } from "./TrackData";
 import { AppContext } from "./AppState";
@@ -14,12 +14,15 @@ function TrackList({
   tracks,
   canEnqueue,
   canUnqueue,
+  parentElement,
 }: {
   tracks: TrackData[];
   canEnqueue?: boolean;
   canUnqueue?: boolean;
+  parentElement: RefObject<HTMLElement | null>;
 }) {
   const c = useContext(AppContext)!;
+  const listRef = useRef<HTMLDivElement>(null);
 
   // Displayed count
 
@@ -33,28 +36,24 @@ function TrackList({
 
   // Scroll event decreasing setDisplayedCount for scrolling up
 
-  const listRef = useRef<HTMLDivElement>(null);
   const lastScrollTop = useRef(0);
 
   useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
+    const pe = parentElement.current;
+    if (!pe) return;
 
     const handleScroll = () => {
-      const scrollTop = list.scrollTop;
+      const scrollTop = pe.scrollTop;
       if (scrollTop < lastScrollTop.current) {
         const visibleStart = Math.floor(scrollTop / TRACK_HEIGHT_PX);
-        setDisplayedCount((prev) => {
-          const reduced = Math.max(visibleStart + PAGE_SIZE, PAGE_SIZE);
-          return reduced < prev ? reduced : prev;
-        });
+        setDisplayedCount(Math.max(visibleStart + PAGE_SIZE, PAGE_SIZE));
       }
       lastScrollTop.current = scrollTop;
     };
 
-    list.addEventListener("scroll", handleScroll);
-    return () => list.removeEventListener("scroll", handleScroll);
-  }, []);
+    pe.addEventListener("scroll", handleScroll);
+    return () => pe.removeEventListener("scroll", handleScroll);
+  }, [parentElement.current]);
 
   // Sentinel for scrolling down
 

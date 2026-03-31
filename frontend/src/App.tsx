@@ -229,10 +229,12 @@ export function App() {
     }
   };
 
-  // Left-side tab
+  // Left/right sides
   [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
+  const appLeftSide = useRef(null);
+  const appRightSide = useRef(null);
 
   // Collapse state
   [c.tracksListCollapsed, c.setTracksListCollapsed] = useState(false);
@@ -330,7 +332,7 @@ export function App() {
           <SearchBar />
         </div>
         <div className="app-main">
-          <div id="app-left-side">
+          <div id="app-left-side" ref={appLeftSide}>
             <div className="tab-bar">
               <button
                 className={`tab-btn ${c.leftTab === "tracks" ? "active" : ""}`}
@@ -367,7 +369,8 @@ export function App() {
                 {confirmBoxes.map((b) => (
                   <div key={b.key}>{b.el}</div>
                 ))}
-                {c.leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
+                {c.leftTab === "tracks" && <MainTracksTab tracks={fullTracks}
+                  parentElement={appLeftSide} />}
                 {c.leftTab === "settings" && <SettingsTab />}
                 {c.leftTab === "files" && <FileBrowserTab />}
               </>
@@ -376,6 +379,7 @@ export function App() {
           <div
             id="app-right-side"
             style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
+            ref={appRightSide}
           >
             <div className="tab-bar">
               <div className="tab-separator"></div>
@@ -388,7 +392,7 @@ export function App() {
               </button>
             </div>
             {!c.queueCollapsed && (
-              <TrackList tracks={c.enqueuedTracks} canUnqueue={true} />
+              <TrackList tracks={c.enqueuedTracks} canUnqueue={true} parentElement={appRightSide} />
             )}
           </div>
         </div>
