@@ -3,7 +3,7 @@
 
 package api
 
-func (i *Interface) ScanTracks() (addedFiles int, err error) {
+func (i *Interface) ScanTracks(path string) (addedFiles int, err error) {
 	panic("ScanTracks called by Go code")
 }
 
