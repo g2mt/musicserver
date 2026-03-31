@@ -75,8 +75,20 @@ export function App() {
   }, []);
 
   // Update body background when current track changes
-  const overlay = document.getElementById("background-overlay")!;
+  const canvasRef = useRef<HTMLCanvasElement>(document.getElementById("background-overlay") as HTMLCanvasElement);
   useEffect(() => {
+    const canvas = canvasRef.current;
+    console.log(canvasRef.current);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     if (c.currentTrack && c.darkMode && c.showBlurredCover) {
       if (overlay.childElementCount === 0) {
         overlay.innerHTML = `
@@ -94,18 +106,23 @@ export function App() {
       }
       const image = overlay.querySelector("image");
       const cover = getTrackCover(c.currentTrack);
-      if (image && cover !== image.getAttribute("href")) {
-        if (screen.width > screen.height) {
-          image.setAttribute("width", "100%");
-          image.setAttribute("height", "");
-        } else {
-          image.setAttribute("width", "");
-          image.setAttribute("height", "100%");
-        }
-        image.setAttribute("href", cover);
-      }
-    } else if (overlay.childElementCount > 0) {
-      overlay.innerHTML = "";
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = cover;
+      img.decode().then(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.filter = "blur(30px) brightness(0.3)";
+        ctx.drawImage(
+          img,
+          0, 0, img.width, img.height,
+          0, 0, canvas.width, canvas.height
+        );
+      });
     }
   }, [c.currentTrack, c.darkMode]);
 
