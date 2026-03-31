@@ -47,6 +47,10 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         if (data === null || data.length === 0) {
           toast.warn(<>No tracks found</>);
         } else {
+          if (c.showOnlyQueueAfterEnqueue) {
+            c.setTracksListCollapsed(true);
+            c.setQueueCollapsed(false);
+          }
           c.enqueueTrack(data);
         }
       })
@@ -93,7 +97,13 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
         </Select>
         <button
           className="btn"
-          onClick={() => c.enqueueTrack(tracks)}
+          onClick={() => {
+            if (c.showOnlyQueueAfterEnqueue) {
+              c.setTracksListCollapsed(true);
+              c.setQueueCollapsed(false);
+            }
+            c.enqueueTrack(tracks);
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             showContextMenu(e.currentTarget, (

@@ -52,6 +52,7 @@ export function App() {
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   [c.showBlurredCover, c.setShowBlurredCover] = useState(true);
+  [c.showOnlyQueueAfterEnqueue, c.setShowOnlyQueueAfterEnqueue] = useState(false);
   [c.props, c.setProps] = useState<{ version: string; config: any } | null>(
     null,
   );

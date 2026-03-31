@@ -31,6 +31,7 @@ export const AppStateSchema = z.object({
   searchQuery: z.string().default(""),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
+  showOnlyQueueAfterEnqueue: z.boolean().default(false),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
@@ -61,6 +62,8 @@ export interface AppState extends AppStateData {
   setTracksListCollapsed: Dispatch<SetStateAction<boolean>>;
   queueCollapsed: boolean;
   setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
+  showOnlyQueueAfterEnqueue: boolean;
+  setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppState | null>(null);
@@ -88,6 +91,8 @@ export function mergeConfig(dest: AppState) {
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined)
         dest.setShowBlurredCover(config.showBlurredCover);
+      if (config.showOnlyQueueAfterEnqueue !== undefined)
+        dest.setShowOnlyQueueAfterEnqueue(config.showOnlyQueueAfterEnqueue);
     } catch (e: any) {
       toast.error(
         <p>
@@ -111,6 +116,7 @@ export function saveConfig(state: AppState) {
     searchQuery: state.searchQuery,
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,
+    showOnlyQueueAfterEnqueue: state.showOnlyQueueAfterEnqueue,
   };
   (window._native_settings ?? localStorage).setItem(
     CONFIG_KEY,
