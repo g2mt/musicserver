@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useContext, useRef } from "react";
+import { useEffect, useMemo, useContext, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
@@ -97,6 +97,7 @@ export function MusicPlayer() {
     })(),
   );
   const didUpdatePosition = useRef(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   function goNextQueue(doSetIsPlaying: boolean = true) {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
@@ -182,6 +183,24 @@ export function MusicPlayer() {
     };
   }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
+  // Swipe gestures
+
+  function handleTouchStart(e: React.TouchEvent) {
+    setTouchStartX(e.touches[0].clientX);
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+    if (diff > 50) {
+      handleBack();
+    } else if (diff < -50) {
+      handleForward();
+    }
+    setTouchStartX(null);
+  }
+
   // Media info
 
   if ("mediaSession" in navigator) {
@@ -249,7 +268,11 @@ export function MusicPlayer() {
         value={c.progress}
         onChange={(e) => c.setProgress(Number(e.target.value))}
       />
-      <div className="player-controls">
+      <div
+        className="player-controls"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="player-left">
           <button
             className="icon-btn btn-prev-song"
