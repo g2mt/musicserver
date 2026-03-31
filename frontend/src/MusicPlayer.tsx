@@ -66,6 +66,7 @@ export function useBackForward() {
     if (typeof c.enqueuedTracks[prevIndex] === "undefined") return;
     c.setEnqueuedTrackIndex(prevIndex);
     c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+    c.trackQueueScroll(prevIndex);
   }
 
   function handleForward() {
@@ -73,6 +74,7 @@ export function useBackForward() {
     if (typeof c.enqueuedTracks[nextIndex] === "undefined") return;
     c.setEnqueuedTrackIndex(nextIndex);
     c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+    c.trackQueueScroll(nextIndex);
   }
 
   return {
