@@ -28,8 +28,10 @@ import (
 var Version string
 
 type Interface struct {
-	db      *sql.DB
-	cacheDb *sql.DB // nullable
+	db *sql.DB
+
+	cacheDb   *sql.DB // nullable
+	cacheChan chan<- trackCacheData
 
 	config *schema.Config // readonly
 	prog   *progress.Progress
@@ -79,6 +81,7 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	}
 
 	var cacheDb *sql.DB
+	var cacheChan chan trackCacheData
 	if config.CacheDbEnabled != nil && *config.CacheDbEnabled {
 		// Open cache database
 		cacheDbDir := filepath.Join(config.DbDir, CacheDbPath)
@@ -86,18 +89,24 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		if err != nil {
 			return nil, err
 		}
+		cacheChan = make(chan trackCacheData)
 	}
 
 	trackCache, _ := lru.New[string, schema.Track](32)
 
-	return &Interface{
+	i := &Interface{
 		db:         db,
 		cacheDb:    cacheDb,
+		cacheChan:  cacheChan,
 		config:     config,
 		prog:       progress.NewProgress(),
 		LongIdGen:  defaultLongIdGen,
 		trackCache: trackCache,
-	}, nil
+	}
+	if cacheChan != nil {
+		go i.runFlushTrackCache()
+	}
+	return i, nil
 }
 
 func (i *Interface) InitDb() error {

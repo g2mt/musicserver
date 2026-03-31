@@ -252,32 +252,38 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	}
 
 	// Check cache first
-	if i.cacheDb != nil {
-		cacheTx, err := i.cacheDb.Begin()
-		if err != nil {
-			slog.Warn("Unable to begin cache transaction", "path", path, "err", err)
-		} else {
-			var cachedData []byte
-			var mimeType string
-			var cacheTxErr error
-			defer func() {
-				if cacheTxErr != nil {
-					cacheTx.Rollback()
-				} else {
-					cacheTx.Commit()
-				}
-			}()
-
-			cacheTxErr = cacheTx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
-			if cacheTxErr == nil {
-				// Update timestamp on cache hit
-				_, cacheTxErr = cacheTx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
-				if cacheTxErr != nil {
-					slog.Warn("Unable to update cached track", "path", path, "err", cacheTxErr)
-				}
-				return cachedData, mimeType, nil
-			}
+	cachedData, mimeType, cErr := func() ([]byte, string, error) {
+		if i.cacheDb != nil {
+			return nil, "", err
 		}
+		ctx, err := i.cacheDb.Begin()
+		if err != nil {
+			return nil, "", err
+		}
+		defer func() {
+			if err != nil {
+				ctx.Rollback()
+			}
+		}()
+		var cachedData []byte
+		var mimeType string
+
+		err = ctx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
+		if err != nil {
+			return nil, "", err
+		}
+
+		// Update timestamp on cache hit
+		_, err = ctx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+		if err != nil {
+			return nil, "", err
+		}
+		return cachedData, mimeType, nil
+	}()
+	if cachedData != nil {
+		return cachedData, mimeType, nil
+	} else {
+		slog.Warn("Unable to complete cache transaction", "cErr", cErr)
 	}
 
 	// Use taglib to extract cover art
@@ -288,56 +294,9 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Cache the result if cache db is available
 	if i.cacheDb != nil && data != nil {
-		dataLen := len(data)
-
-		// Begin a transaction for caching
-		tx, err := i.cacheDb.Begin()
-		if err != nil {
-			slog.Warn("Unable to begin cache transaction", "path", path, "err", err)
-		} else {
-			var txErr error
-			// Use a function to handle commit/rollback
-			defer func() {
-				if txErr != nil {
-					tx.Rollback()
-				} else {
-					tx.Commit()
-				}
-			}()
-
-			// Evict old entries if cache is full
-			var currentSize int
-			txErr = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
-			if txErr == nil && currentSize+dataLen >= CacheMaxBytes {
-				// Expire oldest entries first until we have enough space
-				rows, qErr := tx.Query("SELECT path, length(data) FROM cover_cache ORDER BY timestamp ASC")
-				if qErr == nil {
-					defer rows.Close()
-					for rows.Next() && currentSize+dataLen >= CacheMaxBytes {
-						var evictPath string
-						var evictSize int
-						if rows.Scan(&evictPath, &evictSize) == nil {
-							tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
-							tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
-							currentSize -= evictSize
-						}
-					}
-				}
-			}
-
-			_, txErr = tx.Exec(
-				"INSERT OR REPLACE INTO cover_cache (path, data, mime_type, timestamp) VALUES (?, ?, ?, strftime('%s','now'))",
-				path, data, mimeType,
-			)
-			if txErr != nil {
-				slog.Warn("Unable to cache track", "path", path, "err", txErr)
-				return data, mimeType, nil
-			}
-
-			_, txErr = tx.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
-			if txErr != nil {
-				slog.Warn("Unable to update cache size", "path", path, "err", txErr)
-			}
+		i.cacheChan <- trackCacheData{
+			data:     data,
+			mimeType: mimeType,
 		}
 	}
 
