@@ -1,4 +1,4 @@
-import TrackList from "./TrackList";
+import { useTrackList } from "./TrackList";
 import type { TrackData } from "./TrackData";
 import {
   faChevronLeft,
@@ -132,7 +132,13 @@ export function MainTracksTab({
   return (
     <div className="main-tracks-tab" ref={elRef}>
       {controls}
-      <TrackList tracks={tracks} canEnqueue={true} parentElement={parentElement} />
+      {
+        useTrackList({
+          tracks,
+          canEnqueue: true,
+          parentElement,
+        }).el
+      }
       {controls}
     </div>
   );
