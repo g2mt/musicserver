@@ -55,6 +55,7 @@ export function App() {
   [c.props, c.setProps] = useState<{ version: string; config: any } | null>(
     null,
   );
+  [c.fbPath, c.setFbPath] = useState<string[]>([]);
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", c.darkMode);
