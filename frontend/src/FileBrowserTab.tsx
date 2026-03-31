@@ -101,7 +101,7 @@ export default function FileBrowserTab() {
                   {dir}
                 </a>
               </td>
-              <td width={15}>
+              <td>
                 <a
                   href="#"
                   onClick={(e) => {
@@ -117,7 +117,7 @@ export default function FileBrowserTab() {
           ))}
           {fileList.files?.map((file) => (
             <tr key={file}>
-              <td>
+              <td width={15}>
                 <FontAwesomeIcon icon={faFile} />
               </td>
               <td>
