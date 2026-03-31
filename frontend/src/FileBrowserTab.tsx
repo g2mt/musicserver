@@ -78,9 +78,6 @@ export default function FileBrowserTab() {
                 href="#"
                 title="Show tracks in this path"
                 onClick={(e) => {
-                  e.preventDefault();
-                  c.setSearchQuery(`path:"${[...c.fbPath, dir].join("/")}"`);
-                  c.setLeftTab("tracks");
                 }}
               >
                 <FontAwesomeIcon icon={faSearch} />
@@ -89,26 +86,10 @@ export default function FileBrowserTab() {
                 href="#"
                 title="Scan only this path"
                 onClick={(e) => {
-                  e.preventDefault();
-                  if (nativeScanTracks !== null) {
-                    nativeScanTracks([...c.fbPath, dir].join("/"));
-                  } else {
-                    fetchAPI(
-                      "/track",
-                      { path: [...c.fbPath, dir].join("/") },
-                      "POST",
-                    )
-                      .then(() => {
-                        toast.success("Scanning complete");
-                        c.onRescanned();
-                      })
-                      .catch(() => toast.error("Sync failed"));
-                  }
                 }}
               >
                 <FontAwesomeIcon icon={faReceipt} />
               </a>
-            
             </td>
           </tr>
         </tbody>
