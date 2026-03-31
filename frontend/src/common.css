@@ -90,6 +90,7 @@ body.dark-mode {
   border-radius: var(--border-radius);
   border: 1px solid var(--gray);
   margin: var(--s1);
+  user-select: none;
 }
 
 .icon-btn {
@@ -131,6 +132,10 @@ input {
   &[type="checkbox"] {
     margin: 0 var(--s1);
   }
+}
+
+label {
+  user-select: none;
 }
 
 table {
