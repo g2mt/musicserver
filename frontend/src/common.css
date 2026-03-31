@@ -180,6 +180,7 @@ a {
     padding: var(--s2) var(--s3);
     cursor: pointer;
     font-size: small;
+    user-select: none;
 
     &:not(:last-child) {
       border-bottom: 1px solid var(--gray);
@@ -188,6 +189,12 @@ a {
     &:hover {
       background: var(--accent-color-light);
       color: var(--accent-color-light-text);
+    }
+
+    &.disabled {
+      cursor: not-allowed;
+      font-style: italic;
+      padding: var(--s1) var(--s3);
     }
   }
 }
