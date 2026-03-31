@@ -6,6 +6,7 @@ import {
   faCopy,
   faCompactDisc,
   faUser,
+  faFolder,
 } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiserver";
 import { AppContext } from "./AppState";
@@ -78,6 +79,23 @@ export function Track({
                   Artist
                 </ContextMenuItem>
               )}
+              <ContextMenuItem
+                icon={faFolder}
+                onClick={() => {
+                  const dataPath = c.props?.config.data_path;
+                  if (dataPath && track.path.startsWith(dataPath)) {
+                    const relativePath = track.path.slice(dataPath.length);
+                    const parts = relativePath.split("/").filter((p) => p);
+                    if (parts.length > 0) {
+                      parts.pop();
+                      c.setFbPath(parts);
+                      c.setLeftTab("files");
+                    }
+                  }
+                }}
+              >
+                Path
+              </ContextMenuItem>
             </>,
           );
         }}
