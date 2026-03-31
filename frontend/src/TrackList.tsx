@@ -34,10 +34,12 @@ export function useTrackList({
 
   // Scrolling functions
 
-  const [trackScrolled, scrollToTrack] = useState(0);
+  const [trackScrolled, scrollToTrack] = useState(-1);
   const trackScrollChanged = useRef(false);
 
   useEffect(() => {
+    if (trackScrolled < 0)
+      return;
     if (trackScrolled > displayedCount) {
       setDisplayedCount(trackScrolled + PAGE_SIZE);
       trackScrollChanged.current = true; // delay scrollIntoView until next render
@@ -47,7 +49,7 @@ export function useTrackList({
   }, [trackScrolled]);
 
   useEffect(() => {
-    if (trackRefs.current[trackScrolled]) {
+    if (trackScrollChanged.current && trackRefs.current[trackScrolled]) {
       trackScrollChanged.current = false;
       trackRefs.current[trackScrolled]?.scrollIntoView();
     }
