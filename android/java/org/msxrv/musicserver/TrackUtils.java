@@ -1,6 +1,7 @@
 package org.msxrv.musicserver;
 
 import android.media.MediaMetadataRetriever;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.File;
@@ -9,6 +10,7 @@ import java.io.IOException;
 
 public class TrackUtils {
 	private static final String TAG = "[msxrv] TrackUtils";
+	private static final String COVER_FALLBACK = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0lEQVR4AQEEAPv/ACEhIQDKAGSaOw/yAAAAAElFTkSuQmCC";
 
 	public static class TrackMetadata {
 		public final String title;
@@ -51,15 +53,15 @@ public class TrackUtils {
 		File file = new File(filepath);
 		String parentDir = file.getParent();
 		if (parentDir == null) {
-			outContentType[0] = "image/jpeg";
-			return new byte[0];
+			outContentType[0] = "image/png";
+			return Base64.decode(COVER_FALLBACK, Base64.DEFAULT);
 		}
 
 		File dir = new File(parentDir);
 		File[] files = dir.listFiles();
 		if (files == null) {
-			outContentType[0] = "image/jpeg";
-			return new byte[0];
+			outContentType[0] = "image/png";
+			return Base64.decode(COVER_FALLBACK, Base64.DEFAULT);
 		}
 
 		String[] extensions = {".png", ".jpg", ".webp"};
@@ -94,7 +96,7 @@ public class TrackUtils {
 			}
 		}
 
-		outContentType[0] = "image/jpeg";
-		return new byte[0];
+		outContentType[0] = "image/png";
+		return Base64.decode(COVER_FALLBACK, Base64.DEFAULT);
 	}
 }
