@@ -1,4 +1,11 @@
-import { useContext, useState, useEffect, useRef, useCallback, type RefObject } from "react";
+import {
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  type RefObject,
+} from "react";
 import { Track } from "./Track";
 import { type TrackData } from "./TrackData";
 import { AppContext } from "./AppState";
@@ -10,7 +17,7 @@ import "./TrackList.css";
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
 
-function TrackList({
+export function useTrackList({
   tracks,
   canEnqueue,
   canUnqueue,
@@ -83,7 +90,11 @@ function TrackList({
     return () => observer.disconnect();
   }, [loadMore]);
 
-  return (
+  // Scrolling functions
+
+  const scrollToTrack = (index: number) => {};
+
+  const el = (
     <div className="track-list" ref={listRef}>
       {canUnqueue && (
         <div className="track-list-buttons">
@@ -124,6 +135,6 @@ function TrackList({
       {hasMore && <div ref={sentinelRef} style={{ height: "1px" }} />}
     </div>
   );
-}
 
-export default TrackList;
+  return { el, scrollToTrack };
+}

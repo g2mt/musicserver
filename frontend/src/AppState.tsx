@@ -62,6 +62,7 @@ export interface AppState extends AppStateData {
   setTracksListCollapsed: Dispatch<SetStateAction<boolean>>;
   queueCollapsed: boolean;
   setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
+  trackQueueScroll: (index: number) => void;
   showOnlyQueueAfterEnqueue: boolean;
   setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
   fbPath: string[];

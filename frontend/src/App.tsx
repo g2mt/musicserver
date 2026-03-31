@@ -1,4 +1,4 @@
-import TrackList from "./TrackList";
+import { useTrackList } from "./TrackList";
 import { MainTracksTab } from "./MainTracksTab";
 import { SettingsTab } from "./SettingsTab";
 import FileBrowserTab from "./FileBrowserTab";
@@ -52,6 +52,8 @@ export function App() {
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
   [c.showBlurredCover, c.setShowBlurredCover] = useState(true);
+  [c.showOnlyQueueAfterEnqueue, c.setShowOnlyQueueAfterEnqueue] =
+    useState(false);
   [c.props, c.setProps] = useState<{ version: string; config: any } | null>(
     null,
   );
@@ -70,7 +72,9 @@ export function App() {
   }, []);
 
   // Update body background when current track changes
-  const canvasRef = useRef<HTMLCanvasElement>(document.getElementById("background-overlay") as HTMLCanvasElement);
+  const canvasRef = useRef<HTMLCanvasElement>(
+    document.getElementById("background-overlay") as HTMLCanvasElement,
+  );
   useEffect(() => {
     const canvas = canvasRef.current;
     console.log(canvasRef.current);
@@ -81,7 +85,7 @@ export function App() {
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (c.currentTrack && c.darkMode && c.showBlurredCover) {
@@ -108,26 +112,22 @@ export function App() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = "black";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         let dx, dw, dh;
         if (canvas.width > canvas.height) {
           dw = canvas.width;
-          dh = canvas.width*(img.height/img.width);
+          dh = canvas.width * (img.height / img.width);
           dx = 0;
         } else {
           dh = canvas.height;
-          dw = canvas.height*(img.width/img.height);
-          dx = -(dw-canvas.width)/2;
+          dw = canvas.height * (img.width / img.height);
+          dx = -(dw - canvas.width) / 2;
         }
 
         ctx.filter = "blur(30px) brightness(0.3)";
-        ctx.drawImage(
-          img,
-          0, 0, img.width, img.height,
-          dx, 0, dw, dh
-        );
+        ctx.drawImage(img, 0, 0, img.width, img.height, dx, 0, dw, dh);
       });
     }
   }, [c.currentTrack, c.darkMode]);
@@ -209,6 +209,13 @@ export function App() {
     confirmBoxesCounter.current += 1;
   };
 
+  // Left/right sides
+  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
+    "tracks",
+  );
+  const appLeftSide = useRef(null);
+  const appRightSide = useRef(null);
+
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
   c.onRescanned = () => {
@@ -242,13 +249,17 @@ export function App() {
       c.setEnqueuedTrackIndex(null);
     }
   };
-
-  // Left/right sides
-  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
-    "tracks",
-  );
-  const appLeftSide = useRef(null);
-  const appRightSide = useRef(null);
+  const { el: trackQueue, scrollToTrack: trackQueueScroll } = c.queueCollapsed
+    ? {
+        el: null,
+        scrollToTrack: (_: number) => {},
+      }
+    : useTrackList({
+        tracks: c.enqueuedTracks,
+        canUnqueue: true,
+        parentElement: appRightSide,
+      });
+  c.trackQueueScroll = trackQueueScroll;
 
   // Collapse state
   [c.tracksListCollapsed, c.setTracksListCollapsed] = useState(false);
@@ -262,7 +273,7 @@ export function App() {
     );
   }, [windowWidth]);
 
-  // Post processing after all states have been configured
+  // Post processing and event binding after all states have been configured
 
   useEffect(() => {
     mergeConfig(c);
@@ -375,7 +386,9 @@ export function App() {
                 onClick={() => c.setTracksListCollapsed(!c.tracksListCollapsed)}
                 title="Collapse tracks list"
               >
-                <FontAwesomeIcon icon={c.tracksListCollapsed ? faPlus : faMinus} />
+                <FontAwesomeIcon
+                  icon={c.tracksListCollapsed ? faPlus : faMinus}
+                />
               </button>
             </div>
             {!c.tracksListCollapsed && (
@@ -383,8 +396,12 @@ export function App() {
                 {confirmBoxes.map((b) => (
                   <div key={b.key}>{b.el}</div>
                 ))}
-                {c.leftTab === "tracks" && <MainTracksTab tracks={fullTracks}
-                  parentElement={appLeftSide} />}
+                {c.leftTab === "tracks" && (
+                  <MainTracksTab
+                    tracks={fullTracks}
+                    parentElement={appLeftSide}
+                  />
+                )}
                 {c.leftTab === "settings" && <SettingsTab />}
                 {c.leftTab === "files" && <FileBrowserTab />}
               </>
@@ -405,9 +422,7 @@ export function App() {
                 <FontAwesomeIcon icon={c.queueCollapsed ? faPlus : faMinus} />
               </button>
             </div>
-            {!c.queueCollapsed && (
-              <TrackList tracks={c.enqueuedTracks} canUnqueue={true} parentElement={appRightSide} />
-            )}
+            {trackQueue}
           </div>
         </div>
         <div className="music-player">
