@@ -253,8 +253,8 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Check cache first
 	cachedData, mimeType, cErr := func() ([]byte, string, error) {
-		if i.cacheDb != nil {
-			return nil, "", err
+		if i.cacheDb == nil {
+			return nil, "", nil
 		}
 		ctx, err := i.cacheDb.Begin()
 		if err != nil {
@@ -263,6 +263,8 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		defer func() {
 			if err != nil {
 				ctx.Rollback()
+			} else {
+				ctx.Commit()
 			}
 		}()
 		var cachedData []byte
@@ -270,7 +272,7 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 		err = ctx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
 		if err != nil {
-			return nil, "", err
+			return nil, "", nil // skip not found errors
 		}
 
 		// Update timestamp on cache hit
@@ -281,8 +283,9 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		return cachedData, mimeType, nil
 	}()
 	if cachedData != nil {
+		slog.Debug("Cover cache hit", "path", path)
 		return cachedData, mimeType, nil
-	} else {
+	} else if cErr != nil {
 		slog.Warn("Unable to complete cache transaction", "cErr", cErr)
 	}
 
@@ -294,9 +297,13 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Cache the result if cache db is available
 	if i.cacheDb != nil && data != nil {
-		i.cacheChan <- trackCacheData{
+		select {
+		case i.cacheChan <- trackCacheData{
+			path:     path,
 			data:     data,
 			mimeType: mimeType,
+		}:
+		default:
 		}
 	}
 

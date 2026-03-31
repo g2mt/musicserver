@@ -17,6 +17,7 @@ func (i *Interface) runFlushTrackCache(cacheChan <-chan trackCacheData) {
 			data := cached.data
 			dataLen := len(data)
 			mimeType := cached.mimeType
+			// slog.Debug("Starting to cache image", "path", path, "dataLen", dataLen, "mimeType", mimeType)
 
 			// Begin a transaction for caching
 			tx, err := i.cacheDb.Begin()
@@ -69,7 +70,12 @@ func (i *Interface) runFlushTrackCache(cacheChan <-chan trackCacheData) {
 				slog.Warn("Unable to update cache size", "path", path, "err", err)
 				return
 			}
-			tx.Commit()
+
+			err = tx.Commit()
+			if err != nil {
+				slog.Warn("Unable to commit to cache", "err", err)
+				return
+			}
 		}()
 	}
 }

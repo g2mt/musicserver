@@ -45,7 +45,8 @@ type Interface struct {
 	}
 	watcher *fsnotify.Watcher
 
-	trackCache *lru.Cache[string, schema.Track]
+	// thread-safe external track cache for downloads
+	exTrackCache *lru.Cache[string, schema.Track]
 
 	// dlExternal stores the state of ongoing external downloads
 	dlExternal   map[string]dlExternal
@@ -53,9 +54,11 @@ type Interface struct {
 }
 
 const SqlDbPath = "./info.db"
-const MaxIdLength = 64
+const MaxIdLength = 64 // size of sha256 hash
 const MinShortIdLength = 6
-const MaxPageCount = 50
+const MaxPageCount = 50 // default count
+const MaxTrackCacheQueue = 16
+const MaxExTrackCache = 16
 
 const CacheDbPath = "./cache.db"
 const CacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
@@ -89,22 +92,22 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		if err != nil {
 			return nil, err
 		}
-		cacheChan = make(chan trackCacheData)
+		cacheChan = make(chan trackCacheData, MaxTrackCacheQueue)
 	}
 
-	trackCache, _ := lru.New[string, schema.Track](32)
+	exTrackCache, _ := lru.New[string, schema.Track](MaxExTrackCache)
 
 	i := &Interface{
-		db:         db,
-		cacheDb:    cacheDb,
-		cacheChan:  cacheChan,
-		config:     config,
-		prog:       progress.NewProgress(),
-		LongIdGen:  defaultLongIdGen,
-		trackCache: trackCache,
+		db:           db,
+		cacheDb:      cacheDb,
+		cacheChan:    cacheChan,
+		config:       config,
+		prog:         progress.NewProgress(),
+		LongIdGen:    defaultLongIdGen,
+		exTrackCache: exTrackCache,
 	}
 	if cacheChan != nil {
-		go i.runFlushTrackCache()
+		go i.runFlushTrackCache(cacheChan)
 	}
 	return i, nil
 }
