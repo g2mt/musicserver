@@ -92,11 +92,7 @@ export function useTrackList({
 
   // Scrolling functions
 
-  const scrollToTrack = (index: number) => {
-    const pe = parentElement.current;
-    if (!pe) return;
-    pe.scrollTop = index * TRACK_HEIGHT_PX;
-  };
+  const scrollToTrack = (index: number) => {};
 
   const el = (
     <div className="track-list" ref={listRef}>
