@@ -25,7 +25,7 @@ func (i *Interface) ScanTracks(path string) (addedFiles int, err error) {
 	// Determine base path
 	basePath := i.config.DataPath
 	if path != "" {
-		basePath = filepath.Join(i.config.DataPath, path)
+		basePath = filepath.Join(basePath, path)
 	}
 
 	// Bind progress ticker
