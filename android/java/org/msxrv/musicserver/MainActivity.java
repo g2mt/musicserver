@@ -147,6 +147,16 @@ public class MainActivity extends Activity {
 		detachWebView();
 	}
 
+	@Override
+	public void onBackPressed() {
+		WebView webView = getApp().getWebView();
+		if (webView != null && webView.canGoBack()) {
+			webView.goBack();
+		} else {
+			super.onBackPressed();
+		}
+	}
+
 	// Attaches the shared WebView into this Activity's container
 	private void attachWebView() {
 		WebView webView = getApp().getWebView();
