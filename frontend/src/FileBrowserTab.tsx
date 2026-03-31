@@ -107,7 +107,7 @@ export default function FileBrowserTab() {
                   onClick={(e) => {
                     e.preventDefault();
                     c.setSearchQuery(`path:"${[...path, dir].join("/")}"`);
-                    c.showAllTracks();
+                    c.setLeftTab("tracks");
                   }}
                 >
                   <FontAwesomeIcon icon={faSearch} />

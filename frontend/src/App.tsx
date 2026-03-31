@@ -105,13 +105,6 @@ export function App() {
     }
   }, [c.currentTrack, c.darkMode]);
 
-  c.onRescanned = () => {
-    fetchAPI("/track")
-      .then((data) => setFullTracks(data))
-      .catch(() => setFullTracks([]));
-  };
-  useEffect(() => c.onRescanned(), []);
-
   // Hash params (parsed like URLSearchParams but from window.location.hash)
   const getHashParams = () =>
     new URLSearchParams(window.location.hash.slice(1));
@@ -191,6 +184,12 @@ export function App() {
 
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
+  c.onRescanned = () => {
+    fetchAPI("/track")
+      .then((data) => setFullTracks(data))
+      .catch(() => setFullTracks([]));
+  };
+  useEffect(() => c.onRescanned(), []);
 
   // Track queue
   [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
@@ -221,7 +220,6 @@ export function App() {
   [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
-  c.showAllTracks = () => c.setLeftTab("tracks");
 
   // Collapse state
   [c.tracksListCollapsed, c.setTracksListCollapsed] = useState(false);
