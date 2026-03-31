@@ -75,46 +75,39 @@ export function App() {
   }, []);
 
   // Update body background when current track changes
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(document.getElementById("background-overlay") as HTMLCanvasElement);
   useEffect(() => {
     const canvas = canvasRef.current;
+    console.log(canvasRef.current);
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     if (c.currentTrack && c.darkMode && c.showBlurredCover) {
       const cover = getTrackCover(c.currentTrack);
       const img = new Image();
       img.crossOrigin = "anonymous";
-      img.onload = () => {
+      img.src = cover;
+      img.decode().then(() => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const screenAspect = screen.width / screen.height;
-        const imgAspect = img.width / img.height;
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        let srcX = 0, srcY = 0, srcW = img.width, srcH = img.height;
-
-        if (imgAspect > screenAspect) {
-          srcW = img.height * screenAspect;
-          srcX = (img.width - srcW) / 2;
-        } else {
-          srcH = img.width / screenAspect;
-          srcY = (img.height - srcH) / 2;
-        }
-
-        ctx.filter = "blur(30px) brightness(0.1)";
+        ctx.filter = "blur(30px) brightness(0.3)";
         ctx.drawImage(
           img,
-          srcX, srcY, srcW, srcH,
+          0, 0, img.width, img.height,
           0, 0, canvas.width, canvas.height
         );
-      };
-      img.src = cover;
-      canvas.style.display = "block";
-    } else {
-      canvas.style.display = "none";
+      });
     }
   }, [c.currentTrack, c.darkMode]);
 
