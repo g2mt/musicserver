@@ -35,7 +35,7 @@ export function App() {
 
   // Prevent flickering by fading the body in
   useEffect(() => {
-    document.body.style.opacity="1";
+    document.body.style.opacity = "1";
   }, []);
 
   // State variables
@@ -218,14 +218,14 @@ export function App() {
   };
 
   // Left-side tab
-  const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">(
+  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
-  c.showAllTracks = () => setLeftTab("tracks");
+  c.showAllTracks = () => c.setLeftTab("tracks");
 
   // Collapse state
-  const [tracksListCollapsed, setTracksListCollapsed] = useState(false);
-  const [queueCollapsed, setQueueCollapsed] = useState(false);
+  [c.tracksListCollapsed, c.setTracksListCollapsed] = useState(false);
+  [c.queueCollapsed, c.setQueueCollapsed] = useState(false);
 
   const windowWidth = useWindowWidth();
   useEffect(() => {
@@ -322,22 +322,22 @@ export function App() {
           <div id="app-left-side">
             <div className="tab-bar">
               <button
-                className={`tab-btn ${leftTab === "tracks" ? "active" : ""}`}
-                onClick={() => setLeftTab("tracks")}
+                className={`tab-btn ${c.leftTab === "tracks" ? "active" : ""}`}
+                onClick={() => c.setLeftTab("tracks")}
                 title="Tracks"
               >
                 <FontAwesomeIcon icon={faMusic} />
               </button>
               <button
-                className={`tab-btn ${leftTab === "files" ? "active" : ""}`}
-                onClick={() => setLeftTab("files")}
+                className={`tab-btn ${c.leftTab === "files" ? "active" : ""}`}
+                onClick={() => c.setLeftTab("files")}
                 title="Files"
               >
                 <FontAwesomeIcon icon={faFolder} />
               </button>
               <button
-                className={`tab-btn ${leftTab === "settings" ? "active" : ""}`}
-                onClick={() => setLeftTab("settings")}
+                className={`tab-btn ${c.leftTab === "settings" ? "active" : ""}`}
+                onClick={() => c.setLeftTab("settings")}
                 title="Settings"
               >
                 <FontAwesomeIcon icon={faGear} />
@@ -345,20 +345,20 @@ export function App() {
               <div className="tab-separator"></div>
               <button
                 className="tab-btn"
-                onClick={() => setTracksListCollapsed(!tracksListCollapsed)}
+                onClick={() => c.setTracksListCollapsed(!c.tracksListCollapsed)}
                 title="Collapse tracks list"
               >
-                <FontAwesomeIcon icon={tracksListCollapsed ? faPlus : faMinus} />
+                <FontAwesomeIcon icon={c.tracksListCollapsed ? faPlus : faMinus} />
               </button>
             </div>
-            {!tracksListCollapsed && (
+            {!c.tracksListCollapsed && (
               <>
                 {confirmBoxes.map((b) => (
                   <div key={b.key}>{b.el}</div>
                 ))}
-                {leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
-                {leftTab === "settings" && <SettingsTab />}
-                {leftTab === "files" && <FileBrowserTab />}
+                {c.leftTab === "tracks" && <MainTracksTab tracks={fullTracks} />}
+                {c.leftTab === "settings" && <SettingsTab />}
+                {c.leftTab === "files" && <FileBrowserTab />}
               </>
             )}
           </div>
@@ -370,13 +370,13 @@ export function App() {
               <div className="tab-separator"></div>
               <button
                 className="tab-btn"
-                onClick={() => setQueueCollapsed(!queueCollapsed)}
+                onClick={() => c.setQueueCollapsed(!c.queueCollapsed)}
                 title="Collapse queue"
               >
-                <FontAwesomeIcon icon={queueCollapsed ? faPlus : faMinus} />
+                <FontAwesomeIcon icon={c.queueCollapsed ? faPlus : faMinus} />
               </button>
             </div>
-            {!queueCollapsed && (
+            {!c.queueCollapsed && (
               <TrackList tracks={c.enqueuedTracks} canUnqueue={true} />
             )}
           </div>

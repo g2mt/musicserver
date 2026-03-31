@@ -56,6 +56,14 @@ export interface AppState extends AppStateData {
   oldSearchQuery: RefObject<string | null>;
   onRescanned: () => void;
   refreshSearch: () => void;
+
+  // New UI state fields
+  leftTab: "tracks" | "settings" | "files";
+  setLeftTab: Dispatch<SetStateAction<"tracks" | "settings" | "files">>;
+  tracksListCollapsed: boolean;
+  setTracksListCollapsed: Dispatch<SetStateAction<boolean>>;
+  queueCollapsed: boolean;
+  setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AppContext = createContext<AppState | null>(null);
