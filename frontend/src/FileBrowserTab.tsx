@@ -35,8 +35,6 @@ export default function FileBrowserTab() {
       });
   }, [c.fbPath]);
 
-  const crumbs = c.fbPath;
-
   return (
     <div className="file-browser-tab">
       <div className="file-browser-location-bar">
@@ -50,7 +48,7 @@ export default function FileBrowserTab() {
         >
           root
         </a>
-        {crumbs.map((crumb, i) => (
+        {c.fbPath.map((crumb, i) => (
           <React.Fragment key={i}>
             {" / "}
             <a
@@ -72,7 +70,7 @@ export default function FileBrowserTab() {
           <col style={{ width: "60px" }} />
         </colgroup>
         <tbody>
-          {path.length > 0 && (
+          {c.fbPath.length > 0 && (
             <tr>
               <td>
                 <FontAwesomeIcon icon={faFolder} />
@@ -112,7 +110,7 @@ export default function FileBrowserTab() {
                   title="Show tracks in this path"
                   onClick={(e) => {
                     e.preventDefault();
-                    c.setSearchQuery(`path:"${[...path, dir].join("/")}"`);
+                    c.setSearchQuery(`path:"${[...c.fbPath, dir].join("/")}"`);
                     c.setLeftTab("tracks");
                   }}
                 >
@@ -124,11 +122,11 @@ export default function FileBrowserTab() {
                   onClick={(e) => {
                     e.preventDefault();
                     if (nativeScanTracks !== null) {
-                      nativeScanTracks([...path, dir].join("/"));
+                      nativeScanTracks([...c.fbPath, dir].join("/"));
                     } else {
                       fetchAPI(
                         "/track",
-                        { path: [...path, dir].join("/") },
+                        { path: [...c.fbPath, dir].join("/") },
                         "POST",
                       )
                         .then(() => {
@@ -155,7 +153,7 @@ export default function FileBrowserTab() {
                   onClick={(e) => {
                     e.preventDefault();
                     fetchAPI(
-                      `/track/:by-path/${path.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`,
+                      `/track/:by-path/${c.fbPath.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`,
                     )
                       .then((data) => {
                         if (data.error) {
