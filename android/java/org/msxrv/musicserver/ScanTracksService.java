@@ -25,6 +25,7 @@ public class ScanTracksService extends Service {
 	private static final int COMPLETE_NOTIFICATION_ID = 2;
 
 	public static final String EXTRA_MUSIC_DIR = "music_dir";
+	public static final String EXTRA_SCAN_PATH = "scan_path";
 
 	private static final AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -38,9 +39,11 @@ public class ScanTracksService extends Service {
 
 	private class ScanThread extends Thread {
 		private final String musicDir;
+		private final String scanPath;
 
-		ScanThread(String musicDir) {
+		ScanThread(String musicDir, String scanPath) {
 			this.musicDir = musicDir;
+			this.scanPath = scanPath;
 		}
 
 		@Override
@@ -54,10 +57,15 @@ public class ScanTracksService extends Service {
 					return;
 				}
 
+				File baseDir = new File(musicDir);
+				if (scanPath != null && !scanPath.isEmpty()) {
+					baseDir = new File(baseDir, scanPath);
+				}
+
 				// First pass: collect all files (discovery)
 				isDiscovering.set(true);
 				List<File> files = new ArrayList<>();
-				collectFiles(new File(musicDir), files);
+				collectFiles(baseDir, files);
 				totalCount.set(files.size());
 				Log.d(TAG, "Found " + totalCount.get() + " files to scan.");
 
@@ -125,6 +133,7 @@ public class ScanTracksService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		String musicDir = intent != null ? intent.getStringExtra(EXTRA_MUSIC_DIR) : null;
+		String scanPath = intent != null ? intent.getStringExtra(EXTRA_SCAN_PATH) : null;
 		if (musicDir == null) {
 			Log.e(TAG, "No music dir provided, stopping.");
 			stopSelf();
@@ -147,7 +156,7 @@ public class ScanTracksService extends Service {
 
 		mainHandler.postDelayed(notificationUpdater, 1000);
 
-		ScanThread scanThread = new ScanThread(musicDir);
+		ScanThread scanThread = new ScanThread(musicDir, scanPath);
 		scanThread.setDaemon(true);
 		scanThread.start();
 
