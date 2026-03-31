@@ -54,9 +54,10 @@ export function useBackForward() {
   );
   const isForwardDisabled = useMemo(
     () =>
-      (typeof c.enqueuedTrackIndex === "number" &&
+      (typeof c.enqueuedTrackIndex ===
+        "number" /* for tracks inside of queue */ &&
         c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length) ||
-      c.enqueuedTracks.length > 0,
+      c.enqueuedTracks.length === 0 /* for tracks outside of queue */,
     [c.enqueuedTrackIndex, c.enqueuedTracks],
   );
 
