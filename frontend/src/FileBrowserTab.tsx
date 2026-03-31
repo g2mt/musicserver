@@ -67,10 +67,15 @@ export default function FileBrowserTab() {
         ))}
       </div>
       <table className="file-browser-table">
+        <colgroup>
+          <col style={{ width: "1px" }} />
+          <col style={{ width: "auto" }} />
+          <col style={{ width: "60px" }} />
+        </colgroup>
         <tbody>
           {path.length > 0 && (
             <tr>
-              <td width={15}>
+              <td>
                 <FontAwesomeIcon icon={faFolder} />
               </td>
               <td>
@@ -88,7 +93,7 @@ export default function FileBrowserTab() {
           )}
           {fileList.directories?.map((dir) => (
             <tr key={dir}>
-              <td width={15}>
+              <td>
                 <FontAwesomeIcon icon={faFolder} />
               </td>
               <td>
@@ -102,7 +107,7 @@ export default function FileBrowserTab() {
                   {dir}
                 </a>
               </td>
-              <td width={0} style={{ padding: "0" }}>
+              <td>
                 <a
                   href="#"
                   title="Show tracks in this path"
@@ -114,8 +119,6 @@ export default function FileBrowserTab() {
                 >
                   <FontAwesomeIcon icon={faSearch} />
                 </a>
-              </td>
-              <td width={0} style={{ padding: "0" }}>
                 <a
                   href="#"
                   title="Scan only this path"
