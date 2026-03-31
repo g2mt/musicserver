@@ -57,6 +57,7 @@ public class MusicServerApp extends Application {
 		webSettings.setDomStorageEnabled(true);
 		webSettings.setDatabaseEnabled(true);
 		webSettings.setAlgorithmicDarkeningAllowed(true);
+		webView.clearCache(true);
 	}
 
 	// Called once MainActivity has set up musicDir/dbDir and is ready to finish init
