@@ -3,6 +3,7 @@ package org.msxrv.musicserver;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -26,8 +27,10 @@ public class ScanTracksService extends Service {
 
 	public static final String EXTRA_MUSIC_DIR = "music_dir";
 	public static final String EXTRA_SCAN_PATH = "scan_path";
+	private static final String ACTION_CANCEL = "org.msxrv.musicserver.ACTION_CANCEL_SCAN";
 
 	private static final AtomicBoolean isRunning = new AtomicBoolean(false);
+	private final AtomicBoolean isCancelled = new AtomicBoolean(false);
 
 	private NotificationManager notificationManager;
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -66,12 +69,23 @@ public class ScanTracksService extends Service {
 				isDiscovering.set(true);
 				List<File> files = new ArrayList<>();
 				collectFiles(baseDir, files);
+				
+				if (isCancelled.get()) {
+					notifyCancelled();
+					return;
+				}
+
 				totalCount.set(files.size());
 				Log.d(TAG, "Found " + totalCount.get() + " files to scan.");
 
 				// Second pass: load each file
 				isDiscovering.set(false);
 				for (File file : files) {
+					if (isCancelled.get()) {
+						notifyCancelled();
+						return;
+					}
+
 					currentFileName.set(file.getName());
 
 					Log.d(TAG, "Loading track: " + file.getAbsolutePath());
@@ -97,8 +111,17 @@ public class ScanTracksService extends Service {
 			}
 		}
 
+		private void notifyCancelled() {
+			notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(ScanTracksService.this, CHANNEL_ID)
+				.setSmallIcon(android.R.drawable.ic_media_play)
+				.setContentTitle("Scan cancelled")
+				.setContentText("Scanning was stopped by user.")
+				.setAutoCancel(true)
+				.build());
+		}
+
 		private void collectFiles(File dir, List<File> result) {
-			if (!dir.exists() || !dir.isDirectory()) {
+			if (isCancelled.get() || !dir.exists() || !dir.isDirectory()) {
 				return;
 			}
 			File[] entries = dir.listFiles();
@@ -106,6 +129,7 @@ public class ScanTracksService extends Service {
 				return;
 			}
 			for (File entry : entries) {
+				if (isCancelled.get()) return;
 				if (entry.isDirectory()) {
 					collectFiles(entry, result);
 				} else {
@@ -132,6 +156,11 @@ public class ScanTracksService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent != null && ACTION_CANCEL.equals(intent.getAction())) {
+			isCancelled.set(true);
+			return START_NOT_STICKY;
+		}
+
 		String musicDir = intent != null ? intent.getStringExtra(EXTRA_MUSIC_DIR) : null;
 		String scanPath = intent != null ? intent.getStringExtra(EXTRA_SCAN_PATH) : null;
 		if (musicDir == null) {
@@ -146,6 +175,7 @@ public class ScanTracksService extends Service {
 			return START_NOT_STICKY;
 		}
 
+		isCancelled.set(false);
 		scannedCount.set(0);
 		totalCount.set(0);
 		final String initialFileName = "Starting scan...";
@@ -181,10 +211,21 @@ public class ScanTracksService extends Service {
 	};
 
 	private Notification buildNotification() {
+		Intent cancelIntent = new Intent(this, ScanTracksService.class);
+		cancelIntent.setAction(ACTION_CANCEL);
+		PendingIntent pendingCancelIntent = PendingIntent.getService(this, 0, cancelIntent, PendingIntent.FLAG_IMMUTABLE);
+
+		Notification.Action action = new Notification.Action.Builder(
+			android.R.drawable.ic_menu_close_clear_cancel,
+			"Cancel",
+			pendingCancelIntent
+		).build();
+
 		Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
 			.setSmallIcon(android.R.drawable.ic_media_play)
 			.setOngoing(true)
-			.setOnlyAlertOnce(true);
+			.setOnlyAlertOnce(true)
+			.addAction(action);
 
 		int value = scannedCount.get();
 		int maxValue = totalCount.get();
