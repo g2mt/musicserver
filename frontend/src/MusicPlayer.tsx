@@ -54,21 +54,22 @@ export function useBackForward() {
   );
   const isForwardDisabled = useMemo(
     () =>
-      c.enqueuedTrackIndex === null ||
-      c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length,
+      (typeof c.enqueuedTrackIndex === "number" &&
+        c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length) ||
+      c.enqueuedTracks.length > 0,
     [c.enqueuedTrackIndex, c.enqueuedTracks],
   );
 
   function handleBack() {
-    if (isBackDisabled) return;
-    const prevIndex = (c.enqueuedTrackIndex ?? 0) - 1;
+    const prevIndex = (c.enqueuedTrackIndex ?? 1) - 1;
+    if (typeof c.enqueuedTracks[prevIndex] === "undefined") return;
     c.setEnqueuedTrackIndex(prevIndex);
     c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
   }
 
   function handleForward() {
-    if (isForwardDisabled) return;
-    const nextIndex = (c.enqueuedTrackIndex ?? 0) + 1;
+    const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
+    if (typeof c.enqueuedTracks[nextIndex] === "undefined") return;
     c.setEnqueuedTrackIndex(nextIndex);
     c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
   }
