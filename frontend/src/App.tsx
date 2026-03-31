@@ -243,6 +243,9 @@ export function App() {
         tracks: c.enqueuedTracks,
         canUnqueue: true,
         parentElement: appRightSide,
+        enqueuedTracks: c.enqueuedTracks,
+        setEnqueuedTracks: c.setEnqueuedTracks,
+        unqueueTrack: c.unqueueTrack,
       });
   c.trackQueueScroll = trackQueueScroll;
 

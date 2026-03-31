@@ -1,5 +1,4 @@
 import {
-  useContext,
   useState,
   useEffect,
   useRef,
@@ -8,7 +7,6 @@ import {
 } from "react";
 import { Track } from "./Track";
 import { type TrackData } from "./TrackData";
-import { AppContext } from "./AppState";
 import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -22,11 +20,17 @@ export function useTrackList({
   canEnqueue,
   canUnqueue,
   parentElement,
+  enqueuedTracks,
+  setEnqueuedTracks,
+  unqueueTrack,
 }: {
   tracks: TrackData[];
   canEnqueue?: boolean;
   canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
+  enqueuedTracks: TrackData[];
+  setEnqueuedTracks: React.Dispatch<React.SetStateAction<TrackData[]>>;
+  unqueueTrack: (index?: number) => void;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
