@@ -20,9 +20,24 @@ function TrackList({
   canUnqueue?: boolean;
 }) {
   const c = useContext(AppContext)!;
-  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
-  const sentinelRef = useRef<HTMLDivElement>(null);
 
+  // Displayed count
+
+  const [displayedCount, setDisplayedCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setDisplayedCount(PAGE_SIZE);
+  }, [tracks.length]);
+
+  const displayedTracks = tracks.slice(0, displayedCount);
+
+  // Scroll event decreasing setDisplayedCount for scrolling up
+
+  // TODO
+
+  // Sentinel for scrolling down
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
   const hasMore = displayedCount < tracks.length;
 
   const loadMore = useCallback(() => {
@@ -47,12 +62,6 @@ function TrackList({
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [loadMore]);
-
-  useEffect(() => {
-    setDisplayedCount(PAGE_SIZE);
-  }, [tracks.length]);
-
-  const displayedTracks = tracks.slice(0, displayedCount);
 
   return (
     <div className="track-list">
