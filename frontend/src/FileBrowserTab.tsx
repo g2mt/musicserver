@@ -18,6 +18,174 @@ interface FileList {
   directories: string[] | null;
 }
 
+interface DirectoryRowProps {
+  path: string[];
+  isLocationBar?: boolean;
+}
+
+function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
+  const c = useContext(AppContext)!;
+
+  const handleSearch = () => {
+    c.setSearchQuery(`path:"${path.join("/")}"`);
+    c.setLeftTab("tracks");
+  };
+
+  const handleScan = () => {
+    if (nativeScanTracks !== null) {
+      nativeScanTracks(path.join("/"));
+    } else {
+      fetchAPI("/track", { path: path.join("/") }, "POST")
+        .then(() => {
+          toast.success("Scanning complete");
+          c.onRescanned();
+        })
+        .catch(() => toast.error("Sync failed"));
+    }
+  };
+
+  if (isLocationBar) {
+    return (
+      <tr>
+        <td>
+          <FontAwesomeIcon icon={faFolderOpen} />
+        </td>
+        <td>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              c.setFbPath([]);
+            }}
+          >
+            root
+          </a>
+          {path.map((crumb, i) => (
+            <React.Fragment key={i}>
+              {" / "}
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  c.setFbPath(path.slice(0, i + 1));
+                }}
+              >
+                {crumb}
+              </a>
+            </React.Fragment>
+          ))}
+        </td>
+        <td>
+          <a
+            href="#"
+            title="Show tracks in this path"
+            onClick={(e) => {
+              e.preventDefault();
+              handleSearch();
+            }}
+          >
+            <FontAwesomeIcon icon={faSearch} />
+          </a>
+          <a
+            href="#"
+            title="Scan only this path"
+            onClick={(e) => {
+              e.preventDefault();
+              handleScan();
+            }}
+          >
+            <FontAwesomeIcon icon={faReceipt} />
+          </a>
+        </td>
+      </tr>
+    );
+  }
+
+  const dirName = path[path.length - 1];
+  const parentPath = path.slice(0, -1);
+
+  return (
+    <tr>
+      <td>
+        <FontAwesomeIcon icon={faFolder} />
+      </td>
+      <td>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            c.setFbPath(path);
+          }}
+        >
+          {dirName}
+        </a>
+      </td>
+      <td>
+        <a
+          href="#"
+          title="Show tracks in this path"
+          onClick={(e) => {
+            e.preventDefault();
+            handleSearch();
+          }}
+        >
+          <FontAwesomeIcon icon={faSearch} />
+        </a>
+        <a
+          href="#"
+          title="Scan only this path"
+          onClick={(e) => {
+            e.preventDefault();
+            handleScan();
+          }}
+        >
+          <FontAwesomeIcon icon={faReceipt} />
+        </a>
+      </td>
+    </tr>
+  );
+}
+
+interface FileRowProps {
+  fileName: string;
+  dirPath: string[];
+}
+
+function FileRow({ fileName, dirPath }: FileRowProps) {
+  const c = useContext(AppContext)!;
+
+  return (
+    <tr>
+      <td width={15}>
+        <FontAwesomeIcon icon={faFile} />
+      </td>
+      <td>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault();
+            fetchAPI(
+              `/track/:by-path/${dirPath.map(encodeURIComponent).join("/")}/${encodeURIComponent(fileName)}`,
+            )
+              .then((data) => {
+                if (data.error) {
+                  toast.error(data.error);
+                } else {
+                  c.setCurrentTrack(data);
+                }
+              })
+              .catch((err) =>
+                toast.error(`Failed to load track: ${err.message}`),
+              );
+          }}
+        >
+          {fileName}
+        </a>
+      </td>
+    </tr>
+  );
+}
+
 export default function FileBrowserTab() {
   const c = useContext(AppContext)!;
   const [fileList, setFileList] = useState<FileList>({
@@ -26,7 +194,9 @@ export default function FileBrowserTab() {
   });
 
   useEffect(() => {
-    const encodedPath = [c.props?.config.data_path ?? "", ...c.fbPath].map(encodeURIComponent).join("/");
+    const encodedPath = [c.props?.config.data_path ?? "", ...c.fbPath]
+      .map(encodeURIComponent)
+      .join("/");
     fetchAPI(`/file/${encodedPath}`)
       .then((data) => setFileList(data))
       .catch((err) => {
@@ -34,24 +204,6 @@ export default function FileBrowserTab() {
         setFileList({ files: [], directories: [] });
       });
   }, [c.fbPath]);
-
-  const handleSearchCurrentPath = () => {
-    c.setSearchQuery(`path:"${c.fbPath.join("/")}"`);
-    c.setLeftTab("tracks");
-  };
-
-  const handleScanCurrentPath = () => {
-    if (nativeScanTracks !== null) {
-      nativeScanTracks(c.fbPath.join("/"));
-    } else {
-      fetchAPI("/track", { path: c.fbPath.join("/") }, "POST")
-        .then(() => {
-          toast.success("Scanning complete");
-          c.onRescanned();
-        })
-        .catch(() => toast.error("Sync failed"));
-    }
-  };
 
   return (
     <div className="file-browser-tab">
@@ -62,58 +214,7 @@ export default function FileBrowserTab() {
           <col style={{ width: "60px" }} />
         </colgroup>
         <tbody>
-          <tr>
-            <td>
-              <FontAwesomeIcon icon={faFolderOpen} />
-            </td>
-            <td>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  c.setFbPath([]);
-                }}
-              >
-                root
-              </a>
-              {c.fbPath.map((crumb, i) => (
-                <React.Fragment key={i}>
-                  {" / "}
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      c.setFbPath(c.fbPath.slice(0, i + 1));
-                    }}
-                  >
-                    {crumb}
-                  </a>
-                </React.Fragment>
-              ))}
-            </td>
-            <td>
-              <a
-                href="#"
-                title="Show tracks in this path"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSearchCurrentPath();
-                }}
-              >
-                <FontAwesomeIcon icon={faSearch} />
-              </a>
-              <a
-                href="#"
-                title="Scan only this path"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleScanCurrentPath();
-                }}
-              >
-                <FontAwesomeIcon icon={faReceipt} />
-              </a>
-            </td>
-          </tr>
+          <DirectoryRow path={c.fbPath} isLocationBar={true} />
         </tbody>
       </table>
       <table className="file-browser-table">
@@ -142,88 +243,10 @@ export default function FileBrowserTab() {
             </tr>
           )}
           {fileList.directories?.map((dir) => (
-            <tr key={dir}>
-              <td>
-                <FontAwesomeIcon icon={faFolder} />
-              </td>
-              <td>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    c.setFbPath([...c.fbPath, dir]);
-                  }}
-                >
-                  {dir}
-                </a>
-              </td>
-              <td>
-                <a
-                  href="#"
-                  title="Show tracks in this path"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    c.setSearchQuery(`path:"${[...c.fbPath, dir].join("/")}"`);
-                    c.setLeftTab("tracks");
-                  }}
-                >
-                  <FontAwesomeIcon icon={faSearch} />
-                </a>
-                <a
-                  href="#"
-                  title="Scan only this path"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (nativeScanTracks !== null) {
-                      nativeScanTracks([...c.fbPath, dir].join("/"));
-                    } else {
-                      fetchAPI(
-                        "/track",
-                        { path: [...c.fbPath, dir].join("/") },
-                        "POST",
-                      )
-                        .then(() => {
-                          toast.success("Scanning complete");
-                          c.onRescanned();
-                        })
-                        .catch(() => toast.error("Sync failed"));
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon icon={faReceipt} />
-                </a>
-              </td>
-            </tr>
+            <DirectoryRow key={dir} path={[...c.fbPath, dir]} />
           ))}
           {fileList.files?.map((file) => (
-            <tr key={file}>
-              <td width={15}>
-                <FontAwesomeIcon icon={faFile} />
-              </td>
-              <td>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    fetchAPI(
-                      `/track/:by-path/${c.fbPath.map(encodeURIComponent).join("/")}/${encodeURIComponent(file)}`,
-                    )
-                      .then((data) => {
-                        if (data.error) {
-                          toast.error(data.error);
-                        } else {
-                          c.setCurrentTrack(data);
-                        }
-                      })
-                      .catch((err) =>
-                        toast.error(`Failed to load track: ${err.message}`),
-                      );
-                  }}
-                >
-                  {file}
-                </a>
-              </td>
-            </tr>
+            <FileRow key={file} fileName={file} dirPath={c.fbPath} />
           ))}
         </tbody>
       </table>
