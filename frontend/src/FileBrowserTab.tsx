@@ -5,9 +5,10 @@ import {
   faFile,
   faFolderOpen,
   faSearch,
+  faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { fetchAPI } from "./apiserver";
+import { fetchAPI, nativeScanTracks } from "./apiserver";
 import { AppContext } from "./AppState";
 
 import "./FileBrowserTab.css";
@@ -101,9 +102,10 @@ export default function FileBrowserTab() {
                   {dir}
                 </a>
               </td>
-              <td>
+              <td width={0} style={{ padding: "0" }}>
                 <a
                   href="#"
+                  title="Show tracks in this path"
                   onClick={(e) => {
                     e.preventDefault();
                     c.setSearchQuery(`path:"${[...path, dir].join("/")}"`);
@@ -111,6 +113,31 @@ export default function FileBrowserTab() {
                   }}
                 >
                   <FontAwesomeIcon icon={faSearch} />
+                </a>
+              </td>
+              <td width={0} style={{ padding: "0" }}>
+                <a
+                  href="#"
+                  title="Scan only this path"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (nativeScanTracks !== null) {
+                      nativeScanTracks([...path, dir].join("/"));
+                    } else {
+                      fetchAPI(
+                        "/track",
+                        { path: [...path, dir].join("/") },
+                        "POST",
+                      )
+                        .then(() => {
+                          toast.success("Scanning complete");
+                          c.onRescanned();
+                        })
+                        .catch(() => toast.error("Sync failed"));
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon icon={faReceipt} />
                 </a>
               </td>
             </tr>
