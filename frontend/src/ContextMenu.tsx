@@ -2,6 +2,30 @@ import React, { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
+type ContextMenuState = {
+  anchor: HTMLElement;
+  content: React.ReactNode;
+} | null;
+
+let setMenuState: ((state: ContextMenuState) => void) | null = null;
+
+/*
+  Usage:
+
+  toggleContextMenu(anchorElement, (
+    <>
+      <ContextMenuItem onClick=...>1</ContextMenuItem>
+      <ContextMenuItem onClick=...>2</ContextMenuItem>
+    </>
+  ))
+ */
+export function toggleContextMenu(
+  anchor: HTMLElement,
+  content: React.ReactNode,
+) {
+  setMenuState?.({ anchor, content });
+}
+
 export function ContextMenuItem({
   onClick,
   icon,
@@ -27,42 +51,30 @@ export function ContextMenuItem({
   );
 }
 
-type ContextMenuState = {
-  anchor: HTMLElement;
-  content: React.ReactNode;
-} | null;
-
-let setMenuState: ((state: ContextMenuState) => void) | null = null;
-
-/*
-  Usage:
-
-  showContextMenu(anchorElement, (
-    <>
-      <ContextMenuItem onClick=...>1</ContextMenuItem>
-      <ContextMenuItem onClick=...>2</ContextMenuItem>
-    </>
-  ))
- */
-export function showContextMenu(anchor: HTMLElement, content: React.ReactNode) {
-  setMenuState?.({ anchor, content });
-}
-
 export function ContextMenu() {
   const [state, setState] = useState<ContextMenuState>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMenuState = setState;
+    setMenuState = (newState: ContextMenuState) => {
+      if (state !== null && state?.anchor === newState?.anchor) {
+        setState(null);
+        return;
+      }
+      setState(newState);
+    };
     return () => {
       setMenuState = null;
     };
-  }, []);
+  }, [state]);
 
   useEffect(() => {
     if (!state) return;
 
     function handleClick(e: MouseEvent) {
+      if (state?.anchor.contains(e.target as Node)) {
+        return; // prevent double click
+      }
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setState(null);
       }
@@ -90,8 +102,11 @@ export function ContextMenu() {
   const style: React.CSSProperties = {
     left: anchorRect.left,
     ...(showAbove
-      ? { bottom: window.innerHeight - anchorRect.top, marginBottom: "var(--s2)", }
-      : { top: anchorRect.bottom, marginTop: "var(--s2)", }),
+      ? {
+          bottom: window.innerHeight - anchorRect.top,
+          marginBottom: "var(--s2)",
+        }
+      : { top: anchorRect.bottom, marginTop: "var(--s2)" }),
   };
 
   return (

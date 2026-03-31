@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useRef } from "react";
 import { AppContext } from "./AppState";
 import { Select, Option } from "./Select";
-import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 import { fetchAPI } from "./apiserver";
 import { toast } from "react-toastify";
 
@@ -106,11 +106,14 @@ export function MainTracksTab({ tracks }: { tracks: TrackData[] | null }) {
           }}
           onContextMenu={(e) => {
             e.preventDefault();
-            showContextMenu(e.currentTarget, (
+            toggleContextMenu(
+              e.currentTarget,
               <>
-                <ContextMenuItem onClick={handleAddAllToQueue}>Add all to queue</ContextMenuItem>
-              </>
-            ));
+                <ContextMenuItem onClick={handleAddAllToQueue}>
+                  Add all to queue
+                </ContextMenuItem>
+              </>,
+            );
           }}
         >
           <FontAwesomeIcon icon={faPlus} />

@@ -1,5 +1,5 @@
 import React from "react";
-import { ContextMenuItem, showContextMenu } from "./ContextMenu";
+import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
@@ -28,7 +28,7 @@ export function Select({ onChange, children }: SelectProps) {
     <button
       className="btn"
       onClick={(e) => {
-        showContextMenu(
+        toggleContextMenu(
           e.currentTarget,
           <>
             {children.map((option, index) => {
