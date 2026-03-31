@@ -22,11 +22,20 @@ export function useTrackList({
   canEnqueue,
   canUnqueue,
   parentElement,
+
+  // workaround since context cannot be passed as argument
+  enqueuedTracks,
+  setEnqueuedTracks,
+  unqueueTrack,
 }: {
   tracks: TrackData[];
   canEnqueue?: boolean;
   canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
+
+  enqueuedTracks: TrackData[];
+  setEnqueuedTracks: React.Dispatch<React.SetStateAction<TrackData[]>>;
+  unqueueTrack: (index?: number) => void;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
