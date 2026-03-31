@@ -28,7 +28,6 @@ export function useTrackList({
   canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
 }) {
-  const c = useContext(AppContext)!;
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -121,19 +120,19 @@ export function useTrackList({
     <div className="track-list" ref={listRef}>
       {canUnqueue && (
         <div className="track-list-buttons">
-          <button className="btn" onClick={() => c.unqueueTrack()}>
+          <button className="btn" onClick={() => unqueueTrack()}>
             <FontAwesomeIcon icon={faMinus} />
             Remove all from queue
           </button>
           <button
             className="btn"
             onClick={() => {
-              const shuffled = [...c.enqueuedTracks];
+              const shuffled = [...enqueuedTracks];
               for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
               }
-              c.setEnqueuedTracks(shuffled);
+              setEnqueuedTracks(shuffled);
             }}
           >
             <FontAwesomeIcon icon={faShuffle} />
