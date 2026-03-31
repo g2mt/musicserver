@@ -20,7 +20,13 @@ func (i *Interface) ScanTracks() (addedFiles int, err error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
-	slog.Debug("full scan started")
+	slog.Debug("full scan started", "path", path)
+
+	// Determine base path
+	basePath := i.config.DataPath
+	if path != "" {
+		basePath = filepath.Join(basePath, path)
+	}
 
 	// Bind progress ticker
 	if ticker, err := i.prog.Bind("scanTracks"); err == nil {
