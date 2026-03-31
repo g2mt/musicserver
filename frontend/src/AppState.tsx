@@ -52,12 +52,9 @@ export interface AppState extends AppStateData {
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
   props: { version: string; config: any } | null;
   setProps: Dispatch<SetStateAction<{ version: string; config: any } | null>>;
-  showAllTracks: () => void;
   oldSearchQuery: RefObject<string | null>;
   onRescanned: () => void;
   refreshSearch: () => void;
-
-  // New UI state fields
   leftTab: "tracks" | "settings" | "files";
   setLeftTab: Dispatch<SetStateAction<"tracks" | "settings" | "files">>;
   tracksListCollapsed: boolean;
