@@ -183,6 +183,24 @@ export function MusicPlayer() {
     };
   }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
+  // Swipe gestures
+
+  function handleTouchStart(e: React.TouchEvent) {
+    setTouchStartX(e.touches[0].clientX);
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchEndX - touchStartX;
+    if (diff < -50) {
+      handleBack();
+    } else if (diff > 50) {
+      handleForward();
+    }
+    setTouchStartX(null);
+  }
+
   // Media info
 
   if ("mediaSession" in navigator) {
