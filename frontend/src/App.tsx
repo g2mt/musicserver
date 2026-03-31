@@ -33,6 +33,11 @@ declare global {
 export function App() {
   const c = {} as AppState;
 
+  // Prevent flickering by fading the body in
+  useEffect(() => {
+    document.body.style.opacity="1";
+  }, []);
+
   // State variables
   [c.currentTrack, c.setCurrentTrack] = useState<TrackData | null>(null);
   [c.isPlaying, c.setIsPlaying] = useState(false);
@@ -61,17 +66,6 @@ export function App() {
     fetchAPI("/props")
       .then(c.setProps)
       .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    function onBeforeUnload() {
-      saveConfig(c);
-    }
-
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", onBeforeUnload);
-    };
   }, []);
 
   // Update body background when current track changes
@@ -210,7 +204,73 @@ export function App() {
     confirmBoxesCounter.current += 1;
   };
 
-  // Keyboard shortcuts
+  // Tracks
+  const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
+
+  // Track queue
+  [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
+  c.enqueueTrack = (track: TrackData | TrackData[]) => {
+    if (Array.isArray(track)) {
+      c.setEnqueuedTracks([...c.enqueuedTracks, ...track]);
+    } else {
+      c.setEnqueuedTracks([...c.enqueuedTracks, track]);
+    }
+  };
+  c.unqueueTrack = (index?: number) => {
+    if (typeof index === "number") {
+      c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
+      // If we remove a track before the current index, adjust the index
+      if (c.enqueuedTrackIndex !== null && index < c.enqueuedTrackIndex) {
+        c.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
+      } else if (index === c.enqueuedTrackIndex) {
+        // If we remove the currently highlighted track, reset index
+        c.setEnqueuedTrackIndex(null);
+      }
+    } else {
+      c.setEnqueuedTracks([]);
+      c.setEnqueuedTrackIndex(null);
+    }
+  };
+
+  // Left-side tab
+  const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">(
+    "tracks",
+  );
+  c.showAllTracks = () => setLeftTab("tracks");
+
+  // Collapse state
+  const [tracksListCollapsed, setTracksListCollapsed] = useState(false);
+  const [queueCollapsed, setQueueCollapsed] = useState(false);
+
+  const windowWidth = useWindowWidth();
+  useEffect(() => {
+    document.body.classList.toggle(
+      "minimized",
+      windowWidth < PLAYER_COLLAPSE_AT_WIDTH,
+    );
+  }, [windowWidth]);
+
+  // Post processing after all states have been configured
+
+  useEffect(() => {
+    mergeConfig(c);
+  }, []);
+
+  useEffect(() => {
+    function onBeforeUnload(e: BeforeUnloadEvent) {
+      //saveConfig(c);
+      if (c.isPlaying) {
+        e.preventDefault();
+        return "A track is playing. Are you sure you want to leave?";
+      }
+    }
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [c.isPlaying]);
+
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (
@@ -260,56 +320,6 @@ export function App() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  // Tracks
-  const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
-
-  // Track queue
-  [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
-  c.enqueueTrack = (track: TrackData | TrackData[]) => {
-    if (Array.isArray(track)) {
-      c.setEnqueuedTracks([...c.enqueuedTracks, ...track]);
-    } else {
-      c.setEnqueuedTracks([...c.enqueuedTracks, track]);
-    }
-  };
-  c.unqueueTrack = (index?: number) => {
-    if (typeof index === "number") {
-      c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
-      // If we remove a track before the current index, adjust the index
-      if (c.enqueuedTrackIndex !== null && index < c.enqueuedTrackIndex) {
-        c.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
-      } else if (index === c.enqueuedTrackIndex) {
-        // If we remove the currently highlighted track, reset index
-        c.setEnqueuedTrackIndex(null);
-      }
-    } else {
-      c.setEnqueuedTracks([]);
-      c.setEnqueuedTrackIndex(null);
-    }
-  };
-
-  // Left-side tab
-  const [leftTab, setLeftTab] = useState<"tracks" | "settings" | "files">(
-    "tracks",
-  );
-  c.showAllTracks = () => setLeftTab("tracks");
-
-  useEffect(() => {
-    mergeConfig(c);
-  }, []);
-
-  // Collapse state
-  const [tracksListCollapsed, setTracksListCollapsed] = useState(false);
-  const [queueCollapsed, setQueueCollapsed] = useState(false);
-
-  const windowWidth = useWindowWidth();
-  useEffect(() => {
-    document.body.classList.toggle(
-      "minimized",
-      windowWidth < PLAYER_COLLAPSE_AT_WIDTH,
-    );
-  }, [windowWidth]);
 
   return (
     <AppContext value={c}>

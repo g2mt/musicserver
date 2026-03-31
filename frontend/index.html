@@ -8,7 +8,16 @@
     <link rel="icon" type="image/png" sizes="72x72" href="/branding/favicons/72x72.png" />
     <link rel="icon" type="image/png" sizes="144x144" href="/branding/favicons/144x144.png" />
   </head>
-  <body>
+  <body style="opacity:0;">
+    <!-- Prevent flickering by setting root background directly after loading -->
+    <script>
+    (() => {
+      try {
+        const config = JSON.parse((window._native_settings ?? localStorage).getItem("_config"));
+        document.documentElement.style.background=config.darkMode?"#000":"#fff";
+      } catch(e) {}
+    })();
+    </script>
     <div id="root"></div>
     <canvas id="background-overlay"></canvas>
     <script type="module" src="/src/main.tsx"></script>
