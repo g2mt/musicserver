@@ -165,6 +165,22 @@ export function MusicPlayer() {
     audio.volume = c.muted ? 0 : c.volume;
   }, [c.volume, c.muted]);
 
+  // Navigation
+
+  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
+    useBackForward();
+
+  useEffect(() => {
+    window._setIsPlaying = c.setIsPlaying;
+    window._handleBack = handleBack;
+    window._handleForward = handleForward;
+    return () => {
+      window._setIsPlaying = undefined;
+      window._handleBack = undefined;
+      window._handleForward = undefined;
+    };
+  }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
+
   // Media info
 
   if ("mediaSession" in navigator) {
@@ -192,20 +208,6 @@ export function MusicPlayer() {
     }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
   }
 
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
-    useBackForward();
-
-  useEffect(() => {
-    window._setIsPlaying = c.setIsPlaying;
-    window._handleBack = handleBack;
-    window._handleForward = handleForward;
-    return () => {
-      window._setIsPlaying = undefined;
-      window._handleBack = undefined;
-      window._handleForward = undefined;
-    };
-  }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
-
   const windowWidth = useWindowWidth();
   const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
 
@@ -224,18 +226,12 @@ export function MusicPlayer() {
               {c.isPlaying ? "Pause" : "Play"}
             </ContextMenuItem>
             {!isForwardDisabled && (
-              <ContextMenuItem
-                onClick={handleForward}
-                icon={faForwardStep}
-              >
+              <ContextMenuItem onClick={handleForward} icon={faForwardStep}>
                 Forward
               </ContextMenuItem>
             )}
             {!isBackDisabled && (
-              <ContextMenuItem
-                onClick={handleBack}
-                icon={faBackwardStep}
-              >
+              <ContextMenuItem onClick={handleBack} icon={faBackwardStep}>
                 Backward
               </ContextMenuItem>
             )}
