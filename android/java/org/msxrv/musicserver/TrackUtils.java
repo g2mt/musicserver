@@ -6,7 +6,8 @@ import android.util.Log;
 
 public class TrackUtils {
 	private static final String TAG = "[msxrv] TrackUtils";
-	private static final String COVER_FALLBACK = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0lEQVR4AQEEAPv/ACEhIQDKAGSaOw/yAAAAAElFTkSuQmCC";
+	private static final String COVER_FALLBACK_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAD0lEQVR4AQEEAPv/ACEhIQDKAGSaOw/yAAAAAElFTkSuQmCC";
+	private static final byte[] COVER_FALLBACK = Base64.decode(COVER_FALLBACK_B64, Base64.DEFAULT);
 
 	public static class TrackMetadata {
 		public final String title;
@@ -48,14 +49,14 @@ public class TrackUtils {
 		String parentDir = file.getParent();
 		if (parentDir == null) {
 			outContentType[0] = "image/png";
-			return Base64.decode(COVER_FALLBACK, Base64.DEFAULT);
+			return COVER_FALLBACK;
 		}
 
 		File dir = new File(parentDir);
 		File[] files = dir.listFiles();
 		if (files == null) {
 			outContentType[0] = "image/png";
-			return Base64.decode(COVER_FALLBACK, Base64.DEFAULT);
+			return COVER_FALLBACK;
 		}
 
 		String[] extensions = {".png", ".jpg", ".webp"};
@@ -91,6 +92,6 @@ public class TrackUtils {
 		}
 
 		outContentType[0] = "image/png";
-		return Base64.decode(COVER_FALLBACK, Base64.DEFAULT);
+		return COVER_FALLBACK;
 	}
 }
