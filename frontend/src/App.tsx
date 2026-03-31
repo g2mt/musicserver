@@ -201,7 +201,9 @@ export function App() {
   const appLeftSide = useRef(null);
   const appRightSide = useRef(null);
   c.scrollToTop = () => {
-    // TODO
+    if (appLeftSide.current) {
+      appLeftSide.current.scrollTop = 0;
+    }
   };
 
   // Tracks

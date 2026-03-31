@@ -67,6 +67,7 @@ export interface AppState extends AppStateData {
   setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
   fbPath: string[];
   setFbPath: Dispatch<SetStateAction<string[]>>;
+  scrollToTop: () => void;
 }
 
 export const AppContext = createContext<AppState | null>(null);

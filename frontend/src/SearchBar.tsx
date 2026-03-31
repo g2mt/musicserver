@@ -4,6 +4,7 @@ import {
   faSearch,
   faDownload,
   faTimes,
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import { AppContext } from "./AppState";
 import { Track } from "./Track";
@@ -74,6 +75,14 @@ function SearchBar() {
         c.setSearchQuery(inputValue);
       }}
     >
+      <button
+        type="button"
+        className="icon-btn"
+        onClick={c.scrollToTop}
+        title="Go to top"
+      >
+        <FontAwesomeIcon icon={faHome} />
+      </button>
       <div className="search-input-wrapper">
         <input
           type="search"
