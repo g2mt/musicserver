@@ -18,19 +18,6 @@ public class TrackUtils {
 		}
 	}
 
-	public static byte[] getTrackCover(String filepath, String[] outContentType) {
-		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
-			mmr.setDataSource(filepath);
-			byte[] data = mmr.getEmbeddedPicture();
-			outContentType[0] = "image/jpeg";
-			return data != null ? data : new byte[0];
-		} catch (Exception e) {
-			e.printStackTrace();
-			outContentType[0] = "image/jpeg";
-			return new byte[0];
-		}
-	}
-
 	public static TrackMetadata getTrackMetadata(String filepath) {
 		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
 			mmr.setDataSource(filepath);
@@ -41,6 +28,19 @@ public class TrackUtils {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
+		}
+	}
+
+	public static byte[] getTrackCover(String filepath, String[] outContentType) {
+		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
+			mmr.setDataSource(filepath);
+			byte[] data = mmr.getEmbeddedPicture();
+			outContentType[0] = "image/jpeg";
+			return data != null ? data : new byte[0];
+		} catch (Exception e) {
+			e.printStackTrace();
+			outContentType[0] = "image/jpeg";
+			return new byte[0];
 		}
 	}
 }
