@@ -163,6 +163,14 @@ If the `q` parameter is provided, then the tracks will be filtered based on the 
 
 Only the `limit` operator may be specified multiple times without it being guaranteed to narrow the search results. If it is specified more than once, then the last value will be used as the limit.
 
+### POST `/track`
+
+Starts the track scanning process in the server. The server will recursively scan the data directory specified in its configuration, or any of its subdirectories. During this time, it will start a progress named `scanTracks` which tracks the number of files being scanned and the number of files remaining.
+
+This endpoint will block until scanning is complete. Returns the number of tracks successfully added.
+
+If the `path` parameter is provided, then the server will only scan the specified subpath of the data directory. Otherwise, the entire data directory is scanned.
+
 ### GET `/track/[id]`
 
 Returns the metadata of the track, encoded as JSON. Refer to the [track fields section above](#track-fields).
