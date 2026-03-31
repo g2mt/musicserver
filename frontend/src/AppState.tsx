@@ -21,7 +21,6 @@ declare global {
 
 export const AppStateSchema = z.object({
   currentTrack: TrackDataSchema.nullable().default(null),
-  isPlaying: z.boolean().default(false),
   progress: z.number().default(0),
   duration: z.number().default(0),
   volume: z.number().default(1),
@@ -38,6 +37,7 @@ export type AppStateData = z.infer<typeof AppStateSchema>;
 
 export interface AppState extends AppStateData {
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
+  isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
   setProgress: Dispatch<SetStateAction<number>>;
   setDuration: Dispatch<SetStateAction<number>>;
@@ -81,7 +81,6 @@ export function mergeConfig(dest: AppState) {
       const config = AppStateSchema.parse(parsed);
       if (config.currentTrack !== null)
         dest.setCurrentTrack(config.currentTrack);
-      if (config.isPlaying !== undefined) dest.setIsPlaying(config.isPlaying);
       if (config.progress !== undefined) dest.setProgress(config.progress);
       if (config.duration !== undefined) dest.setDuration(config.duration);
       if (config.volume !== undefined) dest.setVolume(config.volume);
@@ -107,7 +106,6 @@ export function mergeConfig(dest: AppState) {
 export function saveConfig(state: AppState) {
   const config: AppStateData = {
     currentTrack: state.currentTrack,
-    isPlaying: state.isPlaying,
     progress: state.progress,
     duration: state.duration,
     volume: state.volume,
