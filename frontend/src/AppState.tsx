@@ -20,9 +20,6 @@ declare global {
 }
 
 export const AppStateSchema = z.object({
-  currentTrack: TrackDataSchema.nullable().default(null),
-  progress: z.number().default(0),
-  duration: z.number().default(0),
   volume: z.number().default(1),
   muted: z.boolean().default(false),
   enqueuedTracks: z.array(TrackDataSchema).default([]),
@@ -36,10 +33,13 @@ export const AppStateSchema = z.object({
 export type AppStateData = z.infer<typeof AppStateSchema>;
 
 export interface AppState extends AppStateData {
+  currentTrack: TrackData | null;
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
   isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
+  progress: number;
   setProgress: Dispatch<SetStateAction<number>>;
+  duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
   setVolume: Dispatch<SetStateAction<number>>;
   setMuted: Dispatch<SetStateAction<boolean>>;
@@ -80,10 +80,6 @@ export function mergeConfig(dest: AppState) {
     try {
       const parsed = JSON.parse(saved);
       const config = AppStateSchema.parse(parsed);
-      if (config.currentTrack !== null)
-        dest.setCurrentTrack(config.currentTrack);
-      if (config.progress !== undefined) dest.setProgress(config.progress);
-      if (config.duration !== undefined) dest.setDuration(config.duration);
       if (config.volume !== undefined) dest.setVolume(config.volume);
       if (config.muted !== undefined) dest.setMuted(config.muted);
       if (config.enqueuedTracks.length > 0)
@@ -108,9 +104,6 @@ export function mergeConfig(dest: AppState) {
 
 export function saveConfig(state: AppState) {
   const config: AppStateData = {
-    currentTrack: state.currentTrack,
-    progress: state.progress,
-    duration: state.duration,
     volume: state.volume,
     muted: state.muted,
     enqueuedTracks: state.enqueuedTracks,
