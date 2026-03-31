@@ -324,7 +324,14 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", errors.New("method not allowed")
 		}
 
-		fullPath := filepath.Join(i.config.DataPath, path)
+		path, err = url.QueryUnescape(path)
+		if err != nil {
+			return nil, "", err
+		}
+		fullPath := filepath.Join("/", path)
+		if !strings.HasPrefix(fullPath, i.config.DataPath) {
+			return nil, "", errors.New("permission denied")
+		}
 		info, err := os.Stat(fullPath)
 		if err != nil {
 			return nil, "", err
