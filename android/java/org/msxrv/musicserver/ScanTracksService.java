@@ -69,12 +69,6 @@ public class ScanTracksService extends Service {
 				isDiscovering.set(true);
 				List<File> files = new ArrayList<>();
 				collectFiles(baseDir, files);
-				
-				if (isCancelled.get()) {
-					notifyCancelled();
-					return;
-				}
-
 				totalCount.set(files.size());
 				Log.d(TAG, "Found " + totalCount.get() + " files to scan.");
 
