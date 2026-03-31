@@ -243,7 +243,7 @@ export function App() {
 
   useEffect(() => {
     function onBeforeUnload(e: BeforeUnloadEvent) {
-      //saveConfig(c);
+      saveConfig(c);
       if (c.isPlaying) {
         e.preventDefault();
         return "A track is playing. Are you sure you want to leave?";
@@ -254,7 +254,7 @@ export function App() {
     return () => {
       window.removeEventListener("beforeunload", onBeforeUnload);
     };
-  }, [c.isPlaying]);
+  }, [c]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
