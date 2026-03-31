@@ -146,9 +146,11 @@ export function MusicPlayer() {
   // Play state
 
   useEffect(() => {
+    c.setProgress(0);
     if (c.currentTrack !== null) {
-      c.setProgress(0);
       c.setIsPlaying(true);
+    } else {
+      c.setIsPlaying(false);
     }
   }, [c.currentTrack]);
 
