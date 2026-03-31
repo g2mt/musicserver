@@ -23,7 +23,6 @@ export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
   enqueuedTracks: z.array(TrackDataSchema).default([]),
-  enqueuedTrackIndex: z.number().nullable().default(null),
   searchQuery: z.string().default(""),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
@@ -43,6 +42,7 @@ export interface AppState extends AppStateData {
   setDuration: Dispatch<SetStateAction<number>>;
   setVolume: Dispatch<SetStateAction<number>>;
   setMuted: Dispatch<SetStateAction<boolean>>;
+  enqueuedTrackIndex: number | null;
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (_: TrackData | TrackData[]) => void;
   unqueueTrack: (index?: number) => void;
@@ -83,8 +83,6 @@ export function mergeConfig(dest: AppState) {
       if (config.muted !== undefined) dest.setMuted(config.muted);
       if (config.enqueuedTracks.length > 0)
         dest.setEnqueuedTracks(config.enqueuedTracks);
-      if (config.enqueuedTrackIndex !== null)
-        dest.setEnqueuedTrackIndex(config.enqueuedTrackIndex);
       if (config.searchQuery !== "") dest.setSearchQuery(config.searchQuery);
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined)
@@ -104,7 +102,6 @@ export function saveConfig(state: AppState) {
     volume: state.volume,
     muted: state.muted,
     enqueuedTracks: state.enqueuedTracks,
-    enqueuedTrackIndex: state.enqueuedTrackIndex,
     searchQuery: state.searchQuery,
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,
