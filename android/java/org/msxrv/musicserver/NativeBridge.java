@@ -238,11 +238,12 @@ public class NativeBridge {
 	// Javascript interface
 
 	@JavascriptInterface
-	public void scanTracks() {
+	public void scanTracks(String path) {
 		Toast.makeText(activity, "Scan tracks started...", Toast.LENGTH_SHORT).show();
 		String musicDir = ((MainActivity) activity).getMusicDir();
 		Intent intent = new Intent(activity, ScanTracksService.class);
 		intent.putExtra(ScanTracksService.EXTRA_MUSIC_DIR, musicDir);
+		intent.putExtra(ScanTracksService.EXTRA_SCAN_PATH, path);
 		activity.startForegroundService(intent);
 	}
 
