@@ -213,7 +213,7 @@ export function MusicPlayer() {
 
   return (
     <div
-      className={`music-player${collapsed ? " collapsed" : ""}`}
+      className={`music-player ${collapsed ? "collapsed" : ""}`}
       onContextMenu={(e) => {
         e.preventDefault();
         showContextMenu(
