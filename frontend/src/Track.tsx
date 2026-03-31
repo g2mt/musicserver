@@ -58,6 +58,7 @@ export function Track({
               >
                 Copy info
               </ContextMenuItem>
+              <ContextMenuItem disabled={true}>Go to...</ContextMenuItem>
               {track.album !== "" && (
                 <ContextMenuItem
                   icon={faCompactDisc}

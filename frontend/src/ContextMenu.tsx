@@ -30,15 +30,21 @@ export function ContextMenuItem({
   onClick,
   icon,
   children,
+  disabled,
 }: {
-  onClick: () => boolean | void;
+  onClick?: () => boolean | void;
   icon?: IconDefinition;
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
     <div
-      className="menu-item"
+      className={`menu-item ${disabled ? "disabled" : ""}`}
       onClick={() => {
+        if (!onClick) {
+          setMenuState?.(null);
+          return;
+        }
         const result = onClick();
         if (result === undefined || result === true) {
           setMenuState?.(null);

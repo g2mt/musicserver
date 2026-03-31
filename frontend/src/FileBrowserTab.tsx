@@ -37,32 +37,82 @@ export default function FileBrowserTab() {
 
   return (
     <div className="file-browser-tab">
-      <div className="file-browser-location-bar">
-        <FontAwesomeIcon icon={faFolderOpen} />{" "}
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            c.setFbPath([]);
-          }}
-        >
-          root
-        </a>
-        {c.fbPath.map((crumb, i) => (
-          <React.Fragment key={i}>
-            {" / "}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                c.setFbPath(c.fbPath.slice(0, i + 1));
-              }}
-            >
-              {crumb}
-            </a>
-          </React.Fragment>
-        ))}
-      </div>
+      <table className="file-browser-location-bar">
+        <colgroup>
+          <col style={{ width: "1px" }} />
+          <col style={{ width: "auto" }} />
+          <col style={{ width: "60px" }} />
+        </colgroup>
+        <tbody>
+          <tr>
+            <td>
+              <FontAwesomeIcon icon={faFolderOpen} />
+            </td>
+            <td>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  c.setFbPath([]);
+                }}
+              >
+                root
+              </a>
+              {c.fbPath.map((crumb, i) => (
+                <React.Fragment key={i}>
+                  {" / "}
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      c.setFbPath(c.fbPath.slice(0, i + 1));
+                    }}
+                  >
+                    {crumb}
+                  </a>
+                </React.Fragment>
+              ))}
+            </td>
+            <td>
+              <a
+                href="#"
+                title="Show tracks in this path"
+                onClick={(e) => {
+                  e.preventDefault();
+                  c.setSearchQuery(`path:"${[...c.fbPath, dir].join("/")}"`);
+                  c.setLeftTab("tracks");
+                }}
+              >
+                <FontAwesomeIcon icon={faSearch} />
+              </a>
+              <a
+                href="#"
+                title="Scan only this path"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (nativeScanTracks !== null) {
+                    nativeScanTracks([...c.fbPath, dir].join("/"));
+                  } else {
+                    fetchAPI(
+                      "/track",
+                      { path: [...c.fbPath, dir].join("/") },
+                      "POST",
+                    )
+                      .then(() => {
+                        toast.success("Scanning complete");
+                        c.onRescanned();
+                      })
+                      .catch(() => toast.error("Sync failed"));
+                  }
+                }}
+              >
+                <FontAwesomeIcon icon={faReceipt} />
+              </a>
+            
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <table className="file-browser-table">
         <colgroup>
           <col style={{ width: "1px" }} />

@@ -1,6 +1,15 @@
 .file-browser-tab {
   padding: var(--s4);
-  tr:hover {
+  tr td:nth-child(3) {
+    text-align: right;
+  }
+  .file-browser-location-bar {
+    border-bottom: 1px solid var(--accent-color);
+    td {
+      padding: 0;
+    }
+  }
+  .file-browser-table tr:hover {
     outline: 1px solid var(--accent-color);
   }
 }

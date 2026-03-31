@@ -15,7 +15,13 @@ export function Option({ onClick, children, disabled }: OptionProps) {
     if (disabled) return () => false;
     return onClick ?? (() => {});
   })();
-  return <ContextMenuItem onClick={itemOnClick}>{children}</ContextMenuItem>;
+  return (
+    <ContextMenuItem
+      onClick={itemOnClick}
+      disabled={disabled}>
+      {children}
+    </ContextMenuItem>
+  );
 }
 
 type SelectProps = {
