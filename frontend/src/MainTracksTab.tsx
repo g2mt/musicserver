@@ -137,6 +137,10 @@ export function MainTracksTab({
           tracks,
           canEnqueue: true,
           parentElement,
+          // context vars
+          enqueuedTracks: c.enqueuedTracks,
+          setEnqueuedTracks: c.setEnqueuedTracks,
+          unqueueTrack: c.unqueueTrack,
         }).el
       }
       {controls}
