@@ -217,7 +217,11 @@ public class MainActivity extends Activity {
 		addPermissionHandler(result -> {
 			if (result.grantResults[0] == PackageManager.PERMISSION_DENIED) {
 				requestPermissions(
-					new String[]{android.Manifest.permission.READ_MEDIA_AUDIO},
+					new String[]{
+						android.Manifest.permission.READ_MEDIA_AUDIO,
+						android.Manifest.permission.READ_MEDIA_IMAGES,
+						android.Manifest.permission.READ_MEDIA_VIDEO,
+					},
 					0);
 			} else {
 				runNextPermissionHandler(result);
