@@ -194,9 +194,9 @@ export function MusicPlayer() {
     if (touchStartX === null) return;
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchEndX - touchStartX;
-    if (diff > 50) {
+    if (diff < -50) {
       handleBack();
-    } else if (diff < -50) {
+    } else if (diff > 50) {
       handleForward();
     }
     setTouchStartX(null);
