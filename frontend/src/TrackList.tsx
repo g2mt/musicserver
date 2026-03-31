@@ -31,9 +31,16 @@ function TrackList({
 
   const displayedTracks = tracks.slice(0, displayedCount);
 
-  // Scroll event decreasing setDisplayedCount for scrolling up
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY === 0 && displayedCount > PAGE_SIZE) {
+        setDisplayedCount(PAGE_SIZE);
+      }
+    };
 
-  // TODO
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [displayedCount]);
 
   // Sentinel for scrolling down
 
