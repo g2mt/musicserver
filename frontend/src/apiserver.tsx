@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 const HOST = (() => {
   if (import.meta.env.DEV) {
     return "http://localhost:8000/api";
@@ -81,7 +83,28 @@ export function listenAPI(
 }
 
 // Bind to prevent "Java bridge method can't be invoked on a non-injected object" error
-export const nativeScanTracks = (() =>
+const nativeScanTracks = (() =>
   typeof window._native !== "undefined"
     ? window._native.scanTracks.bind(window._native)
     : null)();
+
+export function rescanFiles(force: boolean, path?: string): Promise<void> {
+  return new Promise((res, rej) => {
+    if (nativeScanTracks !== null) {
+      nativeScanTracks(path ?? "", force);
+    } else {
+      fetchAPI("/track", {
+        path: path ?? "",
+        force: force ? "true" : "",
+      }, "POST")
+        .then(() => {
+          toast.success("Scanning complete");
+          res();
+        })
+        .catch(() => {
+          toast.error("Sync failed");
+          rej();
+        });
+    }
+  });
+};
