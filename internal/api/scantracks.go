@@ -16,7 +16,7 @@ import (
 
 const WatchDirInterval = 1 * time.Second
 
-func (i *Interface) ScanTracks(path string) (addedFiles int, err error) {
+func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
@@ -73,15 +73,17 @@ func (i *Interface) ScanTracks(path string) (addedFiles int, err error) {
 			return err
 		}
 
-		// Skip if file hasn't changed
-		ckLastModified, ckSize, err := i.GetTrackFileChecksumInfo(path)
-		if err == nil {
-			// Check if the file's current checksum matches database
-			fileInfo, err := os.Stat(path)
+		// Skip if file hasn't changed (unless force is true)
+		if !force {
+			ckLastModified, ckSize, err := i.GetTrackFileChecksumInfo(path)
 			if err == nil {
-				if ckLastModified == fileInfo.ModTime().Unix() && ckSize == fileInfo.Size() {
-					i.scan.ticker.Load().AddValue(1)
-					return nil
+				// Check if the file's current checksum matches database
+				fileInfo, err := os.Stat(path)
+				if err == nil {
+					if ckLastModified == fileInfo.ModTime().Unix() && ckSize == fileInfo.Size() {
+						i.scan.ticker.Load().AddValue(1)
+						return nil
+					}
 				}
 			}
 		}
