@@ -41,6 +41,8 @@ public class ScanTracksService extends Service {
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 	
 	private final AtomicInteger scannedCount = new AtomicInteger(0);
+	private final AtomicInteger addedCount = new AtomicInteger(0);
+	private final AtomicInteger removedCount = new AtomicInteger(0);
 	private final AtomicInteger totalCount = new AtomicInteger(0);
 	private final AtomicBoolean isDiscovering = new AtomicBoolean(true);
 	private final AtomicReference<String> currentFileName = new AtomicReference<>("");
@@ -113,18 +115,20 @@ public class ScanTracksService extends Service {
 
 					Log.d(TAG, "Loading track: " + absPath);
 					bridge.loadTrackByPath(absPath);
+					addedCount.incrementAndGet();
 
 					scannedCount.incrementAndGet();
 				}
 
 				for (String path : toRemove) {
 					bridge.forgetTrackByPath(path);
+					removedCount.incrementAndGet();
 				}
 
 				notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(ScanTracksService.this, CHANNEL_ID)
 					.setSmallIcon(android.R.drawable.ic_media_play)
 					.setContentTitle("Scan complete")
-					.setContentText("Scanned " + scannedCount.get() + " files.")
+					.setContentText("Added " + addedCount.get() + " files, removed " + removedCount.get() + " files.")
 					.setAutoCancel(true)
 					.build());
 
@@ -219,6 +223,8 @@ public class ScanTracksService extends Service {
 
 		isCancelled.set(false);
 		scannedCount.set(0);
+		addedCount.set(0);
+		removedCount.set(0);
 		totalCount.set(0);
 		final String initialFileName = "Starting scan...";
 		currentFileName.set(initialFileName);
