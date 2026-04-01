@@ -73,6 +73,8 @@ func (i *Interface) ScanTracks() (addedFiles int, err error) {
 			return err
 		}
 
+		// TODO: call GetTrackFileChecksumInfo and skip if last modified == ckLastModified and size == ckSize
+
 		track, err := taglib.LoadTrack(path)
 		if err != nil {
 			return nil

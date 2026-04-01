@@ -441,6 +441,13 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	return track.ShortID, nil
 }
 
+func (i *Interface) GetTrackFileChecksumInfo(path string) (
+	ckLastModified int64,
+	ckSize int64,
+	err error
+) {
+}
+
 func (i *Interface) ForgetAllTracks() (bool, error) {
 	// Start a transaction to ensure atomic deletion
 	tx, err := i.db.Begin()
