@@ -121,6 +121,16 @@ public class NativeBridge {
 	private native void msrvDeleteHandle(long handle);
 
 	/**
+	 * Gets the checksum info for a track from the database.
+	 *
+	 * @param ifaceHandle the interface handle
+	 * @param path        the absolute path to the track file
+	 * @param outErr      output array to store error message if any
+	 * @return a long array [ckLastModified, ckSize], or null on error
+	 */
+	private native long[] msrvGetTrackFileChecksumInfo(long ifaceHandle, String path, String[] outErr);
+
+	/**
 	 * Loads a track from the given path and adds it to the library.
 	 *
 	 * @param ifaceHandle the interface handle
@@ -219,6 +229,17 @@ public class NativeBridge {
 		}
 
 		return result.toString();
+	}
+
+	public long[] getTrackFileChecksumInfo(String path) {
+		String[] outErr = new String[1];
+		long[] result = msrvGetTrackFileChecksumInfo(interfaceHandle, path, outErr);
+
+		if (outErr[0] != null) {
+			return null;
+		}
+
+		return result;
 	}
 
 	public String loadTrackByPath(String path) {

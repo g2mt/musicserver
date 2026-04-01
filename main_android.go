@@ -43,6 +43,12 @@ typedef struct MsrvLoadTrackByPathResult {
 	char *ShortId;
 	char *Err;
 } MsrvLoadTrackByPathResult;
+
+typedef struct MsrvGetTrackFileChecksumInfoResult {
+	int64_t CkLastModified;
+	int64_t CkSize;
+	char *Err;
+} MsrvGetTrackFileChecksumInfoResult;
 */
 import "C"
 
@@ -141,6 +147,24 @@ func MsrvReadAll(readerHandle C.uintptr_t) C.struct_MsrvReadAllResult {
 
 	cData := C.CBytes(data)
 	return C.struct_MsrvReadAllResult{Data: (*C.char)(cData), N: C.int(len(data)), Err: nil}
+}
+
+// MsrvGetTrackFileChecksumInfo gets the checksum info for a track from the database.
+//
+//export MsrvGetTrackFileChecksumInfo
+func MsrvGetTrackFileChecksumInfo(ifaceHandle C.uintptr_t, path *C.char) C.struct_MsrvGetTrackFileChecksumInfoResult {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+
+	ckLastModified, ckSize, err := iface.GetTrackFileChecksumInfo(C.GoString(path))
+	if err != nil {
+		return C.struct_MsrvGetTrackFileChecksumInfoResult{CkLastModified: 0, CkSize: 0, Err: C.CString(err.Error())}
+	}
+
+	return C.struct_MsrvGetTrackFileChecksumInfoResult{
+		CkLastModified: C.int64_t(ckLastModified),
+		CkSize:         C.int64_t(ckSize),
+		Err:            nil,
+	}
 }
 
 // MsrvLoadTrackByPath loads a track from the given path and adds it to the interface.
