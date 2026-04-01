@@ -24,6 +24,7 @@ public class ScanTracksService extends Service {
 	private static final String CHANNEL_ID = "msxrv_scan";
 	private static final int NOTIFICATION_ID = 1;
 	private static final int COMPLETE_NOTIFICATION_ID = 2;
+	private static final long MAX_TOLERATED_LAST_MODIFIED_DIFF = 3;
 
 	public static final String EXTRA_MUSIC_DIR = "music_dir";
 	public static final String EXTRA_SCAN_PATH = "scan_path";
@@ -89,7 +90,8 @@ public class ScanTracksService extends Service {
 					if (!force) {
 						long[] ckInfo = bridge.getTrackFileChecksumInfo(file.getAbsolutePath());
 						if (ckInfo != null) {
-							if (ckInfo[0] == file.lastModified() / 1000 && ckInfo[1] == file.length()) {
+							long diff = Math.abs(ckInfo[0] - (file.lastModified() / 1000));
+							if (diff <= MAX_TOLERATED_LAST_MODIFIED_DIFF && ckInfo[1] == file.length()) {
 								scannedCount.incrementAndGet();
 								continue;
 							}
