@@ -3,6 +3,7 @@ package migration
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strconv"
 )
 
@@ -50,6 +51,7 @@ func Migrate(db *sql.DB) error {
 		if err = Migrators[idx].Migrate(tx); err != nil {
 			return fmt.Errorf("migration v%d failed: %w", idx, err)
 		}
+		slog.Info("Migrated to ver=" + strconv.Itoa(idx+1))
 	}
 
 	return tx.Commit()
