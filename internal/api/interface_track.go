@@ -489,7 +489,10 @@ func (i *Interface) ForgetTrackByPath(path string) error {
 
 	// Find the track by path
 	var longID, shortID string
-	err = i.db.QueryRow("SELECT id, short_id FROM tracks WHERE path = ?", absPath).Scan(&longID, &shortID)
+	err = i.db.QueryRow(
+		"SELECT id, short_id FROM tracks WHERE (path = ?) OR (substr(path, ?) = ?)",
+		absPath, -(len(absPath)+1), absPath+"/",
+	).Scan(&longID, &shortID)
 	if err == sql.ErrNoRows {
 		// Track not found, nothing to delete
 		return nil

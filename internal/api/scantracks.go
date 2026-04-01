@@ -201,32 +201,10 @@ eventLoop:
 
 		// Process deleted paths
 		for path := range deletedPaths {
-			info, err := os.Stat(path)
-			if err != nil {
-				// File doesn't exist, proceed with deletion
-			} else if info.IsDir() {
-				err = filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
-					if err != nil {
-						return err
-					}
-					if d.IsDir() {
-						return nil
-					}
-					slog.Info("WatchDataDir processing deleted path", "path", path)
-					if err := i.ForgetTrackByPath(path); err != nil {
-						return err
-					}
-					ticker.AddValue(1)
-					return nil
-				})
-				if err != nil {
-					slog.Error("WatchDataDir error walking directory", "path", path, "error", err)
-				}
-				continue
-			}
 			slog.Info("WatchDataDir processing deleted path", "path", path)
 			if err := i.ForgetTrackByPath(path); err != nil {
-				return err
+				slog.Error("Failed to forget path", "err", err)
+				continue
 			}
 			ticker.AddValue(1)
 		}
