@@ -20,7 +20,7 @@ Handles database migration by version. This module contains the following files:
 
 This section describes the changes between database versions:
 
-  * 0: initial version, creates the initial table:
+  * 0: initial version, creates the initial table based on this schema:
 
 ```sql
 CREATE TABLE IF NOT EXISTS tracks (
@@ -41,4 +41,8 @@ CREATE TABLE IF NOT EXISTS short_ids (
 ```
 
   * 1: adds the `prefs(key: string,value: string)` table with version key set to 1.
-    From this verion onwards, the version key will be incremented by 1.
+    From this verion onwards, for every Migrate function, the version key will be set to the migrated version using the function:
+
+```go
+func setVersion(db *sql.DB, version int) error
+```
