@@ -8,7 +8,7 @@ import {
   faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { fetchAPI, nativeScanTracks, rescanFiles } from "./apiserver";
+import { fetchAPI, rescanFiles } from "./apiserver";
 import { AppContext } from "./AppState";
 
 import "./FileBrowserTab.css";
@@ -26,10 +26,31 @@ interface DirectoryRowProps {
 function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
   const c = useContext(AppContext)!;
 
-  const handleSearch = () => {
-    c.setSearchQuery(`path:"${path.join("/")}"`);
-    c.setLeftTab("tracks");
-  };
+  const sideIcons = (
+    <td>
+      <a
+        href="#"
+        title="Show tracks in this path"
+        onClick={(e) => {
+          e.preventDefault();
+          c.setSearchQuery(`path:"${path.join("/")}"`);
+          c.setLeftTab("tracks");
+        }}
+      >
+        <FontAwesomeIcon icon={faSearch} />
+      </a>
+      <a
+        href="#"
+        title="Scan only this path"
+        onClick={(e) => {
+          e.preventDefault();
+          rescanFiles(false, path.join("/"));
+        }}
+      >
+        <FontAwesomeIcon icon={faReceipt} />
+      </a>
+    </td>
+  );
 
   if (isLocationBar) {
     return (
@@ -62,28 +83,7 @@ function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
             </React.Fragment>
           ))}
         </td>
-        <td>
-          <a
-            href="#"
-            title="Show tracks in this path"
-            onClick={(e) => {
-              e.preventDefault();
-              handleSearch();
-            }}
-          >
-            <FontAwesomeIcon icon={faSearch} />
-          </a>
-          <a
-            href="#"
-            title="Scan only this path"
-            onClick={(e) => {
-              e.preventDefault();
-              rescanFiles(false, path.join("/"));
-            }}
-          >
-            <FontAwesomeIcon icon={faReceipt} />
-          </a>
-        </td>
+        {sideIcons}
       </tr>
     );
   }
@@ -106,28 +106,7 @@ function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
           {dirName}
         </a>
       </td>
-      <td>
-        <a
-          href="#"
-          title="Show tracks in this path"
-          onClick={(e) => {
-            e.preventDefault();
-            handleSearch();
-          }}
-        >
-          <FontAwesomeIcon icon={faSearch} />
-        </a>
-        <a
-          href="#"
-          title="Scan only this path"
-          onClick={(e) => {
-            e.preventDefault();
-            handleScan();
-          }}
-        >
-          <FontAwesomeIcon icon={faReceipt} />
-        </a>
-      </td>
+      {sideIcons}
     </tr>
   );
 }
