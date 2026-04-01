@@ -11,6 +11,7 @@
 ## Backend
 
 - This project uses Go for the backend.
+- For **Go code**: use tabs for indenting.
 - In go, import libraries starting from "musicserver/" path (i.e. "musicserver/internal/schema")
 - When comparing structs for testing, use the `cmp.Diff` function:
 
