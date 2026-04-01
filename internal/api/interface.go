@@ -171,7 +171,6 @@ func (i *Interface) getQueryRow(tx *sql.Tx) interface {
 	}
 }
 
-// out is either []byte, or io.ReadCloser
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out handler, contentType string, err error) {
 	var response interface{}
 	if path == "/track" {
