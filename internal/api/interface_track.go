@@ -317,6 +317,15 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	}
 	track.LongID = longID
 
+	// Get file info for ck_last_modified and ck_size
+	var ckLastModified int64
+	var ckSize int64
+	fileInfo, err := os.Stat(track.Path)
+	if err == nil {
+		ckLastModified = fileInfo.ModTime().Unix()
+		ckSize = fileInfo.Size()
+	}
+
 	// Start a single transaction for the entire operation
 	tx, err := i.db.Begin()
 	if err != nil {
@@ -419,8 +428,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 
 	// Insert track into tracks table
 	_, err = tx.Exec(
-		"INSERT INTO tracks (id, short_id, name, path, artist, album) VALUES (?, ?, ?, ?, ?, ?)",
-		track.LongID, track.ShortID, track.Name, track.Path, track.Artist, track.Album,
+		"INSERT INTO tracks (id, short_id, name, path, artist, album, ck_last_modified, ck_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		track.LongID, track.ShortID, track.Name, track.Path, track.Artist, track.Album, ckLastModified, ckSize,
 	)
 	if err != nil {
 		return "", err
