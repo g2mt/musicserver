@@ -104,3 +104,29 @@ Java_org_msxrv_musicserver_NativeBridge_msrvLoadTrackByPath(
   free(result.ShortId);
   return shortIdStr;
 }
+
+JNIEXPORT jlongArray JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvGetTrackFileChecksumInfo(
+    JNIEnv *env, jobject obj, jlong ifaceHandle, jstring path,
+    jobjectArray outErr) {
+  const char *cPath = (*env)->GetStringUTFChars(env, path, NULL);
+
+  MsrvGetTrackFileChecksumInfoResult result =
+      MsrvGetTrackFileChecksumInfo((uintptr_t)ifaceHandle, (char *)cPath);
+
+  (*env)->ReleaseStringUTFChars(env, path, cPath);
+
+  if (result.Err != NULL) {
+    jstring errStr = (*env)->NewStringUTF(env, result.Err);
+    (*env)->SetObjectArrayElement(env, outErr, 0, errStr);
+    free(result.Err);
+    return NULL;
+  }
+
+  jlongArray jArr = (*env)->NewLongArray(env, 2);
+  jlong fill[2];
+  fill[0] = (jlong)result.CkLastModified;
+  fill[1] = (jlong)result.CkSize;
+  (*env)->SetLongArrayRegion(env, jArr, 0, 2, fill);
+  return jArr;
+}
