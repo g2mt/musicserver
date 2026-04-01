@@ -60,6 +60,15 @@ func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err err
 		return 0, err
 	}
 
+	toRemove := make(map[string]struct{})
+	if toRemoveArray, err := i.GetAllTrackPaths(); err == nil {
+		for _, path := range toRemoveArray {
+			toRemove[path] = struct{}{}
+		}
+	} else {
+		return 0, err
+	}
+
 	// Scan all files
 	err = filepath.WalkDir(basePath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -73,6 +82,7 @@ func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err err
 		if err != nil {
 			return err
 		}
+		delete(toRemove, path)
 
 		// Skip if file hasn't changed (unless force is true)
 		if !force {
@@ -107,6 +117,15 @@ func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err err
 		i.scan.ticker.Load().AddValue(1)
 		return nil
 	})
+	slog.Debug("Added tracks", "n", addedFiles)
+
+	for path := range toRemove {
+		if err := i.ForgetTrackByPath(path); err != nil {
+			slog.Error("Failed to forget path", "err", err)
+			continue
+		}
+	}
+	slog.Debug("Removed tracks", "n", len(toRemove))
 
 	if err != nil {
 		return 0, err
