@@ -119,6 +119,9 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 	return result, nil
 }
 
+func (i *Interface) GetAllTrackPaths() ([]string, error) {
+}
+
 // Resolves a short id to a long ID
 func (i *Interface) resolveTrackShortId(id string, tx *sql.Tx) (string, error) {
 	if len(id) == MaxIdLength {
@@ -310,6 +313,18 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	return data, mimeType, nil
 }
 
+func (i *Interface) GetTrackFileChecksumInfo(path string) (
+	ckLastModified int64,
+	ckSize int64,
+	err error,
+) {
+	err = i.db.QueryRow("SELECT ck_last_modified, ck_size FROM tracks WHERE path = ?", path).Scan(&ckLastModified, &ckSize)
+	if err != nil {
+		return 0, 0, err
+	}
+	return ckLastModified, ckSize, nil
+}
+
 func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	longID := i.LongIdGen(track)
 	if len(longID) != MaxIdLength {
@@ -439,14 +454,6 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	}
 
 	return track.ShortID, nil
-}
-
-func (i *Interface) GetTrackFileChecksumInfo(path string) (
-	ckLastModified int64,
-	ckSize int64,
-	err error,
-) {
-	// TODO: get from the database these info
 }
 
 func (i *Interface) ForgetAllTracks() (bool, error) {
