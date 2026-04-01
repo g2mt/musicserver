@@ -171,6 +171,8 @@ This endpoint will block until scanning is complete. Returns the number of track
 
 If the `path` parameter is provided, then the server will only scan the specified subpath of the data directory. Otherwise, the entire data directory is scanned.
 
+If the `force` parameter is provided, then the server will force the scan even if the last modified and sizes of the current file match the values in the database.
+
 ### GET `/track/[id]`
 
 Returns the metadata of the track, encoded as JSON. Refer to the [track fields section above](#track-fields).

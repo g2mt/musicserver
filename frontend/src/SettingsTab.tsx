@@ -17,6 +17,19 @@ export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
 
+  const rescanFiles = (force: boolean) => {
+    if (nativeScanTracks !== null) {
+      nativeScanTracks("", force);
+    } else {
+      fetchAPI("/track", force ? { force: "true" } : undefined, "POST")
+        .then(() => {
+          toast.success("Scanning complete");
+          c.onRescanned();
+        })
+        .catch(() => toast.error("Sync failed"));
+    }
+  };
+
   return (
     <div className="settings-tab">
       <h2>Settings</h2>
@@ -48,44 +61,37 @@ export function SettingsTab() {
           Show only queue after adding tracks
         </label>
       </div>
-      <button
-        className="btn"
-        disabled={!unsaved}
-        onClick={() => {
-          saveConfig(c);
-          setUnsaved(false);
-          toast.success("Settings saved");
-        }}
-      >
-        <FontAwesomeIcon icon={faSave} /> Save
-      </button>
-      <button
-        className="btn"
-        onClick={() => {
-          c.setDarkMode((b) => !b);
-          setUnsaved(true);
-        }}
-      >
-        <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
-        {c.darkMode ? "Light Mode" : "Dark Mode"}
-      </button>
-      <button
-        className="btn"
-        onClick={() => {
-          if (nativeScanTracks !== null) {
-            nativeScanTracks("");
-          } else {
-            fetchAPI("/track", undefined, "POST")
-              .then(() => {
-                toast.success("Scanning complete");
-                c.onRescanned();
-              })
-              .catch(() => toast.error("Sync failed"));
-          }
-        }}
-      >
-        <FontAwesomeIcon icon={faRotate} /> Rescan Music
-      </button>
+      <p>
+        <button
+          className="btn"
+          disabled={!unsaved}
+          onClick={() => {
+            saveConfig(c);
+            setUnsaved(false);
+            toast.success("Settings saved");
+          }}
+        >
+          <FontAwesomeIcon icon={faSave} /> Save
+        </button>
+        <button
+          className="btn"
+          onClick={() => {
+            c.setDarkMode((b) => !b);
+            setUnsaved(true);
+          }}
+        >
+          <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
+          {c.darkMode ? "Light Mode" : "Dark Mode"}
+        </button>
+      </p>
+      <p>
+        <button className="btn" onClick={() => rescanFiles(false)}>
+          <FontAwesomeIcon icon={faRotate} /> Rescan Music
+        </button>
+        <button className="btn" onClick={() => rescanFiles(false)}>
+          <FontAwesomeIcon icon={faRotate} /> Rescan Music
+        </button>
+      </p>
       <hr />
 
       <h2>Server properties</h2>
