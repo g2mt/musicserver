@@ -4,7 +4,7 @@ Handles database migration by version. This module contains the following files:
 
 - `migration.go`:
 
-  * Defines the public `Migrator` interface, the `Migrators` array containing all the migration interfaces. The `Migrator` interface will have the functions:
+  * Defines the public `Migrator` interface. The `Migrator` interface will have the functions:
     * `Migrate(tx) -> error`: migrates from the direct previous version to this version. This migration is atomic and occurs within a single transaction.
 
   * The `Migrators` array is sorted by version in ascending order: `MigratorV1`, ...
@@ -14,7 +14,7 @@ Handles database migration by version. This module contains the following files:
   * `Migrate(*sql.DB) -> error`: migrates the database to the latest version. Create a transaction here, then run the migration by the `Migrators` array from index=(current version+1).
     * The transaction is created once. Once rolled back, the database will be restored to before the Migrate function is called.
 
-- `v*.go` (`v1.go`, ...): Implements the `MigratorV*` structs (`MigratorV1`, ...), constructors NewMigratorV1, ...
+- `v*.go` (`v1.go`, ...): Implements the `MigratorV*` structs (`MigratorV1`, ...)
 
 ## New version changes
 
