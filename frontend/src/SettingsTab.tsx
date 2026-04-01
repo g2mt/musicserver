@@ -88,8 +88,8 @@ export function SettingsTab() {
         <button className="btn" onClick={() => rescanFiles(false)}>
           <FontAwesomeIcon icon={faRotate} /> Rescan Music
         </button>
-        <button className="btn" onClick={() => rescanFiles(false)}>
-          <FontAwesomeIcon icon={faRotate} /> Rescan Music
+        <button className="btn" onClick={() => rescanFiles(true)}>
+          <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
         </button>
       </p>
       <hr />
