@@ -343,8 +343,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	if err == nil {
 		// Track already exists, update it
 		_, err = tx.Exec(
-			"UPDATE tracks SET name = ?, path = ?, artist = ?, album = ? WHERE id = ?",
-			track.Name, track.Path, track.Artist, track.Album, longID,
+			"UPDATE tracks SET name = ?, path = ?, artist = ?, album = ?, ck_last_modified = ?, ck_size = ? WHERE id = ?",
+			track.Name, track.Path, track.Artist, track.Album, ckLastModified, ckSize, longID,
 		)
 		if err != nil {
 			return "", err
