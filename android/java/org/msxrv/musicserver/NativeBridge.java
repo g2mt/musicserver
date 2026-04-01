@@ -140,6 +140,15 @@ public class NativeBridge {
 	 */
 	private native String msrvLoadTrackByPath(long ifaceHandle, String path, String[] outErr);
 
+	/**
+	 * Gets all track paths from the database.
+	 *
+	 * @param ifaceHandle the interface handle
+	 * @param outErr      output array to store error message if any
+	 * @return an array of paths, or null on error
+	 */
+	private native String[] msrvGetAllTrackPaths(long ifaceHandle, String[] outErr);
+
 	// Utilities
 
 	private String decodeURI(String encodedURI) {
@@ -240,6 +249,18 @@ public class NativeBridge {
 		}
 
 		return result;
+	}
+
+	public String[] getAllTrackPaths() {
+		String[] outErr = new String[1];
+		String[] paths = msrvGetAllTrackPaths(interfaceHandle, outErr);
+
+		if (outErr[0] != null) {
+			Log.e(TAG, "getAllTrackPaths failed: " + outErr[0]);
+			return null;
+		}
+
+		return paths;
 	}
 
 	public String loadTrackByPath(String path) {

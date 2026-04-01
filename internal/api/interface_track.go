@@ -120,6 +120,21 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 }
 
 func (i *Interface) GetAllTrackPaths() ([]string, error) {
+	rows, err := i.db.Query("SELECT path FROM tracks")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paths []string
+	for rows.Next() {
+		var path string
+		if err := rows.Scan(&path); err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
+	}
+	return paths, nil
 }
 
 // Resolves a short id to a long ID
