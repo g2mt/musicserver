@@ -177,7 +177,8 @@ eventLoop:
 		for path := range deletedPaths {
 			slog.Info("WatchDataDir processing deleted path", "path", path)
 			if err := i.ForgetTrackByPath(path); err != nil {
-				return err
+				slog.Error("Failed to forget path", "err", err)
+				continue
 			}
 			ticker.AddValue(1)
 		}
