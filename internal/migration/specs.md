@@ -47,4 +47,4 @@ CREATE TABLE IF NOT EXISTS short_ids (
 func setVersion(tx *sql.Tx, version int) error
 ```
 
-  * 2: adds the columns `ck_last_modified` (int64), `ck_size` (int64) to tracks
+  * 2: adds the columns `ck_last_modified` (int64), `ck_size` (int64) to tracks. These default to 0 and are NOT NULL.
