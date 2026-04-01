@@ -444,7 +444,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 func (i *Interface) GetTrackFileChecksumInfo(path string) (
 	ckLastModified int64,
 	ckSize int64,
-	err error
+	err error,
 ) {
 	// TODO: get from the database these info
 }
