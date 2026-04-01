@@ -164,17 +164,66 @@ eventLoop:
 			if err != nil {
 				continue
 			}
-			slog.Info("WatchDataDir processing written path", "path", absPath)
-			track, err := taglib.LoadTrack(absPath)
+			info, err := os.Stat(absPath)
 			if err != nil {
 				continue
 			}
-			i.AddTrack(&track)
-			ticker.AddValue(1)
+			if info.IsDir() {
+				err = filepath.WalkDir(absPath, func(path string, d os.DirEntry, err error) error {
+					if err != nil {
+						return err
+					}
+					if d.IsDir() {
+						return nil
+					}
+					slog.Info("WatchDataDir processing written path", "path", path)
+					track, err := taglib.LoadTrack(path)
+					if err != nil {
+						return nil
+					}
+					i.AddTrack(&track)
+					ticker.AddValue(1)
+					return nil
+				})
+				if err != nil {
+					slog.Error("WatchDataDir error walking directory", "path", absPath, "error", err)
+				}
+			} else {
+				slog.Info("WatchDataDir processing written path", "path", absPath)
+				track, err := taglib.LoadTrack(absPath)
+				if err != nil {
+					continue
+				}
+				i.AddTrack(&track)
+				ticker.AddValue(1)
+			}
 		}
 
 		// Process deleted paths
 		for path := range deletedPaths {
+			info, err := os.Stat(path)
+			if err != nil {
+				// File doesn't exist, proceed with deletion
+			} else if info.IsDir() {
+				err = filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
+					if err != nil {
+						return err
+					}
+					if d.IsDir() {
+						return nil
+					}
+					slog.Info("WatchDataDir processing deleted path", "path", path)
+					if err := i.ForgetTrackByPath(path); err != nil {
+						return err
+					}
+					ticker.AddValue(1)
+					return nil
+				})
+				if err != nil {
+					slog.Error("WatchDataDir error walking directory", "path", path, "error", err)
+				}
+				continue
+			}
 			slog.Info("WatchDataDir processing deleted path", "path", path)
 			if err := i.ForgetTrackByPath(path); err != nil {
 				return err
