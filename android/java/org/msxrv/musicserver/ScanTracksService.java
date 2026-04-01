@@ -24,12 +24,13 @@ public class ScanTracksService extends Service {
 	private static final String CHANNEL_ID = "msxrv_scan";
 	private static final int NOTIFICATION_ID = 1;
 	private static final int COMPLETE_NOTIFICATION_ID = 2;
-	private static final long MAX_TOLERATED_LAST_MODIFIED_DIFF = 3;
 
 	public static final String EXTRA_MUSIC_DIR = "music_dir";
 	public static final String EXTRA_SCAN_PATH = "scan_path";
 	public static final String EXTRA_FORCE = "force";
 	private static final String ACTION_CANCEL = "org.msxrv.musicserver.ACTION_CANCEL_SCAN";
+
+	private static final long MAX_TOLERATED_LAST_MODIFIED_DIFF = 3;
 
 	private static final AtomicBoolean isRunning = new AtomicBoolean(false);
 	private final AtomicBoolean isCancelled = new AtomicBoolean(false);
