@@ -149,6 +149,15 @@ public class NativeBridge {
 	 */
 	private native String[] msrvGetAllTrackPaths(long ifaceHandle, String[] outErr);
 
+	/**
+	 * Removes a track from the database by its path.
+	 *
+	 * @param ifaceHandle the interface handle
+	 * @param path        the absolute path to the track file
+	 * @param outErr      output array to store error message if any
+	 */
+	private native void msrvForgetTrackByPath(long ifaceHandle, String path, String[] outErr);
+
 	// Utilities
 
 	private String decodeURI(String encodedURI) {
@@ -261,6 +270,15 @@ public class NativeBridge {
 		}
 
 		return paths;
+	}
+
+	public void forgetTrackByPath(String path) {
+		String[] outErr = new String[1];
+		msrvForgetTrackByPath(interfaceHandle, path, outErr);
+
+		if (outErr[0] != null) {
+			Log.e(TAG, "forgetTrackByPath failed: " + outErr[0]);
+		}
 	}
 
 	public String loadTrackByPath(String path) {

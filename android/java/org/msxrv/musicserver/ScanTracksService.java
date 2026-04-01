@@ -14,7 +14,9 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -70,6 +72,14 @@ public class ScanTracksService extends Service {
 					baseDir = new File(baseDir, scanPath);
 				}
 
+				Set<String> toRemove = new HashSet<>();
+				String[] existingPaths = bridge.getAllTrackPaths();
+				if (existingPaths != null) {
+					for (String path : existingPaths) {
+						toRemove.add(path);
+					}
+				}
+
 				// First pass: collect all files (discovery)
 				isDiscovering.set(true);
 				List<File> files = new ArrayList<>();
@@ -85,11 +95,13 @@ public class ScanTracksService extends Service {
 						return;
 					}
 
+					String absPath = file.getAbsolutePath();
+					toRemove.remove(absPath);
 					currentFileName.set(file.getName());
 
 					// Skip if file hasn't changed (unless force is true)
 					if (!force) {
-						long[] ckInfo = bridge.getTrackFileChecksumInfo(file.getAbsolutePath());
+						long[] ckInfo = bridge.getTrackFileChecksumInfo(absPath);
 						if (ckInfo != null) {
 							long diff = Math.abs(ckInfo[0] - (file.lastModified() / 1000));
 							if (diff <= MAX_TOLERATED_LAST_MODIFIED_DIFF && ckInfo[1] == file.length()) {
@@ -99,10 +111,14 @@ public class ScanTracksService extends Service {
 						}
 					}
 
-					Log.d(TAG, "Loading track: " + file.getAbsolutePath());
-					bridge.loadTrackByPath(file.getAbsolutePath());
+					Log.d(TAG, "Loading track: " + absPath);
+					bridge.loadTrackByPath(absPath);
 
 					scannedCount.incrementAndGet();
+				}
+
+				for (String path : toRemove) {
+					bridge.forgetTrackByPath(path);
 				}
 
 				notificationManager.notify(COMPLETE_NOTIFICATION_ID, new Notification.Builder(ScanTracksService.this, CHANNEL_ID)
