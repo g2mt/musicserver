@@ -82,16 +82,10 @@ export function listenAPI(
   return () => es.close();
 }
 
-// Bind to prevent "Java bridge method can't be invoked on a non-injected object" error
-const nativeScanTracks = (() =>
-  typeof window._native !== "undefined"
-    ? window._native.scanTracks.bind(window._native)
-    : null)();
-
 export function rescanFiles(force: boolean, path?: string): Promise<void> {
   return new Promise((res, rej) => {
-    if (nativeScanTracks !== null) {
-      nativeScanTracks(path ?? "", force);
+    if (typeof window._native !== "undefined") {
+      window._native.scanTracks(path ?? "", force);
     } else {
       fetchAPI("/track", {
         path: path ?? "",
