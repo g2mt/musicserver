@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS short_ids (
 ```
 
   * 1: adds the `prefs(key: string,value: string)` table with version key set to 1.
-    From this verion onwards, for every Migrate function, the version key will be set to the migrated version using the function:
+    From this verion onwards, for every Migrate function, the version key will be set to the migrated version using the internal module function:
 
 ```go
 func setVersion(db *sql.DB, version int) error
