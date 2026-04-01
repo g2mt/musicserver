@@ -455,6 +455,7 @@ func (i *Interface) GetTrackFileChecksumInfo(path string) (
 	ckSize int64,
 	err error
 ) {
+	// TODO: get from the database these info
 }
 
 func (i *Interface) ForgetAllTracks() (bool, error) {
