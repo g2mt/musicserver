@@ -51,7 +51,7 @@ func Migrate(db *sql.DB) error {
 		if err = Migrators[idx].Migrate(tx); err != nil {
 			return fmt.Errorf("migration v%d failed: %w", idx, err)
 		}
-		slog.Info("Migrated to ver=" + strconv.Itoa(idx+1))
+		slog.Info("Migrated to", "ver", idx)
 	}
 
 	return tx.Commit()
