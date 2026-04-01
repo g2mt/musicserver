@@ -453,7 +453,7 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 func (i *Interface) GetTrackFileChecksumInfo(path string) (
 	ckLastModified int64,
 	ckSize int64,
-	err error
+	err error,
 ) {
 	err = i.db.QueryRow("SELECT ck_last_modified, ck_size FROM tracks WHERE path = ?", path).Scan(&ckLastModified, &ckSize)
 	if err != nil {
