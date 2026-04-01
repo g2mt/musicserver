@@ -4,6 +4,19 @@ A minimal, cross-platform music server.
 
 This is my personal project. Do not expect any updates or support.
 
+<table>
+  <tr>
+    <td>
+      <p><img src="./docs/screenshots/desktop.png" height="200" /></p>
+      <p><em>Desktop</em></p>
+    </td>
+    <td>
+      <p><img src="./docs/screenshots/phone.png" height="200" /></p>
+      <p><em>Phone</em></p>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - Manages your music library as a database for a single directory
