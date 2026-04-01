@@ -455,7 +455,11 @@ func (i *Interface) GetTrackFileChecksumInfo(path string) (
 	ckSize int64,
 	err error
 ) {
-	// TODO: get from the database these info
+	err = i.db.QueryRow("SELECT ck_last_modified, ck_size FROM tracks WHERE path = ?", path).Scan(&ckLastModified, &ckSize)
+	if err != nil {
+		return 0, 0, err
+	}
+	return ckLastModified, ckSize, nil
 }
 
 func (i *Interface) ForgetAllTracks() (bool, error) {

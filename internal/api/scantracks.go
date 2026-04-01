@@ -73,7 +73,18 @@ func (i *Interface) ScanTracks(path string) (addedFiles int, err error) {
 			return err
 		}
 
-		// TODO: call GetTrackFileChecksumInfo and skip if last modified == ckLastModified and size == ckSize
+		// Skip if file hasn't changed
+		ckLastModified, ckSize, err := i.GetTrackFileChecksumInfo(path)
+		if err == nil {
+			// Check if the file's current checksum matches database
+			fileInfo, err := os.Stat(path)
+			if err == nil {
+				if ckLastModified == fileInfo.ModTime().Unix() && ckSize == fileInfo.Size() {
+					i.scan.ticker.Load().AddValue(1)
+					return nil
+				}
+			}
+		}
 
 		track, err := taglib.LoadTrack(path)
 		if err != nil {
