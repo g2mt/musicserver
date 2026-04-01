@@ -15,6 +15,7 @@ import (
 )
 
 const WatchDirInterval = 1 * time.Second
+const MaxToleratedLastModifiedDiff = 3
 
 func (i *Interface) ScanTracks() (addedFiles int, err error) {
 	i.scan.mu.Lock()
@@ -73,7 +74,24 @@ func (i *Interface) ScanTracks() (addedFiles int, err error) {
 			return err
 		}
 
-		// TODO: call GetTrackFileChecksumInfo and skip if last modified == ckLastModified and size == ckSize
+		// Skip if file hasn't changed (unless force is true)
+		if !force {
+			ckLastModified, ckSize, err := i.GetTrackFileChecksumInfo(path)
+			if err == nil {
+				// Check if the file's current checksum matches database
+				fileInfo, err := os.Stat(path)
+				if err == nil {
+					diff := ckLastModified - fileInfo.ModTime().Unix()
+					if diff < 0 {
+						diff = -diff
+					}
+					if diff <= MaxToleratedLastModifiedDiff && ckSize == fileInfo.Size() {
+						i.scan.ticker.Load().AddValue(1)
+						return nil
+					}
+				}
+			}
+		}
 
 		track, err := taglib.LoadTrack(path)
 		if err != nil {
