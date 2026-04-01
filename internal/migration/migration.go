@@ -28,6 +28,11 @@ func getVersion(db *sql.DB) int {
 	return version
 }
 
+func setVersion(tx *sql.Tx, version int) error {
+	_, err := tx.Exec("INSERT OR REPLACE INTO prefs (key, value) VALUES ('version', ?)", version)
+	return err
+}
+
 func Migrate(db *sql.DB) error {
 	current := getVersion(db)
 
