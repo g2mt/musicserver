@@ -8,7 +8,7 @@ import {
   faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { fetchAPI, nativeScanTracks } from "./apiserver";
+import { fetchAPI, nativeScanTracks, rescanFiles } from "./apiserver";
 import { AppContext } from "./AppState";
 
 import "./FileBrowserTab.css";
@@ -29,19 +29,6 @@ function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
   const handleSearch = () => {
     c.setSearchQuery(`path:"${path.join("/")}"`);
     c.setLeftTab("tracks");
-  };
-
-  const handleScan = () => {
-    if (nativeScanTracks !== null) {
-      nativeScanTracks(path.join("/"));
-    } else {
-      fetchAPI("/track", { path: path.join("/") }, "POST")
-        .then(() => {
-          toast.success("Scanning complete");
-          c.onRescanned();
-        })
-        .catch(() => toast.error("Sync failed"));
-    }
   };
 
   if (isLocationBar) {
@@ -91,7 +78,7 @@ function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
             title="Scan only this path"
             onClick={(e) => {
               e.preventDefault();
-              handleScan();
+              rescanFiles(false, path.join("/"));
             }}
           >
             <FontAwesomeIcon icon={faReceipt} />

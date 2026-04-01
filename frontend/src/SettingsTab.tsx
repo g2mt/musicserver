@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { fetchAPI, nativeScanTracks } from "./apiserver";
+import { rescanFiles } from "./apiserver";
 import { toast } from "react-toastify";
 import {
   faRotate,
@@ -16,19 +16,6 @@ import "./SettingsTab.css";
 export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
-
-  const rescanFiles = (force: boolean) => {
-    if (nativeScanTracks !== null) {
-      nativeScanTracks("", force);
-    } else {
-      fetchAPI("/track", force ? { force: "true" } : undefined, "POST")
-        .then(() => {
-          toast.success("Scanning complete");
-          c.onRescanned();
-        })
-        .catch(() => toast.error("Sync failed"));
-    }
-  };
 
   return (
     <div className="settings-tab">
@@ -85,10 +72,10 @@ export function SettingsTab() {
         </button>
       </p>
       <p>
-        <button className="btn" onClick={() => rescanFiles(false)}>
+        <button className="btn" onClick={() => rescanFiles(false).then(() => c.onRescanned())}>
           <FontAwesomeIcon icon={faRotate} /> Rescan Music
         </button>
-        <button className="btn" onClick={() => rescanFiles(true)}>
+        <button className="btn" onClick={() => rescanFiles(true).then(() => c.onRescanned())}>
           <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
         </button>
       </p>
