@@ -130,3 +130,44 @@ Java_org_msxrv_musicserver_NativeBridge_msrvGetTrackFileChecksumInfo(
   (*env)->SetLongArrayRegion(env, jArr, 0, 2, fill);
   return jArr;
 }
+
+JNIEXPORT jobjectArray JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvGetAllTrackPaths(
+    JNIEnv *env, jobject obj, jlong ifaceHandle, jobjectArray outErr) {
+  MsrvGetAllTrackPathsResult result =
+      MsrvGetAllTrackPaths((uintptr_t)ifaceHandle);
+
+  if (result.Err != NULL) {
+    jstring errStr = (*env)->NewStringUTF(env, result.Err);
+    (*env)->SetObjectArrayElement(env, outErr, 0, errStr);
+    free(result.Err);
+    return NULL;
+  }
+
+  jobjectArray jPaths = (*env)->NewObjectArray(
+      env, result.N, (*env)->FindClass(env, "java/lang/String"), NULL);
+  for (int i = 0; i < result.N; i++) {
+    jstring pathStr = (*env)->NewStringUTF(env, result.Paths[i]);
+    (*env)->SetObjectArrayElement(env, jPaths, i, pathStr);
+    free(result.Paths[i]);
+  }
+  free(result.Paths);
+  return jPaths;
+}
+
+JNIEXPORT void JNICALL
+Java_org_msxrv_musicserver_NativeBridge_msrvForgetTrackByPath(
+    JNIEnv *env, jobject obj, jlong ifaceHandle, jstring path,
+    jobjectArray outErr) {
+  const char *cPath = (*env)->GetStringUTFChars(env, path, NULL);
+
+  char *err = MsrvForgetTrackByPath((uintptr_t)ifaceHandle, (char *)cPath);
+
+  (*env)->ReleaseStringUTFChars(env, path, cPath);
+
+  if (err != NULL) {
+    jstring errStr = (*env)->NewStringUTF(env, err);
+    (*env)->SetObjectArrayElement(env, outErr, 0, errStr);
+    free(err);
+  }
+}
