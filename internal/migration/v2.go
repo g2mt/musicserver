@@ -9,8 +9,8 @@ func (m MigratorV2) Migrate(tx *sql.Tx) error {
 		return err
 	}
 	_, err := tx.Exec(`
-	ALTER TABLE tracks ADD COLUMN ck_last_modified INTEGER;
-	ALTER TABLE tracks ADD COLUMN ck_size INTEGER;
+	ALTER TABLE tracks ADD COLUMN ck_last_modified INTEGER DEFAULT 0 NOT NULL;
+	ALTER TABLE tracks ADD COLUMN ck_size INTEGER DEFAULT 0 NOT NULL;
 	`)
 	return err
 }
