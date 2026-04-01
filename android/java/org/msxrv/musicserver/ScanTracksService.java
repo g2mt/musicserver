@@ -27,6 +27,7 @@ public class ScanTracksService extends Service {
 
 	public static final String EXTRA_MUSIC_DIR = "music_dir";
 	public static final String EXTRA_SCAN_PATH = "scan_path";
+	public static final String EXTRA_FORCE = "force";
 	private static final String ACTION_CANCEL = "org.msxrv.musicserver.ACTION_CANCEL_SCAN";
 
 	private static final AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -43,10 +44,12 @@ public class ScanTracksService extends Service {
 	private class ScanThread extends Thread {
 		private final String musicDir;
 		private final String scanPath;
+		private final boolean force;
 
-		ScanThread(String musicDir, String scanPath) {
+		ScanThread(String musicDir, String scanPath, boolean force) {
 			this.musicDir = musicDir;
 			this.scanPath = scanPath;
+			this.force = force;
 		}
 
 		@Override
@@ -81,6 +84,17 @@ public class ScanTracksService extends Service {
 					}
 
 					currentFileName.set(file.getName());
+
+					// Skip if file hasn't changed (unless force is true)
+					if (!force) {
+						long[] ckInfo = bridge.getTrackFileChecksumInfo(file.getAbsolutePath());
+						if (ckInfo != null) {
+							if (ckInfo[0] == file.lastModified() / 1000 && ckInfo[1] == file.length()) {
+								scannedCount.incrementAndGet();
+								continue;
+							}
+						}
+					}
 
 					Log.d(TAG, "Loading track: " + file.getAbsolutePath());
 					bridge.loadTrackByPath(file.getAbsolutePath());
@@ -171,6 +185,7 @@ public class ScanTracksService extends Service {
 
 		String musicDir = intent != null ? intent.getStringExtra(EXTRA_MUSIC_DIR) : null;
 		String scanPath = intent != null ? intent.getStringExtra(EXTRA_SCAN_PATH) : null;
+		boolean force = intent != null && intent.getBooleanExtra(EXTRA_FORCE, false);
 		if (musicDir == null) {
 			Log.e(TAG, "No music dir provided, stopping.");
 			stopSelf();
@@ -194,7 +209,7 @@ public class ScanTracksService extends Service {
 
 		mainHandler.postDelayed(notificationUpdater, 1000);
 
-		ScanThread scanThread = new ScanThread(musicDir, scanPath);
+		ScanThread scanThread = new ScanThread(musicDir, scanPath, force);
 		scanThread.setDaemon(true);
 		scanThread.start();
 
