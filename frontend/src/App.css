@@ -50,7 +50,7 @@
 }
 
 body.collapsed {
-  .app-main {
+  #app-main {
     flex-direction: column;
     overflow: auto;
   }
