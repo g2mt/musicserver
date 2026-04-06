@@ -55,7 +55,7 @@ export function App() {
   [c.showBlurredCover, c.setShowBlurredCover] = useState(true);
   [c.showOnlyQueueAfterEnqueue, c.setShowOnlyQueueAfterEnqueue] =
     useState(false);
-  [c.searchHistoryLimit, c.setSearchHistoryLimit] = useState(10);
+  [c.searchHistoryLimit, c.setSearchHistoryLimit] = useState(50);
   [c.props, c.setProps] = useState<{ version: string; config: any } | null>(
     null,
   );
