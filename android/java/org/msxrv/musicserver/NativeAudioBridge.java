@@ -79,8 +79,10 @@ public class NativeAudioBridge {
 			}
 
 			@Override
-			public void onStop() {
-				activity.getApp().quit();
+			public void onCustomAction(String action, android.os.Bundle extras) {
+				if (MusicServerApp.ACTION_QUIT.equals(action)) {
+					activity.getApp().quit();
+				}
 			}
 		});
 	}
@@ -145,11 +147,14 @@ public class NativeAudioBridge {
 		long position = mediaPlayer != null ? mediaPlayer.getCurrentPosition() : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
 		float speed = playing ? 1.0f : 0.0f;
 
+		PlaybackState.CustomAction quitAction = new PlaybackState.CustomAction.Builder(
+			MusicServerApp.ACTION_QUIT, "Quit", android.R.drawable.ic_delete).build();
+
 		playbackState = new PlaybackState.Builder()
 			.setState(state, position, speed)
 			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
-				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT |
-				PlaybackState.ACTION_STOP)
+				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
+			.addCustomAction(quitAction)
 			.build();
 		mediaSession.setPlaybackState(playbackState);
 	}
