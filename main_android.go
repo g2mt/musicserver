@@ -204,7 +204,7 @@ func MsrvGetAllTrackPaths(ifaceHandle C.uintptr_t) C.struct_MsrvGetAllTrackPaths
 
 	n := len(paths)
 	cPaths := C.malloc(C.size_t(n) * C.size_t(unsafe.Sizeof((*C.char)(nil))))
-	pSlice := (*[1 << 28]*C.char)(cPaths)[:n:n]
+	pSlice := unsafe.Slice((**C.char)(cPaths), n)
 
 	for i, p := range paths {
 		pSlice[i] = C.CString(p)
