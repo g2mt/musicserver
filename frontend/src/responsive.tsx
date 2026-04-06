@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const PLAYER_COLLAPSE_AT_WIDTH = 800;
+export const COLLAPSE_AT_WIDTH = 800;
 
 export function useWindowWidth() {
   const [width, setWidth] = useState(window.innerWidth);

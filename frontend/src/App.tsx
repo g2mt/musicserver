@@ -19,7 +19,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import type { TrackData } from "./TrackData";
-import { PLAYER_COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
+import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -294,7 +294,7 @@ export function App() {
   useEffect(() => {
     document.body.classList.toggle(
       "minimized",
-      windowWidth < PLAYER_COLLAPSE_AT_WIDTH,
+      windowWidth < COLLAPSE_AT_WIDTH,
     );
   }, [windowWidth]);
 
@@ -377,7 +377,7 @@ export function App() {
         theme="dark"
       />
       <ContextMenu />
-      <SearchSuggestions 
+      <SearchSuggestions
         searchInput={searchInput}
         setSearchInput={setSearchInput}
         searchBarRef={searchBarRef}

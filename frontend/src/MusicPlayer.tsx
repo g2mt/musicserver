@@ -9,7 +9,7 @@ import {
   faForwardStep,
 } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCover, Track } from "./Track";
-import { useWindowWidth, PLAYER_COLLAPSE_AT_WIDTH } from "./responsive";
+import { useWindowWidth, COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
 import { getFilePath, getTrackFileFromId } from "./apiserver";
 import { apiAudio, useAbsoluteAudioPath } from "./apiaudio";
@@ -233,7 +233,7 @@ export function MusicPlayer() {
   }
 
   const windowWidth = useWindowWidth();
-  const collapsed = windowWidth < PLAYER_COLLAPSE_AT_WIDTH;
+  const collapsed = windowWidth < COLLAPSE_AT_WIDTH;
 
   return (
     <div
