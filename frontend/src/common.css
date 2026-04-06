@@ -187,7 +187,7 @@ a {
       border-bottom: 1px solid var(--gray);
     }
 
-    &:hover {
+    &:hover, &.highlighted {
       background: var(--accent-color-light);
       color: var(--accent-color-light-text);
     }
