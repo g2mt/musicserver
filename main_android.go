@@ -49,6 +49,12 @@ typedef struct MsrvGetTrackFileChecksumInfoResult {
 	int64_t CkSize;
 	char *Err;
 } MsrvGetTrackFileChecksumInfoResult;
+
+typedef struct MsrvGetAllTrackPathsResult {
+	char **Paths;
+	int N;
+	char *Err;
+} MsrvGetAllTrackPathsResult;
 */
 import "C"
 
@@ -59,6 +65,7 @@ import (
 	"musicserver/internal/schema"
 	"musicserver/internal/taglib"
 	"runtime/cgo"
+	"unsafe"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -184,6 +191,42 @@ func MsrvLoadTrackByPath(ifaceHandle C.uintptr_t, path *C.char) C.struct_MsrvLoa
 	}
 
 	return C.struct_MsrvLoadTrackByPathResult{ShortId: C.CString(shortId), Err: nil}
+}
+
+//export MsrvGetAllTrackPaths
+func MsrvGetAllTrackPaths(ifaceHandle C.uintptr_t) C.struct_MsrvGetAllTrackPathsResult {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+
+	paths, err := iface.GetAllTrackPaths()
+	if err != nil {
+		return C.struct_MsrvGetAllTrackPathsResult{Paths: nil, N: 0, Err: C.CString(err.Error())}
+	}
+
+	n := len(paths)
+	cPaths := C.malloc(C.size_t(n) * C.size_t(unsafe.Sizeof((*C.char)(nil))))
+	pSlice := (*[1 << 28]*C.char)(cPaths)[:n:n]
+
+	for i, p := range paths {
+		pSlice[i] = C.CString(p)
+	}
+
+	return C.struct_MsrvGetAllTrackPathsResult{
+		Paths: (**C.char)(cPaths),
+		N:     C.int(n),
+		Err:   nil,
+	}
+}
+
+//export MsrvForgetTrackByPath
+func MsrvForgetTrackByPath(ifaceHandle C.uintptr_t, path *C.char) *C.char {
+	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
+
+	err := iface.ForgetTrackByPath(C.GoString(path))
+	if err != nil {
+		return C.CString(err.Error())
+	}
+
+	return nil
 }
 
 type byteReader struct {
