@@ -1,7 +1,5 @@
 import {
   useContext,
-  useEffect,
-  useState,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -28,7 +26,7 @@ function SearchBar({
 }: {
   searchInput: string;
   setSearchInput: Dispatch<SetStateAction<string>>;
-  searchBarRef: RefObject<HTMLInputElement|null>;
+  searchBarRef: RefObject<HTMLInputElement | null>;
 }) {
   const c = useContext(AppContext)!;
 
