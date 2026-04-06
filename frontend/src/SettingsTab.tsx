@@ -48,6 +48,22 @@ export function SettingsTab() {
           Show only queue after adding tracks
         </label>
       </div>
+      <div>
+        <label htmlFor="setting-search-history-limit">
+          Search history limit
+        </label>
+        <input
+          type="number"
+          id="setting-search-history-limit"
+          min={0}
+          max={9999}
+          value={c.searchHistoryLimit}
+          onChange={(e) => {
+            c.setSearchHistoryLimit(parseInt(e.target.value) || 0);
+            setUnsaved(true);
+          }}
+        />
+      </div>
       <p>
         <button
           className="btn"

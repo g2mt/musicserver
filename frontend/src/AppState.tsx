@@ -18,6 +18,7 @@ export const AppStateSchema = z.object({
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
   showOnlyQueueAfterEnqueue: z.boolean().default(false),
+  searchHistoryLimit: z.number().min(0).max(9999).default(10),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
@@ -42,6 +43,7 @@ export interface AppState extends AppStateData {
   setSearchQuery: (_: string) => void;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
+  setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
   props: { version: string; config: any } | null;
   setProps: Dispatch<SetStateAction<{ version: string; config: any } | null>>;
   oldSearchQuery: RefObject<string | null>;
@@ -78,6 +80,10 @@ export function mergeConfig(dest: AppState) {
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined)
         dest.setShowBlurredCover(config.showBlurredCover);
+      if (config.showOnlyQueueAfterEnqueue !== undefined)
+        dest.setShowOnlyQueueAfterEnqueue(config.showOnlyQueueAfterEnqueue);
+      if (config.searchHistoryLimit !== undefined)
+        dest.setSearchHistoryLimit(config.searchHistoryLimit);
     } catch (e: any) {
       toast.error(
         <p>
@@ -96,6 +102,8 @@ export function saveConfig(state: AppState) {
     searchQuery: state.searchQuery,
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,
+    showOnlyQueueAfterEnqueue: state.showOnlyQueueAfterEnqueue,
+    searchHistoryLimit: state.searchHistoryLimit,
   };
   Settings.setItem(CONFIG_KEY, JSON.stringify(config));
 }
