@@ -3,6 +3,7 @@ import {
   useEffect,
   useState,
   type Dispatch,
+  type RefObject,
   type SetStateAction,
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,9 +24,11 @@ import "./SearchBar.css";
 function SearchBar({
   searchInput,
   setSearchInput,
+  searchBarRef,
 }: {
   searchInput: string;
   setSearchInput: Dispatch<SetStateAction<string>>;
+  searchBarRef: RefObject<HTMLInputElement|null>;
 }) {
   const c = useContext(AppContext)!;
 
@@ -89,6 +92,7 @@ function SearchBar({
             setSearchInput(e.target.value);
           }}
           className="search-input"
+          ref={searchBarRef}
         />
         {searchInput && (
           <button
