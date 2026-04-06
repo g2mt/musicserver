@@ -193,6 +193,13 @@ export function App() {
   }, []);
   useEffect(c.refreshSearch, [c.searchQuery]);
 
+  // Search input box text
+  const [searchInput, setSearchInput] = useState(c.searchQuery);
+  useEffect(() => {
+    if (c.oldSearchQuery.current !== null) return; // still being processed
+    setSearchInput(c.searchQuery);
+  }, [c.searchQuery, c.oldSearchQuery.current]);
+
   // Confirm boxes
   const [confirmBoxes, setConfirmBoxes] = useState<
     {
@@ -370,7 +377,10 @@ export function App() {
       <ContextMenu />
       <div className="app-layout">
         <div className="search-bar-container">
-          <SearchBar />
+          <SearchBar
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+          />
         </div>
         <div className="app-main" ref={appMain}>
           <div id="app-left-side" ref={appLeftSide}>

@@ -1,4 +1,10 @@
-import { useContext, useEffect, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
@@ -14,14 +20,14 @@ import type { TrackData } from "./TrackData";
 
 import "./SearchBar.css";
 
-function SearchBar() {
+function SearchBar({
+  searchInput,
+  setSearchInput,
+}: {
+  searchInput: string;
+  setSearchInput: Dispatch<SetStateAction<string>>;
+}) {
   const c = useContext(AppContext)!;
-  const [inputValue, setInputValue] = useState(c.searchQuery);
-
-  useEffect(() => {
-    if (c.oldSearchQuery.current !== null) return; // still being processed
-    setInputValue(c.searchQuery);
-  }, [c.searchQuery, c.oldSearchQuery.current]);
 
   const confirmTrackDownload = async (url: string) => {
     const encodedUrl = encodeURIComponent(url);
@@ -64,32 +70,32 @@ function SearchBar() {
   };
 
   const isValidUrl =
-    inputValue.startsWith("http://") || inputValue.startsWith("https://");
+    searchInput.startsWith("http://") || searchInput.startsWith("https://");
 
   return (
     <form
       className="search-bar"
       onSubmit={(e) => {
         e.preventDefault();
-        c.setSearchQuery(inputValue);
+        c.setSearchQuery(searchInput);
       }}
     >
       <div className="search-input-wrapper">
         <input
           type="search"
           placeholder="Search tracks..."
-          value={inputValue}
+          value={searchInput}
           onChange={(e) => {
-            setInputValue(e.target.value);
+            setSearchInput(e.target.value);
           }}
           className="search-input"
         />
-        {inputValue && (
+        {searchInput && (
           <button
             type="button"
             className="clear-btn"
             onClick={() => {
-              setInputValue("");
+              setSearchInput("");
               c.setSearchQuery("");
             }}
           >
@@ -105,7 +111,7 @@ function SearchBar() {
           type="button"
           className="icon-btn btn-download"
           title='Paste a URL beginning with "http:" or "https:" to download it.'
-          onClick={() => confirmTrackDownload(inputValue)}
+          onClick={() => confirmTrackDownload(searchInput)}
           disabled={!isValidUrl}
         >
           <FontAwesomeIcon icon={faDownload} />
