@@ -109,45 +109,79 @@ export function SettingsTab() {
       {c.props && (
         <form>
           <div>
-            <label>Version:</label>
-            <input type="text" readOnly value={c.props.version} />
+            <label htmlFor="setting-sr-version">Version:</label>
+            <input
+              type="text"
+              id="setting-sr-version"
+              readOnly
+              value={c.props.version}
+            />
           </div>
           <div>
-            <label>HTTP Bind:</label>
-            <input type="text" readOnly value={c.props.config.http_bind} />
+            <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
+            <input
+              type="text"
+              id="setting-sr-http-bind"
+              readOnly
+              value={c.props.config.http_bind}
+            />
           </div>
           <div>
-            <label>Unix Socket Enabled:</label>
+            <label htmlFor="setting-sr-unix-enabled">
+              Unix Socket Enabled:
+            </label>
             <input
               type="checkbox"
+              id="setting-sr-unix-enabled"
               readOnly
               checked={c.props.config.unix_bind_enabled}
             />
           </div>
           <div>
-            <label>Unix Socket Path:</label>
-            <input type="text" readOnly value={c.props.config.unix_bind} />
+            <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
+            <input
+              type="text"
+              id="setting-sr-unix-path"
+              readOnly
+              value={c.props.config.unix_bind}
+            />
           </div>
           <div>
-            <label>Data Path:</label>
-            <input type="text" readOnly value={c.props.config.data_path} />
+            <label htmlFor="setting-sr-data-path">Data Path:</label>
+            <input
+              type="text"
+              id="setting-sr-data-path"
+              readOnly
+              value={c.props.config.data_path}
+            />
           </div>
           <div>
-            <label>Database Directory:</label>
-            <input type="text" readOnly value={c.props.config.db_dir} />
+            <label htmlFor="setting-sr-db-dir">Database Directory:</label>
+            <input
+              type="text"
+              id="setting-sr-db-dir"
+              readOnly
+              value={c.props.config.db_dir}
+            />
           </div>
           <div>
-            <label>Cache database enabled:</label>
+            <label htmlFor="setting-sr-cache-db-enabled">
+              Cache database enabled:
+            </label>
             <input
               type="checkbox"
+              id="setting-sr-cache-db-enabled"
               readOnly
               checked={c.props.config.cache_db_enabled}
             />
           </div>
           <div>
-            <label>Media Downloader:</label>
+            <label htmlFor="setting-sr-media-downloader">
+              Media Downloader:
+            </label>
             <input
               type="text"
+              id="setting-sr-media-downloader"
               readOnly
               value={c.props.config.media_downloader}
             />
