@@ -174,7 +174,7 @@ export default function FileBrowserTab() {
     <div className="file-browser-tab">
       <table className="file-browser-location-bar">
         <colgroup>
-          <col style={{ width: "1px" }} />
+          <col style={{ width: "25px" }} />
           <col style={{ width: "auto" }} />
           <col style={{ width: "60px" }} />
         </colgroup>
@@ -184,7 +184,7 @@ export default function FileBrowserTab() {
       </table>
       <table className="file-browser-table">
         <colgroup>
-          <col style={{ width: "1px" }} />
+          <col style={{ width: "25px" }} />
           <col style={{ width: "auto" }} />
           <col style={{ width: "60px" }} />
         </colgroup>

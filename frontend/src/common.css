@@ -141,8 +141,10 @@ label {
 
 table {
   width: 100%;
+  max-width: 100%;
   border-collapse: collapse;
   margin-top: var(--s2);
+  table-layout: fixed;
 
   & th,
   & td {

@@ -9,7 +9,10 @@
       padding: 0;
     }
   }
-  .file-browser-table tr:hover {
-    outline: 1px solid var(--accent-color);
+  .file-browser-table {
+    overflow-wrap: break-word;
+    tr:hover {
+      outline: 1px solid var(--accent-color);
+    }
   }
 }
