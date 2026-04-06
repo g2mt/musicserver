@@ -16,9 +16,7 @@ export function Option({ onClick, children, disabled }: OptionProps) {
     return onClick ?? (() => {});
   })();
   return (
-    <ContextMenuItem
-      onClick={itemOnClick}
-      disabled={disabled}>
+    <ContextMenuItem onClick={itemOnClick} disabled={disabled}>
       {children}
     </ContextMenuItem>
   );

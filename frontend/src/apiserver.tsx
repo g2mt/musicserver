@@ -87,10 +87,14 @@ export function rescanFiles(force: boolean, path?: string): Promise<void> {
     if (typeof window._native !== "undefined") {
       window._native.scanTracks(path ?? "", force);
     } else {
-      fetchAPI("/track", {
-        path: path ?? "",
-        force: force ? "true" : "",
-      }, "POST")
+      fetchAPI(
+        "/track",
+        {
+          path: path ?? "",
+          force: force ? "true" : "",
+        },
+        "POST",
+      )
         .then(() => {
           toast.success("Scanning complete");
           res();
@@ -101,4 +105,4 @@ export function rescanFiles(force: boolean, path?: string): Promise<void> {
         });
     }
   });
-};
+}

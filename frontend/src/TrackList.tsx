@@ -46,8 +46,7 @@ export function useTrackList({
   const trackScrollChanged = useRef(false);
 
   useEffect(() => {
-    if (trackScrolled < 0)
-      return;
+    if (trackScrolled < 0) return;
     if (trackScrolled > displayedCount) {
       setDisplayedCount(trackScrolled + PAGE_SIZE);
       trackScrollChanged.current = true; // delay scrollIntoView until next render
@@ -65,7 +64,9 @@ export function useTrackList({
 
   // Displayed count
 
-  const [displayedCount, setDisplayedCount] = useState(trackScrolled + PAGE_SIZE);
+  const [displayedCount, setDisplayedCount] = useState(
+    trackScrolled + PAGE_SIZE,
+  );
 
   useEffect(() => {
     setDisplayedCount(PAGE_SIZE);
@@ -85,10 +86,9 @@ export function useTrackList({
       const scrollTop = pe.scrollTop;
       if (scrollTop < lastScrollTop.current) {
         const visibleStart = Math.floor(scrollTop / TRACK_HEIGHT_PX);
-        setDisplayedCount(Math.max(
-          visibleStart + PAGE_SIZE,
-          trackScrolled + PAGE_SIZE,
-        ));
+        setDisplayedCount(
+          Math.max(visibleStart + PAGE_SIZE, trackScrolled + PAGE_SIZE),
+        );
       }
       lastScrollTop.current = scrollTop;
     };
@@ -151,7 +151,12 @@ export function useTrackList({
       )}
 
       {displayedTracks.map((track, index) => (
-        <div key={canUnqueue ? `${index}-${track.id}` : track.id} ref={(el) => { trackRefs.current[index] = el; }}>
+        <div
+          key={canUnqueue ? `${index}-${track.id}` : track.id}
+          ref={(el) => {
+            trackRefs.current[index] = el;
+          }}
+        >
           <Track
             track={track}
             index={canUnqueue ? index : undefined}
