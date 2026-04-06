@@ -51,7 +51,7 @@ export function SettingsTab() {
         </div>
         <div>
           <label htmlFor="setting-search-history-limit">
-            Search history limit
+            Search history limit:
           </label>
           <input
             type="number"
