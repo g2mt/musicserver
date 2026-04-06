@@ -294,7 +294,7 @@ export function App() {
   const windowWidth = useWindowWidth();
   useEffect(() => {
     document.body.classList.toggle(
-      "minimized",
+      "collapsed",
       windowWidth < COLLAPSE_AT_WIDTH,
     );
   }, [windowWidth]);

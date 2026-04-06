@@ -11,7 +11,7 @@
   }
 }
 
-.minimized .main-tracks-controls {
+.collapsed .main-tracks-controls {
   .main-tracks-controls-left .btn span {
     display: none;
   }
