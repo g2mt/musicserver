@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
   faMinus,
+  faPlay,
   faCopy,
   faCompactDisc,
   faUser,
@@ -46,6 +47,15 @@ export function Track({
           toggleContextMenu(
             e.currentTarget,
             <>
+              <ContextMenuItem
+                icon={faPlay}
+                onClick={() => {
+                  if (index !== undefined) c.setEnqueuedTrackIndex(index);
+                  c.setCurrentTrack(track);
+                }}
+              >
+                Play
+              </ContextMenuItem>
               <ContextMenuItem
                 icon={faCopy}
                 onClick={() => {
