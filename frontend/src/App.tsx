@@ -6,7 +6,7 @@ import { MusicPlayer } from "./MusicPlayer";
 import SearchBar from "./SearchBar";
 import React, { useEffect, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
-import { fetchAPI } from "./apiserver";
+import { fetchAPI } from "./apiServer";
 import {
   faMusic,
   faGear,
