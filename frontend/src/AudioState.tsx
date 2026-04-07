@@ -55,7 +55,7 @@ export function useAudio({
     console.log(`Playing ${url}`);
     audio.src = url;
     audio.currentTime = 0;
-    audio.play();
+    setProgress(0);
     setIsPlaying(true);
     setEnded(false);
   }, [url]);
