@@ -15,7 +15,7 @@ export interface AudioState {
   setDuration: Dispatch<SetStateAction<number>>;
 }
 
-export function useAudio(): AudioState {
+export function useAudio({ volume , muted } : {volume:number; muted: boolean;}): AudioState {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -55,20 +55,33 @@ export function useAudio(): AudioState {
     };
   }, [currentTrack?.id]);
 
+  useEffect(() => {
+    audio.volume = muted ? 0 : volume;
+  }, [volume, muted]);
+
   return {
     currentTrack,
     setCurrentTrack,
     isPlaying,
-    setIsPlaying,
+    setIsPlaying: (action: boolean | ((prevState: boolean) => boolean)) => {
+      setIsPlaying(old => {
+        const isPlaying = typeof action === "boolean" ? action: action(old);
+        if (isPlaying)
+          audio.play();
+        else
+          audio.pause();
+        return isPlaying;
+      });
+    },
     progress,
     setProgress: (action: number | ((prevState: number) => number)) => {
-      setProgress(progress => {
+      setProgress(old => {
         if (typeof action === "number") {
           audio.currentTime = action;
           return action;
         } else {
-          audio.currentTime = action(progress);
-          return action(progress);
+          audio.currentTime = action(old);
+          return action(old);
         }
       });
     },
