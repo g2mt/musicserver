@@ -207,6 +207,17 @@ public class NativeAudioBridge {
 	// Called by NativeAudio constructor. Returns the instance ID.
 	@JavascriptInterface
 	public int createInstance() {
+		if (currentInstanceId == 0) {
+			mainHandler.post(() -> {
+				WebMessagePort[] channel = webView.createWebMessageChannel();
+				setMessagePort(channel[0]);
+				webView.postWebMessage(
+					new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
+					android.net.Uri.parse("*")
+				);
+			});
+		}
+
 		currentInstanceId++;
 
 		if (mediaPlayer != null) {

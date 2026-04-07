@@ -110,15 +110,6 @@ public class MainActivity extends Activity {
 				return super.shouldInterceptRequest(view, request);
 			}
 
-			@Override
-			public void onPageFinished(WebView view, String url) {
-				WebMessagePort[] channel = webView.createWebMessageChannel();
-				nativeAudioBridge.setMessagePort(channel[0]);
-				webView.postWebMessage(
-					new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
-					android.net.Uri.parse("*")
-				);
-			}
 		});
 
 		// Start the background service to keep the WebView alive
