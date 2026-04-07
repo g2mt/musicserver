@@ -235,6 +235,7 @@ public class NativeAudioBridge {
 		});
 
 		mediaPlayer.setOnCompletionListener(mp -> {
+			Log.d(TAG, "ended");
 			updatePlaybackState();
 			fireEvent(instanceId, "ended");
 		});
