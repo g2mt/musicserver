@@ -73,24 +73,24 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
+  useEffect(() => {
+    if (isPlaying) {
+      if (url === null) {
+        setIsPlaying(false);
+        setPlayRequestedWithoutTrack(true);
+      } else {
+        audio.play();
+      }
+    } else {
+      audio.pause();
+    }
+  }, [isPlaying, url]);
+
   return {
     currentTrack,
     setCurrentTrack,
     isPlaying,
-    setIsPlaying: useCallback((action: boolean | ((prevState: boolean) => boolean)) => {
-      setIsPlaying(old => {
-        if (url === null) {
-          setPlayRequestedWithoutTrack(true);
-          return false;
-        }
-        const isPlaying = typeof action === "boolean" ? action: action(old);
-        if (isPlaying)
-          audio.play();
-        else
-          audio.pause();
-        return isPlaying;
-      });
-    }, [currentTrack]),
+    setIsPlaying,
     playRequestedWithoutTrack,
     setPlayRequestedWithoutTrack,
     progress,
