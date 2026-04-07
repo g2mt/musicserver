@@ -25,35 +25,59 @@ export const AppStateSchema = z.object({
 export type AppStateData = z.infer<typeof AppStateSchema>;
 
 export interface AppState extends AppStateData {
+  // audio
   as: AudioState;
   setVolume: Dispatch<SetStateAction<number>>;
   setMuted: Dispatch<SetStateAction<boolean>>;
+
+  // track queue
   enqueuedTrackIndex: number | null;
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (_: TrackData | TrackData[]) => void;
   unqueueTrack: (index?: number) => void;
-  addConfirmBox: (confirmBox: React.ReactNode) => void;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number | null>>;
+  goNextQueue: (doPause?: boolean) => void;
+
+  // search
   setSearchQuery: (_: string) => void;
+  setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
+  oldSearchQuery: RefObject<string | null>;
+  refreshSearch: () => void;
+
+  // config setters
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
-  setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
+
+  // server props
   props: { version: string; config: any } | null;
   setProps: Dispatch<SetStateAction<{ version: string; config: any } | null>>;
-  oldSearchQuery: RefObject<string | null>;
+
+  // misc event handlers
   onRescanned: () => void;
-  refreshSearch: () => void;
+
+  // ### UI
+
+  // left tab
   leftTab: "tracks" | "settings" | "files";
   setLeftTab: Dispatch<SetStateAction<"tracks" | "settings" | "files">>;
+
+  // track list
   tracksListCollapsed: boolean;
   setTracksListCollapsed: Dispatch<SetStateAction<boolean>>;
+
+  // queue ui
   queueCollapsed: boolean;
   setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
   trackQueueScroll: (index: number) => void;
-  showOnlyQueueAfterEnqueue: boolean;
   setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
+
+  // file browser path
   fbPath: string[];
   setFbPath: Dispatch<SetStateAction<string[]>>;
+
+  // misc ui functions
+  scrollToTop: () => void;
+  addConfirmBox: (confirmBox: React.ReactNode) => void;
 }
 
 export const AppContext = createContext<AppState | null>(null);

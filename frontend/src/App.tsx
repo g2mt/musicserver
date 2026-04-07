@@ -40,8 +40,9 @@ export function App() {
     document.body.style.opacity = "1";
   }, []);
 
+  // ### States
+
   // State variables
-  c.as = useAudio();
   [c.volume, c.setVolume] = useState(1);
   [c.muted, c.setMuted] = useState(false);
   [c.enqueuedTrackIndex, c.setEnqueuedTrackIndex] = useState<number | null>(
@@ -70,52 +71,6 @@ export function App() {
       .then(c.setProps)
       .catch(() => {});
   }, []);
-
-  // Update body background when current track changes
-  const canvasRef = useRef<HTMLCanvasElement>(
-    document.getElementById("background-overlay") as HTMLCanvasElement,
-  );
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    console.log(canvasRef.current);
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    if (c.as.currentTrack && c.darkMode && c.showBlurredCover) {
-      const cover = getTrackCover(c.as.currentTrack);
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.src = cover;
-      img.decode().then(() => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        let dx, dw, dh;
-        if (canvas.width > canvas.height) {
-          dw = canvas.width;
-          dh = canvas.width * (img.height / img.width);
-          dx = 0;
-        } else {
-          dh = canvas.height;
-          dw = canvas.height * (img.width / img.height);
-          dx = -(dw - canvas.width) / 2;
-        }
-
-        ctx.filter = "blur(30px) brightness(0.3)";
-        ctx.drawImage(img, 0, 0, img.width, img.height, dx, 0, dw, dh);
-      });
-    }
-  }, [c.as.currentTrack, c.darkMode]);
 
   // Hash params (parsed like URLSearchParams but from window.location.hash)
   const getHashParams = () =>
@@ -254,6 +209,23 @@ export function App() {
       c.setEnqueuedTrackIndex(null);
     }
   };
+  c.goNextQueue = (doPause: boolean = true) => {
+    const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
+    if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
+      c.setEnqueuedTrackIndex(nextIndex);
+      c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+    } else {
+      // No more tracks in queue
+      c.setEnqueuedTrackIndex(null);
+      if (doPause) c.as.setIsPlaying(false);
+    }
+  };
+
+  // Audio
+  c.as = useAudio();
+
+  // ### UI
+  // Track queue ui
   const { el: trackQueue, scrollToTrack: trackQueueScroll } = c.queueCollapsed
     ? {
         el: null,
@@ -282,7 +254,53 @@ export function App() {
     );
   }, [windowWidth]);
 
-  // Post processing and event binding after all states have been configured
+  // Update body background when current track changes
+  const canvasRef = useRef<HTMLCanvasElement>(
+    document.getElementById("background-overlay") as HTMLCanvasElement,
+  );
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    console.log(canvasRef.current);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (c.as.currentTrack && c.darkMode && c.showBlurredCover) {
+      const cover = getTrackCover(c.as.currentTrack);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = cover;
+      img.decode().then(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        let dx, dw, dh;
+        if (canvas.width > canvas.height) {
+          dw = canvas.width;
+          dh = canvas.width * (img.height / img.width);
+          dx = 0;
+        } else {
+          dh = canvas.height;
+          dw = canvas.height * (img.width / img.height);
+          dx = -(dw - canvas.width) / 2;
+        }
+
+        ctx.filter = "blur(30px) brightness(0.3)";
+        ctx.drawImage(img, 0, 0, img.width, img.height, dx, 0, dw, dh);
+      });
+    }
+  }, [c.as.currentTrack, c.darkMode]);
+
+  // ### Post processing and event binding after all states have been configured
 
   useEffect(() => {
     mergeConfig(c);

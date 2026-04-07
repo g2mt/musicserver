@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useContext, useRef } from "react";
+import { useEffect, useMemo, useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlay,
@@ -67,30 +67,12 @@ export function MusicPlayer() {
   const c = useContext(AppContext)!;
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  function goNextQueue(doSetIsPlaying: boolean = true) {
-    const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
-    if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
-      c.setEnqueuedTrackIndex(nextIndex);
-      c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
-    } else {
-      // No more tracks in queue
-      c.setEnqueuedTrackIndex(null);
-      if (doSetIsPlaying) c.as.setIsPlaying(false);
-    }
-  }
-
   useEffect(() => {
     c.as.addEventListener("ended", () => goNextQueue());
     return () => {
       c.as.removeEventListener("ended", () => goNextQueue());
     };
   }, [c.enqueuedTracks, c.enqueuedTrackIndex]);
-
-  // Progress
-
-  useEffect(() => {
-    c.as.currentTime = c.as.progress;
-  }, [c.as.progress]);
 
   // Play state
 
@@ -108,7 +90,7 @@ export function MusicPlayer() {
       if (c.as.currentTrack !== null) {
         c.as.play();
       } else {
-        goNextQueue(false);
+        c.goNextQueue(false);
       }
     } else {
       c.as.pause();

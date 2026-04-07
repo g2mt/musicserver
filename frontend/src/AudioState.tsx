@@ -61,7 +61,17 @@ export function useAudio(): AudioState {
     isPlaying,
     setIsPlaying,
     progress,
-    setProgress,
+    setProgress: (action: number | ((prevState: number) => number)) => {
+      setProgress(progress => {
+        if (typeof action === "number") {
+          audio.currentTime = action;
+          return action;
+        } else {
+          audio.currentTime = action(progress);
+          return action(progress);
+        }
+      });
+    },
     duration,
     setDuration,
   };
