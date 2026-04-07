@@ -11,8 +11,6 @@ import {
 import { getTrackCover, Track } from "./Track";
 import { useWindowWidth, COLLAPSE_AT_WIDTH } from "./responsive";
 import { AppContext } from "./AppState";
-import { getFilePath, getTrackFileFromId } from "./apiServer";
-import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
 import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 
 import "./MusicPlayer.css";

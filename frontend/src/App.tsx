@@ -21,10 +21,10 @@ import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
 import { useAudio } from "./AudioState";
 import type { TrackData } from "./TrackData";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
+import { SearchSuggestions } from "./SearchSuggestions";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import { SearchSuggestions } from "./SearchSuggestions";
 
 declare global {
   interface Window {

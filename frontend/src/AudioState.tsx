@@ -13,7 +13,7 @@ export interface AudioState {
   setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
-  audio: apiAudio;
+  audio: any;
 }
 
 export function useAudio(): AudioState {
@@ -44,12 +44,6 @@ export function useAudio(): AudioState {
       audio.play();
     }
   }, [url]);
-
-  useEffect(() => {
-    return () => {
-      audio.pause();
-    };
-  }, [audio]);
 
   return {
     currentTrack,
