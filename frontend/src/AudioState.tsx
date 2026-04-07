@@ -13,6 +13,8 @@ export interface AudioState {
   setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
+  ended: boolean;
+  setEnded: Dispatch<SetStateAction<boolean>>;
 }
 
 export function useAudio({ volume , muted } : {volume:number; muted: boolean;}): AudioState {
@@ -20,6 +22,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [ended, setEnded] = useState(false);
 
   const audio = useMemo(() => new apiAudio(), []);
 
@@ -42,6 +45,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     if (isPlaying) {
       audio.play();
     }
+    setEnded(false);
   }, [url]);
 
   useEffect(() => {
@@ -49,9 +53,14 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
       setProgress(audio.currentTime);
       setDuration(audio.duration);
     }
+    function onEnded() {
+      setEnded(true);
+    }
     audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
     };
   }, [currentTrack?.id]);
 
@@ -87,5 +96,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     },
     duration,
     setDuration,
+    ended,
+    setEnded,
   };
 }
