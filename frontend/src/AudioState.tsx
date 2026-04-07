@@ -70,6 +70,7 @@ export function useAudio({
       }
     }
     function onEnded() {
+      setProgress(audio.duration);
       setEnded(true);
     }
     audio.addEventListener("timeupdate", onTimeUpdate);
