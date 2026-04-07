@@ -9,7 +9,7 @@ export interface AudioState {
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
   isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
-  playRequestedWithoutTrack: boolean;
+  playRequestedWithoutTrack: boolean; // signal to request next audio in queue (see App.tsx)
   setPlayRequestedWithoutTrack: Dispatch<SetStateAction<boolean>>;
   progress: number;
   setProgress: Dispatch<SetStateAction<number>>;
@@ -19,10 +19,17 @@ export interface AudioState {
   setEnded: Dispatch<SetStateAction<boolean>>;
 }
 
-export function useAudio({ volume , muted } : {volume:number; muted: boolean;}): AudioState {
+export function useAudio({
+  volume,
+  muted,
+}: {
+  volume: number;
+  muted: boolean;
+}): AudioState {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playRequestedWithoutTrack, setPlayRequestedWithoutTrack] = useState(false);
+  const [playRequestedWithoutTrack, setPlayRequestedWithoutTrack] =
+    useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ended, setEnded] = useState(false);
@@ -95,7 +102,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     setPlayRequestedWithoutTrack,
     progress,
     setProgress: (action: number | ((prevState: number) => number)) => {
-      setProgress(old => {
+      setProgress((old) => {
         if (typeof action === "number") {
           audio.currentTime = action;
           return action;
