@@ -65,8 +65,7 @@ export function useBackForward() {
 
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
-  const audio = c.as.audio;
-  const didUpdatePosition = useRef(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   function goNextQueue(doSetIsPlaying: boolean = true) {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
@@ -81,32 +80,16 @@ export function MusicPlayer() {
   }
 
   useEffect(() => {
-    function onTimeUpdate() {
-      didUpdatePosition.current = true;
-      c.as.setProgress(audio.currentTime);
-      c.as.setDuration(audio.duration);
-    }
-    audio.addEventListener("timeupdate", onTimeUpdate);
+    c.as.addEventListener("ended", () => goNextQueue());
     return () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-    };
-  }, [c.as.currentTrack?.id]);
-
-  useEffect(() => {
-    audio.addEventListener("ended", () => goNextQueue());
-    return () => {
-      audio.removeEventListener("ended", () => goNextQueue());
+      c.as.removeEventListener("ended", () => goNextQueue());
     };
   }, [c.enqueuedTracks, c.enqueuedTrackIndex]);
 
   // Progress
 
   useEffect(() => {
-    if (didUpdatePosition.current) {
-      didUpdatePosition.current = false;
-      return;
-    }
-    audio.currentTime = c.as.progress;
+    c.as.currentTime = c.as.progress;
   }, [c.as.progress]);
 
   // Play state
@@ -123,19 +106,19 @@ export function MusicPlayer() {
   useEffect(() => {
     if (c.as.isPlaying) {
       if (c.as.currentTrack !== null) {
-        audio.play();
+        c.as.play();
       } else {
         goNextQueue(false);
       }
     } else {
-      audio.pause();
+      c.as.pause();
     }
   }, [c.as.isPlaying]);
 
   // Volume
 
   useEffect(() => {
-    audio.volume = c.muted ? 0 : c.volume;
+    c.as.volume = c.muted ? 0 : c.volume;
   }, [c.volume, c.muted]);
 
   // Navigation

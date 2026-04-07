@@ -13,7 +13,6 @@ export interface AudioState {
   setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
-  audio: any;
 }
 
 export function useAudio(): AudioState {
@@ -45,6 +44,17 @@ export function useAudio(): AudioState {
     }
   }, [url]);
 
+  useEffect(() => {
+    function onTimeUpdate() {
+      setProgress(audio.currentTime);
+      setDuration(audio.duration);
+    }
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    return () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+    };
+  }, [currentTrack?.id]);
+
   return {
     currentTrack,
     setCurrentTrack,
@@ -54,6 +64,5 @@ export function useAudio(): AudioState {
     setProgress,
     duration,
     setDuration,
-    audio,
   };
 }
