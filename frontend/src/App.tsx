@@ -40,10 +40,10 @@ export function App() {
   }, []);
 
   // State variables
-  [c.currentTrack, c.setCurrentTrack] = useState<TrackData | null>(null);
-  [c.isPlaying, c.setIsPlaying] = useState(false);
-  [c.progress, c.setProgress] = useState(0);
-  [c.duration, c.setDuration] = useState(0);
+  [c.as.currentTrack, c.as.setCurrentTrack] = useState<TrackData | null>(null);
+  [c.as.isPlaying, c.as.setIsPlaying] = useState(false);
+  [c.as.progress, c.as.setProgress] = useState(0);
+  [c.as.duration, c.as.setDuration] = useState(0);
   [c.volume, c.setVolume] = useState(1);
   [c.muted, c.setMuted] = useState(false);
   [c.enqueuedTrackIndex, c.setEnqueuedTrackIndex] = useState<number | null>(
@@ -90,23 +90,8 @@ export function App() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (c.currentTrack && c.darkMode && c.showBlurredCover) {
-      if (overlay.childElementCount === 0) {
-        overlay.innerHTML = `
-        <style>:root { fill: #000; stroke: none; }</style>
-        <filter id="blur">
-          <feGaussianBlur stdDeviation="30" edgeMode="wrap" />
-          <feComponentTransfer>
-            <feFuncR type="linear" slope="0.1"/>
-            <feFuncG type="linear" slope="0.1"/>
-            <feFuncB type="linear" slope="0.1"/>
-            <feFuncA type="linear" slope="1"/>
-          </feComponentTransfer>
-        </filter>
-        <image href="" filter="url(#blur)"/>`;
-      }
-      const image = overlay.querySelector("image");
-      const cover = getTrackCover(c.currentTrack);
+    if (c.as.currentTrack && c.darkMode && c.showBlurredCover) {
+      const cover = getTrackCover(c.as.currentTrack);
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.src = cover;
@@ -132,7 +117,7 @@ export function App() {
         ctx.drawImage(img, 0, 0, img.width, img.height, dx, 0, dw, dh);
       });
     }
-  }, [c.currentTrack, c.darkMode]);
+  }, [c.as.currentTrack, c.darkMode]);
 
   // Hash params (parsed like URLSearchParams but from window.location.hash)
   const getHashParams = () =>
@@ -308,7 +293,7 @@ export function App() {
   useEffect(() => {
     function onBeforeUnload(e: BeforeUnloadEvent) {
       saveConfig(c);
-      if (c.isPlaying) {
+      if (c.as.isPlaying) {
         e.preventDefault();
         return "A track is playing. Are you sure you want to leave?";
       }
@@ -337,7 +322,7 @@ export function App() {
         case " ":
         case "k":
           e.preventDefault();
-          c.setIsPlaying((prev) => !prev);
+          c.as.setIsPlaying((prev) => !prev);
           break;
         case "m":
           e.preventDefault();
@@ -345,11 +330,11 @@ export function App() {
           break;
         case "j":
           e.preventDefault();
-          c.setProgress((prev) => prev - 10);
+          c.as.setProgress((prev) => prev - 10);
           break;
         case "l":
           e.preventDefault();
-          c.setProgress((prev) => prev + 10);
+          c.as.setProgress((prev) => prev + 10);
           break;
         case "(":
           e.preventDefault();

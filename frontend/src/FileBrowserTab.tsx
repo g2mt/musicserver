@@ -136,7 +136,7 @@ function FileRow({ fileName, dirPath }: FileRowProps) {
                 if (data.error) {
                   toast.error(data.error);
                 } else {
-                  c.setCurrentTrack(data);
+                  c.as.setCurrentTrack(data);
                 }
               })
               .catch((err) =>

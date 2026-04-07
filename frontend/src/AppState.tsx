@@ -23,7 +23,7 @@ export const AppStateSchema = z.object({
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
 
-export interface AppState extends AppStateData {
+export interface AudioState {
   currentTrack: TrackData | null;
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
   isPlaying: boolean;
@@ -32,6 +32,10 @@ export interface AppState extends AppStateData {
   setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
+}
+
+export interface AppState extends AppStateData {
+  as: AudioState;
   setVolume: Dispatch<SetStateAction<number>>;
   setMuted: Dispatch<SetStateAction<boolean>>;
   enqueuedTrackIndex: number | null;

@@ -51,7 +51,7 @@ export function Track({
                 icon={faPlay}
                 onClick={() => {
                   if (index !== undefined) c.setEnqueuedTrackIndex(index);
-                  c.setCurrentTrack(track);
+                  c.as.setCurrentTrack(track);
                 }}
               >
                 Play
@@ -98,7 +98,7 @@ export function Track({
           onClick={(e) => {
             e.preventDefault();
             if (index !== undefined) c.setEnqueuedTrackIndex(index);
-            c.setCurrentTrack(track);
+            c.as.setCurrentTrack(track);
           }}
         >
           {track.name}

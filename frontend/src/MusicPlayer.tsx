@@ -65,7 +65,7 @@ export function useBackForward() {
     const prevIndex = (c.enqueuedTrackIndex ?? 1) - 1;
     if (typeof c.enqueuedTracks[prevIndex] === "undefined") return;
     c.setEnqueuedTrackIndex(prevIndex);
-    c.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+    c.as.setCurrentTrack(c.enqueuedTracks[prevIndex]);
     c.trackQueueScroll(prevIndex);
   }
 
@@ -73,7 +73,7 @@ export function useBackForward() {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
     if (typeof c.enqueuedTracks[nextIndex] === "undefined") return;
     c.setEnqueuedTrackIndex(nextIndex);
-    c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+    c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
     c.trackQueueScroll(nextIndex);
   }
 
@@ -89,13 +89,13 @@ export function MusicPlayer() {
   const c = useContext(AppContext)!;
   const audio = useAudio(
     (() => {
-      if (!c.currentTrack) return null;
+      if (!c.as.currentTrack) return null;
       // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
       // without adding additional functions, so use the absolute path directly.
       // the path is checked in NativeAudioBridge
-      if (useAbsoluteAudioPath) return `file://${c.currentTrack.path}`;
-      if (c.currentTrack.id) return getTrackFileFromId(c.currentTrack.id);
-      if (c.currentTrack.path) return getFilePath(c.currentTrack.path);
+      if (useAbsoluteAudioPath) return `file://${c.as.currentTrack.path}`;
+      if (c.as.currentTrack.id) return getTrackFileFromId(c.as.currentTrack.id);
+      if (c.as.currentTrack.path) return getFilePath(c.as.currentTrack.path);
       return null;
     })(),
   );
@@ -105,25 +105,25 @@ export function MusicPlayer() {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
     if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
       c.setEnqueuedTrackIndex(nextIndex);
-      c.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+      c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
     } else {
       // No more tracks in queue
       c.setEnqueuedTrackIndex(null);
-      if (doSetIsPlaying) c.setIsPlaying(false);
+      if (doSetIsPlaying) c.as.setIsPlaying(false);
     }
   }
 
   useEffect(() => {
     function onTimeUpdate() {
       didUpdatePosition.current = true;
-      c.setProgress(audio.currentTime);
-      c.setDuration(audio.duration);
+      c.as.setProgress(audio.currentTime);
+      c.as.setDuration(audio.duration);
     }
     audio.addEventListener("timeupdate", onTimeUpdate);
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, [c.currentTrack?.id]);
+  }, [c.as.currentTrack?.id]);
 
   useEffect(() => {
     audio.addEventListener("ended", () => goNextQueue());
@@ -139,23 +139,23 @@ export function MusicPlayer() {
       didUpdatePosition.current = false;
       return;
     }
-    audio.currentTime = c.progress;
-  }, [c.progress]);
+    audio.currentTime = c.as.progress;
+  }, [c.as.progress]);
 
   // Play state
 
   useEffect(() => {
-    c.setProgress(0);
-    if (c.currentTrack !== null) {
-      c.setIsPlaying(true);
+    c.as.setProgress(0);
+    if (c.as.currentTrack !== null) {
+      c.as.setIsPlaying(true);
     } else {
-      c.setIsPlaying(false);
+      c.as.setIsPlaying(false);
     }
-  }, [c.currentTrack]);
+  }, [c.as.currentTrack]);
 
   useEffect(() => {
-    if (c.isPlaying) {
-      if (c.currentTrack !== null) {
+    if (c.as.isPlaying) {
+      if (c.as.currentTrack !== null) {
         audio.play();
       } else {
         goNextQueue(false);
@@ -163,7 +163,7 @@ export function MusicPlayer() {
     } else {
       audio.pause();
     }
-  }, [c.isPlaying]);
+  }, [c.as.isPlaying]);
 
   // Volume
 
@@ -177,7 +177,7 @@ export function MusicPlayer() {
     useBackForward();
 
   useEffect(() => {
-    window._setIsPlaying = c.setIsPlaying;
+    window._setIsPlaying = c.as.setIsPlaying;
     window._handleBack = handleBack;
     window._handleForward = handleForward;
     return () => {
@@ -185,7 +185,7 @@ export function MusicPlayer() {
       window._handleBack = undefined;
       window._handleForward = undefined;
     };
-  }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
+  }, [c.as.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
 
   // Swipe gestures
 
@@ -209,27 +209,27 @@ export function MusicPlayer() {
 
   if ("mediaSession" in navigator) {
     useEffect(() => {
-      if (c.currentTrack) {
+      if (c.as.currentTrack) {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: c.currentTrack.name,
-          artist: c.currentTrack.artist,
-          album: c.currentTrack.album,
-          artwork: [{ src: getTrackCover(c.currentTrack) }],
+          title: c.as.currentTrack.name,
+          artist: c.as.currentTrack.artist,
+          album: c.as.currentTrack.album,
+          artwork: [{ src: getTrackCover(c.as.currentTrack) }],
         });
 
         navigator.mediaSession.setActionHandler("play", () =>
-          c.setIsPlaying(true),
+          c.as.setIsPlaying(true),
         );
         navigator.mediaSession.setActionHandler("pause", () =>
-          c.setIsPlaying(false),
+          c.as.setIsPlaying(false),
         );
         navigator.mediaSession.setActionHandler("previoustrack", handleBack);
         navigator.mediaSession.setActionHandler("nexttrack", handleForward);
         navigator.mediaSession.setActionHandler("stop", null);
       }
 
-      document.title = c.currentTrack?.name ?? "Music Player";
-    }, [c.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
+      document.title = c.as.currentTrack?.name ?? "Music Player";
+    }, [c.as.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
   }
 
   const windowWidth = useWindowWidth();
@@ -244,10 +244,10 @@ export function MusicPlayer() {
           e.currentTarget,
           <>
             <ContextMenuItem
-              onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
-              icon={c.isPlaying ? faPause : faPlay}
+              onClick={() => c.as.setIsPlaying && c.as.setIsPlaying((p) => !p)}
+              icon={c.as.isPlaying ? faPause : faPlay}
             >
-              {c.isPlaying ? "Pause" : "Play"}
+              {c.as.isPlaying ? "Pause" : "Play"}
             </ContextMenuItem>
             {!isForwardDisabled && (
               <ContextMenuItem onClick={handleForward} icon={faForwardStep}>
@@ -267,10 +267,10 @@ export function MusicPlayer() {
         className="scrubber-bar"
         type="range"
         min={0}
-        max={c.duration || 0}
+        max={c.as.duration || 0}
         step={0.1}
-        value={c.progress}
-        onChange={(e) => c.setProgress(Number(e.target.value))}
+        value={c.as.progress}
+        onChange={(e) => c.as.setProgress(Number(e.target.value))}
       />
       <div className="player-controls">
         <div className="player-left">
@@ -283,9 +283,9 @@ export function MusicPlayer() {
           </button>
           <button
             className="icon-btn btn-play-pause"
-            onClick={() => c.setIsPlaying && c.setIsPlaying((p) => !p)}
+            onClick={() => c.as.setIsPlaying && c.as.setIsPlaying((p) => !p)}
           >
-            <FontAwesomeIcon icon={c.isPlaying ? faPause : faPlay} />
+            <FontAwesomeIcon icon={c.as.isPlaying ? faPause : faPlay} />
           </button>
           <button
             className="icon-btn btn-next-song"
@@ -296,7 +296,7 @@ export function MusicPlayer() {
           </button>
         </div>
         <div className="player-center">
-          {c.currentTrack && <Track track={c.currentTrack} />}
+          {c.as.currentTrack && <Track track={c.as.currentTrack} />}
         </div>
         <div className="player-right">
           <input
