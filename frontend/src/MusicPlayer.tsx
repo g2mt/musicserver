@@ -163,7 +163,7 @@ export function MusicPlayer() {
         className="scrubber-bar"
         type="range"
         min={0}
-        max={c.as.duration || 0}
+        max={c.as.duration}
         step={0.1}
         value={c.as.progress}
         onChange={(e) => c.as.setProgress(Number(e.target.value))}

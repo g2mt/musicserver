@@ -39,22 +39,19 @@ function setupNativeAudioMessagePort() {
 
 class NativeAudio extends EventTarget {
   static instance: NativeAudio | null = null;
+  static bridge = window._native_audio_bridge!;
 
   instanceId: number;
-  private bridge: NativeAudioBridge;
   private _volume: number = 1;
 
   constructor() {
     super();
-
-    this.bridge = window._native_audio_bridge!;
-    this.instanceId = this.bridge.createInstance();
-
+    this.instanceId = NativeAudio.bridge.createInstance();
     NativeAudio.instance = this;
   }
 
   private get isActive(): boolean {
-    return NativeAudio.instance === this;
+    return NativeAudio.instance?.instanceId === this.instanceId;
   }
 
   get src(): string {
@@ -63,22 +60,22 @@ class NativeAudio extends EventTarget {
 
   set src(value: string) {
     if (!this.isActive) return;
-    this.bridge.setSrc(this.instanceId, value);
+    NativeAudio.bridge.setSrc(this.instanceId, value);
   }
 
   get currentTime(): number {
     if (!this.isActive) return 0;
-    return this.bridge.getCurrentTime(this.instanceId);
+    return NativeAudio.bridge.getCurrentTime(this.instanceId);
   }
 
   set currentTime(value: number) {
     if (!this.isActive) return;
-    this.bridge.setCurrentTime(this.instanceId, value);
+    NativeAudio.bridge.setCurrentTime(this.instanceId, value);
   }
 
   get duration(): number {
     if (!this.isActive) return 0;
-    return this.bridge.getDuration(this.instanceId);
+    return NativeAudio.bridge.getDuration(this.instanceId);
   }
 
   get volume(): number {
@@ -88,18 +85,18 @@ class NativeAudio extends EventTarget {
   set volume(value: number) {
     if (!this.isActive) return;
     this._volume = value;
-    this.bridge.setVolume(this.instanceId, value);
+    NativeAudio.bridge.setVolume(this.instanceId, value);
   }
 
   play(): Promise<void> {
     if (!this.isActive) return Promise.resolve();
-    this.bridge.play(this.instanceId);
+    NativeAudio.bridge.play(this.instanceId);
     return Promise.resolve();
   }
 
   pause(): void {
     if (!this.isActive) return;
-    this.bridge.pause(this.instanceId);
+    NativeAudio.bridge.pause(this.instanceId);
   }
 }
 

@@ -56,6 +56,7 @@ export function useAudio({
     audio.src = url;
     audio.currentTime = 0;
     setProgress(0);
+    setDuration(audio.duration);
     setIsPlaying(true);
     setEnded(false);
   }, [url]);
@@ -64,6 +65,9 @@ export function useAudio({
     function onTimeUpdate() {
       setProgress(audio.currentTime);
       setDuration(audio.duration);
+      if (audio.currentTime >= audio.duration) {
+        setEnded(true);
+      }
     }
     function onEnded() {
       setEnded(true);
