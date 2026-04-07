@@ -10,7 +10,7 @@ import { useContext, useRef, type RefObject } from "react";
 import { AppContext } from "./AppState";
 import { Select, Option } from "./Select";
 import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
-import { fetchAPI } from "./apiserver";
+import { fetchAPI } from "./apiServer";
 import { toast } from "react-toastify";
 
 import "./MainTracksTab.css";

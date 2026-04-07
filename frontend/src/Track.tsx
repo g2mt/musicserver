@@ -8,7 +8,7 @@ import {
   faCompactDisc,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiserver";
+import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiServer";
 import { AppContext } from "./AppState";
 import { toggleContextMenu, ContextMenuItem } from "./ContextMenu";
 import type { TrackData } from "./TrackData";

@@ -8,7 +8,7 @@ import {
   faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
-import { fetchAPI, rescanFiles } from "./apiserver";
+import { fetchAPI, rescanFiles } from "./apiServer";
 import { AppContext } from "./AppState";
 
 import "./FileBrowserTab.css";

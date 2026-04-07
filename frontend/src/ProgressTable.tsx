@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchAPI, listenAPI } from "./apiserver";
+import { fetchAPI, listenAPI } from "./apiServer";
 
 interface ProgressEntry {
   value: number;

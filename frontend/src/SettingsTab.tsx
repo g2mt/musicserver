@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { rescanFiles } from "./apiserver";
+import { rescanFiles } from "./apiServer";
 import { toast } from "react-toastify";
 import {
   faRotate,
