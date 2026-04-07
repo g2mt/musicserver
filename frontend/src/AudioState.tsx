@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { TrackData } from "./TrackData";
 import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
@@ -41,7 +41,10 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
   }, [currentTrack]);
 
   useEffect(() => {
-    if (!url) return;
+    if (!url) {
+      setIsPlaying(false);
+      return;
+    }
     console.log(`Playing ${url}`);
     audio.src = url;
     audio.currentTime = 0;
@@ -64,7 +67,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("ended", onEnded);
     };
-  }, [currentTrack?.id]);
+  }, [currentTrack]);
 
   useEffect(() => {
     audio.volume = muted ? 0 : volume;
@@ -74,7 +77,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     currentTrack,
     setCurrentTrack,
     isPlaying,
-    setIsPlaying: (action: boolean | ((prevState: boolean) => boolean)) => {
+    setIsPlaying: useCallback((action: boolean | ((prevState: boolean) => boolean)) => {
       setIsPlaying(old => {
         if (url === null) {
           setPlayRequestedWithoutTrack(true);
@@ -87,7 +90,7 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
           audio.pause();
         return isPlaying;
       });
-    },
+    }, [currentTrack]),
     playRequestedWithoutTrack,
     setPlayRequestedWithoutTrack,
     progress,
