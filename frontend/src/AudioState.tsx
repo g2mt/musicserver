@@ -103,13 +103,9 @@ export function useAudio({
     progress,
     setProgress: (action: number | ((prevState: number) => number)) => {
       setProgress((old) => {
-        if (typeof action === "number") {
-          audio.currentTime = action;
-          return action;
-        } else {
-          audio.currentTime = action(old);
-          return action(old);
-        }
+        const progress = typeof action === "number" ? action : action(old);
+        audio.currentTime = progress;
+        return progress;
       });
     },
     duration,
