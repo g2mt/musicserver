@@ -36,7 +36,7 @@ export interface AppState extends AppStateData {
   enqueueTrack: (_: TrackData | TrackData[]) => void;
   unqueueTrack: (index?: number) => void;
   setEnqueuedTrackIndex: Dispatch<SetStateAction<number | null>>;
-  goNextQueue: (doPause?: boolean) => void;
+  goNextQueue: () => void;
 
   // search
   setSearchQuery: (_: string) => void;

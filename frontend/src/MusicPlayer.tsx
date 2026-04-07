@@ -67,42 +67,6 @@ export function MusicPlayer() {
   const c = useContext(AppContext)!;
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  useEffect(() => {
-    c.as.addEventListener("ended", () => goNextQueue());
-    return () => {
-      c.as.removeEventListener("ended", () => goNextQueue());
-    };
-  }, [c.enqueuedTracks, c.enqueuedTrackIndex]);
-
-  // Play state
-
-  useEffect(() => {
-    c.as.setProgress(0);
-    if (c.as.currentTrack !== null) {
-      c.as.setIsPlaying(true);
-    } else {
-      c.as.setIsPlaying(false);
-    }
-  }, [c.as.currentTrack]);
-
-  useEffect(() => {
-    if (c.as.isPlaying) {
-      if (c.as.currentTrack !== null) {
-        c.as.play();
-      } else {
-        c.goNextQueue(false);
-      }
-    } else {
-      c.as.pause();
-    }
-  }, [c.as.isPlaying]);
-
-  // Volume
-
-  useEffect(() => {
-    c.as.volume = c.muted ? 0 : c.volume;
-  }, [c.volume, c.muted]);
-
   // Navigation
 
   const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =

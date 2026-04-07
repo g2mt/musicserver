@@ -9,17 +9,20 @@ export interface AudioState {
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
   isPlaying: boolean;
   setIsPlaying: Dispatch<SetStateAction<boolean>>;
+  playRequestedWithoutTrack: boolean;
+  setPlayRequestedWithoutTrack: Dispatch<SetStateAction<boolean>>;
   progress: number;
   setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
-  ended: boolean;
+  ended: boolean; // ended signal to request next audio in queue (see App.tsx)
   setEnded: Dispatch<SetStateAction<boolean>>;
 }
 
 export function useAudio({ volume , muted } : {volume:number; muted: boolean;}): AudioState {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playRequestedWithoutTrack, setPlayRequestedWithoutTrack] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ended, setEnded] = useState(false);
@@ -42,9 +45,8 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     console.log(`Playing ${url}`);
     audio.src = url;
     audio.currentTime = 0;
-    if (isPlaying) {
-      audio.play();
-    }
+    audio.play();
+    setIsPlaying(true);
     setEnded(false);
   }, [url]);
 
@@ -74,6 +76,10 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
     isPlaying,
     setIsPlaying: (action: boolean | ((prevState: boolean) => boolean)) => {
       setIsPlaying(old => {
+        if (url === null) {
+          setPlayRequestedWithoutTrack(true);
+          return false;
+        }
         const isPlaying = typeof action === "boolean" ? action: action(old);
         if (isPlaying)
           audio.play();
@@ -82,6 +88,8 @@ export function useAudio({ volume , muted } : {volume:number; muted: boolean;}):
         return isPlaying;
       });
     },
+    playRequestedWithoutTrack,
+    setPlayRequestedWithoutTrack,
     progress,
     setProgress: (action: number | ((prevState: number) => number)) => {
       setProgress(old => {

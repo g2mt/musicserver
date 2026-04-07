@@ -209,20 +209,38 @@ export function App() {
       c.setEnqueuedTrackIndex(null);
     }
   };
-  c.goNextQueue = (doPause: boolean = true) => {
+  c.goNextQueue = () => {
     const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
     if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
       c.setEnqueuedTrackIndex(nextIndex);
       c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
     } else {
       // No more tracks in queue
-      c.setEnqueuedTrackIndex(null);
-      if (doPause) c.as.setIsPlaying(false);
+      if (c.enqueuedTrackIndex !== null) {
+        c.setEnqueuedTrackIndex(null);
+      }
     }
   };
 
   // Audio
-  c.as = useAudio();
+  c.as = useAudio({
+    volume: c.volume,
+    muted: c.muted,
+  });
+
+  useEffect(() => {
+    if (c.as.ended) {
+      c.goNextQueue();
+      c.as.setEnded(false);
+    }
+  }, [c.as.ended, c.enqueuedTracks, c.enqueuedTrackIndex]);
+
+  useEffect(() => {
+    if (c.as.playRequestedWithoutTrack) {
+      c.goNextQueue();
+      c.as.setPlayRequestedWithoutTrack(false);
+    }
+  }, [c.as.playRequestedWithoutTrack]);
 
   // ### UI
   // Track queue ui
