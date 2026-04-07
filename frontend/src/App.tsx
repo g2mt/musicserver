@@ -18,6 +18,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
+import { useAudio } from "./AudioState";
 import type { TrackData } from "./TrackData";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 
@@ -40,10 +41,7 @@ export function App() {
   }, []);
 
   // State variables
-  [c.as.currentTrack, c.as.setCurrentTrack] = useState<TrackData | null>(null);
-  [c.as.isPlaying, c.as.setIsPlaying] = useState(false);
-  [c.as.progress, c.as.setProgress] = useState(0);
-  [c.as.duration, c.as.setDuration] = useState(0);
+  c.as = useAudio();
   [c.volume, c.setVolume] = useState(1);
   [c.muted, c.setMuted] = useState(false);
   [c.enqueuedTrackIndex, c.setEnqueuedTrackIndex] = useState<number | null>(

@@ -25,26 +25,6 @@ declare global {
   }
 }
 
-function useAudio(url: string | null) {
-  const audio = useMemo(() => new apiAudio(), []);
-
-  useEffect(() => {
-    if (!url) return;
-    console.log(`Playing ${url}`);
-    audio.src = url;
-    audio.currentTime = 0;
-    audio.play();
-  }, [url]);
-
-  useEffect(() => {
-    return () => {
-      audio.pause();
-    };
-  }, [audio]);
-
-  return audio;
-}
-
 export function useBackForward() {
   const c = useContext(AppContext)!;
 
@@ -87,18 +67,7 @@ export function useBackForward() {
 
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
-  const audio = useAudio(
-    (() => {
-      if (!c.as.currentTrack) return null;
-      // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
-      // without adding additional functions, so use the absolute path directly.
-      // the path is checked in NativeAudioBridge
-      if (useAbsoluteAudioPath) return `file://${c.as.currentTrack.path}`;
-      if (c.as.currentTrack.id) return getTrackFileFromId(c.as.currentTrack.id);
-      if (c.as.currentTrack.path) return getFilePath(c.as.currentTrack.path);
-      return null;
-    })(),
-  );
+  const audio = c.as.audio;
   const didUpdatePosition = useRef(false);
 
   function goNextQueue(doSetIsPlaying: boolean = true) {
