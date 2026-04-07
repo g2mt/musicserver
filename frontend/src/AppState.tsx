@@ -9,6 +9,7 @@ import type React from "react";
 import { toast } from "react-toastify";
 import { TrackDataSchema, type TrackData } from "./TrackData";
 import { Settings } from "./settings";
+import type { AudioState } from "./AudioState";
 
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
@@ -22,17 +23,6 @@ export const AppStateSchema = z.object({
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
-
-export interface AudioState {
-  currentTrack: TrackData | null;
-  setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;
-  isPlaying: boolean;
-  setIsPlaying: Dispatch<SetStateAction<boolean>>;
-  progress: number;
-  setProgress: Dispatch<SetStateAction<number>>;
-  duration: number;
-  setDuration: Dispatch<SetStateAction<number>>;
-}
 
 export interface AppState extends AppStateData {
   as: AudioState;
