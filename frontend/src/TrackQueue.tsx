@@ -25,6 +25,7 @@ export interface TrackQueue {
   canNext: () => boolean;
   canPrev: () => boolean;
   trackNavigated: boolean;
+  setTrackNavigated: Dispatch<SetStateAction<boolean>>;
 }
 
 export function useTrackQueue(as: AudioState): TrackQueue {
@@ -104,5 +105,6 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       }
     },
     trackNavigated,
+    setTrackNavigated,
   };
 }

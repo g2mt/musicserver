@@ -224,18 +224,14 @@ export function App() {
 
   // ### UI
   // Track queue ui
-  const { el: trackQueue, scrollToTrack: trackQueueScroll } = c.queueCollapsed
-    ? {
-        el: null,
-        scrollToTrack: (_: number) => {},
-      }
+  const trackQueue = c.queueCollapsed
+    ? null
     : useTrackList({
         tracks: c.queue.tracks,
         canUnqueue: true,
         parentElement: appRightSide,
         queue: c.queue,
       });
-  c.trackQueueScroll = trackQueueScroll;
 
   // Collapse state
   [c.tracksListCollapsed, c.setTracksListCollapsed] = useState(false);

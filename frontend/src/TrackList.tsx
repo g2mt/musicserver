@@ -56,6 +56,13 @@ export function useTrackList({
     }
   }, [trackScrollChanged.current, trackRefs.current[trackScrolled]]);
 
+  useEffect(() => {
+    if (queue?.trackNavigated && queue.index !== null) {
+      scrollToTrack(queue.index);
+      queue.setTrackNavigated(false);
+    }
+  }, [queue?.trackNavigated]);
+
   // Displayed count
 
   const [displayedCount, setDisplayedCount] = useState(
@@ -119,7 +126,7 @@ export function useTrackList({
     return () => observer.disconnect();
   }, [loadMore]);
 
-  const el = (
+  return (
     <div className="track-list" ref={listRef}>
       {canUnqueue && (
         <div className="track-list-buttons">
@@ -163,6 +170,4 @@ export function useTrackList({
       {hasMore && <div ref={sentinelRef} style={{ height: "1px" }} />}
     </div>
   );
-
-  return { el, scrollToTrack };
 }

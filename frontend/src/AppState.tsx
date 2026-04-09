@@ -62,7 +62,6 @@ export interface AppState extends AppStateData {
   // queue ui
   queueCollapsed: boolean;
   setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
-  trackQueueScroll: (index: number) => void;
   setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
 
   // file browser path
