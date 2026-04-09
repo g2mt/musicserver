@@ -210,7 +210,7 @@ public class NativeAudioBridge {
 		public int index = -1;
 	}
 
-	private Queue queue;
+	public Queue queue; // non-null if the main activity (webview) is suspended
 
 	private void loadFromQueue() {
 		if (queue == null || queue.index < 0 || queue.index >= queue.paths.size()) return;

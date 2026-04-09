@@ -165,6 +165,9 @@ public class MainActivity extends Activity {
 				LinearLayout.LayoutParams.MATCH_PARENT
 			));
 		}
+
+		NativeAudioBridge nativeAudioBridge = getApp().getNativeAudioBridge();
+		nativeAudioBridge.queue = null;
 	}
 
 	// Detaches the shared WebView from this Activity's layout so it can survive in the service
