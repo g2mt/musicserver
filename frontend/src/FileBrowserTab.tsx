@@ -33,7 +33,10 @@ function DirectoryRow({ path, isLocationBar = false }: DirectoryRowProps) {
         title="Show tracks in this path"
         onClick={(e) => {
           e.preventDefault();
-          c.setSearchQuery(`path:"${path.join("/")}"`);
+          c.setSearchQuery((old) => ({
+            ...old,
+            q: `path:"${path.join("/")}"`,
+          }));
           c.setLeftTab("tracks");
         }}
       >

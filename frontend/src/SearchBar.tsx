@@ -74,13 +74,15 @@ function SearchBar({
     searchInput.startsWith("http://") || searchInput.startsWith("https://");
 
   return (
-    <form
-      className="search-bar"
-      onSubmit={(e) => {
-        e.preventDefault();
-        c.setSearchQuery(searchInput);
-      }}
-    >
+    <form className="search-bar" onSubmit={handleSubmit}>
+      <button
+        type="button"
+        className="icon-btn"
+        onClick={c.scrollToTop}
+        title="Go to top"
+      >
+        <FontAwesomeIcon icon={faHome} />
+      </button>
       <div className="search-input-wrapper">
         <input
           type="search"

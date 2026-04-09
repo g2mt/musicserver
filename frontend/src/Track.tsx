@@ -71,7 +71,10 @@ export function Track({
                 <ContextMenuItem
                   icon={faCompactDisc}
                   onClick={() => {
-                    c.setSearchQuery(old => ({ ...old, q: `album:"${track.album}"` }));
+                    c.setSearchQuery((old) => ({
+                      ...old,
+                      q: `album:"${track.album}"`,
+                    }));
                   }}
                 >
                   Album
@@ -81,7 +84,10 @@ export function Track({
                 <ContextMenuItem
                   icon={faUser}
                   onClick={() => {
-                    c.setSearchQuery(old => ({ ...old, q: `artist:"${track.artist}"` }));
+                    c.setSearchQuery((old) => ({
+                      ...old,
+                      q: `artist:"${track.artist}"`,
+                    }));
                   }}
                 >
                   Artist
@@ -110,7 +116,10 @@ export function Track({
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                c.setSearchQuery(old => ({ ...old, q: `album:"${track.album}"` }));
+                c.setSearchQuery((old) => ({
+                  ...old,
+                  q: `album:"${track.album}"`,
+                }));
               }}
             >
               {track.album}
@@ -122,7 +131,10 @@ export function Track({
               href="#"
               onClick={(e) => {
                 e.preventDefault();
-                c.setSearchQuery(old => ({ ...old, q: `artist:"${track.artist}"` }));
+                c.setSearchQuery((old) => ({
+                  ...old,
+                  q: `artist:"${track.artist}"`,
+                }));
               }}
             >
               {track.artist}
