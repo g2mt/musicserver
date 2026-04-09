@@ -51,7 +51,7 @@ export function MainTracksTab({
   };
 
   const handleAddAllToQueue = () => {
-    fetchAPI("/track", { ...c.searchQuery, limit: -1 })
+    fetchAPI("/track", { ...c.searchQuery, limit: "-1" })
       .then((data) => {
         if (data === null || data.length === 0) {
           toast.warn(<>No tracks found</>);
@@ -64,7 +64,7 @@ export function MainTracksTab({
         }
       })
       .catch((e) => {
-        toast.error(<>Error loading: {e.toString()}</>);
+        toast.error(<>Error loading tracks: {e.toString()}</>);
       });
   };
 

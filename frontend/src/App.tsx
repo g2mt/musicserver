@@ -124,7 +124,7 @@ export function App() {
   useEffect(() => {
     let ignored = false;
     fetchAPI("/props")
-      .then(props => {
+      .then((props) => {
         if (ignored) return;
         c.setProps(props);
       })
@@ -142,8 +142,7 @@ export function App() {
 
       if (searchQuery.limit !== 0)
         params.set("limit", searchQuery.limit.toString());
-      else
-        params.delete("limit");
+      else params.delete("limit");
     });
   };
 
@@ -155,7 +154,10 @@ export function App() {
   c.refreshSearch = () => {
     // https://react.dev/learn/you-might-not-need-an-effect#fetching-data
     let ignored = false;
-    fetchAPI("/track", c.searchQuery)
+    fetchAPI("/track", {
+      q: c.searchQuery.q,
+      limit: c.searchQuery.limit.toString(),
+    })
       .then((data) => {
         if (ignored) return;
         if (data === null || data.length === 0) {
@@ -176,7 +178,7 @@ export function App() {
       })
       .catch((e) => {
         if (ignored) return;
-        toast.error(<>Error loading: {e.toString()}</>);
+        toast.error(<>Error loading tracks: {e.toString()}</>);
       });
     return () => {
       ignored = true;
