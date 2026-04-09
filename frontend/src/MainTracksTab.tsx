@@ -138,7 +138,7 @@ export function MainTracksTab({
           canEnqueue: true,
           parentElement,
           queue: c.queue,
-        }).el
+        })
       }
       {controls}
     </div>

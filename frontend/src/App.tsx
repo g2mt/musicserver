@@ -184,7 +184,6 @@ export function App() {
       .then((data) => setFullTracks(data))
       .catch(() => setFullTracks([]));
   };
-  useEffect(() => c.onRescanned(), []);
 
   // Audio
   c.as = useAudio({
