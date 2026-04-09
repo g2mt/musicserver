@@ -36,6 +36,7 @@ public class NativeAudioBridge {
 	}
 
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
+	private Runnable timeUpdateRunnable;
 	private MediaSession mediaSession;
 	private PlaybackState playbackState;
 
@@ -191,7 +192,10 @@ public class NativeAudioBridge {
 
 	// Schedules periodic timeupdate events (~4x per second) while the player is active and playing.
 	private void scheduleTimeUpdates(int instanceId) {
-		mainHandler.postDelayed(new Runnable() {
+		if (timeUpdateRunnable != null) {
+			mainHandler.removeCallbacks(timeUpdateRunnable);
+		}
+		timeUpdateRunnable = new Runnable() {
 			@Override
 			public void run() {
 				if (!isActive(instanceId)) return;
@@ -201,7 +205,8 @@ public class NativeAudioBridge {
 					mainHandler.postDelayed(this, 250);
 				}
 			}
-		}, 250);
+		};
+		mainHandler.postDelayed(timeUpdateRunnable, 250);
 	}
 
 	// Queue
@@ -336,6 +341,10 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public void pause(int instanceId) {
 		if (!isActive(instanceId)) return;
+		if (timeUpdateRunnable != null) {
+			mainHandler.removeCallbacks(timeUpdateRunnable);
+			timeUpdateRunnable = null;
+		}
 		if (mediaPlayer.isPlaying()) {
 			mediaPlayer.pause();
 			updatePlaybackState();
