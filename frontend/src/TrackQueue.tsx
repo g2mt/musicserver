@@ -1,6 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import * as z from "zod";
-import { TrackDataSchema, type TrackData } from "./TrackData";
+import { type TrackData } from "./TrackData";
 import type { AudioState } from "./AudioState";
 
 export interface TrackQueue {
