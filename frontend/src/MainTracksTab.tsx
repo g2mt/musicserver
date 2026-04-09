@@ -53,7 +53,11 @@ export function MainTracksTab({
         if (data === null || data.length === 0) {
           toast.warn(<>No tracks found</>);
         } else {
-          c.enqueueTrack(data);
+          if (c.showOnlyQueueAfterEnqueue) {
+            c.setTracksListCollapsed(true);
+            c.setQueueCollapsed(false);
+          }
+          c.queue.enqueueTrack(data);
         }
       })
       .catch((e) => {
@@ -99,7 +103,13 @@ export function MainTracksTab({
         </Select>
         <button
           className="btn"
-          onClick={() => c.enqueueTrack(tracks)}
+          onClick={() => {
+            if (c.showOnlyQueueAfterEnqueue) {
+              c.setTracksListCollapsed(true);
+              c.setQueueCollapsed(false);
+            }
+            c.queue.enqueueTrack(tracks);
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             toggleContextMenu(
@@ -128,9 +138,9 @@ export function MainTracksTab({
           canEnqueue: true,
           parentElement,
           // context vars
-          enqueuedTracks: c.enqueuedTracks,
-          setEnqueuedTracks: c.setEnqueuedTracks,
-          unqueueTrack: c.unqueueTrack,
+          enqueuedTracks: c.queue.enqueuedTracks,
+          setEnqueuedTracks: c.queue.setEnqueuedTracks,
+          unqueueTrack: c.queue.unqueueTrack,
         }).el
       }
       {controls}

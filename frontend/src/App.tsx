@@ -18,8 +18,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
-import { useAudio } from "./AudioState";
-import type { TrackData } from "./TrackData";
+import { useAudio, type AudioState } from "./AudioState";
+import type { TrackData, TrackQueue } from "./TrackData";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 import { SearchSuggestions } from "./SearchSuggestions";
 
@@ -30,6 +30,57 @@ declare global {
   interface Window {
     _refreshSearch?: () => void;
   }
+}
+
+export function useTrackQueue(as: AudioState): TrackQueue {
+  const [enqueuedTracks, setEnqueuedTracks] = useState<TrackData[]>([]);
+  const [enqueuedTrackIndex, setEnqueuedTrackIndex] = useState<number | null>(
+    null,
+  );
+
+  const enqueueTrack = (track: TrackData | TrackData[]) => {
+    if (Array.isArray(track)) {
+      setEnqueuedTracks((prev) => [...prev, ...track]);
+    } else {
+      setEnqueuedTracks((prev) => [...prev, track]);
+    }
+  };
+
+  const unqueueTrack = (index?: number) => {
+    if (typeof index === "number") {
+      setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
+      if (enqueuedTrackIndex !== null && index < enqueuedTrackIndex) {
+        setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
+      } else if (index === enqueuedTrackIndex) {
+        setEnqueuedTrackIndex(null);
+      }
+    } else {
+      setEnqueuedTracks([]);
+      setEnqueuedTrackIndex(null);
+    }
+  };
+
+  const goNextQueue = () => {
+    const nextIndex = (enqueuedTrackIndex ?? -1) + 1;
+    if (enqueuedTracks.length > 0 && nextIndex < enqueuedTracks.length) {
+      setEnqueuedTrackIndex(nextIndex);
+      as.setCurrentTrack(enqueuedTracks[nextIndex]);
+    } else {
+      if (enqueuedTrackIndex !== null) {
+        setEnqueuedTrackIndex(null);
+      }
+    }
+  };
+
+  return {
+    enqueuedTracks,
+    setEnqueuedTracks,
+    enqueuedTrackIndex,
+    setEnqueuedTrackIndex,
+    enqueueTrack,
+    unqueueTrack,
+    goNextQueue,
+  };
 }
 
 export function App() {
@@ -45,9 +96,6 @@ export function App() {
   // State variables
   [c.volume, c.setVolume] = useState(1);
   [c.muted, c.setMuted] = useState(false);
-  [c.enqueuedTrackIndex, c.setEnqueuedTrackIndex] = useState<number | null>(
-    null,
-  );
   [c.darkMode, c.setDarkMode] = useState(
     () => window.matchMedia("(prefers-color-scheme: dark)").matches,
   );
@@ -185,59 +233,25 @@ export function App() {
   };
   useEffect(() => c.onRescanned(), []);
 
-  // Track queue
-  [c.enqueuedTracks, c.setEnqueuedTracks] = useState<TrackData[]>([]);
-  c.enqueueTrack = (track: TrackData | TrackData[]) => {
-    if (Array.isArray(track)) {
-      c.setEnqueuedTracks([...c.enqueuedTracks, ...track]);
-    } else {
-      c.setEnqueuedTracks([...c.enqueuedTracks, track]);
-    }
-  };
-  c.unqueueTrack = (index?: number) => {
-    if (typeof index === "number") {
-      c.setEnqueuedTracks((prev) => prev.filter((_, i) => i !== index));
-      // If we remove a track before the current index, adjust the index
-      if (c.enqueuedTrackIndex !== null && index < c.enqueuedTrackIndex) {
-        c.setEnqueuedTrackIndex((prev) => (prev ?? 1) - 1);
-      } else if (index === c.enqueuedTrackIndex) {
-        // If we remove the currently highlighted track, reset index
-        c.setEnqueuedTrackIndex(null);
-      }
-    } else {
-      c.setEnqueuedTracks([]);
-      c.setEnqueuedTrackIndex(null);
-    }
-  };
-  c.goNextQueue = () => {
-    const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
-    if (c.enqueuedTracks.length > 0 && nextIndex < c.enqueuedTracks.length) {
-      c.setEnqueuedTrackIndex(nextIndex);
-      c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
-    } else {
-      // No more tracks in queue
-      if (c.enqueuedTrackIndex !== null) {
-        c.setEnqueuedTrackIndex(null);
-      }
-    }
-  };
-
   // Audio
   c.as = useAudio({
     volume: c.volume,
     muted: c.muted,
   });
 
+  // Track queue
+  c.queue = useTrackQueue(c.as);
+
   useEffect(() => {
     if (c.as.ended) {
-      c.goNextQueue();
+      c.queue.goNextQueue();
       c.as.setEnded(false);
     }
-  }, [c.as.ended, c.enqueuedTracks, c.enqueuedTrackIndex]);
+  }, [c.as.ended, c.queue]);
 
   useEffect(() => {
     if (c.as.playRequestedWithoutTrack) {
-      c.goNextQueue();
+      c.queue.goNextQueue();
       c.as.setPlayRequestedWithoutTrack(false);
     }
   }, [c.as.playRequestedWithoutTrack]);
@@ -250,13 +264,13 @@ export function App() {
         scrollToTrack: (_: number) => {},
       }
     : useTrackList({
-        tracks: c.enqueuedTracks,
+        tracks: c.queue.enqueuedTracks,
         canUnqueue: true,
         parentElement: appRightSide,
         // context variables
-        enqueuedTracks: c.enqueuedTracks,
-        setEnqueuedTracks: c.setEnqueuedTracks,
-        unqueueTrack: c.unqueueTrack,
+        enqueuedTracks: c.queue.enqueuedTracks,
+        setEnqueuedTracks: c.queue.setEnqueuedTracks,
+        unqueueTrack: c.queue.unqueueTrack,
       });
   c.trackQueueScroll = trackQueueScroll;
 
@@ -463,7 +477,7 @@ export function App() {
           </div>
           <div
             id="app-right-side"
-            style={{ display: c.enqueuedTracks.length > 0 ? "block" : "none" }}
+            style={{ display: c.queue.enqueuedTracks.length > 0 ? "block" : "none" }}
             ref={appRightSide}
           >
             <div className="tab-bar">

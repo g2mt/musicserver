@@ -37,7 +37,7 @@ export function Track({
 }) {
   const c = useContext(AppContext)!;
   const isHighlighted =
-    highlighted || (index !== undefined && index === c.enqueuedTrackIndex);
+    highlighted || (index !== undefined && index === c.queue.enqueuedTrackIndex);
   return (
     <div className={`track ${isHighlighted ? "highlighted" : ""}`}>
       <img
@@ -50,7 +50,7 @@ export function Track({
               <ContextMenuItem
                 icon={faPlay}
                 onClick={() => {
-                  if (index !== undefined) c.setEnqueuedTrackIndex(index);
+                  if (index !== undefined) c.queue.setEnqueuedTrackIndex(index);
                   c.as.setCurrentTrack(track);
                 }}
               >
@@ -97,7 +97,7 @@ export function Track({
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            if (index !== undefined) c.setEnqueuedTrackIndex(index);
+            if (index !== undefined) c.queue.setEnqueuedTrackIndex(index);
             c.as.setCurrentTrack(track);
           }}
         >
@@ -133,7 +133,7 @@ export function Track({
       {canEnqueue && (
         <button
           className="icon-btn track-queue-btn"
-          onClick={() => c.enqueueTrack(track)}
+          onClick={() => c.queue.enqueueTrack(track)}
         >
           <FontAwesomeIcon icon={faPlus} />
         </button>
@@ -141,7 +141,7 @@ export function Track({
       {canUnqueue && index !== undefined && (
         <button
           className="icon-btn track-queue-btn"
-          onClick={() => c.unqueueTrack(index)}
+          onClick={() => c.queue.unqueueTrack(index)}
         >
           <FontAwesomeIcon icon={faMinus} />
         </button>

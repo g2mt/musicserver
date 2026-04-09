@@ -27,31 +27,31 @@ export function useBackForward() {
   const c = useContext(AppContext)!;
 
   const isBackDisabled = useMemo(
-    () => c.enqueuedTrackIndex === null || c.enqueuedTrackIndex <= 0,
-    [c.enqueuedTrackIndex],
+    () => c.queue.enqueuedTrackIndex === null || c.queue.enqueuedTrackIndex <= 0,
+    [c.queue.enqueuedTrackIndex],
   );
   const isForwardDisabled = useMemo(
     () =>
-      (typeof c.enqueuedTrackIndex ===
+      (typeof c.queue.enqueuedTrackIndex ===
         "number" /* for tracks inside of queue */ &&
-        c.enqueuedTrackIndex + 1 >= c.enqueuedTracks.length) ||
-      c.enqueuedTracks.length === 0 /* for tracks outside of queue */,
-    [c.enqueuedTrackIndex, c.enqueuedTracks],
+        c.queue.enqueuedTrackIndex + 1 >= c.queue.enqueuedTracks.length) ||
+      c.queue.enqueuedTracks.length === 0 /* for tracks outside of queue */,
+    [c.queue.enqueuedTrackIndex, c.queue.enqueuedTracks],
   );
 
   function handleBack() {
-    const prevIndex = (c.enqueuedTrackIndex ?? 1) - 1;
-    if (typeof c.enqueuedTracks[prevIndex] === "undefined") return;
-    c.setEnqueuedTrackIndex(prevIndex);
-    c.as.setCurrentTrack(c.enqueuedTracks[prevIndex]);
+    const prevIndex = (c.queue.enqueuedTrackIndex ?? 1) - 1;
+    if (typeof c.queue.enqueuedTracks[prevIndex] === "undefined") return;
+    c.queue.setEnqueuedTrackIndex(prevIndex);
+    c.as.setCurrentTrack(c.queue.enqueuedTracks[prevIndex]);
     c.trackQueueScroll(prevIndex);
   }
 
   function handleForward() {
-    const nextIndex = (c.enqueuedTrackIndex ?? -1) + 1;
-    if (typeof c.enqueuedTracks[nextIndex] === "undefined") return;
-    c.setEnqueuedTrackIndex(nextIndex);
-    c.as.setCurrentTrack(c.enqueuedTracks[nextIndex]);
+    const nextIndex = (c.queue.enqueuedTrackIndex ?? -1) + 1;
+    if (typeof c.queue.enqueuedTracks[nextIndex] === "undefined") return;
+    c.queue.setEnqueuedTrackIndex(nextIndex);
+    c.as.setCurrentTrack(c.queue.enqueuedTracks[nextIndex]);
     c.trackQueueScroll(nextIndex);
   }
 
@@ -81,7 +81,7 @@ export function MusicPlayer() {
       window._handleBack = undefined;
       window._handleForward = undefined;
     };
-  }, [c.as.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
+  }, [c.as.currentTrack, c.queue]);
 
   // Swipe gestures
 
@@ -125,7 +125,7 @@ export function MusicPlayer() {
       }
 
       document.title = c.as.currentTrack?.name ?? "Music Player";
-    }, [c.as.currentTrack, c.enqueuedTracks, c.enqueuedTrackIndex]);
+    }, [c.as.currentTrack, c.queue]);
   }
 
   const windowWidth = useWindowWidth();
