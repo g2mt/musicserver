@@ -132,14 +132,12 @@ export function MainTracksTab({
   return (
     <div className="main-tracks-tab" ref={elRef}>
       {controls}
-      {
-        useTrackList({
-          tracks,
-          canEnqueue: true,
-          parentElement,
-          queue: c.queue,
-        })
-      }
+      <TrackList
+        tracks={tracks}
+        canEnqueue={true}
+        parentElement={parentElement}
+        queue={c.queue}
+      />
       {controls}
     </div>
   );
