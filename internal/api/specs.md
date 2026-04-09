@@ -159,9 +159,8 @@ If the `q` parameter is provided, then the tracks will be filtered based on the 
   - `album`: album title contains the value specified
   - `artist`: artist name contains the value specified
   - `path`: path of track file starts with the specified directory
-  - `limit`: show only this amount of tracks in the list. This defaults to the constant MaxPageCount (50) if not set. If set to a negative value (usually -1), then returns all tracks without limits.
 
-Only the `limit` operator may be specified multiple times without it being guaranteed to narrow the search results. If it is specified more than once, then the last value will be used as the limit.
+If the `limit` parameter is provided, show only this amount of tracks in the list. This defaults to the constant MaxPageCount (50) if not set. If set to a value less than 1, then returns all tracks without limits.
 
 ### POST `/track`
 
