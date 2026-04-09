@@ -92,13 +92,23 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 	// Ordering
 
 	if longBeforeId != "" {
-		query = "SELECT * FROM (" +
-			query +
-			" ORDER BY id DESC LIMIT ?) as sub ORDER BY id ASC"
-		args = append(args, limit)
+		if limit > 0 {
+			query = "SELECT * FROM (" +
+				query +
+				" ORDER BY id DESC LIMIT ?) as sub ORDER BY id ASC"
+			args = append(args, limit)
+		} else {
+			query = "SELECT * FROM (" +
+				query +
+				" ORDER BY id DESC) as sub ORDER BY id ASC"
+		}
 	} else {
-		query += " ORDER BY id LIMIT ?"
-		args = append(args, limit)
+		if limit > 0 {
+			query += " ORDER BY id LIMIT ?"
+			args = append(args, limit)
+		} else {
+			query += " ORDER BY id"
+		}
 	}
 
 	rows, err := i.db.Query(query, args...)

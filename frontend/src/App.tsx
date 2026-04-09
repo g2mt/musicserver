@@ -138,8 +138,12 @@ export function App() {
   const setHashSearchQuery = (searchQuery: SearchQuery) => {
     setLocationHash((params) => {
       if (searchQuery.q) params.set("q", searchQuery.q);
+      else params.delete("q");
+
       if (searchQuery.limit !== 0)
         params.set("limit", searchQuery.limit.toString());
+      else
+        params.delete("limit");
     });
   };
 
@@ -162,10 +166,11 @@ export function App() {
             toast.warn(<>No tracks found</>);
           } else {
             setFullTracks([]);
+            setHashSearchQuery(c.searchQuery); // save on empty
           }
         } else {
           setFullTracks(data);
-          setHashSearchQuery(c.searchQuery); // only save to history on success
+          setHashSearchQuery(c.searchQuery); // save on success
           c.oldSearchQuery.current = null;
         }
       })

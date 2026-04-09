@@ -11,6 +11,13 @@ import { type TrackQueue } from "./TrackQueue";
 import { Settings } from "./settings";
 import type { AudioState } from "./AudioState";
 
+export const SearchQuerySchema = z.object({
+  q: z.string().default(""),
+  limit: z.number().int().default(0),
+});
+
+export type SearchQuery = z.infer<typeof SearchQuerySchema>;
+
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
