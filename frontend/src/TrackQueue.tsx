@@ -14,9 +14,7 @@ export interface TrackQueue {
 
 export function useTrackQueue(as: AudioState): TrackQueue {
   const [tracks, setTracks] = useState<TrackData[]>([]);
-  const [index, setIndex] = useState<number | null>(
-    null,
-  );
+  const [index, setIndex] = useState<number | null>(null);
 
   return {
     tracks,
