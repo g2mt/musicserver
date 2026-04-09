@@ -15,7 +15,7 @@ import type { AudioState } from "./AudioState";
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
-  queue: TrackQueueSchema.default({}),
+  queue: TrackQueueSchema.default([]),
   searchQuery: z.string().default(""),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
