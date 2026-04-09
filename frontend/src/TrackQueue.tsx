@@ -73,16 +73,9 @@ export function useTrackQueue(as: AudioState): TrackQueue {
         setIndex(null);
       }
     },
-    next: () => {
-      const nextIndex = (index ?? -1) + 1;
-      if (tracks.length > 0 && nextIndex < tracks.length) {
-        setIndex(nextIndex);
-        as.setCurrentTrack(tracks[nextIndex]);
-      } else {
-        if (index !== null) {
-          setIndex(null);
-        }
-      }
+    canPrev: () => {
+      const prevIndex = (index ?? 1) - 1;
+      return tracks.length > 0 && prevIndex >= 0;
     },
     prev: () => {
       const prevIndex = (index ?? 1) - 1;
@@ -95,9 +88,16 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       const nextIndex = (index ?? -1) + 1;
       return tracks.length > 0 && nextIndex < tracks.length;
     },
-    canPrev: () => {
-      const prevIndex = (index ?? 1) - 1;
-      return tracks.length > 0 && prevIndex >= 0;
+    next: () => {
+      const nextIndex = (index ?? -1) + 1;
+      if (tracks.length > 0 && nextIndex < tracks.length) {
+        setIndex(nextIndex);
+        as.setCurrentTrack(tracks[nextIndex]);
+      } else {
+        if (index !== null) {
+          setIndex(null);
+        }
+      }
     },
   };
 }
