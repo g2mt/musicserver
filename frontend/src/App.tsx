@@ -17,7 +17,13 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
-import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
+import {
+  AppContext,
+  mergeConfig,
+  saveConfig,
+  type AppState,
+  type SearchQuery,
+} from "./AppState";
 import { useAudio, type SerializedAudioState } from "./AudioState";
 import type { TrackData } from "./TrackData";
 import { useTrackQueue, type SerializedTrackQueue } from "./TrackQueue";
@@ -35,16 +41,25 @@ declare global {
     _native_audio_bridge?: NativeAudioBridge;
     _reloadFromSuspend?: () => void;
 
-    _refreshSearch?: () => (() => void);
+    _refreshSearch?: () => () => void;
     _setIsPlaying?: (_: boolean) => void;
     _handleBack?: () => void;
     _handleForward?: () => void;
   }
 }
 
-type LocationHash = string[][] | Record<string, string> | string | URLSearchParams;
-export function useLocationHash(): [URLSearchParams, (action: LocationHash | ((prevParams: URLSearchParams) => void)) => void] {
-  const [params, setParams] = useState<URLSearchParams>(() => new URLSearchParams(window.location.hash.slice(1)));
+type LocationHash =
+  | string[][]
+  | Record<string, string>
+  | string
+  | URLSearchParams;
+export function useLocationHash(): [
+  URLSearchParams,
+  (action: LocationHash | ((prevParams: URLSearchParams) => void)) => void,
+] {
+  const [params, setParams] = useState<URLSearchParams>(
+    () => new URLSearchParams(window.location.hash.slice(1)),
+  );
   useEffect(() => {
     function onHashchange() {
       setParams(new URLSearchParams(window.location.hash.slice(1)));
@@ -68,7 +83,7 @@ export function useLocationHash(): [URLSearchParams, (action: LocationHash | ((p
         window.location.hash = "#" + params.toString();
         return params;
       });
-    }
+    },
   ];
 }
 
@@ -114,9 +129,10 @@ export function App() {
 
   // Search
   const setHashSearchQuery = (searchQuery: SearchQuery) => {
-    setLocationHash(params => {
-      params.set("q", searchQuery.q);
-      params.set("limit", searchQuery.limit.toString());
+    setLocationHash((params) => {
+      if (searchQuery.q) params.set("q", searchQuery.q);
+      if (searchQuery.limit !== 0)
+        params.set("limit", searchQuery.limit.toString());
     });
   };
 
