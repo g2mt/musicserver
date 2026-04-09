@@ -309,13 +309,6 @@ public class NativeAudioBridge {
 
 		mediaPlayer.setOnPreparedListener(mp -> {
 			Log.d(TAG, "prepared");
-			MediaMetadata current = mediaSession.getController().getMetadata();
-			if (current != null) {
-				Log.d(TAG, "duration:"+mp.getDuration());
-				mediaSession.setMetadata(new MediaMetadata.Builder(current)
-					.putLong(MediaMetadata.METADATA_KEY_DURATION, mp.getDuration())
-					.build());
-			}
 			fireEvent(instanceId, "canplay");
 		});
 
