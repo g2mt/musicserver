@@ -9,7 +9,7 @@ frontend:
 	cd frontend && npm run build
 
 ifneq ($(strip $(ANDROID_HOME)),)
-include mk/android.mk
+include android/common.mk
 
 .PHONY: taglib_android
 taglib_android:

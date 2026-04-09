@@ -14,7 +14,7 @@ endif
 .PHONY: all | init_build
 all: build/$(PKG_NAME).apk
 
-include ../mk/android.mk
+include common.mk
 
 .classpath: .classpath.m4 # for lsp
 	m4 $< >$@
