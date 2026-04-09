@@ -173,9 +173,14 @@ func (i *Interface) getQueryRow(tx *sql.Tx) interface {
 
 func (i *Interface) handleRequest(path string, method string, params map[string]string) (out handler, contentType string, err error) {
 	var response interface{}
+
 	if path == "/track" {
 		if method == "GET" {
 			var search searchparser.Result
+			limit := 0
+			if limitParam, ok := params["limit"]; ok {
+				limit, _ = strconv.Atoi(limitParam)
+			}
 			if searchParam, ok := params["q"]; ok {
 				search = searchparser.Parse(searchParam)
 				response, err = i.GetTracks(&search)
