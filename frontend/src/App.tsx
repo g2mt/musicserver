@@ -4,7 +4,7 @@ import { SettingsTab } from "./SettingsTab";
 import FileBrowserTab from "./FileBrowserTab";
 import { MusicPlayer } from "./MusicPlayer";
 import SearchBar from "./SearchBar";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { getTrackCover } from "./Track";
 import { fetchAPI } from "./apiServer";
 import {
@@ -42,6 +42,36 @@ declare global {
   }
 }
 
+type LocationHash = string[][] | Record<string, string> | string | URLSearchParams;
+export function useLocationHash(): [URLSearchParams, (action: LocationHash | ((prevParams: URLSearchParams) => void)) => void] {
+  const [params, setParams] = useState<URLSearchParams>(() => new URLSearchParams(window.location.hash.slice(1)));
+  useEffect(() => {
+    function onHashchange() {
+      setParams(new URLSearchParams(window.location.hash.slice(1)));
+    }
+    window.addEventListener("hashchange", onHashchange);
+    return () => {
+      window.removeEventListener("hashchange", onHashchange);
+    };
+  });
+  return [
+    params,
+    (action: LocationHash | ((prevParams: URLSearchParams) => void)) => {
+      setParams((old) => {
+        let params;
+        if (typeof action === "function") {
+          params = new URLSearchParams(old);
+          action(params);
+        } else {
+          params = new URLSearchParams(action);
+        }
+        window.location.hash = "#" + params.toString();
+        return params;
+      });
+    }
+  ];
+}
+
 export function App() {
   const c = {} as AppState;
 
@@ -51,6 +81,9 @@ export function App() {
   }, []);
 
   // ### States
+
+  // Location
+  const [locationHash, setLocationHash] = useLocationHash();
 
   // State variables
   [c.volume, c.setVolume] = useState(1);
@@ -79,36 +112,19 @@ export function App() {
       .catch(() => {});
   }, []);
 
-  // Hash params (parsed like URLSearchParams but from window.location.hash)
-  const getHashParams = () =>
-    new URLSearchParams(window.location.hash.slice(1));
-  const setHashParam = (key: string, value: string) => {
-    const params = getHashParams();
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
-    window.location.hash = params.toString();
+  // Search
+  const setHashSearchQuery = (searchQuery: SearchQuery) => {
+    setLocationHash(params => {
+      params.set("q", searchQuery.q);
+      params.set("limit", searchQuery.limit.toString());
+    });
   };
 
-  // Search
-  const initialHashParams = getHashParams();
-  [c.searchQuery, c.setSearchQuery] = useState(
-    () => initialHashParams.get("q") ?? "",
-  );
-  c.oldSearchQuery = useRef(null);
-  useEffect(() => {
-    function onHashchange() {
-      const hashParams = getHashParams();
-      c.setSearchQuery(hashParams.get("q") ?? "");
-    }
-
-    window.addEventListener("hashchange", onHashchange);
-    return () => {
-      window.removeEventListener("hashchange", onHashchange);
-    };
+  [c.searchQuery, c.setSearchQuery] = useState({
+    q: locationHash.get("q") ?? "",
+    limit: parseInt(locationHash.get("limit") ?? "0"),
   });
+  c.oldSearchQuery = useRef<SearchQuery | null>(null);
   c.refreshSearch = () => {
     fetchAPI("/track", { q: c.searchQuery })
       .then((data) => {
