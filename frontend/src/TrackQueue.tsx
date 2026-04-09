@@ -21,6 +21,9 @@ export interface TrackQueue {
   add: (track: TrackData | TrackData[]) => void;
   remove: (index?: number) => void;
   next: () => void;
+  prev: () => void;
+  canNext: () => boolean;
+  canPrev: () => boolean;
 }
 
 export function useTrackQueue(as: AudioState): TrackQueue {
@@ -80,6 +83,21 @@ export function useTrackQueue(as: AudioState): TrackQueue {
           setIndex(null);
         }
       }
+    },
+    prev: () => {
+      const prevIndex = (index ?? 1) - 1;
+      if (tracks.length > 0 && prevIndex >= 0) {
+        setIndex(prevIndex);
+        as.setCurrentTrack(tracks[prevIndex]);
+      }
+    },
+    canNext: () => {
+      const nextIndex = (index ?? -1) + 1;
+      return tracks.length > 0 && nextIndex < tracks.length;
+    },
+    canPrev: () => {
+      const prevIndex = (index ?? 1) - 1;
+      return tracks.length > 0 && prevIndex >= 0;
     },
   };
 }

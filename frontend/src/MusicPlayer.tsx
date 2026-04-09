@@ -23,58 +23,16 @@ declare global {
   }
 }
 
-export function useBackForward() {
-  const c = useContext(AppContext)!;
-
-  const isBackDisabled = useMemo(
-    () => c.queue.index === null || c.queue.index <= 0,
-    [c.queue.index],
-  );
-  const isForwardDisabled = useMemo(
-    () =>
-      (typeof c.queue.index === "number" /* for tracks inside of queue */ &&
-        c.queue.index + 1 >= c.queue.tracks.length) ||
-      c.queue.tracks.length === 0 /* for tracks outside of queue */,
-    [c.queue.index, c.queue.tracks],
-  );
-
-  function handleBack() {
-    const prevIndex = (c.queue.index ?? 1) - 1;
-    if (typeof c.queue.tracks[prevIndex] === "undefined") return;
-    c.queue.setIndex(prevIndex);
-    c.as.setCurrentTrack(c.queue.tracks[prevIndex]);
-    c.trackQueueScroll(prevIndex);
-  }
-
-  function handleForward() {
-    const nextIndex = (c.queue.index ?? -1) + 1;
-    if (typeof c.queue.tracks[nextIndex] === "undefined") return;
-    c.queue.setIndex(nextIndex);
-    c.as.setCurrentTrack(c.queue.tracks[nextIndex]);
-    c.trackQueueScroll(nextIndex);
-  }
-
-  return {
-    handleBack,
-    handleForward,
-    isBackDisabled,
-    isForwardDisabled,
-  };
-}
-
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   // Navigation
 
-  const { handleBack, handleForward, isBackDisabled, isForwardDisabled } =
-    useBackForward();
-
   useEffect(() => {
     window._setIsPlaying = c.as.setIsPlaying;
-    window._handleBack = handleBack;
-    window._handleForward = handleForward;
+    window._handleBack = c.queue.prev;
+    window._handleForward = c.queue.next;
     return () => {
       window._setIsPlaying = undefined;
       window._handleBack = undefined;
@@ -93,9 +51,9 @@ export function MusicPlayer() {
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchEndX - touchStartX;
     if (diff < -50) {
-      handleBack();
+      c.queue.prev();
     } else if (diff > 50) {
-      handleForward();
+      c.queue.next();
     }
     setTouchStartX(null);
   }
@@ -118,8 +76,8 @@ export function MusicPlayer() {
         navigator.mediaSession.setActionHandler("pause", () =>
           c.as.setIsPlaying(false),
         );
-        navigator.mediaSession.setActionHandler("previoustrack", handleBack);
-        navigator.mediaSession.setActionHandler("nexttrack", handleForward);
+        navigator.mediaSession.setActionHandler("previoustrack", c.queue.prev);
+        navigator.mediaSession.setActionHandler("nexttrack", c.queue.next);
         navigator.mediaSession.setActionHandler("stop", null);
       }
 
@@ -144,13 +102,13 @@ export function MusicPlayer() {
             >
               {c.as.isPlaying ? "Pause" : "Play"}
             </ContextMenuItem>
-            {!isForwardDisabled && (
-              <ContextMenuItem onClick={handleForward} icon={faForwardStep}>
+            {c.queue.canNext() && (
+              <ContextMenuItem onClick={c.queue.next} icon={faForwardStep}>
                 Forward
               </ContextMenuItem>
             )}
-            {!isBackDisabled && (
-              <ContextMenuItem onClick={handleBack} icon={faBackwardStep}>
+            {c.queue.canPrev() && (
+              <ContextMenuItem onClick={c.queue.prev} icon={faBackwardStep}>
                 Backward
               </ContextMenuItem>
             )}
@@ -171,8 +129,8 @@ export function MusicPlayer() {
         <div className="player-left">
           <button
             className="icon-btn btn-prev-song"
-            onClick={handleBack}
-            disabled={isBackDisabled}
+            onClick={c.queue.prev}
+            disabled={!c.queue.canPrev()}
           >
             <FontAwesomeIcon icon={faBackwardStep} />
           </button>
@@ -184,8 +142,8 @@ export function MusicPlayer() {
           </button>
           <button
             className="icon-btn btn-next-song"
-            onClick={handleForward}
-            disabled={isForwardDisabled}
+            onClick={c.queue.next}
+            disabled={!c.queue.canNext()}
           >
             <FontAwesomeIcon icon={faForwardStep} />
           </button>
