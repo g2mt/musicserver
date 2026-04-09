@@ -15,11 +15,6 @@ import type { AudioState } from "./AudioState";
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
-  queue: z
-    .object({
-      tracks: z.array(TrackDataSchema).default([]),
-    })
-    .default({}),
   searchQuery: z.string().default(""),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
@@ -92,8 +87,6 @@ export function mergeConfig(dest: AppState) {
       const config = AppStateSchema.parse(parsed);
       if (config.volume !== undefined) dest.setVolume(config.volume);
       if (config.muted !== undefined) dest.setMuted(config.muted);
-      if (config.queue.tracks.length > 0)
-        dest.queue.setTracks(config.queue.tracks);
       if (config.searchQuery !== "") dest.setSearchQuery(config.searchQuery);
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined)
@@ -116,9 +109,6 @@ export function saveConfig(state: AppState) {
   const config: AppStateData = {
     volume: state.volume,
     muted: state.muted,
-    queue: {
-      tracks: state.queue.tracks,
-    },
     searchQuery: state.searchQuery,
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,

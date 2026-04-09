@@ -11,6 +11,7 @@ import { type TrackData } from "./TrackData";
 import { AppContext } from "./AppState";
 import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { TrackQueue } from "./TrackQueue";
 
 import "./TrackList.css";
 
@@ -22,20 +23,13 @@ export function useTrackList({
   canEnqueue,
   canUnqueue,
   parentElement,
-
-  // workaround since context cannot be passed as argument
-  tracks,
-  setTracks,
-  remove,
+  queue,
 }: {
   tracks: TrackData[];
   canEnqueue?: boolean;
   canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
-
-  tracks: TrackData[];
-  setTracks: React.Dispatch<React.SetStateAction<TrackData[]>>;
-  remove: (index?: number) => void;
+  queue?: TrackQueue;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -129,7 +123,7 @@ export function useTrackList({
     <div className="track-list" ref={listRef}>
       {canUnqueue && (
         <div className="track-list-buttons">
-          <button className="btn" onClick={() => remove()}>
+          <button className="btn" onClick={() => queue!.remove()}>
             <FontAwesomeIcon icon={faMinus} />
             Remove all from queue
           </button>
@@ -141,7 +135,7 @@ export function useTrackList({
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
               }
-              setTracks(shuffled);
+              queue!.setTracks(shuffled);
             }}
           >
             <FontAwesomeIcon icon={faShuffle} />

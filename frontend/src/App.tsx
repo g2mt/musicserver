@@ -217,10 +217,7 @@ export function App() {
         tracks: c.queue.tracks,
         canUnqueue: true,
         parentElement: appRightSide,
-        // context variables
-        tracks: c.queue.tracks,
-        setTracks: c.queue.setTracks,
-        remove: c.queue.remove,
+        queue: c.queue,
       });
   c.trackQueueScroll = trackQueueScroll;
 
