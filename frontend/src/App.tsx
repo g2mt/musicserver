@@ -18,9 +18,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
-import { useAudio } from "./AudioState";
+import { useAudio, type SerializedAudioState } from "./AudioState";
 import type { TrackData } from "./TrackData";
-import { useTrackQueue } from "./TrackQueue";
+import { useTrackQueue, type SerializedTrackQueue } from "./TrackQueue";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 import { SearchSuggestions } from "./SearchSuggestions";
 
@@ -28,7 +28,13 @@ import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 declare global {
+  interface NativeAudioBridge {
+    loadAudioState: () => string;
+  }
   interface Window {
+    _native_audio_bridge?: NativeAudioBridge;
+    _reloadFromSuspend?: () => void;
+
     _refreshSearch?: () => void;
     _setIsPlaying?: (_: boolean) => void;
     _handleBack?: () => void;
@@ -193,6 +199,22 @@ export function App() {
 
   // Track queue
   c.queue = useTrackQueue(c.as);
+
+  useEffect(() => {
+    window._reloadFromSuspend = () => {
+      if (!window._native_audio_bridge)
+        return;
+      const state = JSON.parse(window._native_audio_bridge.loadAudioState()) as {
+        audio: SerializedAudioState,
+        queue: SerializedTrackQueue,
+      };
+      c.as.loadSerializedState(state.audio);
+      c.queue.loadSerializedState(state.queue);
+    };
+    return () => {
+      window._reloadFromSuspend = undefined;
+    };
+  });
 
   useEffect(() => {
     if (c.as.ended) {

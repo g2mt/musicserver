@@ -29,6 +29,7 @@ export interface TrackQueue {
   canPrev: () => boolean;
   trackNavigated: boolean;
   setTrackNavigated: Dispatch<SetStateAction<boolean>>;
+  loadSerializedState: (state: SerializedTrackQueue) => void;
 }
 
 export function useTrackQueue(as: AudioState): TrackQueue {
@@ -105,5 +106,8 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     },
     trackNavigated,
     setTrackNavigated,
+    loadSerializedState: (state: SerializedTrackQueue) => {
+      setIndex(state.index);
+    },
   };
 }
