@@ -4,7 +4,7 @@ import { SettingsTab } from "./SettingsTab";
 import FileBrowserTab from "./FileBrowserTab";
 import { MusicPlayer } from "./MusicPlayer";
 import SearchBar from "./SearchBar";
-import React, { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { getTrackCover } from "./Track";
 import { fetchAPI } from "./apiServer";
 import {
@@ -35,7 +35,7 @@ declare global {
     _native_audio_bridge?: NativeAudioBridge;
     _reloadFromSuspend?: () => void;
 
-    _refreshSearch?: () => void;
+    _refreshSearch?: () => (() => void);
     _setIsPlaying?: (_: boolean) => void;
     _handleBack?: () => void;
     _handleForward?: () => void;
@@ -126,8 +126,11 @@ export function App() {
   });
   c.oldSearchQuery = useRef<SearchQuery | null>(null);
   c.refreshSearch = () => {
-    fetchAPI("/track", { q: c.searchQuery })
+    // https://react.dev/learn/you-might-not-need-an-effect#fetching-data
+    let ignored = false;
+    fetchAPI("/track", c.searchQuery)
       .then((data) => {
+        if (ignored) return;
         if (data === null || data.length === 0) {
           if (c.oldSearchQuery.current !== null) {
             const oldSearchQuery = c.oldSearchQuery.current;
@@ -139,14 +142,17 @@ export function App() {
           }
         } else {
           setFullTracks(data);
-          setHashParam("q", c.searchQuery);
+          setHashSearchQuery(c.searchQuery); // only save to history on success
           c.oldSearchQuery.current = null;
         }
       })
       .catch((e) => {
+        if (ignored) return;
         toast.error(<>Error loading: {e.toString()}</>);
-        setHashParam("q", c.searchQuery);
       });
+    return () => {
+      ignored = true;
+    };
   };
   useEffect(() => {
     window._refreshSearch = c.refreshSearch;
@@ -290,7 +296,6 @@ export function App() {
   );
   useEffect(() => {
     const canvas = canvasRef.current;
-    console.log(canvasRef.current);
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
