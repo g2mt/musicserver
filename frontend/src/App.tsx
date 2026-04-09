@@ -18,9 +18,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
 import { ContextMenu } from "./ContextMenu";
 import { AppContext, mergeConfig, saveConfig, type AppState } from "./AppState";
-import { useAudio, type AudioState } from "./AudioState";
+import { useAudio } from "./AudioState";
 import type { TrackData } from "./TrackData";
-import { useTrackQueue, type TrackQueue } from "./TrackQueue";
+import { useTrackQueue } from "./TrackQueue";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 import { SearchSuggestions } from "./SearchSuggestions";
 
