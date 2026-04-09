@@ -44,7 +44,10 @@ export function MainTracksTab({
   const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
     const newLimit = Number(e.target.value);
-    updateQuery(`limit:${newLimit}`, "limit");
+    c.setSearchQuery({
+      q: c.searchQuery.q,
+      limit: newLimit,
+    });
   };
 
   const handleAddAllToQueue = () => {
