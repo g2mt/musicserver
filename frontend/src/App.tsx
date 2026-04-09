@@ -140,49 +140,6 @@ export function App() {
   }, []);
   useEffect(c.refreshSearch, [c.searchQuery]);
 
-  // Search input box text
-  const [searchInput, setSearchInput] = useState(c.searchQuery);
-  useEffect(() => {
-    if (c.oldSearchQuery.current !== null) return; // still being processed
-    setSearchInput(c.searchQuery);
-  }, [c.searchQuery, c.oldSearchQuery.current]);
-  const searchBarRef = useRef<HTMLInputElement>(null);
-
-  // Confirm boxes
-  const [confirmBoxes, setConfirmBoxes] = useState<
-    {
-      key: number;
-      el: React.ReactNode;
-    }[]
-  >([]);
-  let confirmBoxesCounter = useRef(0);
-  c.addConfirmBox = (confirmBox: React.ReactNode) => {
-    setConfirmBoxes([
-      { key: confirmBoxesCounter.current, el: confirmBox },
-      ...confirmBoxes,
-    ]);
-    confirmBoxesCounter.current += 1;
-  };
-
-  // Left/right sides
-  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
-    "tracks",
-  );
-  const appMain = useRef<HTMLDivElement>(null);
-  const appLeftSide = useRef<HTMLDivElement>(null);
-  const appRightSide = useRef<HTMLDivElement>(null);
-  c.scrollToTop = () => {
-    if (appMain.current) {
-      appMain.current.scrollTop = 0;
-    }
-    if (appLeftSide.current) {
-      appLeftSide.current.scrollTop = 0;
-    }
-    if (appRightSide.current) {
-      appRightSide.current.scrollTop = 0;
-    }
-  };
-
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
   c.onRescanned = () => {
@@ -246,6 +203,49 @@ export function App() {
   }, [c.as.currentTrack, c.queue]);
 
   // ### UI
+  // Search input box text
+  const [searchInput, setSearchInput] = useState(c.searchQuery);
+  useEffect(() => {
+    if (c.oldSearchQuery.current !== null) return; // still being processed
+    setSearchInput(c.searchQuery);
+  }, [c.searchQuery, c.oldSearchQuery.current]);
+  const searchBarRef = useRef<HTMLInputElement>(null);
+
+  // Confirm boxes
+  const [confirmBoxes, setConfirmBoxes] = useState<
+    {
+      key: number;
+      el: React.ReactNode;
+    }[]
+  >([]);
+  let confirmBoxesCounter = useRef(0);
+  c.addConfirmBox = (confirmBox: React.ReactNode) => {
+    setConfirmBoxes([
+      { key: confirmBoxesCounter.current, el: confirmBox },
+      ...confirmBoxes,
+    ]);
+    confirmBoxesCounter.current += 1;
+  };
+
+  // Left/right sides
+  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
+    "tracks",
+  );
+  const appMain = useRef<HTMLDivElement>(null);
+  const appLeftSide = useRef<HTMLDivElement>(null);
+  const appRightSide = useRef<HTMLDivElement>(null);
+  c.scrollToTop = () => {
+    if (appMain.current) {
+      appMain.current.scrollTop = 0;
+    }
+    if (appLeftSide.current) {
+      appLeftSide.current.scrollTop = 0;
+    }
+    if (appRightSide.current) {
+      appRightSide.current.scrollTop = 0;
+    }
+  };
+
   // Track queue ui
   const trackQueue = c.queueCollapsed ? null : (
     <TrackList

@@ -34,9 +34,11 @@ export interface AppState extends AppStateData {
 
   // search
   setSearchQuery: (_: string) => void;
-  setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
   oldSearchQuery: RefObject<string | null>;
   refreshSearch: () => void;
+
+  // search history
+  setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
 
   // config setters
   setDarkMode: Dispatch<SetStateAction<boolean>>;
