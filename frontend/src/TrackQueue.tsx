@@ -39,6 +39,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
 
   useEffect(() => {
     window._requestSaveTrackQueue = () => {
+      console.log("_requestSaveTrackQueue called");
       window._native_audio_bridge?.saveTrackQueue(
         JSON.stringify({
           paths: tracks.map((track) => track.path),
