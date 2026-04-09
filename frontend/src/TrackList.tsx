@@ -56,12 +56,12 @@ export function useTrackList({
     }
   }, [trackScrollChanged.current, trackRefs.current[trackScrolled]]);
 
-  useEffect(() => {
-    if (queue?.trackNavigated && queue.index !== null) {
+  useEffect(() => { // Only scroll the queue
+    if (canUnqueue && queue?.trackNavigated && queue.index !== null) {
       scrollToTrack(queue.index);
       queue.setTrackNavigated(false);
     }
-  }, [queue?.trackNavigated]);
+  }, [canUnqueue && queue?.trackNavigated]);
 
   // Displayed count
 
