@@ -110,6 +110,14 @@ public class NativeAudioBridge {
 			}
 
 			@Override
+			public void onSeekTo(long pos) {
+				if (mediaPlayer != null) {
+					mediaPlayer.seekTo((int) pos);
+					updatePlaybackState();
+				}
+			}
+
+			@Override
 			public void onCustomAction(String action, android.os.Bundle extras) {
 				if (MusicServerApp.ACTION_QUIT.equals(action)) {
 					activity.getApp().quit();
@@ -184,7 +192,8 @@ public class NativeAudioBridge {
 		playbackState = new PlaybackState.Builder()
 			.setState(state, position, speed)
 			.setActions(PlaybackState.ACTION_PLAY | PlaybackState.ACTION_PAUSE |
-				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT)
+				PlaybackState.ACTION_SKIP_TO_PREVIOUS | PlaybackState.ACTION_SKIP_TO_NEXT |
+				PlaybackState.ACTION_SEEK_TO)
 			.addCustomAction(quitAction)
 			.build();
 		mediaSession.setPlaybackState(playbackState);
