@@ -8,14 +8,18 @@ import * as z from "zod";
 import type React from "react";
 import { toast } from "react-toastify";
 import { TrackDataSchema, type TrackData } from "./TrackData";
-import { type TrackQueue, TrackQueueSchema } from "./TrackQueue";
+import { type TrackQueue } from "./TrackQueue";
 import { Settings } from "./settings";
 import type { AudioState } from "./AudioState";
 
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
-  queue: TrackQueueSchema.default([]),
+  queue: z
+    .object({
+      enqueuedTracks: z.array(TrackDataSchema).default([]),
+    })
+    .default({}),
   searchQuery: z.string().default(""),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),

@@ -3,13 +3,8 @@ import * as z from "zod";
 import { TrackDataSchema, type TrackData } from "./TrackData";
 import type { AudioState } from "./AudioState";
 
-export const TrackQueueSchema = z.object({
-  enqueuedTracks: z.array(TrackDataSchema).default([]),
-});
-
-export type TrackQueueData = z.infer<typeof TrackQueueSchema>;
-
-export interface TrackQueue extends TrackQueueData {
+export interface TrackQueue {
+  enqueuedTracks: TrackData[];
   enqueuedTrackIndex: number | null;
   setEnqueuedTracks: Dispatch<SetStateAction<TrackData[]>>;
   enqueueTrack: (track: TrackData | TrackData[]) => void;
