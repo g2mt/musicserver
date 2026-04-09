@@ -401,4 +401,7 @@ public class NativeAudioBridge {
 			Log.e(TAG, "Failed to parse track queue", e);
 		}
 	}
+
+	@JavascriptInterface
+	public String loadAudioState() {}
 }
