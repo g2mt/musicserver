@@ -403,5 +403,30 @@ public class NativeAudioBridge {
 	}
 
 	@JavascriptInterface
-	public String loadAudioState() {}
+	public String loadAudioState() {
+		JSONObject result = new JSONObject();
+		JSONObject audioObj = new JSONObject();
+		JSONObject queueObj = new JSONObject();
+
+		// Audio state
+		String path = null;
+		if (queue != null && queue.index >= 0 && queue.index < queue.paths.size()) {
+			path = queue.paths.get(queue.index);
+		}
+
+		try {
+			audioObj.put("path", path != null ? path : "");
+			audioObj.put("isPlaying", mediaPlayer != null && mediaPlayer.isPlaying());
+			audioObj.put("progress", mediaPlayer != null ? mediaPlayer.getCurrentPosition() / 1000f : 0);
+			audioObj.put("duration", mediaPlayer != null ? mediaPlayer.getDuration() / 1000f : 0);
+			queueObj.put("index", queue != null ? queue.index : -1);
+			result.put("audio", audioObj);
+			result.put("queue", queueObj);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		queue = null; // Unload the queue since the function triggers when WebView is unsuspended
+		return result.toString();
+	}
 }

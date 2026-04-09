@@ -166,8 +166,7 @@ public class MainActivity extends Activity {
 			));
 		}
 
-		NativeAudioBridge nativeAudioBridge = getApp().getNativeAudioBridge();
-		nativeAudioBridge.queue = null;
+		webView.evaluateJavascript("window._reloadFromSuspend()", null);
 	}
 
 	// Detaches the shared WebView from this Activity's layout so it can survive in the service

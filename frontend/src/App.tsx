@@ -202,6 +202,7 @@ export function App() {
 
   useEffect(() => {
     window._reloadFromSuspend = () => {
+      console.log("Reloading from suspend");
       if (!window._native_audio_bridge)
         return;
       const state = JSON.parse(window._native_audio_bridge.loadAudioState()) as {
