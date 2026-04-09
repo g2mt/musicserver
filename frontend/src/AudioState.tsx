@@ -4,6 +4,13 @@ import type { TrackData } from "./TrackData";
 import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
 import { getFilePath, getTrackFileFromId } from "./apiServer";
 
+export interface SerializedAudioState {
+  path: string; // get the track using the `/track/:by-path` endpoint
+  isPlaying: boolean;
+  progress: number;
+  duration: number;
+}
+
 export interface AudioState {
   currentTrack: TrackData | null;
   setCurrentTrack: Dispatch<SetStateAction<TrackData | null>>;

@@ -9,8 +9,11 @@ declare global {
   interface Window {
     _native_audio_bridge?: NativeAudioBridge;
     _requestSaveTrackQueue?: () => void;
-    _setTrackQueueIndex?: (index: number) => void;
   }
+}
+
+export interface SerializedTrackQueue {
+  index: number | null;
 }
 
 export interface TrackQueue {
@@ -42,12 +45,8 @@ export function useTrackQueue(as: AudioState): TrackQueue {
         }),
       );
     };
-    window._setTrackQueueIndex = (index: number) => {
-      setIndex(index);
-    };
     return () => {
       window._requestSaveTrackQueue = undefined;
-      window._setTrackQueueIndex = undefined;
     };
   });
 
