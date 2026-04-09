@@ -15,30 +15,9 @@ import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 
 import "./MusicPlayer.css";
 
-declare global {
-  interface Window {
-    _setIsPlaying?: (_: boolean) => void;
-    _handleBack?: () => void;
-    _handleForward?: () => void;
-  }
-}
-
 export function MusicPlayer() {
   const c = useContext(AppContext)!;
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-
-  // Navigation
-
-  useEffect(() => {
-    window._setIsPlaying = c.as.setIsPlaying;
-    window._handleBack = c.queue.prev;
-    window._handleForward = c.queue.next;
-    return () => {
-      window._setIsPlaying = undefined;
-      window._handleBack = undefined;
-      window._handleForward = undefined;
-    };
-  }, [c.as.currentTrack, c.queue]);
 
   // Swipe gestures
 
