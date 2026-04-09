@@ -24,11 +24,13 @@ export interface TrackQueue {
   prev: () => void;
   canNext: () => boolean;
   canPrev: () => boolean;
+  trackNavigated: boolean;
 }
 
 export function useTrackQueue(as: AudioState): TrackQueue {
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const [index, setIndex] = useState<number | null>(null);
+  const [trackNavigated, setTrackNavigated] = useState(false);
 
   useEffect(() => {
     window._requestSaveTrackQueue = () => {
@@ -80,6 +82,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     prev: () => {
       const prevIndex = (index ?? 1) - 1;
       if (tracks.length > 0 && prevIndex >= 0) {
+        setTrackNavigated(true);
         setIndex(prevIndex);
         as.setCurrentTrack(tracks[prevIndex]);
       }
@@ -91,6 +94,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     next: () => {
       const nextIndex = (index ?? -1) + 1;
       if (tracks.length > 0 && nextIndex < tracks.length) {
+        setTrackNavigated(true);
         setIndex(nextIndex);
         as.setCurrentTrack(tracks[nextIndex]);
       } else {
@@ -99,5 +103,6 @@ export function useTrackQueue(as: AudioState): TrackQueue {
         }
       }
     },
+    trackNavigated,
   };
 }
