@@ -18,47 +18,41 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     null,
   );
 
-  const add = (track: TrackData | TrackData[]) => {
-    if (Array.isArray(track)) {
-      setTracks((prev) => [...prev, ...track]);
-    } else {
-      setTracks((prev) => [...prev, track]);
-    }
-  };
-
-  const remove = (index?: number) => {
-    if (typeof index === "number") {
-      setTracks((prev) => prev.filter((_, i) => i !== index));
-      if (index !== null && index < index) {
-        setIndex((prev) => (prev ?? 1) - 1);
-      } else if (index === index) {
-        setIndex(null);
-      }
-    } else {
-      setTracks([]);
-      setIndex(null);
-    }
-  };
-
-  const next = () => {
-    const nextIndex = (index ?? -1) + 1;
-    if (tracks.length > 0 && nextIndex < tracks.length) {
-      setIndex(nextIndex);
-      as.setCurrentTrack(tracks[nextIndex]);
-    } else {
-      if (index !== null) {
-        setIndex(null);
-      }
-    }
-  };
-
   return {
     tracks,
     setTracks,
     index,
     setIndex,
-    add,
-    remove,
-    next,
+    add: (track: TrackData | TrackData[]) => {
+      if (Array.isArray(track)) {
+        setTracks((prev) => [...prev, ...track]);
+      } else {
+        setTracks((prev) => [...prev, track]);
+      }
+    },
+    remove: (index?: number) => {
+      if (typeof index === "number") {
+        setTracks((prev) => prev.filter((_, i) => i !== index));
+        if (index !== null && index < index) {
+          setIndex((prev) => (prev ?? 1) - 1);
+        } else if (index === index) {
+          setIndex(null);
+        }
+      } else {
+        setTracks([]);
+        setIndex(null);
+      }
+    },
+    next: () => {
+      const nextIndex = (index ?? -1) + 1;
+      if (tracks.length > 0 && nextIndex < tracks.length) {
+        setIndex(nextIndex);
+        as.setCurrentTrack(tracks[nextIndex]);
+      } else {
+        if (index !== null) {
+          setIndex(null);
+        }
+      }
+    },
   };
 }
