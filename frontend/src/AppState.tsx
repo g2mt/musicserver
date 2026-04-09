@@ -33,8 +33,8 @@ export interface AppState extends AppStateData {
   queue: TrackQueue;
 
   // search
-  setSearchQuery: (_: string) => void;
-  oldSearchQuery: RefObject<string | null>;
+  setSearchQuery: Dispatch<SetStateAction<SearchQuery>>;
+  oldSearchQuery: RefObject<SearchQuery | null>;
   refreshSearch: () => void;
 
   // search history
