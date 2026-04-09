@@ -7,12 +7,8 @@ import {
 import * as z from "zod";
 import type React from "react";
 import { toast } from "react-toastify";
-import {
-  TrackDataSchema,
-  type TrackData,
-  type TrackQueue,
-  TrackQueueSchema,
-} from "./TrackData";
+import { TrackDataSchema, type TrackData } from "./TrackData";
+import { type TrackQueue, TrackQueueSchema } from "./TrackQueue";
 import { Settings } from "./settings";
 import type { AudioState } from "./AudioState";
 
