@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { TrackData } from "./TrackData";
 import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
-import { getFilePath, getTrackFileFromId } from "./apiServer";
+import { fetchAPI, getFilePath, getTrackFileFromId } from "./apiServer";
 
 export interface SerializedAudioState {
   path: string; // get the track using the `/track/:by-path` endpoint
@@ -124,5 +124,18 @@ export function useAudio({
     setDuration,
     ended,
     setEnded,
+    loadSerializedState: async (state: SerializedAudioState) => {
+      const encodedPath = state.path
+        .split("/")
+        .map(encodeURIComponent)
+        .join("/");
+      const data = await fetchAPI(`/track/:by-path/${encodedPath}`);
+      if (data && !data.error) {
+        setCurrentTrack(data);
+      }
+      setProgress(state.progress);
+      setDuration(state.duration);
+      setIsPlaying(state.isPlaying);
+    },
   };
 }
