@@ -204,7 +204,7 @@ export function App() {
 
   // ### UI
   // Search input box text
-  const [searchInput, setSearchInput] = useState(c.searchQuery);
+  const [searchInput, setSearchInput] = useState<string>(c.searchQuery);
   useEffect(() => {
     if (c.oldSearchQuery.current !== null) return; // still being processed
     setSearchInput(c.searchQuery);
