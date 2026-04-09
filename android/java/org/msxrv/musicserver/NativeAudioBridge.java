@@ -428,9 +428,9 @@ public class NativeAudioBridge {
 			}
 			audioObj.put("path", relativePath);
 			audioObj.put("isPlaying", mediaPlayer != null && mediaPlayer.isPlaying());
-			audioObj.put("progress", mediaPlayer != null ? mediaPlayer.getCurrentPosition() / 1000f : 0);
-			audioObj.put("duration", mediaPlayer != null ? mediaPlayer.getDuration() / 1000f : 0);
-			queueObj.put("index", queue != null ? queue.index : -1);
+			audioObj.put("progress", mediaPlayer != null ? mediaPlayer.getCurrentPosition() / 1000f : 0f);
+			audioObj.put("duration", mediaPlayer != null ? mediaPlayer.getDuration() / 1000f : 0f);
+			queueObj.put("index", queue != null ? queue.index : null);
 			result.put("audio", audioObj);
 			result.put("queue", queueObj);
 		} catch (JSONException e) {

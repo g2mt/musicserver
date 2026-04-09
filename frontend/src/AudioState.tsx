@@ -122,11 +122,7 @@ export function useAudio({
     ended,
     setEnded,
     loadSerializedState: async (state: SerializedAudioState) => {
-      const encodedPath = state.path
-        .split("/")
-        .map(encodeURIComponent)
-        .join("/");
-      const data = await fetchAPI(`/track/:by-path/${encodedPath}`);
+      const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
       if (data && !data.error) {
         setCurrentTrack(data);
       }

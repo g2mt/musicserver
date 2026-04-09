@@ -204,9 +204,9 @@ export function App() {
     window._reloadFromSuspend = () => {
       console.log("Reloading from suspend");
       if (!window._native_audio_bridge) return;
-      const state = JSON.parse(
-        window._native_audio_bridge.loadAudioState(),
-      ) as {
+      const serializedState = window._native_audio_bridge.loadAudioState();
+      console.log("serializedState=", serializedState);
+      const state = JSON.parse(serializedState) as {
         audio: SerializedAudioState;
         queue: SerializedTrackQueue;
       };
