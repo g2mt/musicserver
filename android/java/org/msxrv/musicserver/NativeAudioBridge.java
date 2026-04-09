@@ -418,7 +418,15 @@ public class NativeAudioBridge {
 		}
 
 		try {
-			audioObj.put("path", path != null ? path : "");
+			String relativePath = "";
+			if (path != null) {
+				try {
+					relativePath = Paths.get(activity.getMusicDir()).relativize(Paths.get(path)).toString();
+				} catch (Exception e) {
+					relativePath = path;
+				}
+			}
+			audioObj.put("path", relativePath);
 			audioObj.put("isPlaying", mediaPlayer != null && mediaPlayer.isPlaying());
 			audioObj.put("progress", mediaPlayer != null ? mediaPlayer.getCurrentPosition() / 1000f : 0);
 			audioObj.put("duration", mediaPlayer != null ? mediaPlayer.getDuration() / 1000f : 0);
