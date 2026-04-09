@@ -139,7 +139,7 @@ public class NativeAudioBridge {
 		}
 	}
 
-	// Media session
+	// ### Media session
 
 	private void updateMediaSession(String filepath) {
 		if (filepath == null) return;
@@ -151,6 +151,8 @@ public class NativeAudioBridge {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		Log.d(TAG, "updateMediaSession");
 
 		NativeBridge bridge = activity.getApp().getNativeBridge();
 
@@ -167,6 +169,7 @@ public class NativeAudioBridge {
 		}
 
 		MediaMetadata.Builder metaBuilder = new MediaMetadata.Builder()
+			.putLong(MediaMetadata.METADATA_KEY_DURATION, mediaPlayer.getDuration())
 			.putString(MediaMetadata.METADATA_KEY_TITLE, title)
 			.putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
 			.putString(MediaMetadata.METADATA_KEY_ALBUM, album);
@@ -178,13 +181,14 @@ public class NativeAudioBridge {
 		activity.getApp().updateNotification(title, artist, coverBitmap);
 	}
 
-	// Playback state
+	// ### Playback state
 
 	private void updatePlaybackState() {
 		boolean playing = mediaPlayer != null && mediaPlayer.isPlaying();
 		int state = playing ? PlaybackState.STATE_PLAYING : PlaybackState.STATE_PAUSED;
 		long position = mediaPlayer != null ? mediaPlayer.getCurrentPosition() : PlaybackState.PLAYBACK_POSITION_UNKNOWN;
 		float speed = playing ? 1.0f : 0.0f;
+		Log.d(TAG, "position="+position);
 
 		PlaybackState.CustomAction quitAction = new PlaybackState.CustomAction.Builder(
 			MusicServerApp.ACTION_QUIT, "Quit", android.R.drawable.ic_delete).build();
@@ -200,17 +204,15 @@ public class NativeAudioBridge {
 	}
 
 	// Schedules periodic timeupdate events (~4x per second) while the player is active and playing.
-	private void scheduleTimeUpdates(int instanceId) {
+	private void scheduleTimeUpdates() {
 		if (timeUpdateRunnable != null) {
 			mainHandler.removeCallbacks(timeUpdateRunnable);
 		}
 		timeUpdateRunnable = new Runnable() {
 			@Override
 			public void run() {
-				if (!isActive(instanceId)) return;
 				if (mediaPlayer != null && mediaPlayer.isPlaying()) {
-					updatePlaybackState();
-					fireEvent(instanceId, "timeupdate");
+					fireEvent(currentInstanceId, "timeupdate");
 					mainHandler.postDelayed(this, 250);
 				}
 			}
@@ -218,24 +220,33 @@ public class NativeAudioBridge {
 		mainHandler.postDelayed(timeUpdateRunnable, 250);
 	}
 
-	// Queue
+	private void cancelTimeUpdates() {
+		if (timeUpdateRunnable != null) {
+			mainHandler.removeCallbacks(timeUpdateRunnable);
+			timeUpdateRunnable = null;
+		}
+	}
+
+	// ### Playback queue
+
 	public static class Queue {
 		public ArrayList<String> paths = new ArrayList<>();
 		public int index = -1;
 	}
 
-	public Queue queue; // non-null if the main activity (webview) is suspended
+	private Queue queue; // non-null if the main activity (webview) is suspended
 
-	private void loadFromQueue() {
+	private void loadFromQueue() { // this will be called 
 		if (queue == null || queue.index < 0 || queue.index >= queue.paths.size()) return;
 		String path = queue.paths.get(queue.index);
 		mainHandler.post(() -> {
-			setSrc(currentInstanceId, "file://" + path);
-			play(currentInstanceId);
+			updateMediaSession(path);
+			mediaPlayer.start();
+			updatePlaybackState();
 		});
 	}
 
-	// JS utils
+	// ### JS utils
 
 	// Posts a JSON message of the form {"instanceId": N, "event": "eventName"}
 	// to the JS MessagePort. Must be called on the main thread.
@@ -263,7 +274,7 @@ public class NativeAudioBridge {
 		});
 	}
 
-	// JS interface
+	// ### JS interface
 
 	// Called by NativeAudio constructor. Returns the instance ID.
 	@JavascriptInterface
@@ -297,8 +308,10 @@ public class NativeAudioBridge {
 		});
 
 		mediaPlayer.setOnPreparedListener(mp -> {
+			Log.d(TAG, "prepared");
 			MediaMetadata current = mediaSession.getController().getMetadata();
 			if (current != null) {
+				Log.d(TAG, "duration:"+mp.getDuration());
 				mediaSession.setMetadata(new MediaMetadata.Builder(current)
 					.putLong(MediaMetadata.METADATA_KEY_DURATION, mp.getDuration())
 					.build());
@@ -344,16 +357,13 @@ public class NativeAudioBridge {
 		Log.d(TAG, "play");
 		mediaPlayer.start();
 		updatePlaybackState();
-		scheduleTimeUpdates(instanceId);
+		scheduleTimeUpdates();
 	}
 
 	@JavascriptInterface
 	public void pause(int instanceId) {
 		if (!isActive(instanceId)) return;
-		if (timeUpdateRunnable != null) {
-			mainHandler.removeCallbacks(timeUpdateRunnable);
-			timeUpdateRunnable = null;
-		}
+		cancelTimeUpdates();
 		if (mediaPlayer.isPlaying()) {
 			mediaPlayer.pause();
 			updatePlaybackState();

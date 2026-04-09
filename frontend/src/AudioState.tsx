@@ -72,9 +72,6 @@ export function useAudio({
     function onTimeUpdate() {
       setProgress(audio.currentTime);
       setDuration(audio.duration);
-      if (audio.currentTime >= audio.duration) {
-        setEnded(true);
-      }
     }
     function onEnded() {
       setProgress(audio.duration);
