@@ -1,6 +1,17 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { type TrackData } from "./TrackData";
 import type { AudioState } from "./AudioState";
+
+declare global {
+  interface NativeAudioBridge {
+    saveTrackQueue: (serialized: string) => void;
+  }
+  interface Window {
+    _native_audio_bridge?: NativeAudioBridge;
+    _requestSaveTrackQueue?: () => void;
+    _setTrackQueueIndex?: (index: number) => void;
+  }
+}
 
 export interface TrackQueue {
   tracks: TrackData[];
@@ -15,6 +26,22 @@ export interface TrackQueue {
 export function useTrackQueue(as: AudioState): TrackQueue {
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const [index, setIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    window._requestSaveTrackQueue = () => {
+      window._native_audio_bridge?.saveTrackQueue(JSON.stringify({
+        paths: tracks.map(track => track.path),
+        index
+      }));
+    };
+    window._setTrackQueueIndex = (index: number) => {
+      setIndex(index);
+    };
+    return () => {
+      window._requestSaveTrackQueue = undefined;
+      window._setTrackQueueIndex = undefined;
+    };
+  });
 
   return {
     tracks,
