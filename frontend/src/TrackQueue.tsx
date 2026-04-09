@@ -78,11 +78,11 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       }
     },
     canPrev: () => {
-      const prevIndex = (index ?? 1) - 1;
+      const prevIndex = (index ?? 0) - 1;
       return tracks.length > 0 && prevIndex >= 0;
     },
     prev: () => {
-      const prevIndex = (index ?? 1) - 1;
+      const prevIndex = (index ?? 0) - 1;
       if (tracks.length > 0 && prevIndex >= 0) {
         setTrackNavigated(true);
         setIndex(prevIndex);
