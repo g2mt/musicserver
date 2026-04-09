@@ -203,11 +203,12 @@ export function App() {
   useEffect(() => {
     window._reloadFromSuspend = () => {
       console.log("Reloading from suspend");
-      if (!window._native_audio_bridge)
-        return;
-      const state = JSON.parse(window._native_audio_bridge.loadAudioState()) as {
-        audio: SerializedAudioState,
-        queue: SerializedTrackQueue,
+      if (!window._native_audio_bridge) return;
+      const state = JSON.parse(
+        window._native_audio_bridge.loadAudioState(),
+      ) as {
+        audio: SerializedAudioState;
+        queue: SerializedTrackQueue;
       };
       c.as.loadSerializedState(state.audio);
       c.queue.loadSerializedState(state.queue);
@@ -215,7 +216,7 @@ export function App() {
     return () => {
       window._reloadFromSuspend = undefined;
     };
-  });
+  }, [c.as, c.queue]);
 
   useEffect(() => {
     if (c.as.ended) {
@@ -246,14 +247,14 @@ export function App() {
 
   // ### UI
   // Track queue ui
-  const trackQueue = c.queueCollapsed
-    ? null
-    : useTrackList({
-        tracks: c.queue.tracks,
-        canUnqueue: true,
-        parentElement: appRightSide,
-        queue: c.queue,
-      });
+  const trackQueue = c.queueCollapsed ? null : (
+    <TrackList
+      tracks={c.queue.tracks}
+      canUnqueue={true}
+      parentElement={appRightSide}
+      queue={c.queue}
+    />
+  );
 
   // Collapse state
   [c.tracksListCollapsed, c.setTracksListCollapsed] = useState(false);
