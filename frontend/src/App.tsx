@@ -122,9 +122,16 @@ export function App() {
   // Config
 
   useEffect(() => {
+    let ignored = false;
     fetchAPI("/props")
-      .then(c.setProps)
+      .then(props => {
+        if (ignored) return;
+        c.setProps(props);
+      })
       .catch(() => {});
+    return () => {
+      ignored = true;
+    };
   }, []);
 
   // Search
