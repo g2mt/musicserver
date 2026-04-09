@@ -57,7 +57,7 @@ export function MainTracksTab({
             c.setTracksListCollapsed(true);
             c.setQueueCollapsed(false);
           }
-          c.queue.enqueueTrack(data);
+          c.queue.add(data);
         }
       })
       .catch((e) => {
@@ -108,7 +108,7 @@ export function MainTracksTab({
               c.setTracksListCollapsed(true);
               c.setQueueCollapsed(false);
             }
-            c.queue.enqueueTrack(tracks);
+            c.queue.add(tracks);
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -138,9 +138,9 @@ export function MainTracksTab({
           canEnqueue: true,
           parentElement,
           // context vars
-          enqueuedTracks: c.queue.enqueuedTracks,
-          setEnqueuedTracks: c.queue.setEnqueuedTracks,
-          unqueueTrack: c.queue.unqueueTrack,
+          tracks: c.queue.tracks,
+          setTracks: c.queue.setTracks,
+          remove: c.queue.remove,
         }).el
       }
       {controls}

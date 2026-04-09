@@ -24,18 +24,18 @@ export function useTrackList({
   parentElement,
 
   // workaround since context cannot be passed as argument
-  enqueuedTracks,
-  setEnqueuedTracks,
-  unqueueTrack,
+  tracks,
+  setTracks,
+  remove,
 }: {
   tracks: TrackData[];
   canEnqueue?: boolean;
   canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
 
-  enqueuedTracks: TrackData[];
-  setEnqueuedTracks: React.Dispatch<React.SetStateAction<TrackData[]>>;
-  unqueueTrack: (index?: number) => void;
+  tracks: TrackData[];
+  setTracks: React.Dispatch<React.SetStateAction<TrackData[]>>;
+  remove: (index?: number) => void;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -129,19 +129,19 @@ export function useTrackList({
     <div className="track-list" ref={listRef}>
       {canUnqueue && (
         <div className="track-list-buttons">
-          <button className="btn" onClick={() => unqueueTrack()}>
+          <button className="btn" onClick={() => remove()}>
             <FontAwesomeIcon icon={faMinus} />
             Remove all from queue
           </button>
           <button
             className="btn"
             onClick={() => {
-              const shuffled = [...enqueuedTracks];
+              const shuffled = [...tracks];
               for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
               }
-              setEnqueuedTracks(shuffled);
+              setTracks(shuffled);
             }}
           >
             <FontAwesomeIcon icon={faShuffle} />

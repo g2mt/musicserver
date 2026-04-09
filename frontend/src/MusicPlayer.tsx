@@ -27,31 +27,31 @@ export function useBackForward() {
   const c = useContext(AppContext)!;
 
   const isBackDisabled = useMemo(
-    () => c.queue.enqueuedTrackIndex === null || c.queue.enqueuedTrackIndex <= 0,
-    [c.queue.enqueuedTrackIndex],
+    () => c.queue.index === null || c.queue.index <= 0,
+    [c.queue.index],
   );
   const isForwardDisabled = useMemo(
     () =>
-      (typeof c.queue.enqueuedTrackIndex ===
+      (typeof c.queue.index ===
         "number" /* for tracks inside of queue */ &&
-        c.queue.enqueuedTrackIndex + 1 >= c.queue.enqueuedTracks.length) ||
-      c.queue.enqueuedTracks.length === 0 /* for tracks outside of queue */,
-    [c.queue.enqueuedTrackIndex, c.queue.enqueuedTracks],
+        c.queue.index + 1 >= c.queue.tracks.length) ||
+      c.queue.tracks.length === 0 /* for tracks outside of queue */,
+    [c.queue.index, c.queue.tracks],
   );
 
   function handleBack() {
-    const prevIndex = (c.queue.enqueuedTrackIndex ?? 1) - 1;
-    if (typeof c.queue.enqueuedTracks[prevIndex] === "undefined") return;
-    c.queue.setEnqueuedTrackIndex(prevIndex);
-    c.as.setCurrentTrack(c.queue.enqueuedTracks[prevIndex]);
+    const prevIndex = (c.queue.index ?? 1) - 1;
+    if (typeof c.queue.tracks[prevIndex] === "undefined") return;
+    c.queue.setIndex(prevIndex);
+    c.as.setCurrentTrack(c.queue.tracks[prevIndex]);
     c.trackQueueScroll(prevIndex);
   }
 
   function handleForward() {
-    const nextIndex = (c.queue.enqueuedTrackIndex ?? -1) + 1;
-    if (typeof c.queue.enqueuedTracks[nextIndex] === "undefined") return;
-    c.queue.setEnqueuedTrackIndex(nextIndex);
-    c.as.setCurrentTrack(c.queue.enqueuedTracks[nextIndex]);
+    const nextIndex = (c.queue.index ?? -1) + 1;
+    if (typeof c.queue.tracks[nextIndex] === "undefined") return;
+    c.queue.setIndex(nextIndex);
+    c.as.setCurrentTrack(c.queue.tracks[nextIndex]);
     c.trackQueueScroll(nextIndex);
   }
 

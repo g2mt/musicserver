@@ -194,14 +194,14 @@ export function App() {
 
   useEffect(() => {
     if (c.as.ended) {
-      c.queue.goNextQueue();
+      c.queue.next();
       c.as.setEnded(false);
     }
   }, [c.as.ended, c.queue]);
 
   useEffect(() => {
     if (c.as.playRequestedWithoutTrack) {
-      c.queue.goNextQueue();
+      c.queue.next();
       c.as.setPlayRequestedWithoutTrack(false);
     }
   }, [c.as.playRequestedWithoutTrack]);
@@ -214,13 +214,13 @@ export function App() {
         scrollToTrack: (_: number) => {},
       }
     : useTrackList({
-        tracks: c.queue.enqueuedTracks,
+        tracks: c.queue.tracks,
         canUnqueue: true,
         parentElement: appRightSide,
         // context variables
-        enqueuedTracks: c.queue.enqueuedTracks,
-        setEnqueuedTracks: c.queue.setEnqueuedTracks,
-        unqueueTrack: c.queue.unqueueTrack,
+        tracks: c.queue.tracks,
+        setTracks: c.queue.setTracks,
+        remove: c.queue.remove,
       });
   c.trackQueueScroll = trackQueueScroll;
 
@@ -427,7 +427,7 @@ export function App() {
           </div>
           <div
             id="app-right-side"
-            style={{ display: c.queue.enqueuedTracks.length > 0 ? "block" : "none" }}
+            style={{ display: c.queue.tracks.length > 0 ? "block" : "none" }}
             ref={appRightSide}
           >
             <div className="tab-bar">
