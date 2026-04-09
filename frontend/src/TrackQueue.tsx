@@ -29,10 +29,12 @@ export function useTrackQueue(as: AudioState): TrackQueue {
 
   useEffect(() => {
     window._requestSaveTrackQueue = () => {
-      window._native_audio_bridge?.saveTrackQueue(JSON.stringify({
-        paths: tracks.map(track => track.path),
-        index
-      }));
+      window._native_audio_bridge?.saveTrackQueue(
+        JSON.stringify({
+          paths: tracks.map((track) => track.path),
+          index,
+        }),
+      );
     };
     window._setTrackQueueIndex = (index: number) => {
       setIndex(index);
@@ -55,12 +57,12 @@ export function useTrackQueue(as: AudioState): TrackQueue {
         setTracks((prev) => [...prev, track]);
       }
     },
-    remove: (index?: number) => {
-      if (typeof index === "number") {
+    remove: (toRemove?: number) => {
+      if (typeof toRemove === "number") {
         setTracks((prev) => prev.filter((_, i) => i !== index));
-        if (index !== null && index < index) {
+        if (index !== null && index < toRemove) {
           setIndex((prev) => (prev ?? 1) - 1);
-        } else if (index === index) {
+        } else if (index === toRemove) {
           setIndex(null);
         }
       } else {
