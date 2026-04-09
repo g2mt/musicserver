@@ -16,10 +16,12 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebMessage;
 import android.webkit.WebMessagePort;
 import android.webkit.WebView;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.util.Log;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 public class NativeAudioBridge {
 	private static final String TAG = "[msxrv] NativeAudioBridge";
@@ -60,21 +62,49 @@ public class NativeAudioBridge {
 		mediaSession.setCallback(new MediaSession.Callback() {
 			@Override
 			public void onPlay() {
+				if (queue != null) {
+					if (mediaPlayer != null && !mediaPlayer.isPlaying()) {
+						mediaPlayer.start();
+						updatePlaybackState();
+					}
+					return;
+				}
 				wv.evaluateJavascript("window._setIsPlaying(true)", null);
 			}
 
 			@Override
 			public void onPause() {
+				if (queue != null) {
+					if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+						mediaPlayer.pause();
+						updatePlaybackState();
+					}
+					return;
+				}
 				wv.evaluateJavascript("window._setIsPlaying(false)", null);
 			}
 
 			@Override
 			public void onSkipToPrevious() {
+				if (queue != null) {
+					if (queue.index > 0) {
+						queue.index--;
+						loadFromQueue();
+					}
+					return;
+				}
 				wv.evaluateJavascript("window._handleBack()", null);
 			}
 
 			@Override
 			public void onSkipToNext() {
+				if (queue != null) {
+					if (queue.index < queue.paths.size() - 1) {
+						queue.index++;
+						loadFromQueue();
+					}
+					return;
+				}
 				wv.evaluateJavascript("window._handleForward()", null);
 			}
 
@@ -175,7 +205,21 @@ public class NativeAudioBridge {
 	}
 
 	// Queue
-	// TODO
+	public static class Queue {
+		public ArrayList<String> paths = new ArrayList<>();
+		public int index = -1;
+	}
+
+	private Queue queue;
+
+	private void loadFromQueue() {
+		if (queue == null || queue.index < 0 || queue.index >= queue.paths.size()) return;
+		String path = queue.paths.get(queue.index);
+		mainHandler.post(() -> {
+			setSrc(currentInstanceId, "file://" + path);
+			play(currentInstanceId);
+		});
+	}
 
 	// JS utils
 
@@ -320,5 +364,23 @@ public class NativeAudioBridge {
 	public void setVolume(int instanceId, float volume) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.setVolume(volume, volume);
+	}
+
+	@JavascriptInterface
+	public void saveTrackQueue(String serialized) {
+		try {
+			JSONObject obj = new JSONObject(serialized);
+			JSONArray pathsArr = obj.getJSONArray("paths");
+			int index = obj.optInt("index", -1);
+
+			Queue newQueue = new Queue();
+			for (int i = 0; i < pathsArr.length(); i++) {
+				newQueue.paths.add(pathsArr.getString(i));
+			}
+			newQueue.index = index;
+			this.queue = newQueue;
+		} catch (JSONException e) {
+			Log.e(TAG, "Failed to parse track queue", e);
+		}
 	}
 }
