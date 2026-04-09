@@ -35,7 +35,7 @@ export function getFilePath(path: string) {
 
 export function fetchAPI(
   path: string,
-  params?: Record<string, string>,
+  params?: Record<string, any>,
   method: string = "GET",
 ): Promise<any> {
   if (!path.startsWith("/")) throw new Error(`"${path}" does not start with /`);
@@ -58,7 +58,7 @@ export function fetchAPI(
   const url = new URL(`${HOST}${path}`);
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, value);
+      url.searchParams.append(key, String(value));
     });
   }
 
