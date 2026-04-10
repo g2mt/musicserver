@@ -9,10 +9,13 @@
         "MS_BUILD_LIB": "OFF"
       }
     },
+
     {
-      "name": "lib",
-      "binaryDir": "${sourceDir}/build/lib",
+      "name": "x86_64-android",
+      "binaryDir": "${sourceDir}/build/x86_64-android",
       "cacheVariables": {
+        "MS_STATIC_TAGLIB": "ON",
+        "MS_BUILD_ANDROID": "ON",
         "MS_BUILD_BIN": "OFF",
         "MS_BUILD_LIB": "ON"
       }
