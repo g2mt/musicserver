@@ -338,6 +338,11 @@ public class NativeAudioBridge {
 
 		mediaPlayer.setOnCompletionListener(mp -> {
 			Log.d(TAG, "ended");
+			if (queue != null) {
+				queue.next();
+				updatePlaybackState();
+				return;
+			}
 			updatePlaybackState();
 			fireEvent(instanceId, "ended");
 		});
