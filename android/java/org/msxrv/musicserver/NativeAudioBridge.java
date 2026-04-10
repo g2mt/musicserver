@@ -36,6 +36,7 @@ public class NativeAudioBridge {
 	private Runnable timeUpdateRunnable;
 	private MediaSession mediaSession;
 	private PlaybackState playbackState;
+	private String currentFilePath;
 
 	public MediaSession getMediaSession() {
 		return mediaSession;
@@ -138,28 +139,28 @@ public class NativeAudioBridge {
 
 	// ### Media session
 
-	private void updateMediaSession(String filepath) {
-		if (filepath == null) return;
+	private void updateMediaSession(String filePath) {
+		if (filePath == null) return;
 
+		Log.d(TAG, "updateMediaSession");
 		try {
 			mediaPlayer.reset();
-			mediaPlayer.setDataSource(filepath);
+			mediaPlayer.setDataSource(filePath);
 			mediaPlayer.prepare();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		Log.d(TAG, "updateMediaSession");
+		currentFilePath = filePath;
 
 		NativeBridge bridge = activity.getApp().getNativeBridge();
 
-		TrackUtils.TrackMetadata metadata = TrackUtils.getTrackMetadata(filepath);
+		TrackUtils.TrackMetadata metadata = TrackUtils.getTrackMetadata(filePath);
 		String title  = (metadata != null && metadata.title  != null) ? metadata.title  : "";
 		String artist = (metadata != null && metadata.artist != null) ? metadata.artist : "";
 		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
 
 		String[] outContentType = new String[1];
-		byte[] coverBytes = TrackUtils.getTrackCover(filepath, outContentType);
+		byte[] coverBytes = TrackUtils.getTrackCover(filePath, outContentType);
 		Bitmap coverBitmap = null;
 		if (coverBytes != null && coverBytes.length > 0) {
 			coverBitmap = BitmapFactory.decodeByteArray(coverBytes, 0, coverBytes.length);
