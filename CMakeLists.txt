@@ -9,7 +9,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(GOFLAGS "-v -ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
+set(GOFLAGS -v -ldflags=\"-X musicserver/internal/api.Version=${GIT_SHORT_HASH}\")
 
 add_custom_target(frontend ALL
   COMMAND npm run build

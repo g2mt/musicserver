@@ -1,3 +1,0 @@
-[submodule "internal/taglib/taglib"]
-	path = internal/taglib/taglib
-	url = https://github.com/taglib/taglib
