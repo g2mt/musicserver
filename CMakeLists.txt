@@ -89,8 +89,8 @@ if(MS_BUILD_LIB)
   if(MS_BUILD_ANDROID)
     add_library(musicserverbind SHARED jni/libmusicserver.c)
     set_target_properties(musicserverbind PROPERTIES PREFIX "lib" IMPORT_PREFIX "lib")
-    target_include_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR})
-    target_link_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR})
+    target_include_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR}) # libmusicserver.h
+    target_link_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR}) # libmusicserver.so
     target_link_libraries(musicserverbind PRIVATE musicserver)
     add_dependencies(musicserverbind libmusicserver)
   endif()
