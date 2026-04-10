@@ -3,7 +3,7 @@
   "configurePresets": [
     {
       "name": "bin",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build/bin",
       "cacheVariables": {
         "BUILD_BIN": "ON",
         "BUILD_LIB": "OFF"
@@ -11,7 +11,7 @@
     },
     {
       "name": "lib",
-      "binaryDir": "${sourceDir}/build",
+      "binaryDir": "${sourceDir}/build/lib",
       "cacheVariables": {
         "BUILD_BIN": "OFF",
         "BUILD_LIB": "ON"
