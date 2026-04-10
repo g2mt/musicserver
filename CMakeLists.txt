@@ -15,16 +15,14 @@ option(BUILD_BIN "Build the music server executable" OFF)
 option(BUILD_LIB "Build the music server shared library" OFF)
 
 ### Frontend
-
-if(BUILD_BIN)
-  add_custom_target(frontend
-    COMMAND npm run build
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
-    COMMENT "Building frontend"
-  )
+add_custom_target(frontend
+  COMMAND npm run build
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
+  COMMENT "Building frontend"
+)
 
 ### Music Server executable
-
+if(BUILD_BIN)
   add_custom_target(musicserver ALL
     COMMAND go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -36,11 +34,11 @@ if(BUILD_BIN)
 endif()
 
 ### Music Server shared library
-
 if(BUILD_LIB)
   add_custom_target(libmusicserver ALL
     COMMAND go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    DEPENDS frontend
     COMMENT "Building libmusicserver.so"
   )
 endif()
