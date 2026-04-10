@@ -122,12 +122,16 @@ export function useAudio({
     ended,
     setEnded,
     loadSerializedState: async (state: SerializedAudioState) => {
-      const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
-      if (data && !data.error) {
-        setCurrentTrack(data);
+      if (state.path !== "") {
+        const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
+        if (data && !data.error) {
+          setCurrentTrack(data);
+        } else {
+          console.error(`Invalid loadSerializedState: ${data}`);
+          return;
+        }
       } else {
-        console.error(`Invalid loadSerializedState: ${data}`);
-        return;
+        setCurrentTrack(null);
       }
       setIsPlaying(state.isPlaying);
       setPlayRequestedWithoutTrack(false);
