@@ -26,6 +26,12 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
   a. Using only one query per method
   b. Wrapping the entirety of the method in a transaction
 
+- Only use the newer build constraint syntax:
+
+```go
+//go:build linux
+```
+
 ## Frontend
 
 - React is used for the frontend.

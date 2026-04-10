@@ -1,5 +1,4 @@
 //go:build unix && !android
-// +build unix,!android
 
 package api
 
