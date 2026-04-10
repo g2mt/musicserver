@@ -13,6 +13,27 @@ set(GOFLAGS -v -ldflags=\"-X musicserver/internal/api.Version=${GIT_SHORT_HASH}\
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
+option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
+
+if(MS_STATIC_TAGLIB)
+  include(ExternalProject)
+  set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
+  ExternalProject_Add(taglib_project
+    GIT_REPOSITORY https://github.com/taglib/taglib.git
+    CMAKE_ARGS
+      -DBUILD_TESTING=OFF
+      -DCMAKE_BUILD_TYPE=MinSizeRel
+      -DCMAKE_INSTALL_PREFIX=${TAGLIB_INSTALL_DIR}
+      -DWITH_ZLIB=OFF
+  )
+  set(GO_ENV PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig)
+  set(TAGLIB_DEP taglib_project)
+else()
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(TAGLIB REQUIRED taglib)
+  set(GO_ENV "")
+  set(TAGLIB_DEP "")
+endif()
 
 ### Frontend
 add_custom_target(frontend
@@ -24,9 +45,9 @@ add_custom_target(frontend
 ### Music Server executable
 if(MS_BUILD_BIN)
   add_custom_target(musicserver ALL
-    COMMAND go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
+    COMMAND ${CMAKE_COMMAND} -E env ${GO_ENV} go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend
+    DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building musicserver"
   )
 
@@ -36,9 +57,9 @@ endif()
 ### Music Server shared library
 if(MS_BUILD_LIB)
   add_custom_target(libmusicserver ALL
-    COMMAND go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
+    COMMAND ${CMAKE_COMMAND} -E env ${GO_ENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend
+    DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building libmusicserver.so"
   )
 endif()
