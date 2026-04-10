@@ -16,30 +16,30 @@ declare global {
 
 // Receives the MessagePort from the Android side and routes events to the
 // active NativeAudio instance.
-function setupNativeAudioMessagePort() {
-  function onMessage(e: MessageEvent) {
-    if (e.data !== "_audio_port") return;
-    console.log("Received audio port");
-    const port = e.ports[0];
-    port.onmessage = (ev: MessageEvent) => {
-      const { instanceId, event } = JSON.parse(ev.data) as {
-        instanceId: number;
-        event: string;
-      };
-      const instance = NativeAudio.instance;
-      if (instance && instance.instanceId === instanceId) {
-        instance.dispatchEvent(new Event(event));
-      }
-    };
-    port.start();
-    window.removeEventListener("message", onMessage);
+function onNativeMessagePort(e: MessageEvent) {
+  if (e.data !== "_audio_port") return;
+  if (NativeAudio.messagePort !== null) {
+    NativeAudio.messagePort.close();
   }
-  window.addEventListener("message", onMessage);
+  console.log("Received audio port");
+  const port = NativeAudio.messagePort = e.ports[0];
+  port.onmessage = (ev: MessageEvent) => {
+    const { instanceId, event } = JSON.parse(ev.data) as {
+      instanceId: number;
+      event: string;
+    };
+    const instance = NativeAudio.instance;
+    if (instance && instance.instanceId === instanceId) {
+      instance.dispatchEvent(new Event(event));
+    }
+  };
+  port.start();
 }
 
 class NativeAudio extends EventTarget {
   static instance: NativeAudio | null = null;
   static bridge = window._native_audio_bridge!;
+  static messagePort: MessagePort | null = null;
 
   instanceId: number;
   private _volume: number = 1;
@@ -104,7 +104,7 @@ export const useAbsoluteAudioPath = window._native_audio_bridge ? true : false;
 
 export const apiAudio = (() => {
   if (window._native_audio_bridge) {
-    setupNativeAudioMessagePort();
+    window.addEventListener("message", onNativeMessagePort);
     return NativeAudio;
   } else {
     return Audio;

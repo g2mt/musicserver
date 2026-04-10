@@ -31,9 +31,6 @@ public class NativeAudioBridge {
 	private MediaPlayer mediaPlayer;
 
 	private WebMessagePort messagePort;
-	public void setMessagePort(WebMessagePort port) {
-		this.messagePort = port;
-	}
 
 	private final Handler mainHandler = new Handler(Looper.getMainLooper());
 	private Runnable timeUpdateRunnable;
@@ -303,16 +300,16 @@ public class NativeAudioBridge {
 	// Called by NativeAudio constructor. Returns the instance ID.
 	@JavascriptInterface
 	public int createInstance() {
-		if (currentInstanceId == 0) {
-			mainHandler.post(() -> {
-				WebMessagePort[] channel = webView.createWebMessageChannel();
-				setMessagePort(channel[0]);
-				webView.postWebMessage(
-					new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
-					android.net.Uri.parse("*")
-				);
-			});
-		}
+		mainHandler.post(() -> {
+			WebMessagePort[] channel = webView.createWebMessageChannel();
+			if (messagePort != null)
+				messagePort.close();
+			messagePort = channel[0];
+			webView.postWebMessage(
+				new WebMessage("_audio_port", new WebMessagePort[]{channel[1]}),
+				android.net.Uri.parse("*")
+			);
+		});
 
 		currentInstanceId++;
 
@@ -398,6 +395,7 @@ public class NativeAudioBridge {
 	public void setCurrentTime(int instanceId, float time) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.seekTo((int)(time * 1000));
+		updatePlaybackState();
 	}
 
 	@JavascriptInterface
@@ -441,8 +439,6 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public String loadAudioState() {
 		JSONObject result = new JSONObject();
-		JSONObject audioObj = new JSONObject();
-		JSONObject queueObj = new JSONObject();
 
 		// Audio state
 		String path = null;
@@ -459,11 +455,16 @@ public class NativeAudioBridge {
 					relativePath = path;
 				}
 			}
+
+			JSONObject audioObj = new JSONObject();
 			audioObj.put("path", relativePath);
 			audioObj.put("isPlaying", mediaPlayer != null && mediaPlayer.isPlaying());
 			audioObj.put("progress", mediaPlayer != null ? mediaPlayer.getCurrentPosition() / 1000f : 0f);
 			audioObj.put("duration", mediaPlayer != null ? mediaPlayer.getDuration() / 1000f : 0f);
+
+			JSONObject queueObj = new JSONObject();
 			queueObj.put("index", queue != null ? queue.index : null);
+
 			result.put("audio", audioObj);
 			result.put("queue", queueObj);
 		} catch (JSONException e) {
