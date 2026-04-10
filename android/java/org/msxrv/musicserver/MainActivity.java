@@ -173,6 +173,8 @@ public class MainActivity extends Activity {
 	private void detachWebView() {
 		WebView webView = getApp().getWebView();
 		if (webView == null) return;
+
+		// After evaluation, the JS side will call NativeAudioBridge's saveTrackQueue
 		webView.evaluateJavascript("window._requestSaveTrackQueue()", null);
 
 		ViewGroup parent = (ViewGroup) webView.getParent();

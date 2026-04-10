@@ -389,6 +389,8 @@ public class NativeAudioBridge {
 
 	@JavascriptInterface
 	public void saveTrackQueue(String serialized) {
+		if (this.queue != null)
+			throw new RuntimeException("queue should be null");
 		try {
 			JSONObject obj = new JSONObject(serialized);
 			JSONArray pathsArr = obj.getJSONArray("paths");
