@@ -2,21 +2,25 @@
   "version": 3,
   "configurePresets": [
     {
-      "name": "default",
+      "name": "bin",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "lib",
       "binaryDir": "${sourceDir}/build"
     }
   ],
   "buildPresets": [
     {
       "name": "bin",
-      "configurePreset": "default",
+      "configurePreset": "bin",
       "targets": [
         "musicserver"
       ]
     },
     {
       "name": "lib",
-      "configurePreset": "default",
+      "configurePreset": "lib",
       "targets": [
         "libmusicserver"
       ]
