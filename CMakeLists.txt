@@ -21,7 +21,8 @@ option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
 if(MS_STATIC_TAGLIB)
   set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
   ExternalProject_Add(taglib_project
-    GIT_REPOSITORY https://github.com/taglib/taglib.git
+    URL https://github.com/taglib/taglib/releases/download/v2.2.1/taglib-2.2.1.tar.gz
+    URL_HASH SHA256=7e76b5299dcef427c486bffe455098470c8da91cf3ccb9ea804893df57389b5e
     CMAKE_ARGS
       -DBUILD_TESTING=OFF
       -DCMAKE_BUILD_TYPE=MinSizeRel
