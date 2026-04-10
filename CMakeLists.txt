@@ -17,6 +17,17 @@ set(GOFLAGS -v -ldflags=\"-X musicserver/internal/api.Version=${GIT_SHORT_HASH}\
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
 option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
+option(MS_BUILD_ANDROID "Build for Android" OFF)
+
+if(MS_BUILD_ANDROID)
+  if(NOT DEFINED ENV{CC} OR NOT DEFINED ENV{CXX})
+    message(FATAL_ERROR "CC and CXX environment variables must be set when MS_BUILD_ANDROID is ON")
+  endif()
+  set(TAGLIB_CMAKE_ARGS
+    -DCMAKE_C_COMPILER=$ENV{CC}
+    -DCMAKE_CXX_COMPILER=$ENV{CXX}
+  )
+endif()
 
 if(MS_STATIC_TAGLIB)
   set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
@@ -28,6 +39,7 @@ if(MS_STATIC_TAGLIB)
       -DCMAKE_BUILD_TYPE=MinSizeRel
       -DCMAKE_INSTALL_PREFIX=${TAGLIB_INSTALL_DIR}
       -DWITH_ZLIB=OFF
+      ${TAGLIB_CMAKE_ARGS}
   )
   set(GO_ENV PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig)
   set(TAGLIB_DEP taglib_project)
