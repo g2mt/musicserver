@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
 					String[] outContentType = new String[1];
 					byte[] data = TrackUtils.getTrackCover(filepath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
-					Log.d("[msxrv] cover", "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
+					Log.d(TAG, "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
 					return new WebResourceResponse(
 						mimeType,
 						"binary",
@@ -208,7 +208,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void requestAllPermissions() {
-		Log.d("[msxrv]", "requestAllPermissions");
+		Log.d(TAG, "requestAllPermissions");
 		requestPermissions(
 			new String[]{android.Manifest.permission.MANAGE_EXTERNAL_STORAGE},
 			0);
