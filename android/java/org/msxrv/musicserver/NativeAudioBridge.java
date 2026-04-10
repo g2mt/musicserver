@@ -352,13 +352,15 @@ public class NativeAudioBridge {
 
 		if (src.startsWith("file://")) {
 			src = src.substring("file://".length());
-			src = Paths.get(src).normalize().toString();
-			if (src.startsWith("/")) {
-				if (!src.startsWith(activity.getMusicDir())) {
+			java.nio.file.Path path = Paths.get(src).normalize();
+			if (path.isAbsolute()) {
+				if (!path.startsWith(activity.getMusicDir())) {
 					src = null;
+				} else {
+					src = path.toString();
 				}
 			} else {
-				src = activity.getMusicDir() + "/" + src;
+				src = activity.getMusicDir().resolve(path).toString();
 			}
 			if (src != null) {
 				Log.d(TAG, "resolved src=" + src);
@@ -447,7 +449,7 @@ public class NativeAudioBridge {
 			String relativePath = "";
 			if (path != null) {
 				try {
-					relativePath = Paths.get(activity.getMusicDir()).relativize(Paths.get(path)).toString();
+					relativePath = activity.getMusicDir().relativize(Paths.get(path)).toString();
 				} catch (Exception e) {
 					relativePath = path;
 				}
