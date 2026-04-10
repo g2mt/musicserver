@@ -3,27 +3,19 @@
   "configurePresets": [
     {
       "name": "bin",
-      "binaryDir": "${sourceDir}/build"
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "BUILD_BIN": "ON",
+        "BUILD_LIB": "OFF"
+      }
     },
     {
       "name": "lib",
-      "binaryDir": "${sourceDir}/build"
-    }
-  ],
-  "buildPresets": [
-    {
-      "name": "bin",
-      "configurePreset": "bin",
-      "targets": [
-        "musicserver"
-      ]
-    },
-    {
-      "name": "lib",
-      "configurePreset": "lib",
-      "targets": [
-        "libmusicserver"
-      ]
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "BUILD_BIN": "OFF",
+        "BUILD_LIB": "ON"
+      }
     }
   ]
 }
