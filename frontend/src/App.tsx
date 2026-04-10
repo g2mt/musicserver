@@ -227,6 +227,7 @@ export function App() {
     };
   }, [c.as, c.queue]);
 
+  // Auto track queue navigation
   useEffect(() => {
     if (c.as.ended) {
       c.queue.next();

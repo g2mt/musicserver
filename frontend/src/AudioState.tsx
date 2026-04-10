@@ -125,10 +125,14 @@ export function useAudio({
       const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
       if (data && !data.error) {
         setCurrentTrack(data);
+      } else {
+        console.error(`Invalid loadSerializedState: ${data}`);
+        return;
       }
       setProgress(state.progress);
       setDuration(state.duration);
       setIsPlaying(state.isPlaying);
+      setEnded(false);
     },
   };
 }
