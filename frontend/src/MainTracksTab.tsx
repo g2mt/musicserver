@@ -3,6 +3,7 @@ import type { TrackData } from "./TrackData";
 import {
   faChevronLeft,
   faChevronRight,
+  faPlay,
   faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -50,22 +51,51 @@ export function MainTracksTab({
     });
   };
 
-  const handleAddAllToQueue = () => {
+  const handlePlayAll = () => {
     fetchAPI("/track", { ...c.searchQuery, limit: "-1" })
-      .then((data) => {
-        if (data === null || data.length === 0) {
+      .then((tracks) => {
+        if (tracks === null || tracks.length === 0) {
           toast.warn(<>No tracks found</>);
         } else {
           if (c.showOnlyQueueAfterEnqueue) {
             c.setTracksListCollapsed(true);
             c.setQueueCollapsed(false);
           }
-          c.queue.add(data);
+          c.queue.setTracks(tracks);
+          c.queue.setTrackNavigated(true);
+          c.queue.setIndex(0);
+          c.as.setCurrentTrack(tracks[0]);
         }
       })
       .catch((e) => {
         toast.error(<>Error loading tracks: {e.toString()}</>);
       });
+  };
+
+  const handleAddAllToQueue = () => {
+    fetchAPI("/track", { ...c.searchQuery, limit: "-1" })
+      .then((tracks) => {
+        if (tracks === null || tracks.length === 0) {
+          toast.warn(<>No tracks found</>);
+        } else {
+          if (c.showOnlyQueueAfterEnqueue) {
+            c.setTracksListCollapsed(true);
+            c.setQueueCollapsed(false);
+          }
+          c.queue.add(tracks);
+        }
+      })
+      .catch((e) => {
+        toast.error(<>Error loading tracks: {e.toString()}</>);
+      });
+  };
+
+  const handleAddVisibleToQueue = () => {
+    if (c.showOnlyQueueAfterEnqueue) {
+      c.setTracksListCollapsed(true);
+      c.setQueueCollapsed(false);
+    }
+    c.queue.add(tracks);
   };
 
   const controls = (
@@ -106,27 +136,26 @@ export function MainTracksTab({
         </Select>
         <button
           className="btn"
-          onClick={() => {
-            if (c.showOnlyQueueAfterEnqueue) {
-              c.setTracksListCollapsed(true);
-              c.setQueueCollapsed(false);
-            }
-            c.queue.add(tracks);
-          }}
+          onClick={handlePlayAll}
           onContextMenu={(e) => {
             e.preventDefault();
             toggleContextMenu(
               e.currentTarget,
               <>
+                <ContextMenuItem onClick={handleAddVisibleToQueue}>
+                  <FontAwesomeIcon icon={faPlus} />
+                  Add visible to queue
+                </ContextMenuItem>
                 <ContextMenuItem onClick={handleAddAllToQueue}>
+                  <FontAwesomeIcon icon={faPlus} />
                   Add all to queue
                 </ContextMenuItem>
               </>,
             );
           }}
         >
-          <FontAwesomeIcon icon={faPlus} />
-          Add visible to queue
+          <FontAwesomeIcon icon={faPlay} />
+          Play all
         </button>
       </div>
     </div>
