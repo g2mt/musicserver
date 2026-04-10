@@ -9,15 +9,30 @@
         "MS_BUILD_LIB": "OFF"
       }
     },
-
     {
-      "name": "x86_64-android",
-      "binaryDir": "${sourceDir}/build/x86_64-android",
+      "name": "android",
       "cacheVariables": {
         "MS_STATIC_TAGLIB": "ON",
         "MS_BUILD_ANDROID": "ON",
         "MS_BUILD_BIN": "OFF",
         "MS_BUILD_LIB": "ON"
+      }
+    },
+
+    {
+      "name": "x86_64-android",
+      "binaryDir": "${sourceDir}/build/x86_64-android",
+      "inherits": ["android"],
+      "cacheVariables": {
+        "MS_GOARCH": "amd64"
+      }
+    },
+    {
+      "name": "armv7a-android",
+      "binaryDir": "${sourceDir}/build/armv7a-android",
+      "inherits": ["android"],
+      "cacheVariables": {
+        "MS_GOARCH": "arm"
       }
     }
   ]
