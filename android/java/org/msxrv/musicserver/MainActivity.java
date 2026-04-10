@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
 
 		if (getApp().getIsFirstLoaded()) {
 			requestAllPermissions();
-			getApp().setIsFirstLoaded();
+			getApp().unsetIsFirstLoaded();
 		}
 	}
 

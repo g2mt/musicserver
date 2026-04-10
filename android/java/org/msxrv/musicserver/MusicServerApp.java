@@ -25,7 +25,7 @@ public class MusicServerApp extends Application {
 	public boolean getIsFirstLoaded() {
 		return isFirstLoaded.get();
 	}
-	public void setIsFirstLoaded() {
+	public void unsetIsFirstLoaded() {
 		isFirstLoaded.set(false);
 	}
 
