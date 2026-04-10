@@ -28,4 +28,12 @@ add_custom_target(musicserver ALL
   COMMENT "Building musicserver"
 )
 
+### Music Server shared library
+
+add_custom_target(libmusicserver ALL
+  COMMAND go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  COMMENT "Building libmusicserver.so"
+)
+
 install(PROGRAMS ${CMAKE_BINARY_DIR}/musicserver DESTINATION bin)
