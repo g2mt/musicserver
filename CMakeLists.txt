@@ -11,11 +11,15 @@ execute_process(
 
 set(GOFLAGS -v -ldflags=\"-X musicserver/internal/api.Version=${GIT_SHORT_HASH}\")
 
+### Frontend
+
 add_custom_target(frontend ALL
   COMMAND npm run build
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
   COMMENT "Building frontend"
 )
+
+### Music Server executable
 
 add_custom_target(musicserver ALL
   COMMAND go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
