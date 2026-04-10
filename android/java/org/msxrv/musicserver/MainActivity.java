@@ -19,10 +19,13 @@ import android.webkit.WebMessage;
 import android.widget.LinearLayout;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
 	private static final String TAG = "[msxrv] MainActivity";
+	private AtomicBoolean isWebViewReloading = new AtomicBoolean(false);
+
 	static {
 		System.loadLibrary("musicserver");
 		System.loadLibrary("musicserverbind");
@@ -93,6 +96,23 @@ public class MainActivity extends Activity {
 			}
 		});
 		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public boolean onRenderProcessGone(WebView view, android.webkit.RenderProcessGoneDetail detail) {
+				Log.e(TAG, "WebView render process gone, reloading...");
+				isWebViewReloading.set(true);
+				view.reload();
+				return true;
+			}
+
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				super.onPageFinished(view, url);
+				if (isWebViewReloading.compareAndSet(true, false)) {
+					// Ensure state is reloaded after the process was killed and revived
+					view.evaluateJavascript("window._reloadFromSuspend()", null);
+				}
+			}
+
 			@Override
 			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 				String url = request.getUrl().toString();
@@ -167,7 +187,11 @@ public class MainActivity extends Activity {
 			));
 		}
 
-		webView.evaluateJavascript("window._reloadFromSuspend()", null);
+		// If the webview is currently reloading due to a crash/suspend, 
+		// onPageFinished will handle the state restoration.
+		if (!isWebViewReloading.get()) {
+			webView.evaluateJavascript("window._reloadFromSuspend()", null);
+		}
 	}
 
 	// Detaches the shared WebView from this Activity's layout so it can survive in the service
