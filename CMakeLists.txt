@@ -28,6 +28,8 @@ add_custom_target(musicserver ALL
   COMMENT "Building musicserver"
 )
 
+install(PROGRAMS ${CMAKE_BINARY_DIR}/musicserver DESTINATION bin)
+
 ### Music Server shared library
 
 add_custom_target(libmusicserver ALL
@@ -35,5 +37,3 @@ add_custom_target(libmusicserver ALL
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
   COMMENT "Building libmusicserver.so"
 )
-
-install(PROGRAMS ${CMAKE_BINARY_DIR}/musicserver DESTINATION bin)
