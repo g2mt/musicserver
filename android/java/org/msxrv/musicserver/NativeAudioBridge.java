@@ -232,6 +232,30 @@ public class NativeAudioBridge {
 	public static class Queue {
 		public ArrayList<String> paths = new ArrayList<>();
 		public int index = -1;
+
+		public void next() {
+			if (index < paths.size() - 1) {
+				index++;
+				loadTrack();
+			}
+		}
+
+		public void prev() {
+			if (index > 0) {
+				index--;
+				loadTrack();
+			}
+		}
+
+		public void loadTrack() {
+			if (index < 0 || index >= paths.size()) return;
+			String path = paths.get(index);
+			mainHandler.post(() -> {
+				updateMediaSession(path);
+				mediaPlayer.start();
+				updatePlaybackState();
+			});
+		}
 	}
 
 	private Queue queue; // non-null if the main activity (webview) is suspended
