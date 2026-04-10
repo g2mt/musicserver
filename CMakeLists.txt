@@ -87,11 +87,11 @@ if(MS_BUILD_LIB)
   )
 
   if(MS_BUILD_ANDROID)
-    add_custom_target(libmusicserverbind ALL
-      COMMAND $ENV{CC} -fpic -shared -I${CMAKE_BINARY_DIR} -L${CMAKE_BINARY_DIR} -o ${CMAKE_BINARY_DIR}/libmusicserverbind.so ${CMAKE_SOURCE_DIR}/jni/libmusicserver.c -lmusicserver
-      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-      DEPENDS libmusicserver
-      COMMENT "Building libmusicserverbind.so"
-    )
+    add_library(musicserverbind SHARED jni/libmusicserver.c)
+    set_target_properties(musicserverbind PROPERTIES PREFIX "lib" IMPORT_PREFIX "lib")
+    target_include_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR})
+    target_link_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR})
+    target_link_libraries(musicserverbind PRIVATE musicserver)
+    add_dependencies(musicserverbind libmusicserver)
   endif()
 endif()
