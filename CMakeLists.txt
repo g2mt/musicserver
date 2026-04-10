@@ -85,4 +85,8 @@ if(MS_BUILD_LIB)
     DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building libmusicserver.so"
   )
+
+  if(MS_BUILD_ANDROID)
+    # TODO: libmusicserverbind.so
+  endif()
 endif()
