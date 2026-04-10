@@ -129,9 +129,10 @@ export function useAudio({
         console.error(`Invalid loadSerializedState: ${data}`);
         return;
       }
+      setIsPlaying(state.isPlaying);
+      setPlayRequestedWithoutTrack(false);
       setProgress(state.progress);
       setDuration(state.duration);
-      setIsPlaying(state.isPlaying);
       setEnded(false);
     },
   };
