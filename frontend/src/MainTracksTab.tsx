@@ -64,7 +64,7 @@ export function MainTracksTab({
           c.queue.setTracks(tracks);
           c.queue.setTrackNavigated(true);
           c.queue.setIndex(0);
-          c.as.setCurrentTrack(tracks[0]);
+          c.as.setCurrentTrack(tracksToPlay[0]);
         }
       })
       .catch((e) => {
