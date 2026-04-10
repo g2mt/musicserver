@@ -25,6 +25,7 @@ export const AppStateSchema = z.object({
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
   showOnlyQueueAfterEnqueue: z.boolean().default(false),
+  shuffleBeforePlayingAll: z.boolean().default(true),
   searchHistoryLimit: z.number().min(0).max(9999).default(10),
 });
 
