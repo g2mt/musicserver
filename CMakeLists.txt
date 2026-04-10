@@ -11,8 +11,8 @@ execute_process(
 
 set(GOFLAGS -v -ldflags=\"-X musicserver/internal/api.Version=${GIT_SHORT_HASH}\")
 
-option(BUILD_BIN "Build the music server executable" OFF)
-option(BUILD_LIB "Build the music server shared library" OFF)
+option(MS_BUILD_BIN "Build the music server executable" OFF)
+option(MS_BUILD_LIB "Build the music server shared library" OFF)
 
 ### Frontend
 add_custom_target(frontend
@@ -22,7 +22,7 @@ add_custom_target(frontend
 )
 
 ### Music Server executable
-if(BUILD_BIN)
+if(MS_BUILD_BIN)
   add_custom_target(musicserver ALL
     COMMAND go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
@@ -34,7 +34,7 @@ if(BUILD_BIN)
 endif()
 
 ### Music Server shared library
-if(BUILD_LIB)
+if(MS_BUILD_LIB)
   add_custom_target(libmusicserver ALL
     COMMAND go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

@@ -5,16 +5,16 @@
       "name": "bin",
       "binaryDir": "${sourceDir}/build/bin",
       "cacheVariables": {
-        "BUILD_BIN": "ON",
-        "BUILD_LIB": "OFF"
+        "MS_BUILD_BIN": "ON",
+        "MS_BUILD_LIB": "OFF"
       }
     },
     {
       "name": "lib",
       "binaryDir": "${sourceDir}/build/lib",
       "cacheVariables": {
-        "BUILD_BIN": "OFF",
-        "BUILD_LIB": "ON"
+        "MS_BUILD_BIN": "OFF",
+        "MS_BUILD_LIB": "ON"
       }
     }
   ]
