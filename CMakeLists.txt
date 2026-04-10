@@ -19,6 +19,17 @@ option(MS_BUILD_LIB "Build the music server shared library" OFF)
 option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
 option(MS_BUILD_ANDROID "Build for Android" OFF)
 
+set(MS_GOENV "")
+string(APPEND MS_GOENV " CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}")
+if(MS_BUILD_ANDROID)
+  string(APPEND MS_GOENV " CGO_ENABLED=1 GOOS=android")
+
+  if(NOT DEFINED MS_GOARCH)
+    message(FATAL_ERROR "MS_GOARCH must be set")
+  endif()
+  string(APPEND MS_GOENV " GOARCH=${MS_GOARCH}")
+endif()
+
 ### Dep: taglib
 if(MS_STATIC_TAGLIB)
   set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
@@ -33,12 +44,11 @@ if(MS_STATIC_TAGLIB)
       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
   )
-  set(GO_ENV PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig)
+  string(APPEND MS_GOENV " PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig")
   set(TAGLIB_DEP taglib_project)
 else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(TAGLIB REQUIRED taglib)
-  set(GO_ENV "")
   set(TAGLIB_DEP "")
 endif()
 
@@ -60,7 +70,7 @@ endif()
 ### Music Server executable
 if(MS_BUILD_BIN)
   add_custom_target(musicserver ALL
-    COMMAND ${CMAKE_COMMAND} -E env ${GO_ENV} go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
+    COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building musicserver"
@@ -73,7 +83,7 @@ endif()
 if(MS_BUILD_LIB)
   add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h
-    COMMAND ${CMAKE_COMMAND} -E env ${GO_ENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
+    COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building libmusicserver.so and libmusicserver.h"
