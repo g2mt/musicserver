@@ -79,11 +79,16 @@ endif()
 
 ### Music Server shared library
 if(MS_BUILD_LIB)
-  add_custom_target(libmusicserver ALL
+  add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h
     COMMAND ${CMAKE_COMMAND} -E env ${GO_ENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS frontend ${TAGLIB_DEP}
-    COMMENT "Building libmusicserver.so"
+    COMMENT "Building libmusicserver.so and libmusicserver.h"
+  )
+
+  add_custom_target(libmusicserver ALL
+    DEPENDS ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h
   )
 
   if(MS_BUILD_ANDROID)
