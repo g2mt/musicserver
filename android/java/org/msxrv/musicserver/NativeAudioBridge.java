@@ -441,19 +441,13 @@ public class NativeAudioBridge {
 	public String loadAudioState() {
 		JSONObject result = new JSONObject();
 
-		// Audio state
-		String path = null;
-		if (queue != null && queue.index >= 0 && queue.index < queue.paths.size()) {
-			path = queue.paths.get(queue.index);
-		}
-
 		try {
 			String relativePath = "";
-			if (path != null) {
+			if (currentFilePath != null) {
 				try {
-					relativePath = activity.getMusicDir().relativize(Paths.get(path)).toString();
+					relativePath = activity.getMusicDir().relativize(Paths.get(currentFilePath)).toString();
 				} catch (Exception e) {
-					relativePath = path;
+					relativePath = currentFilePath;
 				}
 			}
 
