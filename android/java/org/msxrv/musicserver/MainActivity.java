@@ -116,7 +116,10 @@ public class MainActivity extends Activity {
 		// Start the background service to keep the WebView alive
 		startForegroundService(new Intent(this, WebViewService.class));
 
-		requestAllPermissions();
+		if (getApp().getIsFirstLoaded()) {
+			requestAllPermissions();
+			getApp().setIsFirstLoaded();
+		}
 	}
 
 	@Override

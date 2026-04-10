@@ -21,7 +21,13 @@ public class MusicServerApp extends Application {
 	public static final int NOTIFICATION_ID = 100;
 	private static final String TAG = "[msxrv] MusicServerApp";
 
-	public boolean isFirstLoaded = true;
+	private AtomicBoolean isFirstLoaded = new AtomicBoolean(true);
+	public boolean getIsFirstLoaded() {
+		return isFirstLoaded.get();
+	}
+	public void setIsFirstLoaded() {
+		isFirstLoaded.set(false);
+	}
 
 	private WebView webView;
 	public WebView getWebView() {
