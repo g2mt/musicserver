@@ -34,8 +34,8 @@ public class NativeBridge {
 
 		JSONObject configJson = new JSONObject();
 		try {
-			configJson.put("data_path", activity.getMusicDir());
-			configJson.put("db_dir", activity.getDbDir());
+			configJson.put("data_path", activity.getMusicDir().toString());
+			configJson.put("db_dir", activity.getDbDir().toString());
 			configJson.put("cache_db_enabled", false);
 		} catch (JSONException e) {
 			throw new NativeBridgeException("Failed to create config JSON: " + e.toString());
@@ -300,7 +300,7 @@ public class NativeBridge {
 	@JavascriptInterface
 	public void scanTracks(String path, boolean force) {
 		Toast.makeText(activity, "Scan tracks started...", Toast.LENGTH_SHORT).show();
-		String musicDir = ((MainActivity) activity).getMusicDir();
+		String musicDir = ((MainActivity) activity).getMusicDir().toString();
 		Intent intent = new Intent(activity, ScanTracksService.class);
 		intent.putExtra(ScanTracksService.EXTRA_MUSIC_DIR, musicDir);
 		intent.putExtra(ScanTracksService.EXTRA_SCAN_PATH, path);

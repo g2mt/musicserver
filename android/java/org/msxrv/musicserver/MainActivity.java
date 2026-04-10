@@ -17,6 +17,7 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebMessage;
 import android.widget.LinearLayout;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -27,13 +28,13 @@ public class MainActivity extends Activity {
 		System.loadLibrary("musicserverbind");
 	}
 
-	private String musicDir;
-	public String getMusicDir() {
+	private Path musicDir;
+	public Path getMusicDir() {
 		return musicDir;
 	}
 
-	private String dbDir;
-	public String getDbDir() {
+	private Path dbDir;
+	public Path getDbDir() {
 		return dbDir;
 	}
 
@@ -57,11 +58,11 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		musicDir = android.os.Environment.getExternalStoragePublicDirectory(
-			android.os.Environment.DIRECTORY_MUSIC).getAbsolutePath();
+			android.os.Environment.DIRECTORY_MUSIC).toPath().toAbsolutePath();
 		Log.e(TAG, "Setting musicDir = " + musicDir);
 
 		dbDir = getExternalFilesDir(
-			android.os.Environment.DIRECTORY_DOCUMENTS).getAbsolutePath();
+			android.os.Environment.DIRECTORY_DOCUMENTS).toPath().toAbsolutePath();
 		Log.e(TAG, "Setting dbDir = " + dbDir);
 
 		// Finish initializing bridges now that we have an Activity context for paths
