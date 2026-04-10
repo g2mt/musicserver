@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { TrackQueue } from "./TrackQueue";
 
 import "./TrackList.css";
+import { shuffled } from "./utils";
 
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
@@ -56,7 +57,8 @@ export function useTrackList({
     }
   }, [trackScrollChanged.current, trackRefs.current[trackScrolled]]);
 
-  useEffect(() => { // Only scroll the queue
+  useEffect(() => {
+    // Only scroll the queue
     if (canUnqueue && queue?.trackNavigated && queue.index !== null) {
       scrollToTrack(queue.index);
       queue.setTrackNavigated(false);
@@ -136,14 +138,7 @@ export function useTrackList({
           </button>
           <button
             className="btn"
-            onClick={() => {
-              const shuffled = [...tracks];
-              for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-              }
-              queue!.setTracks(shuffled);
-            }}
+            onClick={() => queue!.setTracks(shuffled(tracks))}
           >
             <FontAwesomeIcon icon={faShuffle} />
             Shuffle queue
