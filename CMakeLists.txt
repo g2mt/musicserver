@@ -3,6 +3,9 @@ project(musicserver)
 
 find_package(Git REQUIRED)
 
+include(ExternalProject)
+set(FETCHCONTENT_QUIET FALSE)
+
 execute_process(
   COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
   OUTPUT_VARIABLE GIT_SHORT_HASH
@@ -16,7 +19,6 @@ option(MS_BUILD_LIB "Build the music server shared library" OFF)
 option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
 
 if(MS_STATIC_TAGLIB)
-  include(ExternalProject)
   set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
   ExternalProject_Add(taglib_project
     GIT_REPOSITORY https://github.com/taglib/taglib.git
@@ -36,11 +38,19 @@ else()
 endif()
 
 ### Frontend
-add_custom_target(frontend
-  COMMAND npm run build
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
-  COMMENT "Building frontend"
-)
+if(MS_BUILD_ANDROID)
+  add_custom_target(frontend
+    COMMAND npm run build
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
+    COMMENT "Building frontend"
+  )
+else()
+  add_custom_target(frontend
+    COMMAND npm run build-android
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
+    COMMENT "Building frontend"
+  )
+endif()
 
 ### Music Server executable
 if(MS_BUILD_BIN)
