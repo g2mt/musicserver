@@ -208,6 +208,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void requestAllPermissions() {
+		Log.d("[msxrv]", "requestAllPermissions");
 		requestPermissions(
 			new String[]{android.Manifest.permission.MANAGE_EXTERNAL_STORAGE},
 			0);
