@@ -42,20 +42,12 @@ add_custom_command(
 
 set(NATIVE_LIB_STAMPS "")
 foreach(ARCH ${TARGET_ARCHS})
-  if(ARCH STREQUAL "aarch64")
-    set(APK_ARCH "arm64-v8a")
-  elseif(ARCH STREQUAL "armv7a")
-    set(APK_ARCH "armeabi-v7a")
-  elseif(ARCH STREQUAL "x86_64")
-    set(APK_ARCH "x86_64")
-  endif()
-
   set(STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/build/${ARCH}_native.stamp)
   add_custom_command(
     OUTPUT ${STAMP_FILE}
     COMMAND ${CMAKE_COMMAND} --preset ${ARCH}-android -S ${CMAKE_CURRENT_SOURCE_DIR}/..
     COMMAND ${CMAKE_COMMAND} --build --preset ${ARCH}-android
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/../build/${ARCH}-android --prefix ${CMAKE_CURRENT_BINARY_DIR}/lib/${APK_ARCH}
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/../build/${ARCH}-android --prefix ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP_FILE}
     COMMENT "Building and installing native libraries for ${ARCH}"
   )

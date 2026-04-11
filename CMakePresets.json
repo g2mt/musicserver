@@ -25,7 +25,8 @@
       "inherits": ["android"],
       "cacheVariables": {
         "MS_GOARCH": "amd64",
-        "MS_SYSROOT_TRIPLET": "x86_64-linux-android"
+        "MS_SYSROOT_TRIPLET": "x86_64-linux-android",
+        "MS_APKARCH": "x86_64"
       }
     },
     {
@@ -34,7 +35,8 @@
       "inherits": ["android"],
       "cacheVariables": {
         "MS_GOARCH": "arm",
-        "MS_SYSROOT_TRIPLET": "arm-linux-androideabi"
+        "MS_SYSROOT_TRIPLET": "arm-linux-androideabi",
+        "MS_APKARCH": "armeabi-v7a"
       }
     },
     {
@@ -43,7 +45,8 @@
       "inherits": ["android"],
       "cacheVariables": {
         "MS_GOARCH": "arm64",
-        "MS_SYSROOT_TRIPLET": "aarch64-linux-android"
+        "MS_SYSROOT_TRIPLET": "aarch64-linux-android",
+        "MS_APKARCH": "arm64-v8a"
       }
     }
   ]
