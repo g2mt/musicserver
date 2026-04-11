@@ -71,11 +71,11 @@ endforeach()
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
   COMMAND ${AN_BUILD_TOOLS}/aapt2 compile 
-    --dir res 
+    --dir ${CMAKE_CURRENT_SOURCE_DIR}/res 
     -o ${CMAKE_CURRENT_BINARY_DIR}/res.zip
   COMMAND ${AN_BUILD_TOOLS}/aapt2 link ${CMAKE_CURRENT_BINARY_DIR}/res.zip
     -I ${AN_PLATFORM}/android.jar
-    --manifest AndroidManifest.xml
+    --manifest ${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml
     --java ${CMAKE_CURRENT_BINARY_DIR}/gen
     -o ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
   DEPENDS AndroidManifest.xml
