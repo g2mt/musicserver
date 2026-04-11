@@ -3,11 +3,15 @@ foreach(FILE ${CLASS_FILES})
   list(APPEND ABS_CLASS_FILES "${CLASS_DIR}/${FILE}")
 endforeach()
 
-message(STATUS "Running: ${AN_BUILD_TOOLS}/d8 ${ABS_CLASS_FILES} --lib ${AN_PLATFORM}/android.jar --output ${OUTPUT_DIR}")
+set(D8_CMD
+  "${AN_BUILD_TOOLS}/d8"
+  ${ABS_CLASS_FILES}
+  --lib "${AN_PLATFORM}/android.jar"
+  --output "${OUTPUT_DIR}"
+)
+
+message(STATUS "Running: ${D8_CMD}")
 execute_process(
-  COMMAND "${AN_BUILD_TOOLS}/d8"
-    ${ABS_CLASS_FILES}
-    --lib "${AN_PLATFORM}/android.jar"
-    --output "${OUTPUT_DIR}"
+  COMMAND ${D8_CMD}
   COMMAND_ERROR_IS_FATAL ANY
 )
