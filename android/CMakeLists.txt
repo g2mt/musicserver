@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20)
 project(musicserver_android)
 
+set(MS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 set(PKG_NAME "org.msxrv.musicserver")
 string(REPLACE "." "/" PKG_PATH ${PKG_NAME})
 
@@ -45,9 +47,9 @@ foreach(ARCH ${TARGET_ARCHS})
   set(STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/build/${ARCH}_native.stamp)
   add_custom_command(
     OUTPUT ${STAMP_FILE}
-    COMMAND ${CMAKE_COMMAND} --preset ${ARCH}-android -S ${CMAKE_CURRENT_SOURCE_DIR}/..
+    COMMAND ${CMAKE_COMMAND} --preset ${ARCH}-android -S ${MS_DIR}
     COMMAND ${CMAKE_COMMAND} --build --preset ${ARCH}-android
-    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_CURRENT_SOURCE_DIR}/../build/${ARCH}-android --prefix ${CMAKE_CURRENT_BINARY_DIR}/lib
+    COMMAND ${CMAKE_COMMAND} --install ${MS_DIR}/build/${ARCH}-android --prefix ${CMAKE_CURRENT_BINARY_DIR}/lib
     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP_FILE}
     COMMENT "Building and installing native libraries for ${ARCH}"
   )
