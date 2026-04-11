@@ -12,13 +12,10 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(GOFLAGS "")
-list(APPEND GOFLAGS "-v")
-list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
+option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
-option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
 option(MS_BUILD_ANDROID "Build for Android" OFF)
 option(MS_USE_CCACHE "Use ccache if available" ON)
 option(MS_INSTALL_SHARED "Install shared libraries" OFF)
@@ -30,6 +27,10 @@ if(MS_USE_CCACHE)
     set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
   endif()
 endif()
+
+set(GOFLAGS "")
+list(APPEND GOFLAGS "-v")
+list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
 
 set(MS_GOENV "")
 list(APPEND MS_GOENV "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}")
