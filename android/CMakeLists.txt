@@ -19,7 +19,7 @@ set(AN_SDK_VER "33.0.2" CACHE STRING "Android SDK version")
 set(AN_NDK_VER "27.3.13750724" CACHE STRING "Android NDK version")
 set(AN_JAVA_VER "11" CACHE STRING "Java version")
 
-### Prefixes
+### Computed build tool locations
 
 if($ENV{ANDROID_HOME} STREQUAL "")
   message(FATAL_ERROR "ANDROID_HOME environment variable must be set")
