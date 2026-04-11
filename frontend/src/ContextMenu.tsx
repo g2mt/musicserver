@@ -31,15 +31,19 @@ export function ContextMenuItem({
   icon,
   children,
   disabled,
+  highlighted,
 }: {
   onClick?: () => boolean | void;
   icon?: IconDefinition;
   children: React.ReactNode;
   disabled?: boolean;
+  highlighted?: boolean;
 }) {
   return (
     <div
-      className={`menu-item ${disabled ? "disabled" : ""}`}
+      className={`menu-item
+        ${disabled ? "disabled" : ""}
+        ${highlighted ? "highlighted" : ""}`}
       onClick={() => {
         if (!onClick) {
           setMenuState?.(null);
