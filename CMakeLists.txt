@@ -12,7 +12,9 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-set(GOFLAGS -v -ldflags=\"-X musicserver/internal/api.Version=${GIT_SHORT_HASH}\")
+set(GOFLAGS "")
+list(APPEND GOFLAGS "-v")
+list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
@@ -29,14 +31,14 @@ if(MS_USE_CCACHE)
 endif()
 
 set(MS_GOENV "")
-string(APPEND MS_GOENV " CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER}")
+list(APPEND MS_GOENV "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}")
 if(MS_BUILD_ANDROID)
-  string(APPEND MS_GOENV " CGO_ENABLED=1 GOOS=android")
+  list(APPEND MS_GOENV "CGO_ENABLED=1" "GOOS=android")
 
   if(NOT DEFINED MS_GOARCH)
     message(FATAL_ERROR "MS_GOARCH must be set")
   endif()
-  string(APPEND MS_GOENV " GOARCH=${MS_GOARCH}")
+  list(APPEND MS_GOENV "GOARCH=${MS_GOARCH}")
 endif()
 
 ### Dep: taglib
@@ -55,7 +57,7 @@ if(MS_STATIC_TAGLIB)
       -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
       -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
   )
-  string(APPEND MS_GOENV " PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig")
+  list(APPEND MS_GOENV "PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig")
   set(TAGLIB_DEP taglib_project)
 else()
   find_package(PkgConfig REQUIRED)
@@ -66,13 +68,13 @@ endif()
 ### Frontend
 if(MS_BUILD_ANDROID)
   add_custom_target(frontend
-    COMMAND npm run build
+    COMMAND npm run build-android
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
     COMMENT "Building frontend"
   )
 else()
   add_custom_target(frontend
-    COMMAND npm run build-android
+    COMMAND npm run build
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
     COMMENT "Building frontend"
   )
@@ -85,6 +87,7 @@ if(MS_BUILD_BIN)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building musicserver"
+    VERBATIM
   )
 
   install(PROGRAMS ${CMAKE_BINARY_DIR}/musicserver DESTINATION bin)
@@ -98,6 +101,7 @@ if(MS_BUILD_LIB)
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS frontend ${TAGLIB_DEP}
     COMMENT "Building libmusicserver.so and libmusicserver.h"
+    VERBATIM
   )
 
   add_custom_target(libmusicserver ALL
