@@ -4,7 +4,7 @@ project(musicserver_android)
 set(PKG_NAME "org.msxrv.musicserver")
 string(REPLACE "." "/" PKG_PATH ${PKG_NAME})
 
-set(AN_TARGET "" CACHE STRING "Android target architecture (aarch64, armv7a, x86_64, or empty for all targets)")
+set(AN_TARGET "" CACHE STRING "List of Android target architectures (aarch64, armv7a, x86_64, or empty for all targets)")
 
 ### Android versions
 
