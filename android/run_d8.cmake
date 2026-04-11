@@ -10,7 +10,9 @@ set(D8_CMD
   --output "${OUTPUT_DIR}"
 )
 
-message(STATUS "Running: ${D8_CMD}")
+list(JOIN D8_CMD " " D8_CMD_STR)
+message(STATUS "Running: ${D8_CMD_STR}")
+
 execute_process(
   COMMAND ${D8_CMD}
   COMMAND_ERROR_IS_FATAL ANY
