@@ -67,19 +67,38 @@ else()
 endif()
 
 ### Frontend
+file(GLOB_RECURSE FRONTEND_SOURCES
+  "frontend/public/*"
+  "frontend/src/*"
+)
+list(APPEND FRONTEND_SOURCES
+  "frontend/index.html"
+  "frontend/package-lock.json"
+  "frontend/package.json"
+  "frontend/vite-common.config.ts"
+)
+
 if(MS_BUILD_ANDROID)
-  add_custom_target(frontend
-    COMMAND npm run build-android
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
-    COMMENT "Building frontend"
-  )
+  set(FRONTEND_CONFIG "frontend/vite-android.config.ts")
+  set(FRONTEND_COMMAND npm run build-android)
 else()
-  add_custom_target(frontend
-    COMMAND npm run build
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
-    COMMENT "Building frontend"
-  )
+  set(FRONTEND_CONFIG "frontend/vite.config.ts")
+  set(FRONTEND_COMMAND npm run build)
 endif()
+
+set(FRONTEND_STAMP "${CMAKE_BINARY_DIR}/frontend.stamp")
+
+add_custom_command(
+  OUTPUT ${FRONTEND_STAMP}
+  COMMAND ${FRONTEND_COMMAND}
+  COMMAND ${CMAKE_COMMAND} -E touch ${FRONTEND_STAMP}
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
+  DEPENDS ${FRONTEND_SOURCES} ${FRONTEND_CONFIG}
+  COMMENT "Building frontend"
+  VERBATIM
+)
+
+add_custom_target(frontend DEPENDS ${FRONTEND_STAMP})
 
 ### Music Server executable
 if(MS_BUILD_BIN)
