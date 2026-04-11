@@ -117,11 +117,12 @@ if(MS_BUILD_LIB)
     target_link_libraries(musicserverbind PRIVATE musicserver)
     add_dependencies(musicserverbind libmusicserver)
 
+    install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)
     install(TARGETS musicserverbind DESTINATION lib)
+  else()
+    install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)
+    install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.h DESTINATION include)
   endif()
-
-  install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)
-  install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.h DESTINATION include)
 endif()
 
 ### Related libraries
