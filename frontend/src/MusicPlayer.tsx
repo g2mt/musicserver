@@ -7,6 +7,8 @@ import {
   faVolumeXmark,
   faBackwardStep,
   faForwardStep,
+  faRepeat,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { getTrackCover, Track } from "./Track";
 import { useWindowWidth, COLLAPSE_AT_WIDTH } from "./responsive";
@@ -92,6 +94,24 @@ export function MusicPlayer() {
               </ContextMenuItem>
             )}
             <ContextMenuItem disabled={true}>Repeat...</ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => c.queue.setRepeat("track")}
+              icon={faRepeat}
+            >
+              Track
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => c.queue.setRepeat("queue")}
+              icon={faRepeat}
+            >
+              Queue
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => c.queue.setRepeat(null)}
+              icon={faXmark}
+            >
+              No repeat
+            </ContextMenuItem>
           </>,
         );
       }}
@@ -150,6 +170,30 @@ export function MusicPlayer() {
           >
             <FontAwesomeIcon
               icon={c.muted || c.volume === 0 ? faVolumeXmark : faVolumeHigh}
+            />
+          </button>
+          <button
+            className="icon-btn"
+            onClick={() => {
+              const next =
+                c.queue.repeat === null
+                  ? "queue"
+                  : c.queue.repeat === "queue"
+                    ? "track"
+                    : null;
+              c.queue.setRepeat(next);
+            }}
+            title={
+              c.queue.repeat === "track"
+                ? "Repeat track"
+                : c.queue.repeat === "queue"
+                  ? "Repeat queue"
+                  : "Repeat off"
+            }
+          >
+            <FontAwesomeIcon
+              icon={faRepeat}
+              style={{ opacity: c.queue.repeat ? 1 : 0.5 }}
             />
           </button>
         </div>
