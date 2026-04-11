@@ -19,3 +19,6 @@ if(NOT DEFINED ANDROID_HOME)
 endif()
 
 set(AN_BUILD_TOOLS ${ANDROID_HOME}/build-tools/${AN_SDK_VER})
+
+### Build rules
+
