@@ -64,7 +64,7 @@ foreach(ARCH ${TARGET_ARCHS})
 endforeach()
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java build/resource.apk
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
   COMMAND ${AN_BUILD_TOOLS}/aapt2 compile 
     --dir res 
     -o ${CMAKE_CURRENT_BINARY_DIR}/res.zip
@@ -94,11 +94,11 @@ add_custom_command(
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/resource.apk build/resource_final.apk
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/resource.apk ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk
   COMMAND cd build && zip -u resource_final.apk classes.dex
   COMMAND cd lib && zip -r -u ../${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk .
   COMMAND zip -r -u ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk assets
-  COMMAND "${AN_BUILD_TOOLS}/zipalign" -f 4 ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk build/${PKG_NAME}.unsigned.apk
+  COMMAND "${AN_BUILD_TOOLS}/zipalign" -f 4 ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
   COMMAND "${AN_BUILD_TOOLS}/apksigner" sign 
     --ks ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
     --ks-key-alias androidkey 
@@ -106,7 +106,7 @@ add_custom_command(
     --key-pass pass:android 
     --out ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
     ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk build/classes.dex build/keystore.jks ${NATIVE_LIB_STAMPS}
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk ${CMAKE_CURRENT_BINARY_DIR}/classes.dex ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks ${NATIVE_LIB_STAMPS}
   COMMENT "Packaging APK"
 )
 
