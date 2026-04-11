@@ -116,4 +116,11 @@ if(MS_BUILD_LIB)
     target_link_libraries(musicserverbind PRIVATE musicserver)
     add_dependencies(musicserverbind libmusicserver)
   endif()
+
+  # TODO: install libmusicserver, musicserverbind to library
+endif()
+
+### Related libraries
+if(NOT MS_SYSROOT STREQUAL "")
+  # TODO: install "${MS_SYSROOT}/usr/lib/arm-linux-android/libc++_shared.so" to library prefix
 endif()
