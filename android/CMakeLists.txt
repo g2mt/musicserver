@@ -53,10 +53,22 @@ add_custom_command(
 set(NATIVE_LIB_STAMPS "")
 foreach(ARCH ${TARGET_ARCHS})
   set(STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${ARCH}_native.stamp)
+
+  set(AN_SDK_EABI "")
+  if(ARCH STREQUAL "armv7a")
+    set(AN_SDK_EABI "eabi")
+  endif()
+
+  set(AN_NDK_BIN ${AN_NDK_PREFIX}/bin)
+  set(AN_NDK_CC ${AN_NDK_BIN}/${ARCH}-linux-android${AN_SDK_EABI}${AN_SDK_VER_MAJOR}-clang)
+  set(AN_NDK_CXX ${AN_NDK_BIN}/${ARCH}-linux-android${AN_SDK_EABI}${AN_SDK_VER_MAJOR}-clang++)
+
   add_custom_command(
     OUTPUT ${STAMP_FILE}
     COMMAND ${CMAKE_COMMAND} 
       --preset ${ARCH}-android
+      -DCMAKE_C_COMPILER=${AN_NDK_CC}
+      -DCMAKE_CXX_COMPILER=${AN_NDK_CXX}
     COMMAND ${CMAKE_COMMAND} 
       --build ${MS_DIR}/build/${ARCH}-android
     COMMAND ${CMAKE_COMMAND} 
