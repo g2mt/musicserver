@@ -18,6 +18,8 @@ endif()
 set(AN_SDK_VER "33.0.2" CACHE STRING "Android SDK version")
 set(AN_NDK_VER "27.3.13750724" CACHE STRING "Android NDK version")
 set(AN_JAVA_VER "11" CACHE STRING "Java version")
+set(AN_JAVA_PREFIX "/usr/lib/jvm/java-${AN_JAVA_VER}-openjdk" CACHE PATH "Path to Java JDK")
+set(AN_JAVAC "${AN_JAVA_PREFIX}/bin/javac" CACHE FILEPATH "Path to javac executable")
 
 ### Computed build tool locations
 
@@ -88,7 +90,7 @@ add_custom_command(
     -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/obj
   COMMAND ${CMAKE_COMMAND} 
     -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/obj
-  COMMAND javac 
+  COMMAND ${AN_JAVAC} 
     --release ${AN_JAVA_VER}
     -classpath ${AN_PLATFORM}/android.jar
     -d ${CMAKE_CURRENT_BINARY_DIR}/obj
