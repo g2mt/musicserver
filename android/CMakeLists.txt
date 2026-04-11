@@ -85,6 +85,8 @@ add_custom_command(
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/classes.dex
   COMMAND ${CMAKE_COMMAND} 
+    -E rm -rf ${CMAKE_CURRENT_BINARY_DIR}/obj
+  COMMAND ${CMAKE_COMMAND} 
     -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/obj
   COMMAND javac 
     --release ${AN_JAVA_VER}
