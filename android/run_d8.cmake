@@ -11,7 +11,7 @@ set(D8_CMD
 )
 
 list(JOIN D8_CMD " " D8_CMD_STR)
-message(STATUS "Running: ${D8_CMD_STR}")
+message(STATUS "${D8_CMD_STR}")
 
 execute_process(
   COMMAND ${D8_CMD}
