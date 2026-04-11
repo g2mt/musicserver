@@ -36,9 +36,15 @@ file(GLOB_RECURSE PKG_SRCS "java/*.java")
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
-  COMMAND keytool -genkeypair -keystore ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks -alias androidkey
-    -validity 10000 -keyalg RSA -keysize 2048
-    -storepass android -keypass android
+  COMMAND keytool 
+    -genkeypair 
+    -keystore ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks 
+    -alias androidkey
+    -validity 10000 
+    -keyalg RSA 
+    -keysize 2048
+    -storepass android 
+    -keypass android
   COMMENT "Generating keystore"
 )
 
@@ -59,7 +65,9 @@ endforeach()
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java build/resource.apk
-  COMMAND ${AN_BUILD_TOOLS}/aapt2 compile --dir res -o ${CMAKE_CURRENT_BINARY_DIR}/res.zip
+  COMMAND ${AN_BUILD_TOOLS}/aapt2 compile 
+    --dir res 
+    -o ${CMAKE_CURRENT_BINARY_DIR}/res.zip
   COMMAND ${AN_BUILD_TOOLS}/aapt2 link ${CMAKE_CURRENT_BINARY_DIR}/res.zip
     -I ${AN_PLATFORM}/android.jar
     --manifest AndroidManifest.xml
@@ -91,9 +99,12 @@ add_custom_command(
   COMMAND cd lib && zip -r -u ../${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk .
   COMMAND zip -r -u ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk assets
   COMMAND "${AN_BUILD_TOOLS}/zipalign" -f 4 ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk build/${PKG_NAME}.unsigned.apk
-  COMMAND "${AN_BUILD_TOOLS}/apksigner" sign --ks ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
-    --ks-key-alias androidkey --ks-pass pass:android
-    --key-pass pass:android --out ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
+  COMMAND "${AN_BUILD_TOOLS}/apksigner" sign 
+    --ks ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
+    --ks-key-alias androidkey 
+    --ks-pass pass:android
+    --key-pass pass:android 
+    --out ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
     ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
   DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk build/classes.dex build/keystore.jks ${NATIVE_LIB_STAMPS}
   COMMENT "Packaging APK"
