@@ -21,22 +21,22 @@ set(AN_JAVA_VER "11" CACHE STRING "Java version")
 
 ### Prefixes
 
-if(NOT DEFINED ANDROID_HOME)
+if($ENV{ANDROID_HOME} STREQUAL "")
   message(FATAL_ERROR "ANDROID_HOME environment variable must be set")
 endif()
 
-set(AN_BUILD_TOOLS ${ANDROID_HOME}/build-tools/${AN_SDK_VER})
+set(AN_BUILD_TOOLS $ENV{ANDROID_HOME}/build-tools/${AN_SDK_VER})
 string(REGEX REPLACE "\\..*" "" AN_SDK_VER_MAJOR ${AN_SDK_VER})
-set(AN_PLATFORM ${ANDROID_HOME}/platforms/android-${AN_SDK_VER_MAJOR})
-set(AN_NDK_PREFIX ${ANDROID_HOME}/ndk/${AN_NDK_VER}/toolchains/llvm/prebuilt/linux-x86_64)
+set(AN_PLATFORM $ENV{ANDROID_HOME}/platforms/android-${AN_SDK_VER_MAJOR})
+set(AN_NDK_PREFIX $ENV{ANDROID_HOME}/ndk/${AN_NDK_VER}/toolchains/llvm/prebuilt/linux-x86_64)
 
 ### Build rules
 
 file(GLOB_RECURSE PKG_SRCS "java/*.java")
 
 add_custom_command(
-  OUTPUT build/keystore.jks
-  COMMAND keytool -genkeypair -keystore build/keystore.jks -alias androidkey
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
+  COMMAND keytool -genkeypair -keystore ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks -alias androidkey
     -validity 10000 -keyalg RSA -keysize 2048
     -storepass android -keypass android
   COMMENT "Generating keystore"
@@ -44,58 +44,59 @@ add_custom_command(
 
 set(NATIVE_LIB_STAMPS "")
 foreach(ARCH ${TARGET_ARCHS})
-  set(STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/build/${ARCH}_native.stamp)
+  set(STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${ARCH}_native.stamp)
   add_custom_command(
     OUTPUT ${STAMP_FILE}
-    COMMAND ${CMAKE_COMMAND} --preset ${ARCH}-android -S ${MS_DIR}
-    COMMAND ${CMAKE_COMMAND} --build --preset ${ARCH}-android
-    COMMAND ${CMAKE_COMMAND} --install ${MS_DIR}/build/${ARCH}-android --prefix ${CMAKE_CURRENT_BINARY_DIR}/lib
+    COMMAND ${CMAKE_COMMAND} --preset ${ARCH}-android
+    COMMAND ${CMAKE_COMMAND} --build ${MS_DIR}/build/${ARCH}-android
+    COMMAND ${CMAKE_COMMAND} --install ${MS_DIR}/build/${ARCH}-android --prefix ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND ${CMAKE_COMMAND} -E touch ${STAMP_FILE}
     COMMENT "Building and installing native libraries for ${ARCH}"
+    WORKING_DIRECTORY ${MS_DIR}
   )
   list(APPEND NATIVE_LIB_STAMPS ${STAMP_FILE})
 endforeach()
 
 add_custom_command(
-  OUTPUT build/gen/${PKG_PATH}/R.java build/resource.apk
-  COMMAND ${AN_BUILD_TOOLS}/aapt2 compile --dir res -o build/res.zip
-  COMMAND ${AN_BUILD_TOOLS}/aapt2 link build/res.zip
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java build/resource.apk
+  COMMAND ${AN_BUILD_TOOLS}/aapt2 compile --dir res -o ${CMAKE_CURRENT_BINARY_DIR}/res.zip
+  COMMAND ${AN_BUILD_TOOLS}/aapt2 link ${CMAKE_CURRENT_BINARY_DIR}/res.zip
     -I ${AN_PLATFORM}/android.jar
     --manifest AndroidManifest.xml
-    --java build/gen
-    -o build/resource.apk
+    --java ${CMAKE_CURRENT_BINARY_DIR}/gen
+    -o ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
   DEPENDS AndroidManifest.xml
   COMMENT "Compiling resources"
 )
 
 add_custom_command(
-  OUTPUT build/classes.dex
-  COMMAND ${CMAKE_COMMAND} -E make_directory build/obj
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/classes.dex
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/obj
   COMMAND javac --release ${AN_JAVA_VER}
     -classpath ${AN_PLATFORM}/android.jar
-    -d build/obj
-    build/gen/${PKG_PATH}/R.java
+    -d ${CMAKE_CURRENT_BINARY_DIR}/obj
+    ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java
     ${PKG_SRCS}
-  COMMAND "${AN_BUILD_TOOLS}/d8" build/obj/${PKG_PATH}/*.class
+  COMMAND "${AN_BUILD_TOOLS}/d8" ${CMAKE_CURRENT_BINARY_DIR}/obj/${PKG_PATH}/*.class
     --lib "${AN_PLATFORM}/android.jar"
-    --output build/
-  DEPENDS build/gen/${PKG_PATH}/R.java ${PKG_SRCS}
+    --output ${CMAKE_CURRENT_BINARY_DIR}/
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/gen/${PKG_PATH}/R.java ${PKG_SRCS}
   COMMENT "Compiling Java code"
 )
 
 add_custom_command(
-  OUTPUT build/${PKG_NAME}.apk
-  COMMAND ${CMAKE_COMMAND} -E copy build/resource.apk build/resource_final.apk
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/resource.apk build/resource_final.apk
   COMMAND cd build && zip -u resource_final.apk classes.dex
-  COMMAND cd lib && zip -r -u ../build/resource_final.apk .
-  COMMAND zip -r -u build/resource_final.apk assets
-  COMMAND "${AN_BUILD_TOOLS}/zipalign" -f 4 build/resource_final.apk build/${PKG_NAME}.unsigned.apk
-  COMMAND "${AN_BUILD_TOOLS}/apksigner" sign --ks build/keystore.jks
+  COMMAND cd lib && zip -r -u ../${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk .
+  COMMAND zip -r -u ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk assets
+  COMMAND "${AN_BUILD_TOOLS}/zipalign" -f 4 ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk build/${PKG_NAME}.unsigned.apk
+  COMMAND "${AN_BUILD_TOOLS}/apksigner" sign --ks ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
     --ks-key-alias androidkey --ks-pass pass:android
-    --key-pass pass:android --out build/${PKG_NAME}.apk
-    build/${PKG_NAME}.unsigned.apk
-  DEPENDS build/resource.apk build/classes.dex build/keystore.jks ${NATIVE_LIB_STAMPS}
+    --key-pass pass:android --out ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
+    ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk build/classes.dex build/keystore.jks ${NATIVE_LIB_STAMPS}
   COMMENT "Packaging APK"
 )
 
-add_custom_target(apk ALL DEPENDS build/${PKG_NAME}.apk)
+add_custom_target(apk ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk)
