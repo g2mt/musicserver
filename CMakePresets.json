@@ -24,7 +24,8 @@
       "binaryDir": "${sourceDir}/build/x86_64-android",
       "inherits": ["android"],
       "cacheVariables": {
-        "MS_GOARCH": "amd64"
+        "MS_GOARCH": "amd64",
+        "MS_SYSROOT_TRIPLET": "x86_64-linux-android"
       }
     },
     {
@@ -32,7 +33,17 @@
       "binaryDir": "${sourceDir}/build/armv7a-android",
       "inherits": ["android"],
       "cacheVariables": {
-        "MS_GOARCH": "arm"
+        "MS_GOARCH": "arm",
+        "MS_SYSROOT_TRIPLET": "arm-linux-androideabi"
+      }
+    },
+    {
+      "name": "aarch64-android",
+      "binaryDir": "${sourceDir}/build/aarch64-android",
+      "inherits": ["android"],
+      "cacheVariables": {
+        "MS_GOARCH": "arm64",
+        "MS_SYSROOT_TRIPLET": "aarch64-linux-android"
       }
     }
   ]

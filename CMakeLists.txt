@@ -21,6 +21,7 @@ option(MS_BUILD_LIB "Build the music server shared library" OFF)
 option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
 option(MS_BUILD_ANDROID "Build for Android" OFF)
 option(MS_USE_CCACHE "Use ccache if available" ON)
+option(MS_INSTALL_SHARED "Install shared libraries" OFF)
 
 if(MS_USE_CCACHE)
   find_program(CCACHE_PROGRAM ccache)
@@ -124,6 +125,9 @@ if(MS_BUILD_LIB)
 endif()
 
 ### Related libraries
-if(NOT MS_SYSROOT STREQUAL "")
+if(MS_INSTALL_SHARED)
+  if(MS_SYSROOT STREQUAL "")
+    message(FATAL_ERROR "MS_SYSROOT must be set")
+  endif()
   install(FILES "${MS_SYSROOT}/usr/lib/arm-linux-android/libc++_shared.so" DESTINATION lib)
 endif()
