@@ -24,6 +24,9 @@ export interface AudioState {
   setDuration: Dispatch<SetStateAction<number>>;
   ended: boolean; // ended signal to request next audio in queue (see App.tsx)
   setEnded: Dispatch<SetStateAction<boolean>>;
+  repeated: boolean; // signal request the current audio again
+  setRepeated: Dispatch<SetStateAction<boolean>>; // should be called with true on repeat
+  loadSerializedState: (state: SerializedAudioState) => Promise<void>;
 }
 
 export function useAudio({
@@ -40,6 +43,7 @@ export function useAudio({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [ended, setEnded] = useState(false);
+  const [repeated, setRepeated] = useState(false);
 
   const audio = useMemo(() => new apiAudio(), []);
 
@@ -66,7 +70,8 @@ export function useAudio({
     setDuration(audio.duration);
     setIsPlaying(true);
     setEnded(false);
-  }, [url]);
+    setRepeated(false);
+  }, [url, repeated]);
 
   useEffect(() => {
     function onTimeUpdate() {
@@ -89,7 +94,7 @@ export function useAudio({
     audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
-  useEffect(() => {
+  useEffect(() => { // auto play or pause based on state
     if (isPlaying) {
       if (url === null) {
         setIsPlaying(false);
@@ -100,7 +105,7 @@ export function useAudio({
     } else {
       audio.pause();
     }
-  }, [isPlaying, url]);
+  }, [isPlaying, url, repeated]);
 
   return {
     currentTrack,
@@ -121,6 +126,8 @@ export function useAudio({
     setDuration,
     ended,
     setEnded,
+    repeated,
+    setRepeated,
     loadSerializedState: async (state: SerializedAudioState) => {
       if (state.path !== "") {
         const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);

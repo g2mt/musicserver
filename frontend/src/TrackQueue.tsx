@@ -90,12 +90,21 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       }
     },
     canNext: () => {
+      if (repeat === "track")
+        return as.currentTrack !== null;
       const nextIndex = (index ?? -1) + 1;
-      return tracks.length > 0 && nextIndex < tracks.length;
+      return tracks.length > 0 && (nextIndex < tracks.length || repeat === "queue");
     },
     next: () => {
       const nextIndex = (index ?? -1) + 1;
-      if (tracks.length > 0 && nextIndex < tracks.length) {
+      if (repeat === "track") {
+        setTrackNavigated(true);
+        as.setRepeated(true);
+      } else if (repeat === "queue" && nextIndex >= tracks.length) {
+        setTrackNavigated(true);
+        setIndex(0);
+        as.setCurrentTrack(tracks[0]);
+      } else if (tracks.length > 0 && nextIndex < tracks.length) {
         setTrackNavigated(true);
         setIndex(nextIndex);
         as.setCurrentTrack(tracks[nextIndex]);

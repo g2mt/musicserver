@@ -91,6 +91,7 @@ export function MusicPlayer() {
                 Backward
               </ContextMenuItem>
             )}
+            <ContextMenuItem disabled={true}>Repeat...</ContextMenuItem>
           </>,
         );
       }}
