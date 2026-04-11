@@ -69,6 +69,7 @@ foreach(ARCH ${TARGET_ARCHS})
       --preset ${ARCH}-android
       -DCMAKE_C_COMPILER=${AN_NDK_CC}
       -DCMAKE_CXX_COMPILER=${AN_NDK_CXX}
+      -DMS_SYSROOT=${AN_NDK_PREFIX}/sysroot
     COMMAND ${CMAKE_COMMAND} 
       --build ${MS_DIR}/build/${ARCH}-android
     COMMAND ${CMAKE_COMMAND} 
@@ -125,9 +126,9 @@ add_custom_command(
     -E copy
     ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
     ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk
-  COMMAND cd build && zip -u resource_final.apk classes.dex
-  COMMAND cd lib && zip -r -u ../${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk .
-  COMMAND zip -r -u ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk assets
+  COMMAND cd ${CMAKE_CURRENT_BINARY_DIR} && zip -u resource_final.apk classes.dex
+  COMMAND cd ${CMAKE_CURRENT_BINARY_DIR} && zip -r -u resource_final.apk lib
+  COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && zip -r -u ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk assets
   COMMAND "${AN_BUILD_TOOLS}/zipalign" 
     -f 4 ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk
     ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk

@@ -15,7 +15,8 @@
         "MS_STATIC_TAGLIB": "ON",
         "MS_BUILD_ANDROID": "ON",
         "MS_BUILD_BIN": "OFF",
-        "MS_BUILD_LIB": "ON"
+        "MS_BUILD_LIB": "ON",
+        "MS_INSTALL_SHARED": "ON"
       }
     },
 
