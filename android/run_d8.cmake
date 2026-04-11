@@ -10,8 +10,10 @@ set(D8_CMD
   --output "${OUTPUT_DIR}"
 )
 
-list(JOIN D8_CMD " " D8_CMD_STR)
-message(STATUS "${D8_CMD_STR}")
+if(VERBOSE)
+  list(JOIN D8_CMD " " D8_CMD_STR)
+  message(STATUS "${D8_CMD_STR}")
+endif()
 
 execute_process(
   COMMAND ${D8_CMD}
