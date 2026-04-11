@@ -5,6 +5,11 @@ set(PKG_NAME "org.msxrv.musicserver")
 string(REPLACE "." "/" PKG_PATH ${PKG_NAME})
 
 set(AN_TARGET "" CACHE STRING "List of Android target architectures (aarch64, armv7a, x86_64, or empty for all targets)")
+if(AN_TARGET STREQUAL "")
+  set(TARGET_ARCHS aarch64 armv7a x86_64)
+else()
+  set(TARGET_ARCHS ${AN_TARGET})
+endif()
 
 ### Android versions
 
@@ -34,12 +39,6 @@ add_custom_command(
     -storepass android -keypass android
   COMMENT "Generating keystore"
 )
-
-if(AN_TARGET STREQUAL "")
-  set(TARGET_ARCHS aarch64 armv7a x86_64)
-else()
-  set(TARGET_ARCHS ${AN_TARGET})
-endif()
 
 set(NATIVE_LIB_DEPS "")
 foreach(ARCH ${TARGET_ARCHS})
