@@ -115,12 +115,15 @@ if(MS_BUILD_LIB)
     target_link_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR}) # libmusicserver.so
     target_link_libraries(musicserverbind PRIVATE musicserver)
     add_dependencies(musicserverbind libmusicserver)
+
+    install(TARGETS musicserverbind DESTINATION lib)
   endif()
 
-  # TODO: install libmusicserver, musicserverbind to library
+  install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)
+  install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.h DESTINATION include)
 endif()
 
 ### Related libraries
 if(NOT MS_SYSROOT STREQUAL "")
-  # TODO: install "${MS_SYSROOT}/usr/lib/arm-linux-android/libc++_shared.so" to library prefix
+  install(FILES "${MS_SYSROOT}/usr/lib/arm-linux-android/libc++_shared.so" DESTINATION lib)
 endif()
