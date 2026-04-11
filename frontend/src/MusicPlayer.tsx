@@ -177,9 +177,9 @@ export function MusicPlayer() {
             onClick={() => {
               const next =
                 c.queue.repeat === null
-                  ? "queue"
-                  : c.queue.repeat === "queue"
-                    ? "track"
+                  ? "track"
+                  : c.queue.repeat === "track"
+                    ? "queue"
                     : null;
               c.queue.setRepeat(next);
             }}
@@ -195,6 +195,11 @@ export function MusicPlayer() {
               icon={faRepeat}
               style={{ opacity: c.queue.repeat ? 1 : 0.5 }}
             />
+            {c.queue.repeat && (
+              <span className="repeat-badge">
+                {c.queue.repeat === "track" ? "Track" : "Queue"}
+              </span>
+            )}
           </button>
         </div>
       </div>
