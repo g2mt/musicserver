@@ -3,6 +3,7 @@ foreach(FILE ${CLASS_FILES})
   list(APPEND ABS_CLASS_FILES "${CLASS_DIR}/${FILE}")
 endforeach()
 
+message(STATUS "Running: ${AN_BUILD_TOOLS}/d8 ${ABS_CLASS_FILES} --lib ${AN_PLATFORM}/android.jar --output ${OUTPUT_DIR}")
 execute_process(
   COMMAND "${AN_BUILD_TOOLS}/d8"
     ${ABS_CLASS_FILES}
