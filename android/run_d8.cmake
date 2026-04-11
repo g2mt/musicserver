@@ -1,12 +1,12 @@
-file(GLOB_RECURSE CLASS_FILES RELATIVE "${CMAKE_ARGV3}" "${CMAKE_ARGV3}/*.class")
+file(GLOB_RECURSE CLASS_FILES RELATIVE "${CLASS_DIR}" "${CLASS_DIR}/*.class")
 foreach(FILE ${CLASS_FILES})
-  list(APPEND ABS_CLASS_FILES "${CMAKE_ARGV3}/${FILE}")
+  list(APPEND ABS_CLASS_FILES "${CLASS_DIR}/${FILE}")
 endforeach()
 
 execute_process(
   COMMAND "${AN_BUILD_TOOLS}/d8"
     ${ABS_CLASS_FILES}
     --lib "${AN_PLATFORM}/android.jar"
-    --output "${CMAKE_ARGV4}"
+    --output "${OUTPUT_DIR}"
   COMMAND_ERROR_IS_FATAL ANY
 )
