@@ -26,6 +26,11 @@ export function SearchSuggestions({
   const windowWidth = useWindowWidth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isFocused, setIsFocused] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [searchInput]);
 
   useEffect(() => {
     const saved = Settings.getItem("searchSuggestions");
@@ -45,13 +50,30 @@ export function SearchSuggestions({
     const onFocus = () => setIsFocused(true);
     const onBlur = () => setIsFocused(false);
 
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!isFocused || filtered.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev + 1) % filtered.length);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+      } else if (e.key === "Enter" && highlightedIndex >= 0) {
+        e.preventDefault();
+        selectSuggestion(filtered[highlightedIndex].q);
+      }
+    };
+
     input.addEventListener("focus", onFocus);
     input.addEventListener("blur", onBlur);
+    input.addEventListener("keydown", onKeyDown);
     return () => {
       input.removeEventListener("focus", onFocus);
       input.removeEventListener("blur", onBlur);
+      input.removeEventListener("keydown", onKeyDown);
     };
-  }, [searchBarRef]);
+  }, [searchBarRef, isFocused, highlightedIndex, filtered]);
 
   // Update history when a search is performed
   useEffect(() => {
@@ -113,11 +135,12 @@ export function SearchSuggestions({
       style={style}
       onMouseDown={(e) => e.preventDefault()}
     >
-      {filtered.map((s) => (
+      {filtered.map((s, index) => (
         <div
           key={s.q}
-          className="menu-item suggestion-item"
+          className={`menu-item suggestion-item ${index === highlightedIndex ? "highlighted" : ""}`}
           onClick={() => selectSuggestion(s.q)}
+          onMouseEnter={() => setHighlightedIndex(index)}
         >
           <FontAwesomeIcon icon={faHistory} className="suggestion-icon" />
           <span className="suggestion-text">{s.q}</span>
