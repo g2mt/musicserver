@@ -96,11 +96,22 @@ export function SearchSuggestions({
 
   const isCollapsed = windowWidth < COLLAPSE_AT_WIDTH;
 
+  let style: React.CSSProperties = {};
+  if (isCollapsed) {
+    style = { top: "var(--search-bar-height)" };
+  } else if (searchBarRef.current) {
+    const rect = searchBarRef.current.getBoundingClientRect();
+    style = {
+      top: rect.bottom,
+      left: rect.left,
+      width: rect.width,
+      transform: "none",
+      maxWidth: "none",
+    };
+  }
+
   return (
-    <div
-      className={`search-suggestions ${isCollapsed ? "collapsed" : ""}`}
-      style={{ top: isCollapsed ? "var(--search-bar-height)" : undefined }}
-    >
+    <div className={`search-suggestions ${isCollapsed ? "collapsed" : ""}`} style={style}>
       {filtered.map((s) => (
         <div
           key={s.q}
