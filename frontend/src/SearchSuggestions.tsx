@@ -43,7 +43,7 @@ export function SearchSuggestions({
     if (!input) return;
 
     const onFocus = () => setIsFocused(true);
-    const onBlur = (e: FocusEvent) => {
+    const onBlur = () => {
       // Delay blur to allow click events on suggestions to fire
       setTimeout(() => setIsFocused(false), 200);
     };
