@@ -11,7 +11,7 @@
   height: 100vh;
 }
 
-.app-layout {
+#app-layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -19,7 +19,7 @@
   padding: 0;
 }
 
-.app-main {
+#app-main {
   background: var(--content-bg);
   display: flex;
   flex-direction: row;
@@ -27,42 +27,19 @@
   overflow: hidden;
 }
 
+#app-top {
+  height: var(--search-bar-height);
+}
+
+#app-bottom {
+  height: var(--music-player-height);
+}
+
 #app-left-side {
   flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-}
-
-.tab-bar {
-  display: flex;
-  border-bottom: 1px solid var(--gray);
-  flex-shrink: 0;
-  justify-content: center;
-
-  .tab-btn {
-    background: none;
-    border: none;
-    font-size: large;
-    padding: var(--s2) var(--s3);
-    color: var(--color-disabled);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-
-    &.active {
-      color: var(--accent-color);
-      border-bottom-color: var(--accent-color);
-    }
-
-    &:hover {
-      color: var(--accent-color);
-      background: var(--shadow);
-    }
-  }
-
-  .tab-separator {
-    flex-grow: 1;
-  }
 }
 
 #app-right-side {

@@ -7,6 +7,7 @@ body {
   background: var(--content-bg);
   color: var(--content-color);
 
+  --search-bar-height: 72px;
   --music-player-height: 100px;
 
   --front-bg: #ffffff;
@@ -196,5 +197,36 @@ a {
       font-style: italic;
       padding: var(--s1) var(--s3);
     }
+  }
+}
+
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--gray);
+  flex-shrink: 0;
+  justify-content: center;
+
+  .tab-btn {
+    background: none;
+    border: none;
+    font-size: large;
+    padding: var(--s2) var(--s3);
+    color: var(--color-disabled);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+
+    &.active {
+      color: var(--accent-color);
+      border-bottom-color: var(--accent-color);
+    }
+
+    &:hover {
+      color: var(--accent-color);
+      background: var(--shadow);
+    }
+  }
+
+  .tab-separator {
+    flex-grow: 1;
   }
 }

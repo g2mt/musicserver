@@ -23,6 +23,7 @@ import { PLAYER_COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import { SearchSuggestions } from "./SearchSuggestions";
 
 declare global {
   interface Window {
@@ -199,6 +200,7 @@ export function App() {
     if (c.oldSearchQuery.current !== null) return; // still being processed
     setSearchInput(c.searchQuery);
   }, [c.searchQuery, c.oldSearchQuery.current]);
+  const searchBarRef = useRef<HTMLInputElement>(null);
 
   // Confirm boxes
   const [confirmBoxes, setConfirmBoxes] = useState<
@@ -375,14 +377,20 @@ export function App() {
         theme="dark"
       />
       <ContextMenu />
-      <div className="app-layout">
-        <div className="search-bar-container">
+      <SearchSuggestions 
+        searchInput={searchInput}
+        setSearchInput={setSearchInput}
+        searchBarRef={searchBarRef}
+      />
+      <div id="app-layout">
+        <div id="app-top">
           <SearchBar
             searchInput={searchInput}
             setSearchInput={setSearchInput}
+            searchBarRef={searchBarRef}
           />
         </div>
-        <div className="app-main" ref={appMain}>
+        <div id="app-main" ref={appMain}>
           <div id="app-left-side" ref={appLeftSide}>
             <div className="tab-bar">
               <button
@@ -451,7 +459,7 @@ export function App() {
             {trackQueue}
           </div>
         </div>
-        <div className="music-player">
+        <div id="app-bottom">
           <MusicPlayer />
         </div>
       </div>
