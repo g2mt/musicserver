@@ -16,16 +16,16 @@ import (
 const WatchDirInterval = 1 * time.Second
 const MaxToleratedLastModifiedDiff = 3
 
-func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err error) {
+func (i *Interface) ScanTracks(requestedPath string, force bool) (addedFiles int, err error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
-	slog.Debug("full scan started", "path", path)
+	slog.Debug("full scan started", "path", requestedPath)
 
 	// Determine base path
-	basePath := i.config.DataPath
-	if path != "" {
-		basePath = filepath.Join(basePath, path)
+	scannedPath := i.config.DataPath
+	if requestedPath != "" {
+		scannedPath = filepath.Join(scannedPath, requestedPath)
 	}
 
 	// Bind progress ticker
@@ -45,7 +45,7 @@ func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err err
 
 	// Count total files for progress tracking
 	totalFiles := int32(0)
-	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
+	err = filepath.WalkDir(scannedPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err err
 	}
 
 	// Scan all files
-	err = filepath.WalkDir(i.config.DataPath, func(path string, d os.DirEntry, err error) error {
+	err = filepath.WalkDir(scannedPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
