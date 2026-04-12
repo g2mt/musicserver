@@ -28,6 +28,10 @@ export function SearchSuggestions({
   const [isFocused, setIsFocused] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
+  const filtered = suggestions.filter((s) =>
+    s.q.toLowerCase().includes(searchInput.toLowerCase()),
+  );
+
   useEffect(() => {
     setHighlightedIndex(-1);
   }, [searchInput]);
@@ -105,13 +109,7 @@ export function SearchSuggestions({
     setIsFocused(false);
   };
 
-  if (!isFocused || suggestions.length === 0) return null;
-
-  const filtered = suggestions.filter((s) =>
-    s.q.toLowerCase().includes(searchInput.toLowerCase()),
-  );
-
-  if (filtered.length === 0) return null;
+  if (!isFocused || filtered.length === 0) return null;
 
   const isCollapsed = windowWidth < COLLAPSE_AT_WIDTH;
 
