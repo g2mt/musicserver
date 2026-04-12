@@ -71,6 +71,11 @@ function SearchBar({
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    c.setSearchQuery((old) => ({ ...old, q: searchInput }));
+  };
+
   const isValidUrl =
     searchInput.startsWith("http://") || searchInput.startsWith("https://");
 
