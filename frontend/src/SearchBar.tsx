@@ -9,6 +9,7 @@ import {
   faSearch,
   faDownload,
   faTimes,
+  faHome,
 } from "@fortawesome/free-solid-svg-icons";
 import { AppContext } from "./AppState";
 import { Track } from "./Track";
@@ -100,7 +101,7 @@ function SearchBar({
             className="clear-btn"
             onClick={() => {
               setSearchInput("");
-              c.setSearchQuery("");
+              c.setSearchQuery((old) => ({ ...old, q: "" }));
             }}
           >
             <FontAwesomeIcon icon={faTimes} />

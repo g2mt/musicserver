@@ -1,4 +1,4 @@
-import { useTrackList } from "./TrackList";
+import { TrackList } from "./TrackList";
 import type { TrackData } from "./TrackData";
 import {
   faChevronLeft,
@@ -13,6 +13,7 @@ import { Select, Option } from "./Select";
 import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
 import { fetchAPI } from "./apiServer";
 import { toast } from "react-toastify";
+import { shuffled } from "./utils";
 
 import "./MainTracksTab.css";
 
@@ -34,11 +35,12 @@ export function MainTracksTab({
 
   const updateQuery = (text: string, searchGroup: string = "after|before") => {
     c.oldSearchQuery.current = c.searchQuery;
-    c.setSearchQuery(
-      c.searchQuery
+    c.setSearchQuery((old) => ({
+      ...old,
+      q: old.q
         .replace(new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`), ` ${text}`)
         .trim(),
-    );
+    }));
     elRef.current?.scrollIntoView({ block: "start" });
   };
 
@@ -52,7 +54,7 @@ export function MainTracksTab({
   };
 
   const handlePlayAll = () => {
-    fetchAPI("/track", { ...c.searchQuery, limit: "-1" })
+    fetchAPI("/track", { q: c.searchQuery.q, limit: "-1" })
       .then((tracks) => {
         if (tracks === null || tracks.length === 0) {
           toast.warn(<>No tracks found</>);
@@ -61,7 +63,10 @@ export function MainTracksTab({
             c.setTracksListCollapsed(true);
             c.setQueueCollapsed(false);
           }
-          c.queue.setTracks(tracks);
+          const tracksToPlay = c.shuffleBeforePlayingAll
+            ? shuffled(tracks)
+            : tracks;
+          c.queue.setTracks(tracksToPlay);
           c.queue.setTrackNavigated(true);
           c.queue.setIndex(0);
           c.as.setCurrentTrack(tracksToPlay[0]);
@@ -73,7 +78,7 @@ export function MainTracksTab({
   };
 
   const handleAddAllToQueue = () => {
-    fetchAPI("/track", { ...c.searchQuery, limit: "-1" })
+    fetchAPI("/track", { q: c.searchQuery.q, limit: "-1" })
       .then((tracks) => {
         if (tracks === null || tracks.length === 0) {
           toast.warn(<>No tracks found</>);

@@ -50,6 +50,20 @@ export function SettingsTab() {
           </label>
         </div>
         <div>
+          <input
+            type="checkbox"
+            id="setting-shuffle-before-playing-all"
+            checked={c.shuffleBeforePlayingAll}
+            onChange={() => {
+              c.setShuffleBeforePlayingAll(!c.shuffleBeforePlayingAll);
+              setUnsaved(true);
+            }}
+          />
+          <label htmlFor="setting-shuffle-before-playing-all">
+            Shuffle before playing all tracks
+          </label>
+        </div>
+        <div>
           <label htmlFor="setting-search-history-limit">
             Search history limit:
           </label>

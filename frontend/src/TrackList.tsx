@@ -1,5 +1,4 @@
 import {
-  useContext,
   useState,
   useEffect,
   useRef,
@@ -8,7 +7,6 @@ import {
 } from "react";
 import { Track } from "./Track";
 import { type TrackData } from "./TrackData";
-import { AppContext } from "./AppState";
 import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { TrackQueue } from "./TrackQueue";
@@ -19,7 +17,7 @@ import { shuffled } from "./utils";
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
 
-export function useTrackList({
+export function TrackList({
   tracks,
   canEnqueue,
   canUnqueue,

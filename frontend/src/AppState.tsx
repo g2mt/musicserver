@@ -21,7 +21,7 @@ export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
-  searchQuery: z.string().default(""),
+  searchQuery: SearchQuerySchema.default({ q: "", limit: 0 }),
   darkMode: z.boolean().default(false),
   showBlurredCover: z.boolean().default(true),
   showOnlyQueueAfterEnqueue: z.boolean().default(false),
@@ -49,6 +49,7 @@ export interface AppState extends AppStateData {
   setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
 
   // config setters
+  setShuffleBeforePlayingAll: Dispatch<SetStateAction<boolean>>;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
 
@@ -95,12 +96,14 @@ export function mergeConfig(dest: AppState) {
       const config = AppStateSchema.parse(parsed);
       if (config.volume !== undefined) dest.setVolume(config.volume);
       if (config.muted !== undefined) dest.setMuted(config.muted);
-      if (config.searchQuery !== "") dest.setSearchQuery(config.searchQuery);
+      if (config.searchQuery !== undefined) dest.setSearchQuery(config.searchQuery);
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined)
         dest.setShowBlurredCover(config.showBlurredCover);
       if (config.showOnlyQueueAfterEnqueue !== undefined)
         dest.setShowOnlyQueueAfterEnqueue(config.showOnlyQueueAfterEnqueue);
+      if (config.shuffleBeforePlayingAll !== undefined)
+        dest.setShuffleBeforePlayingAll(config.shuffleBeforePlayingAll);
       if (config.searchHistoryLimit !== undefined)
         dest.setSearchHistoryLimit(config.searchHistoryLimit);
     } catch (e: any) {
@@ -121,6 +124,7 @@ export function saveConfig(state: AppState) {
     darkMode: state.darkMode,
     showBlurredCover: state.showBlurredCover,
     showOnlyQueueAfterEnqueue: state.showOnlyQueueAfterEnqueue,
+    shuffleBeforePlayingAll: state.shuffleBeforePlayingAll,
     searchHistoryLimit: state.searchHistoryLimit,
   };
   Settings.setItem(CONFIG_KEY, JSON.stringify(config));

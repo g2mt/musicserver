@@ -72,6 +72,8 @@ export function MusicPlayer() {
   return (
     <div
       className={`music-player ${collapsed ? "collapsed" : ""}`}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => {
         e.preventDefault();
         toggleContextMenu(
@@ -97,18 +99,21 @@ export function MusicPlayer() {
             <ContextMenuItem
               onClick={() => c.queue.setRepeat("track")}
               icon={faRepeat}
+              highlighted={c.queue.repeat === "track"}
             >
               Track
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => c.queue.setRepeat("queue")}
               icon={faRepeat}
+              highlighted={c.queue.repeat === "queue"}
             >
               Queue
             </ContextMenuItem>
             <ContextMenuItem
               onClick={() => c.queue.setRepeat(null)}
               icon={faXmark}
+              highlighted={c.queue.repeat === null}
             >
               No repeat
             </ContextMenuItem>
@@ -131,12 +136,14 @@ export function MusicPlayer() {
             className="icon-btn btn-prev-song"
             onClick={c.queue.prev}
             disabled={!c.queue.canPrev()}
+            title="Previous track"
           >
             <FontAwesomeIcon icon={faBackwardStep} />
           </button>
           <button
             className="icon-btn btn-play-pause"
             onClick={() => c.as.setIsPlaying && c.as.setIsPlaying((p) => !p)}
+            title={c.as.isPlaying ? "Pause" : "Play"}
           >
             <FontAwesomeIcon icon={c.as.isPlaying ? faPause : faPlay} />
           </button>
@@ -144,6 +151,7 @@ export function MusicPlayer() {
             className="icon-btn btn-next-song"
             onClick={c.queue.next}
             disabled={!c.queue.canNext()}
+            title="Next track"
           >
             <FontAwesomeIcon icon={faForwardStep} />
           </button>
@@ -173,7 +181,7 @@ export function MusicPlayer() {
             />
           </button>
           <button
-            className="icon-btn"
+            className="icon-btn btn-repeat"
             onClick={() => {
               const next =
                 c.queue.repeat === null

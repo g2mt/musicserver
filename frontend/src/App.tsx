@@ -1,4 +1,4 @@
-import { useTrackList } from "./TrackList";
+import { TrackList } from "./TrackList";
 import { MainTracksTab } from "./MainTracksTab";
 import { SettingsTab } from "./SettingsTab";
 import FileBrowserTab from "./FileBrowserTab";
@@ -259,10 +259,10 @@ export function App() {
 
   // ### UI
   // Search input box text
-  const [searchInput, setSearchInput] = useState<string>(c.searchQuery);
+  const [searchInput, setSearchInput] = useState<string>(c.searchQuery.q);
   useEffect(() => {
     if (c.oldSearchQuery.current !== null) return; // still being processed
-    setSearchInput(c.searchQuery);
+    setSearchInput(c.searchQuery.q);
   }, [c.searchQuery, c.oldSearchQuery.current]);
   const searchBarRef = useRef<HTMLInputElement>(null);
 

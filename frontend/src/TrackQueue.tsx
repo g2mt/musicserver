@@ -29,6 +29,8 @@ export interface TrackQueue {
   canPrev: () => boolean;
   trackNavigated: boolean;
   setTrackNavigated: Dispatch<SetStateAction<boolean>>;
+  repeat: "track" | "queue" | null;
+  setRepeat: Dispatch<SetStateAction<"track" | "queue" | null>>;
   loadSerializedState: (state: SerializedTrackQueue) => void;
 }
 
@@ -36,6 +38,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const [index, setIndex] = useState<number | null>(null);
   const [trackNavigated, setTrackNavigated] = useState(false);
+  const [repeat, setRepeat] = useState<"track" | "queue" | null>(null);
 
   useEffect(() => {
     window._requestSaveTrackQueue = () => {
@@ -116,6 +119,8 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     },
     trackNavigated,
     setTrackNavigated,
+    repeat,
+    setRepeat,
     loadSerializedState: (state: SerializedTrackQueue) => {
       setIndex(state.index);
     },
