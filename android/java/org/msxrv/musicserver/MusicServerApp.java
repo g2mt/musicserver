@@ -15,6 +15,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.os.Handler;
 import android.os.Looper;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MusicServerApp extends Application {
 	private static final String CHANNEL_ID = "musicserver_service";

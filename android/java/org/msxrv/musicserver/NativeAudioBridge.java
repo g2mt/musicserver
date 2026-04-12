@@ -86,10 +86,7 @@ public class NativeAudioBridge {
 			@Override
 			public void onSkipToPrevious() {
 				if (queue != null) {
-					if (queue.index > 0) {
-						queue.index--;
-						loadFromQueue();
-					}
+					queue.prev();
 					return;
 				}
 				wv.evaluateJavascript("window._handleBack()", null);
@@ -98,10 +95,7 @@ public class NativeAudioBridge {
 			@Override
 			public void onSkipToNext() {
 				if (queue != null) {
-					if (queue.index < queue.paths.size() - 1) {
-						queue.index++;
-						loadFromQueue();
-					}
+					queue.next();
 					return;
 				}
 				wv.evaluateJavascript("window._handleForward()", null);
@@ -227,7 +221,7 @@ public class NativeAudioBridge {
 
 	// ### Playback queue
 
-	public static class Queue {
+	private class Queue {
 		public ArrayList<String> paths = new ArrayList<>();
 		public int index = -1;
 
@@ -257,16 +251,6 @@ public class NativeAudioBridge {
 	}
 
 	private Queue queue; // non-null if the main activity (webview) is suspended
-
-	private void loadFromQueue() { // this will be called 
-		if (queue == null || queue.index < 0 || queue.index >= queue.paths.size()) return;
-		String path = queue.paths.get(queue.index);
-		mainHandler.post(() -> {
-			updateMediaSession(path);
-			mediaPlayer.start();
-			updatePlaybackState();
-		});
-	}
 
 	// ### JS utils
 

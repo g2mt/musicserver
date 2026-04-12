@@ -3,6 +3,9 @@ package org.msxrv.musicserver;
 import android.media.MediaMetadataRetriever;
 import android.util.Base64;
 import android.util.Log;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class TrackUtils {
 	private static final String TAG = "[msxrv] TrackUtils";
@@ -38,8 +41,10 @@ public class TrackUtils {
 		try (MediaMetadataRetriever mmr = new MediaMetadataRetriever()) {
 			mmr.setDataSource(filepath);
 			byte[] data = mmr.getEmbeddedPicture();
-			outContentType[0] = "image/jpeg";
-			return data != null ? data : new byte[0];
+			if (data != null && data.length > 0) {
+				outContentType[0] = "image/jpeg";
+				return data;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
