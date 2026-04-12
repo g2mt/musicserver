@@ -1,12 +1,9 @@
 .search-suggestions {
   position: fixed;
-  z-index: 1000;
   background: var(--front-bg);
-  border: 1px solid var(--gray);
   border-top: none;
   box-shadow: 0 4px 6px var(--shadow);
-  width: 100%;
-  max-width: 600px;
+  border-radius: 0 !important;
   left: 50%;
   transform: translateX(-50%);
   max-height: 300px;
@@ -24,12 +21,9 @@
   .suggestion-item {
     display: flex;
     align-items: center;
-    padding: var(--s2) var(--s3);
     cursor: pointer;
 
     .suggestion-icon {
-      color: var(--gray);
-      margin-right: var(--s2);
       font-size: small;
     }
 

@@ -109,7 +109,7 @@ export function SearchSuggestions({
 
   return (
     <div
-      className={`search-suggestions ${isCollapsed ? "collapsed" : ""}`}
+      className={`search-suggestions menu ${isCollapsed ? "collapsed" : ""}`}
       style={style}
       onMouseDown={(e) => e.preventDefault()}
     >
