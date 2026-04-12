@@ -13,14 +13,16 @@ import (
 	"musicserver/internal/taglib"
 )
 
-func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, error) {
+func (i *Interface) GetTracks(search *searchparser.Result, limit int) ([]schema.Track, error) {
 	query := "SELECT id, short_id, name, path, artist, album FROM tracks"
 	args := []interface{}{}
 	whereClauses := []string{}
 
 	var longBeforeId string
 	var err error
-	limit := MaxPageCount
+	if limit <= 0 {
+		limit = MaxPageCount
+	}
 
 	// Apply search filters if search is not nil
 	if search != nil {
@@ -71,15 +73,6 @@ func (i *Interface) GetTracks(search *searchparser.Result) ([]schema.Track, erro
 				path := filepath.Join(i.config.DataPath, op.Value)
 				whereClauses = append(whereClauses, "(path LIKE ?)")
 				args = append(args, path+"%")
-			case "limit":
-				parsedLimit := MaxPageCount
-				if op.Value != "" {
-					parsedLimit, err = strconv.Atoi(op.Value)
-					if err != nil {
-						parsedLimit = MaxPageCount
-					}
-				}
-				limit = parsedLimit
 			}
 		}
 	}
@@ -356,6 +349,13 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	}
 	track.LongID = longID
 
+	fileInfo, err := os.Stat(track.Path)
+	if err != nil {
+		return "", err
+	}
+	ckLastModified := fileInfo.ModTime().Unix()
+	ckSize := fileInfo.Size()
+
 	// Start a single transaction for the entire operation
 	tx, err := i.db.Begin()
 	if err != nil {
@@ -373,8 +373,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	if err == nil {
 		// Track already exists, update it
 		_, err = tx.Exec(
-			"UPDATE tracks SET name = ?, path = ?, artist = ?, album = ? WHERE id = ?",
-			track.Name, track.Path, track.Artist, track.Album, longID,
+			"UPDATE tracks SET name = ?, path = ?, artist = ?, album = ?, ck_last_modified = ?, ck_size = ? WHERE id = ?",
+			track.Name, track.Path, track.Artist, track.Album, ckLastModified, ckSize, longID,
 		)
 		if err != nil {
 			return "", err
@@ -458,8 +458,8 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 
 	// Insert track into tracks table
 	_, err = tx.Exec(
-		"INSERT INTO tracks (id, short_id, name, path, artist, album) VALUES (?, ?, ?, ?, ?, ?)",
-		track.LongID, track.ShortID, track.Name, track.Path, track.Artist, track.Album,
+		"INSERT INTO tracks (id, short_id, name, path, artist, album, ck_last_modified, ck_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+		track.LongID, track.ShortID, track.Name, track.Path, track.Artist, track.Album, ckLastModified, ckSize,
 	)
 	if err != nil {
 		return "", err

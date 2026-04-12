@@ -25,6 +25,7 @@ var embeddedFrontend embed.FS
 func main() {
 	configPath := flag.String("config", "", "path to config file")
 	debug := flag.Bool("debug", false, "enable debug mode")
+	frontendDirFlag := flag.String("frontendDir", "", "custom frontend directory path (debug mode only)")
 	loglevel := flag.String("loglevel", "info", "log level (debug, info, warn, error)")
 
 	path := flag.String("path", "", "path for unix socket call")
@@ -109,7 +110,10 @@ func main() {
 			slog.Error("Error getting working directory", "err", err)
 			os.Exit(1)
 		}
-		frontendDir := filepath.Join(workingPath, "frontend", "dist")
+		frontendDir := *frontendDirFlag
+		if frontendDir == "" {
+			frontendDir = filepath.Join(workingPath, "frontend", "dist")
+		}
 		if info, err := os.Stat(frontendDir); err != nil || !info.IsDir() {
 			slog.Error("Expected path to be a directory", "path", frontendDir)
 			os.Exit(1)

@@ -16,7 +16,7 @@ import (
 const WatchDirInterval = 1 * time.Second
 const MaxToleratedLastModifiedDiff = 3
 
-func (i *Interface) ScanTracks() (addedFiles int, err error) {
+func (i *Interface) ScanTracks(path string, force bool) (addedFiles int, err error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
@@ -203,11 +203,24 @@ eventLoop:
 				continue
 			}
 			slog.Info("WatchDataDir processing written path", "path", absPath)
-			track, err := taglib.LoadTrack(absPath)
-			if err != nil {
-				continue
+
+			info, err := os.Stat(absPath)
+			if err == nil && info.IsDir() {
+				filepath.WalkDir(absPath, func(p string, d os.DirEntry, err error) error {
+					if err == nil && !d.IsDir() {
+						track, err := taglib.LoadTrack(p)
+						if err == nil {
+							i.AddTrack(&track)
+						}
+					}
+					return nil
+				})
+			} else {
+				track, err := taglib.LoadTrack(absPath)
+				if err == nil {
+					i.AddTrack(&track)
+				}
 			}
-			i.AddTrack(&track)
 			ticker.AddValue(1)
 		}
 

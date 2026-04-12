@@ -176,19 +176,19 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 
 	if path == "/track" {
 		if method == "GET" {
-			var search searchparser.Result
+			var search *searchparser.Result
 			limit := 0
 			if limitParam, ok := params["limit"]; ok {
 				limit, _ = strconv.Atoi(limitParam)
 			}
 			if searchParam, ok := params["q"]; ok {
-				search = searchparser.Parse(searchParam)
-				response, err = i.GetTracks(&search)
-			} else {
-				response, err = i.GetTracks(nil)
+				s := searchparser.Parse(searchParam)
+				search = &s
 			}
+			response, err = i.GetTracks(search, limit)
 		} else if method == "POST" {
-			response, err = i.ScanTracks()
+			force := params["force"] == "true"
+			response, err = i.ScanTracks(params["path"], force)
 		} else if method == "DELETE" {
 			success, err := i.ForgetAllTracks()
 			if err != nil {

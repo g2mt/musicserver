@@ -197,7 +197,7 @@ func TestInterface_GetTracks(t *testing.T) {
 		}
 	}
 
-	result, err := iface.GetTracks(nil)
+	result, err := iface.GetTracks(nil, 0)
 	if err != nil {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
@@ -247,7 +247,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 	search1 := &searchparser.Result{
 		Words: []string{"Rock"},
 	}
-	result1, err := iface.GetTracks(search1)
+	result1, err := iface.GetTracks(search1, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
@@ -260,7 +260,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 	search2 := &searchparser.Result{
 		Words: []string{"Jazz"},
 	}
-	result2, err := iface.GetTracks(search2)
+	result2, err := iface.GetTracks(search2, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
@@ -273,7 +273,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 	search3 := &searchparser.Result{
 		Words: []string{"Rock", "Classical"},
 	}
-	result3, err := iface.GetTracks(search3)
+	result3, err := iface.GetTracks(search3, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
@@ -287,7 +287,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		Words:   []string{"Collection"},
 		Negated: []string{"Jazz"},
 	}
-	result4, err := iface.GetTracks(search4)
+	result4, err := iface.GetTracks(search4, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
@@ -303,7 +303,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 	search5 := &searchparser.Result{
 		Operators: []searchparser.Operator{{Key: "album", Value: "Rock"}},
 	}
-	result5, err := iface.GetTracks(search5)
+	result5, err := iface.GetTracks(search5, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
@@ -317,7 +317,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		Words:     []string{"Song"},
 		Operators: []searchparser.Operator{{Key: "album", Value: "Rock"}},
 	}
-	result6, err := iface.GetTracks(search6)
+	result6, err := iface.GetTracks(search6, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
@@ -328,7 +328,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 
 	// Test 7: Search with afterId and search
 	// Get all tracks first to get an afterId
-	allTracks, err := iface.GetTracks(nil)
+	allTracks, err := iface.GetTracks(nil, 0)
 	if err != nil {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
@@ -339,7 +339,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		Words:     []string{"Rock"},
 		Operators: []searchparser.Operator{searchparser.Operator{Key: "after", Value: firstID}},
 	}
-	result7, err := iface.GetTracks(search7)
+	result7, err := iface.GetTracks(search7, 0)
 	if err != nil {
 		t.Fatalf("GetTracks with afterId and search failed: %v", err)
 	}
@@ -348,6 +348,31 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 	// we should get 1 or 0 depending on ordering
 	// This test is mainly to ensure the combination works without error
 	_ = result7
+}
+
+func TestInterface_GetTracksWithLimit(t *testing.T) {
+	iface := setupIface(t)
+	if err := iface.InitDb(); err != nil {
+		t.Fatalf("InitDb failed: %v", err)
+	}
+
+	for i := 0; i < 10; i++ {
+		track := &schema.Track{
+			Name:  fmt.Sprintf("Track %d", i),
+			Path:  fmt.Sprintf("/music/%d.mp3", i),
+			Album: "Album",
+		}
+		iface.AddTrack(track)
+	}
+
+	result, err := iface.GetTracks(nil, 5)
+	if err != nil {
+		t.Fatalf("GetTracks failed: %v", err)
+	}
+
+	if len(result) != 5 {
+		t.Errorf("Expected 5 tracks, got %d", len(result))
+	}
 }
 
 func TestInterface_GetTrackById(t *testing.T) {
