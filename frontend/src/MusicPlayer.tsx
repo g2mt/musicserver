@@ -72,8 +72,6 @@ export function MusicPlayer() {
   return (
     <div
       className={`music-player ${collapsed ? "collapsed" : ""}`}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       onContextMenu={(e) => {
         e.preventDefault();
         toggleContextMenu(
@@ -130,7 +128,10 @@ export function MusicPlayer() {
         value={c.as.progress}
         onChange={(e) => c.as.setProgress(Number(e.target.value))}
       />
-      <div className="player-controls">
+      <div className="player-controls" // Touch only affects controls
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="player-left">
           <button
             className="icon-btn btn-prev-song"
