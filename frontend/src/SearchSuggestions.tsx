@@ -43,10 +43,7 @@ export function SearchSuggestions({
     if (!input) return;
 
     const onFocus = () => setIsFocused(true);
-    const onBlur = () => {
-      // Delay blur to allow click events on suggestions to fire
-      setTimeout(() => setIsFocused(false), 200);
-    };
+    const onBlur = () => setIsFocused(false);
 
     input.addEventListener("focus", onFocus);
     input.addEventListener("blur", onBlur);
@@ -111,7 +108,11 @@ export function SearchSuggestions({
   }
 
   return (
-    <div className={`search-suggestions ${isCollapsed ? "collapsed" : ""}`} style={style}>
+    <div
+      className={`search-suggestions ${isCollapsed ? "collapsed" : ""}`}
+      style={style}
+      onMouseDown={(e) => e.preventDefault()}
+    >
       {filtered.map((s) => (
         <div
           key={s.q}
