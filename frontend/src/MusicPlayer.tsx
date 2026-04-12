@@ -126,6 +126,7 @@ export function MusicPlayer() {
         max={c.as.duration}
         step={0.1}
         value={c.as.progress}
+        title="Scrubber bar"
         onChange={(e) => c.as.setProgress(Number(e.target.value))}
       />
       <div className="player-controls" // Touch only affects controls
@@ -176,6 +177,7 @@ export function MusicPlayer() {
           <button
             className="icon-btn"
             onClick={() => c.setMuted && c.setMuted((m) => !m)}
+            title={c.muted ? "Unmute" : "Mute"}
           >
             <FontAwesomeIcon
               icon={c.muted || c.volume === 0 ? faVolumeXmark : faVolumeHigh}
