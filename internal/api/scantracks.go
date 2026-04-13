@@ -16,7 +16,10 @@ import (
 const WatchDirInterval = 1 * time.Second
 const MaxToleratedLastModifiedDiff = 3
 
-func (i *Interface) ScanTracks(requestedPath string, force bool) (addedFiles int, err error) {
+func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct {
+	Added   int `json:"added"`
+	Removed int `json:"removed"`
+}, err error) {
 	i.scan.mu.Lock()
 	defer i.scan.mu.Unlock()
 
@@ -68,6 +71,7 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (addedFiles int
 		return 0, err
 	}
 
+	addedFiles := 0
 	// Scan all files
 	err = filepath.WalkDir(scannedPath, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -127,9 +131,12 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (addedFiles int
 	slog.Debug("Removed tracks", "n", len(toRemove))
 
 	if err != nil {
-		return 0, err
+		return result, err
 	}
-	return addedFiles, nil
+
+	result.Added = addedFiles
+	result.Removed = len(toRemove)
+	return result, nil
 }
 
 func (i *Interface) WatchDataDir() error {
