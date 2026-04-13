@@ -232,7 +232,7 @@ Returns the metadata of the album, encoded as JSON.
 
 The `name` parameter is expected to be URI encoded.
 
-### GET `/album/by-page/[page]`
+### GET `/album/:by-page/[page]`
 
 Returns a list of albums in the page `[page]`. See `/album` endpoint.
 

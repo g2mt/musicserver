@@ -314,7 +314,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", errors.New("method not allowed")
 		}
 
-		if pageStr, ok := strings.CutPrefix(path, "by-page/"); ok && len(pageStr) > 0 {
+		if pageStr, ok := strings.CutPrefix(path, ":by-page/"); ok && len(pageStr) > 0 {
 			page, err := strconv.Atoi(pageStr)
 			if err != nil {
 				return nil, "", err
