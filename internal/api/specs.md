@@ -166,11 +166,20 @@ If the `limit` parameter is provided, show only this amount of tracks in the lis
 
 Starts the track scanning process in the server. The server will recursively scan the data directory specified in its configuration, or any of its subdirectories. During this time, it will start a progress named `scanTracks` which tracks the number of files being scanned and the number of files remaining.
 
-This endpoint will block until scanning is complete. Returns the number of tracks successfully added.
+This endpoint will block until scanning is complete.
 
 If the `path` parameter is provided, then the server will only scan the specified subpath of the data directory. Otherwise, the entire data directory is scanned.
 
 If the `force` parameter is provided, then the server will force the scan even if the last modified and sizes of the current file match the values in the database.
+
+Returns the result in a JSON object:
+
+```json
+{
+  "added": number of added files,
+  "removed": number of removed files
+}
+```
 
 ### GET `/track/[id]`
 
