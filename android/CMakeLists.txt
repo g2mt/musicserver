@@ -50,10 +50,8 @@ add_custom_command(
   COMMENT "Generating keystore"
 )
 
-set(NATIVE_LIB_STAMPS "")
+set(NATIVE_LIB_TARGETS "")
 foreach(ARCH ${TARGET_ARCHS})
-  set(STAMP_FILE ${CMAKE_CURRENT_BINARY_DIR}/${ARCH}_native.stamp)
-
   set(AN_SDK_EABI "")
   if(ARCH STREQUAL "armv7a")
     set(AN_SDK_EABI "eabi")
@@ -63,8 +61,8 @@ foreach(ARCH ${TARGET_ARCHS})
   set(AN_NDK_CC ${AN_NDK_BIN}/${ARCH}-linux-android${AN_SDK_EABI}${AN_SDK_VER_MAJOR}-clang)
   set(AN_NDK_CXX ${AN_NDK_BIN}/${ARCH}-linux-android${AN_SDK_EABI}${AN_SDK_VER_MAJOR}-clang++)
 
-  add_custom_command(
-    OUTPUT ${STAMP_FILE}
+  add_custom_target(
+    native_${ARCH}
     COMMAND ${CMAKE_COMMAND} 
       --preset ${ARCH}-android
       -DCMAKE_C_COMPILER=${AN_NDK_CC}
@@ -75,12 +73,10 @@ foreach(ARCH ${TARGET_ARCHS})
     COMMAND ${CMAKE_COMMAND} 
       --install ${MS_DIR}/build/${ARCH}-android 
       --prefix ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${CMAKE_COMMAND} 
-      -E touch ${STAMP_FILE}
     COMMENT "Building and installing native libraries for ${ARCH}"
     WORKING_DIRECTORY ${MS_DIR}
   )
-  list(APPEND NATIVE_LIB_STAMPS ${STAMP_FILE})
+  list(APPEND NATIVE_LIB_TARGETS native_${ARCH})
 endforeach()
 
 add_custom_command(
@@ -139,7 +135,7 @@ add_custom_command(
     --key-pass pass:android 
     --out ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
     ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk ${CMAKE_CURRENT_BINARY_DIR}/classes.dex ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks ${NATIVE_LIB_STAMPS}
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk ${CMAKE_CURRENT_BINARY_DIR}/classes.dex ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks ${NATIVE_LIB_TARGETS}
   COMMENT "Packaging APK"
 )
 
