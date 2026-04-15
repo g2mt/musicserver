@@ -37,7 +37,7 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct 
 			panic("Expected old ticker to be nil")
 		}
 	} else {
-		return 0, err
+		return result, err
 	}
 	defer func() {
 		if i.scan.ticker.Swap(nil) == nil {
@@ -59,7 +59,7 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct 
 		return nil
 	})
 	if err != nil {
-		return 0, err
+		return result, err
 	}
 
 	toRemove := make(map[string]struct{})
@@ -68,7 +68,7 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct 
 			toRemove[path] = struct{}{}
 		}
 	} else {
-		return 0, err
+		return result, err
 	}
 
 	addedFiles := 0
