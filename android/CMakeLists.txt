@@ -34,6 +34,18 @@ set(AN_NDK_PREFIX $ENV{ANDROID_HOME}/ndk/${AN_NDK_VER}/toolchains/llvm/prebuilt/
 
 ### Build rules
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR NOT CMAKE_BUILD_TYPE)
+  set(ANDROID_DEBUGGABLE "true")
+else()
+  set(ANDROID_DEBUGGABLE "false")
+endif()
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml.in
+  ${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml
+  @ONLY
+)
+
 file(GLOB_RECURSE PKG_SRCS "java/*.java")
 
 add_custom_command(
@@ -86,10 +98,10 @@ add_custom_command(
     -o ${CMAKE_CURRENT_BINARY_DIR}/res.zip
   COMMAND ${AN_BUILD_TOOLS}/aapt2 link ${CMAKE_CURRENT_BINARY_DIR}/res.zip
     -I ${AN_PLATFORM}/android.jar
-    --manifest ${CMAKE_CURRENT_SOURCE_DIR}/AndroidManifest.xml
+    --manifest ${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml
     --java ${CMAKE_CURRENT_BINARY_DIR}/gen
     -o ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
-  DEPENDS AndroidManifest.xml
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/AndroidManifest.xml
   COMMENT "Compiling resources"
 )
 
