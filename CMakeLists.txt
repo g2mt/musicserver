@@ -106,7 +106,7 @@ if(MS_BUILD_BIN)
   add_custom_target(musicserver ALL
     COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend ${TAGLIB_DEP}
+    DEPENDS frontend ${TAGLIB_DEP} FORCE
     COMMENT "Building musicserver"
     VERBATIM
   )
@@ -117,10 +117,10 @@ endif()
 ### Music Server shared library
 if(MS_BUILD_LIB)
   add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h
+    OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h FORCE
     COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend ${TAGLIB_DEP}
+    DEPENDS frontend ${TAGLIB_DEP} FORCE
     COMMENT "Building libmusicserver.so and libmusicserver.h"
     VERBATIM
   )
@@ -144,6 +144,8 @@ if(MS_BUILD_LIB)
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.h DESTINATION include)
   endif()
 endif()
+
+add_custom_target(FORCE)
 
 ### Related libraries
 if(MS_INSTALL_SHARED)
