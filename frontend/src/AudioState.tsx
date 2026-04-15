@@ -99,6 +99,9 @@ export function useAudio({
   }, [volume, muted]);
 
   useEffect(() => { // auto play or pause based on state
+    if (repeated.current) {
+      repeated.current = false;
+    }
     if (isPlaying) {
       if (url === null) {
         setIsPlaying(false);
@@ -109,7 +112,7 @@ export function useAudio({
     } else {
       audio.pause();
     }
-  }, [isPlaying, url]);
+  }, [isPlaying, url, repeated.current /* triggers when repeated */]);
 
   return {
     currentTrack,

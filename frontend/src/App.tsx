@@ -236,9 +236,9 @@ export function App() {
         c.queue.next();
         c.as.ended.current = false;
       }
-    }, 100);
+    }, 0);
     return () => clearInterval(interval);
-  }, [c.as.ended, c.queue]);
+  }, [c.as.ended.current, c.queue]);
 
   useEffect(() => {
     if (c.as.playRequestedWithoutTrack) {
