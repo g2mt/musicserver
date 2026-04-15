@@ -102,7 +102,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       const nextIndex = (index ?? -1) + 1;
       if (repeat === "track") {
         setTrackNavigated(true);
-        as.setRepeated(true);
+        as.repeated.current = true;
       } else if (repeat === "queue" && nextIndex >= tracks.length) {
         setTrackNavigated(true);
         setIndex(0);

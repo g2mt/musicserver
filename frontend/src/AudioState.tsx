@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import type { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction, RefObject } from "react";
 import type { TrackData } from "./TrackData";
 import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "./apiServer";
@@ -22,10 +22,8 @@ export interface AudioState {
   setProgress: Dispatch<SetStateAction<number>>;
   duration: number;
   setDuration: Dispatch<SetStateAction<number>>;
-  ended: boolean; // ended signal to request next audio in queue (see App.tsx)
-  setEnded: Dispatch<SetStateAction<boolean>>;
-  repeated: boolean; // signal request the current audio again
-  setRepeated: Dispatch<SetStateAction<boolean>>; // should be called with true on repeat
+  ended: RefObject<boolean>; // ended signal to request next audio in queue (see App.tsx)
+  repeated: RefObject<boolean>; // signal request the current audio again
   loadSerializedState: (state: SerializedAudioState) => Promise<void>;
 }
 
@@ -43,8 +41,8 @@ export function useAudio({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const [ended, setEnded] = useState(false);
-  const [repeated, setRepeated] = useState(false);
+  const ended = useRef(false);
+  const repeated = useRef(false);
   const loadedFromSerialization = useRef(false);
 
   const audio = useMemo(() => new apiAudio(), []);
@@ -75,9 +73,9 @@ export function useAudio({
     setProgress(0);
     setDuration(audio.duration);
     setIsPlaying(true);
-    setEnded(false);
-    setRepeated(false);
-  }, [url, repeated, loadedFromSerialization.current]);
+    ended.current = false;
+    repeated.current = false;
+  }, [url, loadedFromSerialization.current]);
 
   useEffect(() => {
     function onTimeUpdate() {
@@ -86,7 +84,7 @@ export function useAudio({
     }
     function onEnded() {
       setProgress(audio.duration);
-      setEnded(true);
+      ended.current = true;
     }
     audio.addEventListener("timeupdate", onTimeUpdate);
     audio.addEventListener("ended", onEnded);
@@ -111,7 +109,7 @@ export function useAudio({
     } else {
       audio.pause();
     }
-  }, [isPlaying, url, repeated]);
+  }, [isPlaying, url]);
 
   return {
     currentTrack,
@@ -131,9 +129,7 @@ export function useAudio({
     duration,
     setDuration,
     ended,
-    setEnded,
     repeated,
-    setRepeated,
     loadSerializedState: async (state: SerializedAudioState) => {
       if (state.path !== "") {
         const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
@@ -152,7 +148,7 @@ export function useAudio({
       setPlayRequestedWithoutTrack(false);
       setProgress(state.progress);
       setDuration(state.duration);
-      setEnded(false);
+      ended.current = false;
     },
   };
 }

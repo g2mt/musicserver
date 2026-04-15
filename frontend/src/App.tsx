@@ -231,10 +231,13 @@ export function App() {
 
   // Auto track queue navigation
   useEffect(() => {
-    if (c.as.ended) {
-      c.queue.next();
-      c.as.setEnded(false);
-    }
+    const interval = setInterval(() => {
+      if (c.as.ended.current) {
+        c.queue.next();
+        c.as.ended.current = false;
+      }
+    }, 100);
+    return () => clearInterval(interval);
   }, [c.as.ended, c.queue]);
 
   useEffect(() => {
