@@ -10,8 +10,9 @@ func (m MigratorV1) Migrate(tx *sql.Tx) error {
 	  key TEXT PRIMARY KEY,
 	  value TEXT NOT NULL
 	);
-	INSERT INTO prefs (key, value) VALUES ('version', '1')
-	ON CONFLICT(key) DO UPDATE SET value = excluded.value;
 	`)
+	if err != nil {
+		err = setVersion(tx, 1)
+	}
 	return err
 }
