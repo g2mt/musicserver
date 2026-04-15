@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { TrackData } from "./TrackData";
 import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
@@ -42,8 +42,10 @@ export function useAudio({
     useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+
   const [ended, setEnded] = useState(false);
   const [repeated, setRepeated] = useState(false);
+  const loadedFromSerialization = useRef(false);
 
   const audio = useMemo(() => new apiAudio(), []);
 
@@ -59,6 +61,10 @@ export function useAudio({
   }, [currentTrack]);
 
   useEffect(() => {
+    if (loadedFromSerialization.current) {
+      loadedFromSerialization.current = false;
+      return;
+    }
     if (!url) {
       setIsPlaying(false);
       return;
@@ -71,7 +77,7 @@ export function useAudio({
     setIsPlaying(true);
     setEnded(false);
     setRepeated(false);
-  }, [url, repeated]);
+  }, [url, repeated, loadedFromSerialization.current]);
 
   useEffect(() => {
     function onTimeUpdate() {
@@ -132,12 +138,14 @@ export function useAudio({
       if (state.path !== "") {
         const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
         if (data && !data.error) {
+          loadedFromSerialization.current = true;
           setCurrentTrack(data);
         } else {
           console.error(`Invalid loadSerializedState: ${data}`);
           return;
         }
       } else {
+        loadedFromSerialization.current = true;
         setCurrentTrack(null);
       }
       setIsPlaying(state.isPlaying);
