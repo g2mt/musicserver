@@ -149,7 +149,7 @@ public class NativeAudioBridge {
 		NativeBridge bridge = activity.getApp().getNativeBridge();
 
 		TrackUtils.TrackMetadata metadata = TrackUtils.getTrackMetadata(filePath);
-		String title  = (metadata != null && metadata.title  != null) ? metadata.title  : "";
+		String title  = (metadata != null && metadata.title  != null && !metadata.title.isEmpty()) ? metadata.title  : Paths.get(filePath).getFileName().toString();
 		String artist = (metadata != null && metadata.artist != null) ? metadata.artist : "";
 		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
 
