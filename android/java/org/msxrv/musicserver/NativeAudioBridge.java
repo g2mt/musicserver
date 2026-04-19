@@ -10,6 +10,7 @@ import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.widget.Toast;
 import android.os.Handler;
 import android.os.Looper;
 import android.webkit.JavascriptInterface;
@@ -143,6 +144,7 @@ public class NativeAudioBridge {
 			mediaPlayer.prepare();
 		} catch (Exception e) {
 			e.printStackTrace();
+			Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
 		currentFilePath = filePath;
 
