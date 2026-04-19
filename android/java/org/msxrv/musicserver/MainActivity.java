@@ -19,6 +19,8 @@ import android.webkit.WebMessage;
 import android.widget.LinearLayout;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
@@ -102,9 +104,16 @@ public class MainActivity extends Activity {
 					byte[] data = TrackUtils.getTrackCover(filepath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
 					Log.d(TAG, "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
+
+					Map<String, String> responseHeaders = new HashMap<>();
+					responseHeaders.put("Access-Control-Allow-Origin", "*");
+
 					return new WebResourceResponse(
 						mimeType,
 						"binary",
+						200,
+						"OK",
+						responseHeaders,
 						new java.io.ByteArrayInputStream(data)
 					);
 				}
