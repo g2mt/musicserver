@@ -25,13 +25,3 @@ func (m MigratorV2) Migrate(tx *sql.Tx) error {
 
 	return nil
 }
-
-func columnExists(tx *sql.Tx, tableName, columnName string) bool {
-	var count int
-	// pragma_table_info is a SQLite specific function to get table schema info
-	err := tx.QueryRow("SELECT count(*) FROM pragma_table_info(?) WHERE name = ?", tableName, columnName).Scan(&count)
-	if err != nil {
-		return false
-	}
-	return count > 0
-}

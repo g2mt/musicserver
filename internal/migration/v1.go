@@ -11,8 +11,5 @@ func (m MigratorV1) Migrate(tx *sql.Tx) error {
 	  value TEXT NOT NULL
 	);
 	`)
-	if err != nil {
-		err = setVersion(tx, 1)
-	}
 	return err
 }
