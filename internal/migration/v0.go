@@ -21,6 +21,10 @@ func (m MigratorV0) Migrate(tx *sql.Tx) error {
 		  short_id TEXT PRIMARY KEY,
 		  long_id TEXT NOT NULL
 		);
+		CREATE TABLE IF NOT EXISTS prefs (
+		  key TEXT PRIMARY KEY,
+		  value TEXT NOT NULL
+		);
 	`)
 	return err
 }
