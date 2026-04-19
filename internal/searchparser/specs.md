@@ -39,6 +39,7 @@ Query result should be a struct with the following fields:
   * `words`: array of strings, contains all `word`, or `quoted` (without the quote characters, and transforming every `quotedEscapeChar` into the unescaped character on the right) parsed from left to right
   * `negated`: array of strings, contains all `negated` parsed, excluding the starting '-' character
   * `operators`: array of (operatorKey, operatorValue) tuples
+  * `negatedOperators`: array of (operatorKey, operatorValue) tuples similar to the `operators` field, but with only negated operators
 
 ## Examples
 
