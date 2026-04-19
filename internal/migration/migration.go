@@ -53,6 +53,9 @@ func Migrate(db *sql.DB) error {
 		if err = Migrators[idx].Migrate(tx); err != nil {
 			return fmt.Errorf("migration v%d failed: %w", idx, err)
 		}
+		if err = setVersion(tx, idx); err != nil {
+			return fmt.Errorf("setting version v%d failed: %w", idx, err)
+		}
 		slog.Debug("Migrated to", "ver", idx)
 	}
 
