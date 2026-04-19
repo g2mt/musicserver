@@ -288,18 +288,14 @@ export function App() {
   };
 
   // Left/right sides
-  [c.leftTab, _setLeftTab] = useState<"tracks" | "settings" | "files">(
+  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
-  c.setLeftTab = (action) => {
-    _setLeftTab((prev) => {
-      const next = typeof action === "function" ? action(prev) : action;
-      if (next !== prev && c.showTracksListOnTabChange) {
-        c.setTracksListCollapsed(false);
-      }
-      return next;
-    });
-  };
+  useEffect(() => {
+    if (c.showTracksListOnTabChange) {
+      c.setTracksListCollapsed(false);
+    }
+  }, [c.leftTab]);
   const appMain = useRef<HTMLDivElement>(null);
   const appLeftSide = useRef<HTMLDivElement>(null);
   const appRightSide = useRef<HTMLDivElement>(null);
