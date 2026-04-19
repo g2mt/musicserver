@@ -28,6 +28,7 @@ export const AppStateSchema = z.object({
   showOnlyQueueAfterEnqueue: z.boolean().default(false),
   shuffleBeforePlayingAll: z.boolean().default(true),
   searchHistoryLimit: z.number().min(0).max(9999).default(10),
+  showTracksListOnTabChange: z.boolean().default(false),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
@@ -52,6 +53,7 @@ export interface AppState extends AppStateData {
 
   // config setters
   setShuffleBeforePlayingAll: Dispatch<SetStateAction<boolean>>;
+  setShowTracksListOnTabChange: Dispatch<SetStateAction<boolean>>;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
 
@@ -108,6 +110,8 @@ export function mergeConfig(dest: AppState) {
         dest.setShuffleBeforePlayingAll(config.shuffleBeforePlayingAll);
       if (config.searchHistoryLimit !== undefined)
         dest.setSearchHistoryLimit(config.searchHistoryLimit);
+      if (config.showTracksListOnTabChange !== undefined)
+        dest.setShowTracksListOnTabChange(config.showTracksListOnTabChange);
     } catch (e: any) {
       toast.error(
         <p>
@@ -128,6 +132,7 @@ export function saveConfig(state: AppState) {
     showOnlyQueueAfterEnqueue: state.showOnlyQueueAfterEnqueue,
     shuffleBeforePlayingAll: state.shuffleBeforePlayingAll,
     searchHistoryLimit: state.searchHistoryLimit,
+    showTracksListOnTabChange: state.showTracksListOnTabChange,
   };
   Settings.setItem(CONFIG_KEY, JSON.stringify(config));
 }

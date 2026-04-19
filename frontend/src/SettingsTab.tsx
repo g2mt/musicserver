@@ -64,6 +64,20 @@ export function SettingsTab() {
           </label>
         </div>
         <div>
+          <input
+            type="checkbox"
+            id="setting-show-tracks-list-on-tab-change"
+            checked={c.showTracksListOnTabChange}
+            onChange={() => {
+              c.setShowTracksListOnTabChange(!c.showTracksListOnTabChange);
+              setUnsaved(true);
+            }}
+          />
+          <label htmlFor="setting-show-tracks-list-on-tab-change">
+            Show tracks list when switching tabs
+          </label>
+        </div>
+        <div>
           <label htmlFor="setting-search-history-limit">
             Search history limit:
           </label>

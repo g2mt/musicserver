@@ -111,6 +111,8 @@ export function App() {
     useState(false);
   [c.shuffleBeforePlayingAll, c.setShuffleBeforePlayingAll] =
     useState(true);
+  [c.showTracksListOnTabChange, c.setShowTracksListOnTabChange] =
+    useState(false);
   [c.searchHistoryLimit, c.setSearchHistoryLimit] = useState(50);
   [c.props, c.setProps] = useState<{ version: string; config: any } | null>(
     null,
@@ -286,9 +288,18 @@ export function App() {
   };
 
   // Left/right sides
-  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
+  [c.leftTab, _setLeftTab] = useState<"tracks" | "settings" | "files">(
     "tracks",
   );
+  c.setLeftTab = (action) => {
+    _setLeftTab((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      if (next !== prev && c.showTracksListOnTabChange) {
+        c.setTracksListCollapsed(false);
+      }
+      return next;
+    });
+  };
   const appMain = useRef<HTMLDivElement>(null);
   const appLeftSide = useRef<HTMLDivElement>(null);
   const appRightSide = useRef<HTMLDivElement>(null);
