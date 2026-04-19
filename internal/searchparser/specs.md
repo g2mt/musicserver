@@ -7,8 +7,8 @@ This document describes a search query language similar to those used by popular
 ```
 root ::= param*
 
-param ::= [ whitespace+ | begin of query ] [ negated | quoted | operator | word]
-whitespace ::= (any whitespace defined by Unicode's White Space property)
+param ::= [ whitespace+ | begin of query ] [ negated | quoted | operator | word ]
+whitespace ::= (any whitespace defined by Unicode's White Space property) 
 
 operator ::= operatorKey ':' operatorValue
 operatorKey ::= operatorKeyChar
@@ -19,7 +19,9 @@ word ::= wordStart wordChar*
 wordStart ::= (any character not a whitespace, and not '-')
 wordChar ::= (any character not a whitespace)
 
-negated ::= '-' wordChar+
+negated ::= negatedOperator | negatedWord
+negatedOperator ::= '-' operator
+negatedWord ::= '-' wordChar+
 
 quoted ::= '"' quotedChar* '"'
 quotedChar ::=
@@ -28,7 +30,7 @@ quotedChar ::=
 quotedEscapeChar ::= '\' (any char)
 ```
 
-When parsing the `param` rule, try to parse the text after the whitespace as a `negated` first. If that fails, try doing the `quoted` rule, then the `operator` rule then the `word` rule.
+The order of the grammar rules in each definition dictates which rule gets executed first. When parsing the `param` rule, try to parse the text after the whitespace as a `negated` first. If that fails, try doing the `quoted` rule, then the `operator` rule, then the `word` rule.
 
 ## Query result
 
@@ -87,4 +89,4 @@ asdf:
 -asdf:asdf
 ```
 
-  - **Negated**: `asdf:asdf`
+  - **Negated**: operator `asdf`: `asdf`
