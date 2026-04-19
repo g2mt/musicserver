@@ -134,10 +134,11 @@ public class NativeAudioBridge {
 
 	// ### Media session
 
-	private void updateMediaSession(String filePath) {
-		if (filePath == null) return;
+	private void updateMediaSession(String encFilePath) {
+		if (encFilePath == null) return;
+		final String filePath = BridgeUtils.decodeURI(encFilePath);
 
-		Log.d(TAG, "updateMediaSession");
+		Log.d(TAG, "updateMediaSession: filePath=" + filePath);
 		try {
 			mediaPlayer.reset();
 			mediaPlayer.setDataSource(filePath);

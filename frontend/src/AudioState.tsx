@@ -52,7 +52,8 @@ export function useAudio({
     // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
     // without adding additional functions, so use the absolute path directly.
     // the path is checked in NativeAudioBridge
-    if (useAbsoluteAudioPath) return `file://${currentTrack.path}`;
+    if (currentTrack.path && useAbsoluteAudioPath)
+      return `file://${encodeURI(currentTrack.path)}`;
     if (currentTrack.id) return getTrackFileFromId(currentTrack.id);
     if (currentTrack.path) return getFilePath(currentTrack.path);
     return null;
