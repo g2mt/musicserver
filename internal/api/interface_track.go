@@ -20,9 +20,6 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) ([]schema.
 
 	var longBeforeId string
 	var err error
-	if limit <= 0 {
-		limit = MaxPageCount
-	}
 
 	// Apply search filters if search is not nil
 	if search != nil {
@@ -84,6 +81,9 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) ([]schema.
 
 	// Ordering
 
+	if limit == 0 {
+		limit = MaxPageCount
+	}
 	if longBeforeId != "" {
 		if limit > 0 {
 			query = "SELECT * FROM (" +
