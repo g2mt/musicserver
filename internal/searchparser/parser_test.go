@@ -15,18 +15,20 @@ func TestParse(t *testing.T) {
 			name:  "simple words",
 			query: "a bc",
 			expected: Result{
-				Words:     []string{"a", "bc"},
-				Negated:   []string{},
-				Operators: []Operator{},
+				Words:           []string{"a", "bc"},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
 			name:  "with negated",
 			query: "a  -x bc",
 			expected: Result{
-				Words:     []string{"a", "bc"},
-				Negated:   []string{"x"},
-				Operators: []Operator{},
+				Words:           []string{"a", "bc"},
+				Negated:         []string{"x"},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
@@ -38,51 +40,59 @@ func TestParse(t *testing.T) {
 				Operators: []Operator{
 					{Key: "asdf", Value: "qwerty"},
 				},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
 			name:  "just dash",
 			query: "-",
 			expected: Result{
-				Words:     []string{"-"},
-				Negated:   []string{},
-				Operators: []Operator{},
+				Words:           []string{"-"},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
 			name:  "operator without value",
 			query: "asdf:",
 			expected: Result{
-				Words:     []string{"asdf:"},
-				Negated:   []string{},
-				Operators: []Operator{},
+				Words:           []string{"asdf:"},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
 			name:  "negated operator",
 			query: "-asdf:asdf",
 			expected: Result{
-				Words:     []string{},
-				Negated:   []string{"asdf:asdf"},
-				Operators: []Operator{},
+				Words:           []string{},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{
+					{Key: "asdf", Value: "asdf"},
+				},
 			},
 		},
 		{
 			name:  "quoted string",
 			query: `"hello world"`,
 			expected: Result{
-				Words:     []string{"hello world"},
-				Negated:   []string{},
-				Operators: []Operator{},
+				Words:           []string{"hello world"},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
 			name:  "escaped quote in quoted string",
 			query: `"hello \"world"`,
 			expected: Result{
-				Words:     []string{"hello \"world"},
-				Negated:   []string{},
-				Operators: []Operator{},
+				Words:           []string{"hello \"world"},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
@@ -94,6 +104,7 @@ func TestParse(t *testing.T) {
 				Operators: []Operator{
 					{Key: "key", Value: "hello world"},
 				},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
@@ -105,15 +116,53 @@ func TestParse(t *testing.T) {
 				Operators: []Operator{
 					{Key: "key", Value: "value"},
 				},
+				NegatedOperators: []Operator{},
 			},
 		},
 		{
 			name:  "negated quoted string",
 			query: `-"hello world" abc`,
 			expected: Result{
-				Words:     []string{"abc"},
-				Negated:   []string{"hello world"},
-				Operators: []Operator{},
+				Words:           []string{"abc"},
+				Negated:         []string{"hello world"},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
+			},
+		},
+		{
+			name:  "mixed query with negated operator",
+			query: `word -negated key:"value" -key2:"val2" "quoted word"`,
+			expected: Result{
+				Words:   []string{"word", "quoted word"},
+				Negated: []string{"negated"},
+				Operators: []Operator{
+					{Key: "key", Value: "value"},
+				},
+				NegatedOperators: []Operator{
+					{Key: "key2", Value: "val2"},
+				},
+			},
+		},
+		{
+			name:  "negated operator with word value",
+			query: `-foo:bar`,
+			expected: Result{
+				Words:           []string{},
+				Negated:         []string{},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{
+					{Key: "foo", Value: "bar"},
+				},
+			},
+		},
+		{
+			name:  "negated operator without value falls back to negated word",
+			query: `-foo:`,
+			expected: Result{
+				Words:           []string{},
+				Negated:         []string{"foo:"},
+				Operators:       []Operator{},
+				NegatedOperators: []Operator{},
 			},
 		},
 	}

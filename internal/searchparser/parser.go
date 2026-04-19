@@ -6,9 +6,10 @@ import (
 )
 
 type Result struct {
-	Words     []string
-	Negated   []string
-	Operators []Operator
+	Words           []string
+	Negated         []string
+	Operators       []Operator
+	NegatedOperators []Operator
 }
 
 type Operator struct {
@@ -18,9 +19,10 @@ type Operator struct {
 
 func Parse(query string) Result {
 	result := Result{
-		Words:     []string{},
-		Negated:   []string{},
-		Operators: []Operator{},
+		Words:           []string{},
+		Negated:         []string{},
+		Operators:       []Operator{},
+		NegatedOperators: []Operator{},
 	}
 
 	i := 0
@@ -35,9 +37,17 @@ func Parse(query string) Result {
 		}
 
 		// Try negated first
-		negated, consumed := parseNegated(query[i:])
+		negatedStr, consumed := parseNegated(query[i:])
 		if consumed > 0 {
-			result.Negated = append(result.Negated, negated)
+			// Check if the negated string is actually an operator
+			// We pass the string content (without the '-') to parseOperator
+			op, opConsumed := parseOperator(negatedStr)
+			// If parseOperator successfully consumes the whole negated string, it's a negated operator
+			if opConsumed > 0 && opConsumed == len(negatedStr) {
+				result.NegatedOperators = append(result.NegatedOperators, op)
+			} else {
+				result.Negated = append(result.Negated, negatedStr)
+			}
 			i += consumed
 			continue
 		}
