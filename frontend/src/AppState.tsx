@@ -18,6 +18,7 @@ export const SearchQuerySchema = z.object({
 
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 
+// Contains serializable options for saving
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
   muted: z.boolean().default(false),
@@ -31,6 +32,7 @@ export const AppStateSchema = z.object({
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
 
+// Full state of the App
 export interface AppState extends AppStateData {
   // audio
   as: AudioState;
