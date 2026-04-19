@@ -35,6 +35,7 @@ body {
   /* Colors */
   --color-disabled: #ddd;
   --color-info: #90ee90;
+  --color-info-text: #000;
   --color-front: var(--color-disabled);
   --color-front-text: #000;
 }
@@ -64,6 +65,7 @@ body.dark-mode {
 
   --color-disabled: #808080;
   --color-info: #2e8b57;
+  --color-info-text: #fff;
   --color-front: #000;
   --color-front-text: #fff;
 
@@ -91,6 +93,11 @@ body.dark-mode {
   border: 1px solid var(--gray);
   margin: var(--s1);
   user-select: none;
+
+  &[disabled] {
+    filter: contrast(50%);
+    cursor: not-allowed;
+  }
 }
 
 .icon-btn {
