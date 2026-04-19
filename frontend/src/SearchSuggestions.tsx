@@ -62,7 +62,9 @@ export function SearchSuggestions({
         setHighlightedIndex((prev) => (prev + 1) % filtered.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        setHighlightedIndex((prev) => (prev - 1 + filtered.length) % filtered.length);
+        setHighlightedIndex(
+          (prev) => (prev - 1 + filtered.length) % filtered.length,
+        );
       } else if (e.key === "Enter" && highlightedIndex >= 0) {
         e.preventDefault();
         selectSuggestion(filtered[highlightedIndex].q);

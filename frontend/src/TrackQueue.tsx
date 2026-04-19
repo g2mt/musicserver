@@ -93,10 +93,11 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       }
     },
     canNext: () => {
-      if (repeat === "track")
-        return as.currentTrack !== null;
+      if (repeat === "track") return as.currentTrack !== null;
       const nextIndex = (index ?? -1) + 1;
-      return tracks.length > 0 && (nextIndex < tracks.length || repeat === "queue");
+      return (
+        tracks.length > 0 && (nextIndex < tracks.length || repeat === "queue")
+      );
     },
     next: () => {
       const nextIndex = (index ?? -1) + 1;

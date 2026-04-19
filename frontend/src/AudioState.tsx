@@ -98,7 +98,8 @@ export function useAudio({
     audio.volume = muted ? 0 : volume;
   }, [volume, muted]);
 
-  useEffect(() => { // auto play or pause based on state
+  useEffect(() => {
+    // auto play or pause based on state
     if (repeated.current) {
       repeated.current = false;
     }

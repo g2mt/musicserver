@@ -100,7 +100,8 @@ export function mergeConfig(dest: AppState) {
       const config = AppStateSchema.parse(parsed);
       if (config.volume !== undefined) dest.setVolume(config.volume);
       if (config.muted !== undefined) dest.setMuted(config.muted);
-      if (config.searchQuery !== undefined) dest.setSearchQuery(config.searchQuery);
+      if (config.searchQuery !== undefined)
+        dest.setSearchQuery(config.searchQuery);
       if (config.darkMode !== undefined) dest.setDarkMode(config.darkMode);
       if (config.showBlurredCover !== undefined)
         dest.setShowBlurredCover(config.showBlurredCover);

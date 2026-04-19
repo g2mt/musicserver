@@ -98,8 +98,7 @@ export function rescanFiles(force: boolean, path?: string): Promise<void> {
         .then((resData) => {
           toast.success(
             <>
-              Scanning complete: <b>{resData.added}</b> added,
-              {" "}
+              Scanning complete: <b>{resData.added}</b> added,{" "}
               <b>{resData.removed}</b> removed
             </>,
           );

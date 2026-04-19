@@ -129,7 +129,8 @@ export function MusicPlayer() {
         title="Scrubber bar"
         onChange={(e) => c.as.setProgress(Number(e.target.value))}
       />
-      <div className="player-controls" // Touch only affects controls
+      <div
+        className="player-controls" // Touch only affects controls
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >

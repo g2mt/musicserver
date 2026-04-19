@@ -22,7 +22,7 @@ function onNativeMessagePort(e: MessageEvent) {
     NativeAudio.messagePort.close();
   }
   console.log("Received audio port");
-  const port = NativeAudio.messagePort = e.ports[0];
+  const port = (NativeAudio.messagePort = e.ports[0]);
   port.onmessage = (ev: MessageEvent) => {
     const { instanceId, event } = JSON.parse(ev.data) as {
       instanceId: number;
