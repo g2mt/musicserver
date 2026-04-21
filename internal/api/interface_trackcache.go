@@ -92,7 +92,7 @@ func (i *Interface) runFlushCoverCache(cacheChan <-chan coverCacheData) {
 			data := cached.data
 			dataLen := len(data)
 			mimeType := cached.mimeType
-			// slog.Debug("Starting to cache image", "path", path, "dataLen", dataLen, "mimeType", mimeType)
+			slog.Debug("Starting to cache image", "path", path, "dataLen", dataLen, "mimeType", mimeType)
 
 			// Begin a transaction for caching
 			tx, err := i.ccacheDb.Begin()
