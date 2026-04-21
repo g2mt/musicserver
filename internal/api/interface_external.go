@@ -60,13 +60,15 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 	var tracks []schema.Track
 	if len(info.Entries) > 0 {
 		for _, entry := range info.Entries {
-			tracks = append(tracks, schema.Track{
+			track := schema.Track{
 				Name:          entry.Title,
 				Artist:        entry.Uploader,
 				Album:         entry.Album,
 				Path:          u,
 				ThumbnailPath: entry.Thumbnail,
-			})
+			}
+			tracks = append(tracks, track)
+			i.exTrackCache.Add(u, track)
 		}
 	} else {
 		track := schema.Track{
@@ -77,7 +79,6 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 			ThumbnailPath: info.Thumbnail,
 		}
 		tracks = append(tracks, track)
-		// Add to cache
 		i.exTrackCache.Add(u, track)
 	}
 
