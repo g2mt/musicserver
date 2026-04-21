@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
 	"musicserver/internal/schema"
 	"musicserver/internal/searchparser"
 	"strings"
