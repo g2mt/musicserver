@@ -37,8 +37,8 @@ func (i *Interface) initCacheDb() error {
 			value INTEGER NOT NULL
 		);
 		INSERT OR IGNORE INTO stats (key, value) VALUES ('size', 0);
-		INSERT OR IGNORE INTO stats (key, value) VALUES ('version', 1);
-	`)
+		INSERT OR IGNORE INTO stats (key, value) VALUES ('version', ?);
+	`, CoverCacheVersion)
 	return err
 }
 
