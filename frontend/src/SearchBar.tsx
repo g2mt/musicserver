@@ -23,17 +23,17 @@ import type { TrackData } from "./TrackData";
 
 import "./SearchBar.css";
 
-async function confirmTrackDownload(c: AppState, url: string) {
-  const encodedUrl = encodeURIComponent(url);
-  let tracks: TrackData[];
-  try {
-    tracks = await fetchAPI(`/track/:external/${encodedUrl}`);
-  } catch (e) {
-    toast.error("Unable to get track data");
-    return;
-  }
+function TrackConfirmBox({
+  url,
+  encodedUrl,
+  tracks,
+}: {
+  url: string;
+  encodedUrl: string;
+  tracks: TrackData[];
+}) {
   const [externalTracksCollapsed, setExternalTracksCollapsed] = useState(false);
-  c.addConfirmBox(
+  return (
     <ConfirmBox
       onAccept={() => {
         toast.info(
@@ -72,7 +72,7 @@ async function confirmTrackDownload(c: AppState, url: string) {
       {!externalTracksCollapsed && (
         <TrackList tracks={tracks} parentElement={{ current: null }} />
       )}
-    </ConfirmBox>,
+    </ConfirmBox>
   );
 }
 
@@ -87,13 +87,26 @@ function SearchBar({
 }) {
   const c = useContext(AppContext)!;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SubmitEvent) => {
     e.preventDefault();
     c.setSearchQuery((old) => ({ ...old, q: searchInput }));
   };
 
   const isValidUrl =
     searchInput.startsWith("http://") || searchInput.startsWith("https://");
+  const confirmTrackDownload = async (c: AppState, url: string) => {
+    const encodedUrl = encodeURIComponent(url);
+    let tracks: TrackData[];
+    try {
+      tracks = await fetchAPI(`/track/:external/${encodedUrl}`);
+    } catch (e) {
+      toast.error("Unable to get track data");
+      return;
+    }
+    c.addConfirmBox(
+      <TrackConfirmBox url={url} encodedUrl={encodedUrl} tracks={tracks} />,
+    );
+  };
 
   return (
     <form className="search-bar" onSubmit={handleSubmit}>
