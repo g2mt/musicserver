@@ -29,8 +29,6 @@ export interface ServerConfig {
     cache_db_enabled: boolean;
     cover_cache_max_bytes: number;
     media_downloader: string;
-    ignore_track_path?: boolean;
-    cache_db_path?: string;
   };
 }
 
