@@ -18,9 +18,22 @@ export const SearchQuerySchema = z.object({
 
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 
+export interface ServerConfigData {
+  http_bind: string;
+  unix_bind_enabled: boolean;
+  unix_bind: string;
+  data_path: string;
+  db_dir: string;
+  cache_db_enabled: boolean;
+  cover_cache_max_bytes: number;
+  media_downloader: string;
+  ignore_track_path?: boolean;
+  cache_db_path?: string;
+}
+
 export interface ServerConfig {
   version: string;
-  config: any;
+  config: ServerConfigData;
 }
 
 // Contains serializable options for saving
