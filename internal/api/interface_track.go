@@ -273,10 +273,10 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 
 	// Check cache first
 	cachedData, mimeType, cErr := func() ([]byte, string, error) {
-		if i.cacheDb == nil {
+		if i.ccacheDb == nil {
 			return nil, "", nil
 		}
-		ctx, err := i.cacheDb.Begin()
+		ctx, err := i.ccacheDb.Begin()
 		if err != nil {
 			return nil, "", err
 		}
@@ -316,9 +316,9 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	}
 
 	// Cache the result if cache db is available
-	if i.cacheDb != nil && data != nil {
+	if i.ccacheDb != nil && data != nil {
 		select {
-		case i.cacheChan <- trackCacheData{
+		case i.ccacheChan <- coverCacheData{
 			path:     path,
 			data:     data,
 			mimeType: mimeType,

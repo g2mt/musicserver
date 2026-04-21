@@ -32,8 +32,8 @@ var Version string
 type Interface struct {
 	db *sql.DB
 
-	cacheDb   *sql.DB // nullable
-	cacheChan chan<- trackCacheData
+	ccacheDb   *sql.DB // nullable
+	ccacheChan chan<- coverCacheData
 
 	config *schema.Config // readonly
 	prog   *progress.Progress
@@ -62,9 +62,6 @@ const MaxPageCount = 50 // default count
 const MaxTrackCacheQueue = 16
 const MaxExTrackCache = 16
 
-const CacheDbPath = "./cache.db"
-const CacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
-
 func defaultLongIdGen(track *schema.Track) string {
 	hash := sha256.Sum256([]byte(track.Name + "\x00" + track.Album))
 	return hex.EncodeToString(hash[:])
@@ -85,31 +82,31 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		return nil, err
 	}
 
-	var cacheDb *sql.DB
-	var cacheChan chan trackCacheData
+	var ccacheDb *sql.DB
+	var ccacheChan chan coverCacheData
 	if config.CacheDbEnabled != nil && *config.CacheDbEnabled {
 		// Open cache database
-		cacheDbDir := filepath.Join(config.DbDir, CacheDbPath)
-		cacheDb, err = sql.Open("sqlite3", cacheDbDir)
+		ccacheDbDir := filepath.Join(config.DbDir, CoverCacheDbPath)
+		ccacheDb, err = sql.Open("sqlite3", ccacheDbDir)
 		if err != nil {
 			return nil, err
 		}
-		cacheChan = make(chan trackCacheData, MaxTrackCacheQueue)
+		ccacheChan = make(chan coverCacheData, MaxTrackCacheQueue)
 	}
 
 	exTrackCache, _ := lru.New[string, schema.Track](MaxExTrackCache)
 
 	i := &Interface{
 		db:           db,
-		cacheDb:      cacheDb,
-		cacheChan:    cacheChan,
+		ccacheDb:     ccacheDb,
+		ccacheChan:   ccacheChan,
 		config:       config,
 		prog:         progress.NewProgress(),
 		LongIdGen:    defaultLongIdGen,
 		exTrackCache: exTrackCache,
 	}
-	if cacheChan != nil {
-		go i.runFlushTrackCache(cacheChan)
+	if ccacheChan != nil {
+		go i.runFlushCoverCache(ccacheChan)
 	}
 	return i, nil
 }
@@ -121,31 +118,22 @@ func (i *Interface) InitDb() error {
 	}
 
 	// Initialize cache db if available
-	if i.cacheDb != nil {
+	if i.ccacheDb != nil {
 		if err := i.initCacheDb(); err != nil {
 			slog.Warn("Error initializing cache database, setting to nil", "err", err)
-			i.cacheDb = nil
+			i.ccacheDb = nil
 		}
 	}
 
 	return nil
 }
 
-func (i *Interface) CleanCache() error {
-	if i.cacheDb == nil {
-		return nil
-	}
-
-	_, err := i.cacheDb.Exec("DELETE FROM cover_cache")
-	return err
-}
-
 func (i *Interface) Close() error {
 	if err := i.db.Close(); err != nil {
 		return err
 	}
-	if i.cacheDb != nil {
-		if err := i.cacheDb.Close(); err != nil {
+	if i.ccacheDb != nil {
+		if err := i.ccacheDb.Close(); err != nil {
 			return err
 		}
 	}

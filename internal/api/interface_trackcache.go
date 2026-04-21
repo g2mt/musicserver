@@ -4,14 +4,17 @@ import (
 	"log/slog"
 )
 
-type trackCacheData struct {
+const CoverCacheDbPath = "./cache.db"
+const CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
+
+type coverCacheData struct {
 	path     string
 	data     []byte
 	mimeType string
 }
 
 func (i *Interface) initCacheDb() error {
-	_, err := i.cacheDb.Exec(`
+	_, err := i.ccacheDb.Exec(`
 		CREATE TABLE IF NOT EXISTS cover_cache (
 			path TEXT PRIMARY KEY,
 			data BLOB NOT NULL,
@@ -27,7 +30,16 @@ func (i *Interface) initCacheDb() error {
 	return err
 }
 
-func (i *Interface) runFlushTrackCache(cacheChan <-chan trackCacheData) {
+func (i *Interface) CleanCoverCache() error {
+	if i.ccacheDb == nil {
+		return nil
+	}
+
+	_, err := i.ccacheDb.Exec("DELETE FROM cover_cache")
+	return err
+}
+
+func (i *Interface) runFlushCoverCache(cacheChan <-chan coverCacheData) {
 	for cached := range cacheChan {
 		func() {
 			path := cached.path
@@ -37,7 +49,7 @@ func (i *Interface) runFlushTrackCache(cacheChan <-chan trackCacheData) {
 			// slog.Debug("Starting to cache image", "path", path, "dataLen", dataLen, "mimeType", mimeType)
 
 			// Begin a transaction for caching
-			tx, err := i.cacheDb.Begin()
+			tx, err := i.ccacheDb.Begin()
 			if err != nil {
 				slog.Warn("Unable to begin cache transaction", "path", path, "err", err)
 			}
@@ -50,12 +62,12 @@ func (i *Interface) runFlushTrackCache(cacheChan <-chan trackCacheData) {
 			// Evict old entries if cache is full
 			var currentSize int
 			err = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
-			if err == nil && currentSize+dataLen >= CacheMaxBytes {
+			if err == nil && currentSize+dataLen >= CoverCacheMaxBytes {
 				// Expire oldest entries first until we have enough space
 				rows, qErr := tx.Query("SELECT path, length(data) FROM cover_cache ORDER BY timestamp ASC")
 				if qErr == nil {
 					defer rows.Close()
-					for rows.Next() && currentSize+dataLen >= CacheMaxBytes {
+					for rows.Next() && currentSize+dataLen >= CoverCacheMaxBytes {
 						var evictPath string
 						var evictSize int
 						if rows.Scan(&evictPath, &evictSize) == nil {
