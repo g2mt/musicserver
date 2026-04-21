@@ -1,13 +1,16 @@
 package api
 
 import (
+	"crypto/sha256"
+	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"log/slog"
 )
 
 const CoverCacheDbPath = "./cache.db"
 const CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
-const CoverCacheVersion = 1
+const CoverCacheVersion = 2
 
 type coverCacheData struct {
 	path     string
@@ -28,16 +31,21 @@ func (i *Interface) initCacheDb() error {
 	_, err = i.ccacheDb.Exec(`
 		CREATE TABLE IF NOT EXISTS cover_cache (
 			path TEXT PRIMARY KEY,
-			data BLOB NOT NULL,
+			checksum TEXT NOT NULL,
 			mime_type TEXT NOT NULL,
 			timestamp INTEGER NOT NULL DEFAULT 0
+		);
+		CREATE INDEX IF NOT EXISTS idx_cover_cache_checksum ON cover_cache(checksum);
+		CREATE TABLE IF NOT EXISTS blobs (
+			checksum TEXT PRIMARY KEY,
+			data BLOB NOT NULL
 		);
 		CREATE TABLE IF NOT EXISTS stats (
 			key TEXT PRIMARY KEY,
 			value INTEGER NOT NULL
 		);
 		INSERT OR IGNORE INTO stats (key, value) VALUES ('version', ?);
-		UPDATE stats SET value = (SELECT TOTAL(LENGTH(data)) FROM cover_cache) WHERE key = 'size';
+		UPDATE stats SET value = (SELECT TOTAL(LENGTH(data)) FROM blobs) WHERE key = 'size';
 	`, CoverCacheVersion)
 	return err
 }
@@ -49,6 +57,7 @@ func (i *Interface) CleanCoverCache() error {
 
 	_, err := i.ccacheDb.Exec(`
 		DELETE FROM cover_cache;
+		DELETE FROM blobs;
 		INSERT OR REPLACE INTO stats (key, value) VALUES ('size', 0);
 	`)
 	return err
@@ -72,7 +81,12 @@ func (i *Interface) getTrackCoverCached(path string) ([]byte, string, error) {
 	var cachedData []byte
 	var mimeType string
 
-	err = ctx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
+	err = ctx.QueryRow(`
+		SELECT b.data, c.mime_type
+		FROM cover_cache c
+		JOIN blobs b ON c.checksum = b.checksum
+		WHERE c.path = ?
+	`, path).Scan(&cachedData, &mimeType)
 	if err != nil {
 		return nil, "", nil // skip not found errors
 	}
@@ -92,6 +106,10 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 	mimeType := cached.mimeType
 	slog.Debug("Starting to cache image", "path", path, "dataLen", dataLen, "mimeType", mimeType)
 
+	// Compute checksum
+	hash := sha256.Sum256(data)
+	checksum := hex.EncodeToString(hash[:])
+
 	// Begin a transaction for caching
 	tx, err := i.ccacheDb.Begin()
 	if err != nil {
@@ -104,44 +122,83 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 		}
 	}()
 
-	// Evict old entries if cache is full
-	var currentSize int
-	err = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
-	if err == nil && currentSize+dataLen >= CoverCacheMaxBytes {
-		// Expire oldest entries first until we have enough space
-		rows, qErr := tx.Query("SELECT path, length(data) FROM cover_cache ORDER BY timestamp ASC")
-		if qErr == nil {
-			defer rows.Close()
-			for rows.Next() && currentSize+dataLen >= CoverCacheMaxBytes {
-				var evictPath string
-				var evictSize int
-				if rows.Scan(&evictPath, &evictSize) == nil {
-					_, err = tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
-					if err != nil {
-						return
+	// Check if blob already exists
+	var existing int
+	err = tx.QueryRow("SELECT 1 FROM blobs WHERE checksum = ?", checksum).Scan(&existing)
+	blobExists := false
+	if err == nil {
+		blobExists = true
+	} else if err != sql.ErrNoRows {
+		slog.Warn("Unable to check existing blob", "path", path, "err", err)
+		return
+	}
+
+	// Evict old entries if cache is full (only if we need space for a new blob)
+	if !blobExists {
+		var currentSize int
+		err = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
+		if err == nil && currentSize+dataLen >= CoverCacheMaxBytes {
+			// Expire oldest entries first until we have enough space
+			rows, qErr := tx.Query(`
+				SELECT c.path, c.checksum, length(b.data)
+				FROM cover_cache c
+				JOIN blobs b ON c.checksum = b.checksum
+				ORDER BY c.timestamp ASC
+			`)
+			if qErr == nil {
+				defer rows.Close()
+				for rows.Next() && currentSize+dataLen >= CoverCacheMaxBytes {
+					var evictPath string
+					var evictChecksum string
+					var evictSize int
+					if rows.Scan(&evictPath, &evictChecksum, &evictSize) == nil {
+						_, err = tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
+						if err != nil {
+							return
+						}
+						// Check if checksum is still referenced
+						var refCount int
+						err = tx.QueryRow("SELECT COUNT(*) FROM cover_cache WHERE checksum = ?", evictChecksum).Scan(&refCount)
+						if err != nil {
+							return
+						}
+						if refCount == 0 {
+							_, err = tx.Exec("DELETE FROM blobs WHERE checksum = ?", evictChecksum)
+							if err != nil {
+								return
+							}
+							_, err = tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
+							if err != nil {
+								return
+							}
+							currentSize -= evictSize
+						}
 					}
-					_, err = tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
-					if err != nil {
-						return
-					}
-					currentSize -= evictSize
 				}
 			}
 		}
 	}
 
+	// Insert blob if it doesn't exist
+	if !blobExists {
+		_, err = tx.Exec("INSERT INTO blobs (checksum, data) VALUES (?, ?)", checksum, data)
+		if err != nil {
+			slog.Warn("Unable to insert blob", "path", path, "err", err)
+			return
+		}
+		_, err = tx.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
+		if err != nil {
+			slog.Warn("Unable to update cache size", "path", path, "err", err)
+			return
+		}
+	}
+
 	_, err = tx.Exec(
-		"INSERT OR REPLACE INTO cover_cache (path, data, mime_type, timestamp) VALUES (?, ?, ?, strftime('%s','now'))",
-		path, data, mimeType,
+		"INSERT OR REPLACE INTO cover_cache (path, checksum, mime_type, timestamp) VALUES (?, ?, ?, strftime('%s','now'))",
+		path, checksum, mimeType,
 	)
 	if err != nil {
 		slog.Warn("Unable to cache track", "path", path, "err", err)
-		return
-	}
-
-	_, err = tx.Exec("UPDATE stats SET value = value + ? WHERE key = 'size'", dataLen)
-	if err != nil {
-		slog.Warn("Unable to update cache size", "path", path, "err", err)
 		return
 	}
 
