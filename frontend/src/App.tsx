@@ -32,6 +32,7 @@ import { SearchSuggestions } from "./SearchSuggestions";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
+import { ConfirmBoxContext } from "./ConfirmBox";
 
 declare global {
   interface NativeAudioBridge {
@@ -507,7 +508,13 @@ export function App() {
             {!c.tracksListCollapsed && (
               <>
                 {confirmBoxes.map((b) => (
-                  <div key={b.key}>{b.el}</div>
+                  <ConfirmBoxContext value={{
+                    remove: () => {
+                      setConfirmBoxes(list => list.filter(data => data.key !== b.key));
+                    }
+                  }}>
+                    <div key={b.key}>{b.el}</div>
+                  </ConfirmBoxContext>
                 ))}
                 {c.leftTab === "tracks" && (
                   <MainTracksTab

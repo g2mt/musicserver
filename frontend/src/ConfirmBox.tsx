@@ -1,8 +1,16 @@
 import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef } from "react";
+import { createContext, useContext } from "react";
 
 import "./ConfirmBox.css";
+
+interface ConfirmBoxState {
+  remove: () => void;
+}
+
+export const ConfirmBoxContext = createContext<ConfirmBoxState>({
+  remove: () => {},
+});
 
 interface ConfirmBoxProps {
   children: React.ReactNode;
@@ -17,12 +25,9 @@ function ConfirmBox({
   onDecline,
   titleButtons,
 }: ConfirmBoxProps) {
-  const elRef = useRef<HTMLDivElement | null>(null);
-  function remove() {
-    elRef.current?.remove();
-  }
+  const c = useContext(ConfirmBoxContext)!;
   return (
-    <div className="confirm-box" ref={elRef}>
+    <div className="confirm-box">
       <div className="confirm-title">
         <div className="confirm-title-text">
           <FontAwesomeIcon icon={faCircleQuestion} /> Confirm
@@ -35,7 +40,7 @@ function ConfirmBox({
           className="btn"
           onClick={() => {
             onAccept && onAccept();
-            remove();
+            c.remove();
           }}
         >
           Yes
@@ -44,7 +49,7 @@ function ConfirmBox({
           className="btn"
           onClick={() => {
             onDecline && onDecline();
-            remove();
+            c.remove();
           }}
         >
           No
