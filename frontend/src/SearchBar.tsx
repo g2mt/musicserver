@@ -1,5 +1,6 @@
 import {
   useContext,
+  useState,
   type Dispatch,
   type RefObject,
   type SetStateAction,
@@ -10,9 +11,11 @@ import {
   faDownload,
   faTimes,
   faHome,
+  faChevronUp,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import { AppContext } from "./AppState";
-import { Track } from "./Track";
+import { TrackList } from "./TrackList";
 import { fetchAPI } from "./apiServer";
 import { toast } from "react-toastify";
 import ConfirmBox from "./ConfirmBox";
@@ -31,10 +34,12 @@ function SearchBar({
 }) {
   const c = useContext(AppContext)!;
 
+  const [externalTracksCollapsed, setExternalTracksCollapsed] = useState(false);
+
   const confirmTrackDownload = async (url: string) => {
     const encodedUrl = encodeURIComponent(url);
     try {
-      const trackData: TrackData = await fetchAPI(
+      const tracks: TrackData[] = await fetchAPI(
         `/track/:external/${encodedUrl}`,
       );
       c.addConfirmBox(
@@ -61,9 +66,24 @@ function SearchBar({
                 ),
               );
           }}
+          titleButtons={
+            <button
+              className="btn-icon"
+              onClick={() => setExternalTracksCollapsed((prev) => !prev)}
+            >
+              <FontAwesomeIcon
+                icon={externalTracksCollapsed ? faChevronDown : faChevronUp}
+              />
+            </button>
+          }
         >
           <p>Download this track?</p>
-          <Track highlighted={true} track={trackData} />
+          {!externalTracksCollapsed && (
+            <TrackList
+              tracks={tracks}
+              parentElement={{ current: null }}
+            />
+          )}
         </ConfirmBox>,
       );
     } catch (e) {

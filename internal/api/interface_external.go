@@ -22,24 +22,24 @@ type dlInfo struct {
 	Thumbnail string `json:"thumbnail"`
 }
 
-func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
+func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 	if i.config.MediaDownloader == "" {
-		return schema.Track{}, errors.New("no media downloader configured")
+		return nil, errors.New("no media downloader configured")
 	}
 
 	// Check cache first
 	if track, ok := i.exTrackCache.Get(u); ok {
-		return track, nil
+		return []schema.Track{track}, nil
 	}
 
 	out, err := exec.Command(i.config.MediaDownloader, "--dump-single-json", u).Output()
 	if err != nil {
-		return schema.Track{}, err
+		return nil, err
 	}
 
 	var info dlInfo
 	if err := json.Unmarshal(out, &info); err != nil {
-		return schema.Track{}, err
+		return nil, err
 	}
 
 	track := schema.Track{
@@ -53,7 +53,7 @@ func (i *Interface) GetExternalTrackByURL(u string) (schema.Track, error) {
 	// Add to cache
 	i.exTrackCache.Add(u, track)
 
-	return track, nil
+	return []schema.Track{track}, nil
 }
 
 func (i *Interface) DownloadExternalTrack(url string) (string, error) {
