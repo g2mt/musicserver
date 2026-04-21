@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+// Config stores the configuration for the server
 type Config struct {
 	// binds the HTTP API backend to this path. defaults to localhost:8000
 	HTTPBind string `json:"http_bind" yaml:"http_bind"`
