@@ -10,6 +10,23 @@ type trackCacheData struct {
 	mimeType string
 }
 
+func (i *Interface) initCacheDb() error {
+	_, err := i.cacheDb.Exec(`
+			CREATE TABLE IF NOT EXISTS cover_cache (
+				path TEXT PRIMARY KEY,
+				data BLOB NOT NULL,
+				mime_type TEXT NOT NULL,
+				timestamp INTEGER NOT NULL DEFAULT 0
+			);
+			CREATE TABLE IF NOT EXISTS stats (
+				key TEXT PRIMARY KEY,
+				value INTEGER NOT NULL
+			);
+			INSERT OR IGNORE INTO stats (key, value) VALUES ('size', 0);
+		`)
+	return err
+}
+
 func (i *Interface) runFlushTrackCache(cacheChan <-chan trackCacheData) {
 	for cached := range cacheChan {
 		func() {
