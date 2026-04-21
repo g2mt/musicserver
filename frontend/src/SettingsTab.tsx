@@ -208,6 +208,17 @@ export function SettingsTab() {
             />
           </div>
           <div>
+            <label htmlFor="setting-sr-cover-cache-max-bytes">
+              Cover cache max bytes:
+            </label>
+            <input
+              type="number"
+              id="setting-sr-cover-cache-max-bytes"
+              readOnly
+              value={c.props.config.cover_cache_max_bytes}
+            />
+          </div>
+          <div>
             <label htmlFor="setting-sr-media-downloader">
               Media Downloader:
             </label>
