@@ -18,6 +18,11 @@ export const SearchQuerySchema = z.object({
 
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 
+export interface ServerConfig {
+  version: string;
+  config: any;
+}
+
 // Contains serializable options for saving
 export const AppStateSchema = z.object({
   volume: z.number().default(1),
@@ -58,8 +63,8 @@ export interface AppState extends AppStateData {
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
 
   // server props
-  props: { version: string; config: any } | null;
-  setProps: Dispatch<SetStateAction<{ version: string; config: any } | null>>;
+  props: ServerConfig | null;
+  setProps: Dispatch<SetStateAction<ServerConfig | null>>;
 
   // misc event handlers
   onRescanned: () => void;
