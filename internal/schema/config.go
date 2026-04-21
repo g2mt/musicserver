@@ -23,6 +23,9 @@ type Config struct {
 	CacheDbEnabled *bool `json:"cache_db_enabled" yaml:"cache_db_enabled"`
 	// path to generic media downloader binary
 	MediaDownloader string `json:"media_downloader" yaml:"media_downloader"`
+
+	// internal: flag to disable file operations on tracks for testing
+	IgnoreTrackPath bool
 }
 
 func LoadConfig(path string) (*Config, error) {

@@ -349,12 +349,16 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 	}
 	track.LongID = longID
 
-	fileInfo, err := os.Stat(track.Path)
-	if err != nil {
-		return "", err
+	var ckLastModified int64
+	var ckSize int64
+	if !i.config.IgnoreTrackPath {
+		if fileInfo, err := os.Stat(track.Path); err == nil {
+			ckLastModified = fileInfo.ModTime().Unix()
+			ckSize = fileInfo.Size()
+		} else {
+			slog.Warn("cannot open track.Path", "path", track.Path)
+		}
 	}
-	ckLastModified := fileInfo.ModTime().Unix()
-	ckSize := fileInfo.Size()
 
 	// Start a single transaction for the entire operation
 	tx, err := i.db.Begin()

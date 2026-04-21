@@ -21,7 +21,8 @@ func setupIface(t *testing.T) *Interface {
 	return &Interface{
 		db: db,
 		config: &schema.Config{
-			DataPath: "/",
+			DataPath:        "/",
+			IgnoreTrackPath: true,
 		},
 		LongIdGen: defaultLongIdGen,
 	}
