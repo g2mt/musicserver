@@ -9,7 +9,6 @@ import (
 )
 
 const CoverCacheDbPath = "./cache.db"
-const CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
 const CoverCacheVersion = 2
 
 type coverCacheData struct {
@@ -136,7 +135,7 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 	if !blobExists {
 		var currentSize int
 		err = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
-		if err == nil && currentSize+dataLen >= CoverCacheMaxBytes {
+		if err == nil && currentSize+dataLen >= i.config.CoverCacheMaxBytes {
 			// Expire oldest entries first until we have enough space
 			rows, qErr := tx.Query(`
 				SELECT c.path, c.checksum, length(b.data)
@@ -146,7 +145,7 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 			`)
 			if qErr == nil {
 				defer rows.Close()
-				for rows.Next() && currentSize+dataLen >= CoverCacheMaxBytes {
+				for rows.Next() && currentSize+dataLen >= i.config.CoverCacheMaxBytes {
 					var evictPath string
 					var evictChecksum string
 					var evictSize int
