@@ -43,7 +43,7 @@ func (i *Interface) initCacheDb() error {
 			value INTEGER NOT NULL
 		);
 		INSERT OR IGNORE INTO stats (key, value) VALUES ('version', ?);
-		UPDATE stats SET value = (SELECT TOTAL(LENGTH(data)) FROM blobs) WHERE key = 'size';
+		INSERT OR IGNORE INTO stats (key, value) VALUES ('size', 0);
 	`, CoverCacheVersion)
 	return err
 }
@@ -147,34 +147,36 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 				JOIN blobs b ON c.checksum = b.checksum
 				ORDER BY c.timestamp ASC
 			`)
-			if qErr == nil {
-				defer rows.Close()
-				for rows.Next() && currentSize+dataLen >= i.config.CacheDbMaxBytes {
-					var evictPath string
-					var evictChecksum string
-					var evictSize int
-					if rows.Scan(&evictPath, &evictChecksum, &evictSize) == nil {
-						_, err = tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
+			defer rows.Close()
+			if qErr != nil {
+				slog.Warn("Unable to sort blobs by timestamp", "err", err)
+				return
+			}
+			for rows.Next() && currentSize+dataLen >= i.config.CacheDbMaxBytes {
+				var evictPath string
+				var evictChecksum string
+				var evictSize int
+				if rows.Scan(&evictPath, &evictChecksum, &evictSize) == nil {
+					_, err = tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
+					if err != nil {
+						return
+					}
+					// Check if checksum is still referenced
+					var refCount int
+					err = tx.QueryRow("SELECT COUNT(*) FROM cover_cache WHERE checksum = ?", evictChecksum).Scan(&refCount)
+					if err != nil {
+						return
+					}
+					if refCount == 0 {
+						_, err = tx.Exec("DELETE FROM blobs WHERE checksum = ?", evictChecksum)
 						if err != nil {
 							return
 						}
-						// Check if checksum is still referenced
-						var refCount int
-						err = tx.QueryRow("SELECT COUNT(*) FROM cover_cache WHERE checksum = ?", evictChecksum).Scan(&refCount)
+						_, err = tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
 						if err != nil {
 							return
 						}
-						if refCount == 0 {
-							_, err = tx.Exec("DELETE FROM blobs WHERE checksum = ?", evictChecksum)
-							if err != nil {
-								return
-							}
-							_, err = tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
-							if err != nil {
-								return
-							}
-							currentSize -= evictSize
-						}
+						currentSize -= evictSize
 					}
 				}
 			}
