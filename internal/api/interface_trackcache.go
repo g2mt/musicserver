@@ -85,12 +85,6 @@ func (i *Interface) getTrackCoverCached(path string) ([]byte, string, error) {
 	return cachedData, mimeType, nil
 }
 
-func (i *Interface) runFlushCoverCache(cacheChan <-chan coverCacheData) {
-	for cached := range cacheChan {
-		i.flushCoverCacheEntry(cached)
-	}
-}
-
 func (i *Interface) flushCoverCacheEntry(cached coverCacheData) {
 	path := cached.path
 	data := cached.data

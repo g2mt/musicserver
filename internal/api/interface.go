@@ -106,7 +106,11 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 		exTrackCache: exTrackCache,
 	}
 	if ccacheChan != nil {
-		go i.runFlushCoverCache(ccacheChan)
+		go func() {
+			for cached := range ccacheChan {
+				i.flushCoverCacheEntry(cached)
+			}
+		}()
 	}
 	return i, nil
 }
