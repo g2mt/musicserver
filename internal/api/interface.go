@@ -108,7 +108,7 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	if ccacheChan != nil {
 		go func() {
 			for cached := range ccacheChan {
-				i.flushCoverCacheEntry(cached)
+				i.insertCoverCacheEntry(cached)
 			}
 		}()
 	}

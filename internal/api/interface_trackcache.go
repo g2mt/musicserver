@@ -85,7 +85,7 @@ func (i *Interface) getTrackCoverCached(path string) ([]byte, string, error) {
 	return cachedData, mimeType, nil
 }
 
-func (i *Interface) flushCoverCacheEntry(cached coverCacheData) {
+func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 	path := cached.path
 	data := cached.data
 	dataLen := len(data)

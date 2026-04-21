@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"musicserver/internal/schema"
 	"testing"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -71,7 +70,7 @@ func TestInterface_CacheGetSet(t *testing.T) {
 		t.Error("Expected nil data on cache miss")
 	}
 
-	iface.flushCoverCacheEntry(coverCacheData{
+	iface.insertCoverCacheEntry(coverCacheData{
 		path:     path,
 		data:     data,
 		mimeType: mime,
@@ -95,12 +94,12 @@ func TestInterface_CleanCoverCache(t *testing.T) {
 	iface.ccacheDb = ccacheDb
 	iface.initCacheDb()
 
-	iface.flushCoverCacheEntry(coverCacheData{
+	iface.insertCoverCacheEntry(coverCacheData{
 		path:     "a",
 		data:     []byte("b"),
 		mimeType: "c",
 	})
-	
+
 	if err := iface.CleanCoverCache(); err != nil {
 		t.Fatal(err)
 	}
