@@ -272,41 +272,12 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	}
 
 	// Check cache first
-	cachedData, mimeType, cErr := func() ([]byte, string, error) {
-		if i.ccacheDb == nil {
-			return nil, "", nil
-		}
-		ctx, err := i.ccacheDb.Begin()
-		if err != nil {
-			return nil, "", err
-		}
-		defer func() {
-			if err != nil {
-				ctx.Rollback()
-			} else {
-				ctx.Commit()
-			}
-		}()
-		var cachedData []byte
-		var mimeType string
-
-		err = ctx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
-		if err != nil {
-			return nil, "", nil // skip not found errors
-		}
-
-		// Update timestamp on cache hit
-		_, err = ctx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
-		if err != nil {
-			return nil, "", err
-		}
-		return cachedData, mimeType, nil
-	}()
+	cachedData, mimeType, cErr := i.getTrackCoverCached(path)
 	if cachedData != nil {
 		slog.Debug("Cover cache hit", "path", path)
 		return cachedData, mimeType, nil
 	} else if cErr != nil {
-		slog.Warn("Unable to complete cache transaction", "cErr", cErr)
+		slog.Warn("Unable to complete cache transaction", "err", cErr)
 	}
 
 	// Use taglib to extract cover art

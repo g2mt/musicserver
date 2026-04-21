@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"log/slog"
 )
 
@@ -11,6 +12,37 @@ type coverCacheData struct {
 	path     string
 	data     []byte
 	mimeType string
+}
+
+func (i *Interface) getTrackCoverCached(path string) ([]byte, string, error) {
+	if i.ccacheDb == nil {
+		return nil, "", nil
+	}
+	ctx, err := i.ccacheDb.Begin()
+	if err != nil {
+		return nil, "", err
+	}
+	defer func() {
+		if err != nil {
+			ctx.Rollback()
+		} else {
+			ctx.Commit()
+		}
+	}()
+	var cachedData []byte
+	var mimeType string
+
+	err = ctx.QueryRow("SELECT data, mime_type FROM cover_cache WHERE path = ?", path).Scan(&cachedData, &mimeType)
+	if err != nil {
+		return nil, "", nil // skip not found errors
+	}
+
+	// Update timestamp on cache hit
+	_, err = ctx.Exec("UPDATE cover_cache SET timestamp = strftime('%s','now') WHERE path = ?", path)
+	if err != nil {
+		return nil, "", err
+	}
+	return cachedData, mimeType, nil
 }
 
 func (i *Interface) initCacheDb() error {
