@@ -14,7 +14,7 @@ import {
   faChevronUp,
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
-import { AppContext } from "./AppState";
+import { AppContext, type AppState } from "./AppState";
 import { TrackList } from "./TrackList";
 import { fetchAPI } from "./apiServer";
 import { toast } from "react-toastify";
@@ -23,25 +23,18 @@ import type { TrackData } from "./TrackData";
 
 import "./SearchBar.css";
 
-function SearchBar({
-  searchInput,
-  setSearchInput,
-  searchBarRef,
-}: {
-  searchInput: string;
-  setSearchInput: Dispatch<SetStateAction<string>>;
-  searchBarRef: RefObject<HTMLInputElement | null>;
-}) {
-  const c = useContext(AppContext)!;
-
-  const [externalTracksCollapsed, setExternalTracksCollapsed] = useState(false);
-
-  const confirmTrackDownload = async (url: string) => {
+  async function confirmTrackDownload(c: AppState, url: string) {
     const encodedUrl = encodeURIComponent(url);
+let tracks: TrackData[];
     try {
-      const tracks: TrackData[] = await fetchAPI(
+      tracks = await fetchAPI(
         `/track/:external/${encodedUrl}`,
       );
+    } catch (e) {
+      toast.error("Unable to get track data");
+      return;
+    }
+      const [externalTracksCollapsed, setExternalTracksCollapsed] = useState(false);
       c.addConfirmBox(
         <ConfirmBox
           onAccept={() => {
@@ -86,10 +79,18 @@ function SearchBar({
           )}
         </ConfirmBox>,
       );
-    } catch (e) {
-      toast.error("Unable to get track data");
-    }
-  };
+  }
+
+function SearchBar({
+  searchInput,
+  setSearchInput,
+  searchBarRef,
+}: {
+  searchInput: string;
+  setSearchInput: Dispatch<SetStateAction<string>>;
+  searchBarRef: RefObject<HTMLInputElement | null>;
+}) {
+  const c = useContext(AppContext)!;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,7 +142,7 @@ function SearchBar({
           type="button"
           className="icon-btn btn-download"
           title='Paste a URL beginning with "http:" or "https:" to download it.'
-          onClick={() => confirmTrackDownload(searchInput)}
+          onClick={() => confirmTrackDownload(c, searchInput)}
           disabled={!isValidUrl}
         >
           <FontAwesomeIcon icon={faDownload} />
