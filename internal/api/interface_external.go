@@ -16,10 +16,11 @@ type dlExternal struct {
 }
 
 type dlInfo struct {
-	Title     string `json:"title"`
-	Uploader  string `json:"uploader"`
-	Album     string `json:"album"`
-	Thumbnail string `json:"thumbnail"`
+	Title     string   `json:"title"`
+	Uploader  string   `json:"uploader"`
+	Album     string   `json:"album"`
+	Thumbnail string   `json:"thumbnail"`
+	Entries   []dlInfo `json:"entries"`
 }
 
 func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
@@ -56,18 +57,31 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 		return nil, err
 	}
 
-	track := schema.Track{
-		Name:          info.Title,
-		Artist:        info.Uploader,
-		Album:         info.Album,
-		Path:          u,
-		ThumbnailPath: info.Thumbnail,
+	var tracks []schema.Track
+	if len(info.Entries) > 0 {
+		for _, entry := range info.Entries {
+			tracks = append(tracks, schema.Track{
+				Name:          entry.Title,
+				Artist:        entry.Uploader,
+				Album:         entry.Album,
+				Path:          u,
+				ThumbnailPath: entry.Thumbnail,
+			})
+		}
+	} else {
+		track := schema.Track{
+			Name:          info.Title,
+			Artist:        info.Uploader,
+			Album:         info.Album,
+			Path:          u,
+			ThumbnailPath: info.Thumbnail,
+		}
+		tracks = append(tracks, track)
+		// Add to cache
+		i.exTrackCache.Add(u, track)
 	}
 
-	// Add to cache
-	i.exTrackCache.Add(u, track)
-
-	return []schema.Track{track}, nil
+	return tracks, nil
 }
 
 func (i *Interface) DownloadExternalTrack(url string) (string, error) {
