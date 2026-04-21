@@ -35,7 +35,6 @@ func (i *Interface) initCacheDb() error {
 			mime_type TEXT NOT NULL,
 			timestamp INTEGER NOT NULL DEFAULT 0
 		);
-		CREATE INDEX IF NOT EXISTS idx_cover_cache_checksum ON cover_cache(checksum);
 		CREATE TABLE IF NOT EXISTS blobs (
 			checksum TEXT PRIMARY KEY,
 			data BLOB NOT NULL
