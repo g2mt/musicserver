@@ -35,7 +35,10 @@ func (i *Interface) CleanCoverCache() error {
 		return nil
 	}
 
-	_, err := i.ccacheDb.Exec("DELETE FROM cover_cache")
+	_, err := i.ccacheDb.Exec(`
+		DELETE FROM cover_cache;
+		INSERT OR REPLACE INTO stats (key, value) VALUES ('size', 0);
+	`)
 	return err
 }
 
