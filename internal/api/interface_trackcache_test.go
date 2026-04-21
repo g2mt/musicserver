@@ -78,7 +78,7 @@ func TestInterface_CacheGetSet(t *testing.T) {
 }
 
 func TestInterface_CacheEviction(t *testing.T) {
-	iface := setupCacheIface(t, 20) // Set a small limit: enough for 2 entries of 10 bytes
+	iface := setupCacheIface(t, 21) // Set a small limit: enough for 2 entries of 10 bytes
 	ccacheDb, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatal(err)

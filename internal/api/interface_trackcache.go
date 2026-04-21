@@ -152,6 +152,7 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 				slog.Warn("Unable to sort blobs by timestamp", "err", err)
 				return
 			}
+			evicted := 0
 			for rows.Next() && currentSize+dataLen >= i.config.CacheDbMaxBytes {
 				var evictPath string
 				var evictChecksum string
@@ -183,7 +184,9 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 						currentSize -= evictSize
 					}
 				}
+				evicted += 1
 			}
+			slog.Debug("Evicted cache", "evicted", evicted)
 		}
 	}
 
