@@ -170,10 +170,12 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 					if refCount == 0 {
 						_, err = tx.Exec("DELETE FROM blobs WHERE checksum = ?", evictChecksum)
 						if err != nil {
+							slog.Warn("Unable to delete blob during eviction", "checksum", evictChecksum, "err", err)
 							return
 						}
 						_, err = tx.Exec("UPDATE stats SET value = MAX(0, value - ?) WHERE key = 'size'", evictSize)
 						if err != nil {
+							slog.Warn("Unable to update cache size during eviction", "err", err)
 							return
 						}
 						currentSize -= evictSize
