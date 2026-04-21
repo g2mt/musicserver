@@ -22,7 +22,7 @@ type Config struct {
 	// If set, enables the cache database. defaults to true
 	CacheDbEnabled *bool `json:"cache_db_enabled" yaml:"cache_db_enabled"`
 	// max size of the cover cache in bytes. defaults to 512MB
-	CoverCacheMaxBytes int `json:"cover_cache_max_bytes" yaml:"cover_cache_max_bytes"`
+	CacheDbMaxBytes int `json:"cover_cache_max_bytes" yaml:"cover_cache_max_bytes"`
 	// path to generic media downloader binary
 	MediaDownloader string `json:"media_downloader" yaml:"media_downloader"`
 
@@ -76,8 +76,8 @@ func LoadConfig(path string) (*Config, error) {
 		config.CacheDbEnabled = &defaultVal
 	}
 
-	if config.CoverCacheMaxBytes == 0 {
-		config.CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
+	if config.CacheDbMaxBytes == 0 {
+		config.CacheDbMaxBytes = 512 * 1024 * 1024 // 512 Mb
 	}
 
 	return &config, nil

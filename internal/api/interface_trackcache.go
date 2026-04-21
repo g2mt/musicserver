@@ -135,7 +135,7 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 	if !blobExists {
 		var currentSize int
 		err = tx.QueryRow("SELECT value FROM stats WHERE key = 'size'").Scan(&currentSize)
-		if err == nil && currentSize+dataLen >= i.config.CoverCacheMaxBytes {
+		if err == nil && currentSize+dataLen >= i.config.CacheDbMaxBytes {
 			// Expire oldest entries first until we have enough space
 			rows, qErr := tx.Query(`
 				SELECT c.path, c.checksum, length(b.data)
@@ -145,7 +145,7 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 			`)
 			if qErr == nil {
 				defer rows.Close()
-				for rows.Next() && currentSize+dataLen >= i.config.CoverCacheMaxBytes {
+				for rows.Next() && currentSize+dataLen >= i.config.CacheDbMaxBytes {
 					var evictPath string
 					var evictChecksum string
 					var evictSize int
