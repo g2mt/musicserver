@@ -26,6 +26,8 @@ type Config struct {
 
 	// internal: flag to disable file operations on tracks for testing
 	IgnoreTrackPath bool
+	// internal: path to cache database for testing
+	CacheDbPath string
 }
 
 func LoadConfig(path string) (*Config, error) {
