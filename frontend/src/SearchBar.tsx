@@ -23,63 +23,58 @@ import type { TrackData } from "./TrackData";
 
 import "./SearchBar.css";
 
-  async function confirmTrackDownload(c: AppState, url: string) {
-    const encodedUrl = encodeURIComponent(url);
-let tracks: TrackData[];
-    try {
-      tracks = await fetchAPI(
-        `/track/:external/${encodedUrl}`,
-      );
-    } catch (e) {
-      toast.error("Unable to get track data");
-      return;
-    }
-      const [externalTracksCollapsed, setExternalTracksCollapsed] = useState(false);
-      c.addConfirmBox(
-        <ConfirmBox
-          onAccept={() => {
-            toast.info(
-              <>
-                Download for <b>{url}</b> started
-              </>,
-            );
-            fetchAPI(`/track/:external/${encodedUrl}`, undefined, "POST")
-              .then(() =>
-                toast.success(
-                  <>
-                    Download for <b>{url}</b> completed
-                  </>,
-                ),
-              )
-              .catch(() =>
-                toast.error(
-                  <>
-                    Download for <b>{url}</b> failed
-                  </>,
-                ),
-              );
-          }}
-          titleButtons={
-            <button
-              className="btn-icon"
-              onClick={() => setExternalTracksCollapsed((prev) => !prev)}
-            >
-              <FontAwesomeIcon
-                icon={externalTracksCollapsed ? faChevronDown : faChevronUp}
-              />
-            </button>
-          }
-        >
-          <p>Download this track?</p>
-          {!externalTracksCollapsed && (
-            <TrackList
-              tracks={tracks}
-              parentElement={{ current: null }}
-            />
-          )}
-        </ConfirmBox>,
-      );
+async function confirmTrackDownload(c: AppState, url: string) {
+  const encodedUrl = encodeURIComponent(url);
+  let tracks: TrackData[];
+  try {
+    tracks = await fetchAPI(`/track/:external/${encodedUrl}`);
+  } catch (e) {
+    toast.error("Unable to get track data");
+    return;
   }
+  const [externalTracksCollapsed, setExternalTracksCollapsed] = useState(false);
+  c.addConfirmBox(
+    <ConfirmBox
+      onAccept={() => {
+        toast.info(
+          <>
+            Download for <b>{url}</b> started
+          </>,
+        );
+        fetchAPI(`/track/:external/${encodedUrl}`, undefined, "POST")
+          .then(() =>
+            toast.success(
+              <>
+                Download for <b>{url}</b> completed
+              </>,
+            ),
+          )
+          .catch(() =>
+            toast.error(
+              <>
+                Download for <b>{url}</b> failed
+              </>,
+            ),
+          );
+      }}
+      titleButtons={
+        <button
+          className="btn-icon"
+          onClick={() => setExternalTracksCollapsed((prev) => !prev)}
+        >
+          <FontAwesomeIcon
+            icon={externalTracksCollapsed ? faChevronDown : faChevronUp}
+          />
+        </button>
+      }
+    >
+      <p>Download this track?</p>
+      {!externalTracksCollapsed && (
+        <TrackList tracks={tracks} parentElement={{ current: null }} />
+      )}
+    </ConfirmBox>,
+  );
+}
 
 function SearchBar({
   searchInput,
