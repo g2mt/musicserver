@@ -40,13 +40,11 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  max-width: 50%;
 }
 
 #app-right-side {
   flex: 1;
   overflow-y: auto;
-  max-width: 50%;
 }
 
 body.collapsed {

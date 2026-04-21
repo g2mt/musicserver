@@ -34,8 +34,10 @@ body {
 
   /* Colors */
   --color-disabled: #ddd;
-  --color-info: #90ee90;
+  --color-info: var(--accent-color-light);
   --color-info-text: #000;
+  --color-success: #90ee90;
+  --color-success-text: #000;
   --color-front: var(--color-disabled);
   --color-front-text: #000;
 }
@@ -64,8 +66,10 @@ body.dark-mode {
   --shadow: rgba(0, 0, 0, 0.5);
 
   --color-disabled: #808080;
-  --color-info: #2e8b57;
+  --color-info: #00398f;
   --color-info-text: #fff;
+  --color-success: #2e8b57;
+  --color-success-text: #fff;
   --color-front: #000;
   --color-front-text: #fff;
 

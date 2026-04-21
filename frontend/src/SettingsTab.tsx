@@ -97,8 +97,8 @@ export function SettingsTab() {
           <button
             className="btn"
             style={{
-              background: "var(--color-info)",
-              color: "var(--color-info-text)",
+              background: "var(--color-success)",
+              color: "var(--color-success-text)",
             }}
             disabled={!unsaved}
             onClick={() => {

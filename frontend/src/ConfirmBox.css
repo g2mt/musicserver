@@ -1,7 +1,7 @@
 .confirm-box {
   background-color: var(--color-info);
+  border-bottom: 1px solid var(--gray);
   padding: var(--s3);
-  border-radius: var(--border-radius);
   display: flex;
   flex-direction: column;
   gap: var(--s3);
@@ -28,7 +28,6 @@
 
   .confirm-buttons {
     display: flex;
-    justify-content: center;
-    gap: var(--s3);
+    justify-content: right;
   }
 }
