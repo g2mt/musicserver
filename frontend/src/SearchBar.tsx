@@ -59,7 +59,7 @@ function TrackConfirmBox({
       }}
       titleButtons={
         <button
-          className="btn-icon"
+          className="icon-btn"
           onClick={() => setExternalTracksCollapsed((prev) => !prev)}
         >
           <FontAwesomeIcon
@@ -68,7 +68,7 @@ function TrackConfirmBox({
         </button>
       }
     >
-      <p>Download this track?</p>
+      <p>Download these tracks?</p>
       {!externalTracksCollapsed && (
         <TrackList tracks={tracks} parentElement={{ current: null }} />
       )}
