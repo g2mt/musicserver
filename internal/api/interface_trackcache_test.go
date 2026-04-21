@@ -71,14 +71,11 @@ func TestInterface_CacheGetSet(t *testing.T) {
 		t.Error("Expected nil data on cache miss")
 	}
 
-	// Manual insert to test retrieval (since runFlushCoverCache is async)
-	_, err = iface.ccacheDb.Exec(
-		"INSERT INTO cover_cache (path, data, mime_type, timestamp) VALUES (?, ?, ?, ?)",
-		path, data, mime, time.Now().Unix(),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	iface.flushCoverCacheEntry(coverCacheData{
+		path:     path,
+		data:     data,
+		mimeType: mime,
+	})
 
 	d, m, err = iface.getTrackCoverCached(path)
 	if err != nil {
@@ -98,7 +95,11 @@ func TestInterface_CleanCoverCache(t *testing.T) {
 	iface.ccacheDb = ccacheDb
 	iface.initCacheDb()
 
-	iface.ccacheDb.Exec("INSERT INTO cover_cache (path, data, mime_type) VALUES ('a', 'b', 'c')")
+	iface.flushCoverCacheEntry(coverCacheData{
+		path:     "a",
+		data:     []byte("b"),
+		mimeType: "c",
+	})
 	
 	if err := iface.CleanCoverCache(); err != nil {
 		t.Fatal(err)
