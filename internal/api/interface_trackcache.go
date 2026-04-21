@@ -36,7 +36,6 @@ func (i *Interface) initCacheDb() error {
 			key TEXT PRIMARY KEY,
 			value INTEGER NOT NULL
 		);
-		INSERT OR IGNORE INTO stats (key, value) VALUES ('size', 0);
 		INSERT OR IGNORE INTO stats (key, value) VALUES ('version', ?);
 		UPDATE stats SET value = (SELECT TOTAL(LENGTH(data)) FROM cover_cache) WHERE key = 'size';
 	`, CoverCacheVersion)
