@@ -94,8 +94,7 @@ func (i *Interface) DownloadExternalTrack(url string) (string, error) {
 	}{ticker: ticker, done: make(chan struct{})}
 
 	// Spawn the command
-	// cmd := exec.Command(i.config.MediaDownloader, url)
-	cmd := exec.Command(i.config.MediaDownloader, "about:blank")
+	cmd := exec.Command(i.config.MediaDownloader, url)
 	cmd.Dir = i.config.DataPath
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
