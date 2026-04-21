@@ -23,6 +23,19 @@ type dlInfo struct {
 }
 
 func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
+	if i.config.DebugExternal {
+		if u == "http://track" {
+			return []schema.Track{{Name: "Debug Track", Artist: "Debug Artist", Album: "Debug Album", Path: u}}, nil
+		}
+		if u == "http://album" {
+			return []schema.Track{
+				{Name: "Track 1", Artist: "Debug Artist", Album: "Debug Album", Path: u + "/1"},
+				{Name: "Track 2", Artist: "Debug Artist", Album: "Debug Album", Path: u + "/2"},
+				{Name: "Track 3", Artist: "Debug Artist", Album: "Debug Album", Path: u + "/3"},
+			}, nil
+		}
+	}
+
 	if i.config.MediaDownloader == "" {
 		return nil, errors.New("no media downloader configured")
 	}
@@ -57,6 +70,10 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 }
 
 func (i *Interface) DownloadExternalTrack(url string) (string, error) {
+	if i.config.DebugExternal {
+		return "", nil
+	}
+
 	if i.config.MediaDownloader == "" {
 		return "", errors.New("no media downloader configured")
 	}

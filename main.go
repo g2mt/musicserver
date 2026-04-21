@@ -25,6 +25,7 @@ var embeddedFrontend embed.FS
 func main() {
 	configPath := flag.String("config", "", "path to config file")
 	debug := flag.Bool("debug", false, "enable debug mode")
+	debugExternal := flag.Bool("debugExternal", false, "enable debug mode for external tracks")
 	frontendDirFlag := flag.String("frontendDir", "", "custom frontend directory path (debug mode only)")
 	loglevel := flag.String("loglevel", "info", "log level (debug, info, warn, error)")
 
@@ -60,6 +61,9 @@ func main() {
 	if err != nil {
 		slog.Error("Error loading config", "err", err)
 		os.Exit(1)
+	}
+	if *debugExternal {
+		config.DebugExternal = true
 	}
 
 	// Create API interface and initialize database
