@@ -1,11 +1,13 @@
 package api
 
 import (
+	"fmt"
 	"log/slog"
 )
 
 const CoverCacheDbPath = "./cache.db"
 const CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
+const CacheDbVersion = 1
 
 type coverCacheData struct {
 	path     string
@@ -14,7 +16,16 @@ type coverCacheData struct {
 }
 
 func (i *Interface) initCacheDb() error {
-	_, err := i.ccacheDb.Exec(`
+	// Check version before running initialization
+	var currentVersion int
+	err := i.ccacheDb.QueryRow("SELECT value FROM stats WHERE key = 'version'").Scan(&currentVersion)
+	if err == nil {
+		if currentVersion != CacheDbVersion {
+			return fmt.Errorf("cache database version mismatch: expected %d, found %d", CacheDbVersion, currentVersion)
+		}
+	}
+
+	_, err = i.ccacheDb.Exec(`
 		CREATE TABLE IF NOT EXISTS cover_cache (
 			path TEXT PRIMARY KEY,
 			data BLOB NOT NULL,
@@ -26,6 +37,7 @@ func (i *Interface) initCacheDb() error {
 			value INTEGER NOT NULL
 		);
 		INSERT OR IGNORE INTO stats (key, value) VALUES ('size', 0);
+		INSERT OR IGNORE INTO stats (key, value) VALUES ('version', 1);
 	`)
 	return err
 }
