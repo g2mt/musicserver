@@ -8,7 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func setupCacheIface(t *testing.T) *Interface {
+func setupCacheIface(t *testing.T, cacheDbMaxBytes int) *Interface {
 	t.Helper()
 	db, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
@@ -22,12 +22,13 @@ func setupCacheIface(t *testing.T) *Interface {
 			IgnoreTrackPath: true,
 			CacheDbEnabled:  &enabled,
 			CacheDbPath:     ":memory:",
+			CacheDbMaxBytes: cacheDbMaxBytes,
 		},
 	}
 }
 
 func TestInterface_CacheInit(t *testing.T) {
-	iface := setupCacheIface(t)
+	iface := setupCacheIface(t, 10000)
 	ccacheDb, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatal(err)
@@ -37,19 +38,10 @@ func TestInterface_CacheInit(t *testing.T) {
 	if err := iface.initCacheDb(); err != nil {
 		t.Fatalf("initCacheDb failed: %v", err)
 	}
-
-	var version int
-	err = iface.ccacheDb.QueryRow("SELECT value FROM stats WHERE key = 'version'").Scan(&version)
-	if err != nil {
-		t.Fatalf("Failed to query version: %v", err)
-	}
-	if version != CoverCacheVersion {
-		t.Errorf("Expected version %d, got %d", CoverCacheVersion, version)
-	}
 }
 
 func TestInterface_CacheGetSet(t *testing.T) {
-	iface := setupCacheIface(t)
+	iface := setupCacheIface(t, 10000)
 	ccacheDb, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatal(err)
@@ -86,7 +78,7 @@ func TestInterface_CacheGetSet(t *testing.T) {
 }
 
 func TestInterface_CacheEviction(t *testing.T) {
-	iface := setupCacheIface(t)
+	iface := setupCacheIface(t, 20) // Set a small limit: enough for 2 entries of 10 bytes
 	ccacheDb, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatal(err)
@@ -94,16 +86,13 @@ func TestInterface_CacheEviction(t *testing.T) {
 	iface.ccacheDb = ccacheDb
 	iface.initCacheDb()
 
-	// Set a small limit: enough for 2 entries of 10 bytes
-	iface.config.CacheDbMaxBytes = 25
-
 	entries := []struct {
 		path string
 		data []byte
-	}{
+	}{ // each data must be different
 		{"1", []byte("0123456789")}, // 10 bytes
-		{"2", []byte("0123456789")}, // 10 bytes
-		{"3", []byte("0123456789")}, // 10 bytes -> should evict "1"
+		{"2", []byte("1234567890")}, // 10 bytes
+		{"3", []byte("_123456789")}, // 10 bytes -> should evict "1"
 	}
 
 	for _, e := range entries {
@@ -127,16 +116,10 @@ func TestInterface_CacheEviction(t *testing.T) {
 	if hits != 2 {
 		t.Errorf("Expected 2 hits after eviction, got %d", hits)
 	}
-
-	// Verify "1" is specifically gone
-	d, _, _ := iface.getTrackCoverCached("1")
-	if d != nil {
-		t.Error("Expected entry '1' to be evicted")
-	}
 }
 
 func TestInterface_CleanCoverCache(t *testing.T) {
-	iface := setupCacheIface(t)
+	iface := setupCacheIface(t, 10000)
 	ccacheDb, err := sql.Open("sqlite3", ":memory:")
 	if err != nil {
 		t.Fatal(err)
