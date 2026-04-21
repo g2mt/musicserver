@@ -195,7 +195,7 @@ Returns the cover art image of the track as a raw stream of bytes.
 
 ### GET `/track/:external/[url]`
 
-Returns the track metadata for the URL `url` using the media downloader specified in the config file.
+Returns a list of track metadata for the URL `url` using the media downloader specified in the config file.
 
 ### POST `/track/:external/[url]`
 
