@@ -77,7 +77,7 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	if config.CoverCacheMaxBytes == 0 {
-		config.CoverCacheMaxBytes = 512 * 1024 * 1024
+		config.CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
 	}
 
 	return &config, nil
