@@ -159,12 +159,14 @@ func (i *Interface) insertCoverCacheEntry(cached coverCacheData) {
 				if rows.Scan(&evictPath, &evictChecksum, &evictSize) == nil {
 					_, err = tx.Exec("DELETE FROM cover_cache WHERE path = ?", evictPath)
 					if err != nil {
+						slog.Warn("Unable to delete cover_cache entry during eviction", "path", evictPath, "err", err)
 						return
 					}
 					// Check if checksum is still referenced
 					var refCount int
 					err = tx.QueryRow("SELECT COUNT(*) FROM cover_cache WHERE checksum = ?", evictChecksum).Scan(&refCount)
 					if err != nil {
+						slog.Warn("Unable to check reference count during eviction", "checksum", evictChecksum, "err", err)
 						return
 					}
 					if refCount == 0 {
