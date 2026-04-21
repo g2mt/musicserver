@@ -26,13 +26,14 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 	if i.config.DebugExternal {
 		if u == "http://track" {
 			return []schema.Track{{Name: "Debug Track", Artist: "Debug Artist", Album: "Debug Album", Path: u}}, nil
-		}
-		if u == "http://album" {
+		} else if u == "http://album" {
 			return []schema.Track{
 				{Name: "Track 1", Artist: "Debug Artist", Album: "Debug Album", Path: u + "/1"},
 				{Name: "Track 2", Artist: "Debug Artist", Album: "Debug Album", Path: u + "/2"},
 				{Name: "Track 3", Artist: "Debug Artist", Album: "Debug Album", Path: u + "/3"},
 			}, nil
+		} else {
+			return nil, errors.New("incorrect debug url")
 		}
 	}
 
