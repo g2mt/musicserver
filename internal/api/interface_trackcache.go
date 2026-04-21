@@ -7,7 +7,7 @@ import (
 
 const CoverCacheDbPath = "./cache.db"
 const CoverCacheMaxBytes = 512 * 1024 * 1024 // 512 Mb
-const CacheDbVersion = 1
+const CoverCacheVersion = 1
 
 type coverCacheData struct {
 	path     string
@@ -20,8 +20,8 @@ func (i *Interface) initCacheDb() error {
 	var currentVersion int
 	err := i.ccacheDb.QueryRow("SELECT value FROM stats WHERE key = 'version'").Scan(&currentVersion)
 	if err == nil {
-		if currentVersion != CacheDbVersion {
-			return fmt.Errorf("cache database version mismatch: expected %d, found %d", CacheDbVersion, currentVersion)
+		if currentVersion != CoverCacheVersion {
+			return fmt.Errorf("cache database version mismatch: expected %d, found %d", CoverCacheVersion, currentVersion)
 		}
 	}
 
