@@ -69,7 +69,13 @@ function TrackConfirmBox({
       }
     >
       <p>Download these tracks?</p>
-      {!externalTracksCollapsed && (
+      {externalTracksCollapsed ? (
+        <ul>
+          {tracks.map((t) => (
+            <li key={t.id}>{t.name}</li>
+          ))}
+        </ul>
+      ) : (
         <TrackList tracks={tracks} parentElement={{ current: null }} />
       )}
     </ConfirmBox>
