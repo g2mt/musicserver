@@ -81,7 +81,6 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 		tracks = append(tracks, track)
 		i.exTrackCache.Add(u, track)
 	}
-
 	return tracks, nil
 }
 
