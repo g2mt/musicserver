@@ -24,10 +24,8 @@ func TestCmdArgsConfig_Unmarshal(t *testing.T) {
 		{
 			name:   "YAML Slice",
 			format: "yaml",
-			data:   []byte(`- one
-- two
-- three`),
-			want: CmdArgsConfig{"one", "two", "three"},
+			data:   []byte(`["one", "two", "three"]`),
+			want:   CmdArgsConfig{"one", "two", "three"},
 		},
 		{
 			name:   "JSON String",

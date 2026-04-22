@@ -2,7 +2,6 @@ package schema
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/shlex"
