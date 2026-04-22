@@ -8,98 +8,115 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestCmdArgsConfig_UnmarshalYAML_String(t *testing.T) {
-	data := []byte(`one "two three" four`)
-	var args CmdArgsConfig
-	err := yaml.Unmarshal(data, &args)
-	if err != nil {
-		t.Fatalf("UnmarshalYAML() error = %v", err)
-	}
-
-	want := CmdArgsConfig{"one", "two three", "four"}
-	if diff := cmp.Diff(want, args); diff != "" {
-		t.Errorf("UnmarshalYAML() mismatch (-want +got):\n%s", diff)
-	}
-}
-
-func TestCmdArgsConfig_UnmarshalYAML_Slice(t *testing.T) {
-	data := []byte(`- one
+func TestCmdArgsConfig_Unmarshal(t *testing.T) {
+	tests := []struct {
+		name   string
+		format string
+		data   []byte
+		want   CmdArgsConfig
+	}{
+		{
+			name:   "YAML String",
+			format: "yaml",
+			data:   []byte(`one "two three" four`),
+			want:   CmdArgsConfig{"one", "two three", "four"},
+		},
+		{
+			name:   "YAML Slice",
+			format: "yaml",
+			data:   []byte(`- one
 - two
-- three`)
-	var args CmdArgsConfig
-	err := yaml.Unmarshal(data, &args)
-	if err != nil {
-		t.Fatalf("UnmarshalYAML() error = %v", err)
+- three`),
+			want: CmdArgsConfig{"one", "two", "three"},
+		},
+		{
+			name:   "JSON String",
+			format: "json",
+			data:   []byte(`"one \"two three\" four"`),
+			want:   CmdArgsConfig{"one", "two three", "four"},
+		},
+		{
+			name:   "JSON Slice",
+			format: "json",
+			data:   []byte(`["one", "two", "three"]`),
+			want:   CmdArgsConfig{"one", "two", "three"},
+		},
 	}
 
-	want := CmdArgsConfig{"one", "two", "three"}
-	if diff := cmp.Diff(want, args); diff != "" {
-		t.Errorf("UnmarshalYAML() mismatch (-want +got):\n%s", diff)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var got CmdArgsConfig
+			var err error
 
-func TestCmdArgsConfig_MarshalYAML(t *testing.T) {
-	args := CmdArgsConfig{"one", "two", "three"}
-	data, err := yaml.Marshal(args)
-	if err != nil {
-		t.Fatalf("MarshalYAML() error = %v", err)
-	}
+			if tt.format == "yaml" {
+				err = yaml.Unmarshal(tt.data, &got)
+			} else if tt.format == "json" {
+				err = json.Unmarshal(tt.data, &got)
+			} else {
+				t.Fatalf("unknown format: %s", tt.format)
+			}
 
-	var got []string
-	err = yaml.Unmarshal(data, &got)
-	if err != nil {
-		t.Fatalf("Unmarshal error = %v", err)
-	}
+			if err != nil {
+				t.Fatalf("Unmarshal() error = %v", err)
+			}
 
-	want := []string{"one", "two", "three"}
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("MarshalYAML() mismatch (-want +got):\n%s", diff)
-	}
-}
-
-func TestCmdArgsConfig_UnmarshalJSON_String(t *testing.T) {
-	data := []byte(`"one \"two three\" four"`)
-	var args CmdArgsConfig
-	err := json.Unmarshal(data, &args)
-	if err != nil {
-		t.Fatalf("UnmarshalJSON() error = %v", err)
-	}
-
-	want := CmdArgsConfig{"one", "two three", "four"}
-	if diff := cmp.Diff(want, args); diff != "" {
-		t.Errorf("UnmarshalJSON() mismatch (-want +got):\n%s", diff)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("Unmarshal() mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }
 
-func TestCmdArgsConfig_UnmarshalJSON_Slice(t *testing.T) {
-	data := []byte(`["one", "two", "three"]`)
-	var args CmdArgsConfig
-	err := json.Unmarshal(data, &args)
-	if err != nil {
-		t.Fatalf("UnmarshalJSON() error = %v", err)
+func TestCmdArgsConfig_Marshal(t *testing.T) {
+	tests := []struct {
+		name   string
+		format string
+		input  CmdArgsConfig
+	}{
+		{
+			name:   "YAML",
+			format: "yaml",
+			input:  CmdArgsConfig{"one", "two", "three"},
+		},
+		{
+			name:   "JSON",
+			format: "json",
+			input:  CmdArgsConfig{"one", "two", "three"},
+		},
 	}
 
-	want := CmdArgsConfig{"one", "two", "three"}
-	if diff := cmp.Diff(want, args); diff != "" {
-		t.Errorf("UnmarshalJSON() mismatch (-want +got):\n%s", diff)
-	}
-}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var data []byte
+			var err error
 
-func TestCmdArgsConfig_MarshalJSON(t *testing.T) {
-	args := CmdArgsConfig{"one", "two", "three"}
-	data, err := json.Marshal(args)
-	if err != nil {
-		t.Fatalf("MarshalJSON() error = %v", err)
-	}
+			if tt.format == "yaml" {
+				data, err = yaml.Marshal(tt.input)
+			} else if tt.format == "json" {
+				data, err = json.Marshal(tt.input)
+			} else {
+				t.Fatalf("unknown format: %s", tt.format)
+			}
 
-	var got []string
-	err = json.Unmarshal(data, &got)
-	if err != nil {
-		t.Fatalf("Unmarshal error = %v", err)
-	}
+			if err != nil {
+				t.Fatalf("Marshal() error = %v", err)
+			}
 
-	want := []string{"one", "two", "three"}
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("MarshalJSON() mismatch (-want +got):\n%s", diff)
+			var got []string
+			if tt.format == "yaml" {
+				err = yaml.Unmarshal(data, &got)
+			} else {
+				err = json.Unmarshal(data, &got)
+			}
+
+			if err != nil {
+				t.Fatalf("Unmarshal error = %v", err)
+			}
+
+			want := []string(tt.input)
+			if diff := cmp.Diff(want, got); diff != "" {
+				t.Errorf("Marshal() mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }
