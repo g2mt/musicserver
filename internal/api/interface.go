@@ -381,4 +381,3 @@ func (i *Interface) HandleRequestByteStream(path string, method string, params m
 	reader.HandleWriter(buf)
 	return buf, contentType, err
 }
-```
