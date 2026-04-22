@@ -185,7 +185,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
 		if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
 			if method == "POST" {
-				success, err := i.DownloadExternalTrack(extUrl)
+				success, err := i.DownloadExternalTracks([]string{extUrl})
 				if err != nil {
 					return nil, "", err
 				}
