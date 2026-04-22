@@ -87,12 +87,9 @@ else()
   set(FRONTEND_COMMAND npm run build)
 endif()
 
-set(FRONTEND_STAMP "${CMAKE_SOURCE_DIR}/frontend/dist-android/stamp")
-
 add_custom_command(
-  OUTPUT ${FRONTEND_STAMP}
+  OUTPUT "${CMAKE_SOURCE_DIR}/frontend/index.html"
   COMMAND ${FRONTEND_COMMAND}
-  COMMAND ${CMAKE_COMMAND} -E touch ${FRONTEND_STAMP}
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/frontend
   DEPENDS ${FRONTEND_SOURCES} ${FRONTEND_CONFIG}
   COMMENT "Building frontend"
