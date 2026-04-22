@@ -17,14 +17,22 @@ import { shuffled } from "./utils";
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
 
-type TrackListContainerProps = {
+type OptionalUnion<T extends any[]> = T[number] | {
+  [K in keyof T[number]]?: undefined;
+};
+
+type TrackListContainerProps = OptionalUnion<
+  [
+    {
       canEnqueue: true;
       queue: TrackQueue;
-    }
-  | {
+    },
+    {
       canUnqueue: true;
       queue: TrackQueue;
-    };
+    }
+  ]
+>;
 
 export type TrackListProps = {
   tracks: TrackData[];
