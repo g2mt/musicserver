@@ -17,19 +17,25 @@ import { shuffled } from "./utils";
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
 
-export function TrackList({
-  tracks,
-  canEnqueue,
-  canUnqueue,
-  parentElement,
-  queue,
-}: {
+type TrackListContainerProps =
+  | {
+      canEnqueue: true;
+      queue: TrackQueue;
+    }
+  | {
+      canUnqueue: true;
+      queue: TrackQueue;
+    };
+
+export type TrackListProps = {
   tracks: TrackData[];
-  canEnqueue?: boolean;
-  canUnqueue?: boolean;
   parentElement: RefObject<HTMLElement | null>;
-  queue?: TrackQueue;
-}) {
+} & TrackListContainerProps &
+  Record<string, undefined>;
+
+export function TrackList(props: TrackListProps) {
+  const { tracks, parentElement } = props;
+
   const listRef = useRef<HTMLDivElement>(null);
   const trackRefs = useRef<(HTMLDivElement | null)[]>([]);
 
