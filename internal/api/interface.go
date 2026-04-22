@@ -183,7 +183,21 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			return nil, "", errors.New("method not allowed")
 		}
 	} else if id, ok := strings.CutPrefix(path, "/track/"); ok {
-		if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
+		if id == ":external" {
+			if method == "POST" {
+				urlsParam, ok := params["urls"]
+				if !ok {
+					return nil, "", errors.New("missing urls parameter")
+				}
+				urls := strings.Split(urlsParam, ",")
+				for i := range urls {
+					urls[i] = strings.TrimSpace(urls[i])
+				}
+				response, err = i.DownloadExternalTracks(urls)
+			} else {
+				return nil, "", errors.New("method not allowed")
+			}
+		} else if extUrl, ok := strings.CutPrefix(id, ":external/"); ok {
 			if method == "POST" {
 				success, err := i.DownloadExternalTracks([]string{extUrl})
 				if err != nil {
@@ -367,3 +381,4 @@ func (i *Interface) HandleRequestByteStream(path string, method string, params m
 	reader.HandleWriter(buf)
 	return buf, contentType, err
 }
+```
