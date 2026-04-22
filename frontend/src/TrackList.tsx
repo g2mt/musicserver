@@ -63,11 +63,11 @@ export function TrackList(props: TrackListProps) {
 
   useEffect(() => {
     // Only scroll the queue
-    if (canUnqueue && queue?.trackNavigated && queue.index !== null) {
-      scrollToTrack(queue.index);
-      queue.setTrackNavigated(false);
+    if (props.canUnqueue && props.queue?.trackNavigated && props.queue.index !== null) {
+      scrollToTrack(props.queue.index);
+      props.queue.setTrackNavigated(false);
     }
-  }, [canUnqueue && queue?.trackNavigated]);
+  }, [props.canUnqueue && props.queue?.trackNavigated]);
 
   // Displayed count
 
@@ -134,15 +134,15 @@ export function TrackList(props: TrackListProps) {
 
   return (
     <div className="track-list" ref={listRef}>
-      {canUnqueue && (
+      {props.canUnqueue && (
         <div className="track-list-buttons">
-          <button className="btn" onClick={() => queue!.remove()}>
+          <button className="btn" onClick={() => props.queue!.remove()}>
             <FontAwesomeIcon icon={faMinus} />
             Remove all from queue
           </button>
           <button
             className="btn"
-            onClick={() => queue!.setTracks(shuffled(tracks))}
+            onClick={() => props.queue!.setTracks(shuffled(tracks))}
           >
             <FontAwesomeIcon icon={faShuffle} />
             Shuffle queue
@@ -152,16 +152,16 @@ export function TrackList(props: TrackListProps) {
 
       {displayedTracks.map((track, index) => (
         <div
-          key={canUnqueue ? `${index}-${track.id}` : track.id}
+          key={props.canUnqueue ? `${index}-${track.id}` : track.id}
           ref={(el) => {
             trackRefs.current[index] = el;
           }}
         >
           <Track
             track={track}
-            index={canUnqueue ? index : undefined}
-            canEnqueue={canEnqueue}
-            canUnqueue={canUnqueue}
+            index={props.canUnqueue ? index : undefined}
+            canEnqueue={props.canEnqueue}
+            canUnqueue={props.canUnqueue}
           />
         </div>
       ))}
