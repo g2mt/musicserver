@@ -10,28 +10,22 @@ import { type TrackData } from "./TrackData";
 import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { TrackQueue } from "./TrackQueue";
+import { shuffled, type OptionalUnion } from "./utils";
 
 import "./TrackList.css";
-import { shuffled } from "./utils";
 
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
 
-type OptionalUnion<T extends any[]> = T[number] | {
-  [K in keyof T[number]]?: undefined;
-};
-
 type TrackListContainerProps = OptionalUnion<
-  [
-    {
-      canEnqueue: true;
-      queue: TrackQueue;
-    },
-    {
-      canUnqueue: true;
+  | {
+      act: "enqueue";
       queue: TrackQueue;
     }
-  ]
+  | {
+      act: "unqueue";
+      queue: TrackQueue;
+    }
 >;
 
 export type TrackListProps = {
@@ -69,11 +63,15 @@ export function TrackList(props: TrackListProps) {
 
   useEffect(() => {
     // Only scroll the queue
-    if (props.canUnqueue && props.queue.trackNavigated && props.queue.index !== null) {
+    if (
+      props.act === "unqueue" &&
+      props.queue.trackNavigated &&
+      props.queue.index !== null
+    ) {
       scrollToTrack(props.queue.index);
       props.queue.setTrackNavigated(false);
     }
-  }, [props.canUnqueue && props.queue.trackNavigated]);
+  }, [props.act === "unqueue" && props.queue.trackNavigated]);
 
   // Displayed count
 
@@ -140,7 +138,7 @@ export function TrackList(props: TrackListProps) {
 
   return (
     <div className="track-list" ref={listRef}>
-      {props.canUnqueue && (
+      {props.act === "unqueue" && (
         <div className="track-list-buttons">
           <button className="btn" onClick={() => props.queue.remove()}>
             <FontAwesomeIcon icon={faMinus} />
@@ -158,16 +156,15 @@ export function TrackList(props: TrackListProps) {
 
       {displayedTracks.map((track, index) => (
         <div
-          key={props.canUnqueue ? `${index}-${track.id}` : track.id}
+          key={props.act === "unqueue" ? `${index}-${track.id}` : track.id}
           ref={(el) => {
             trackRefs.current[index] = el;
           }}
         >
           <Track
             track={track}
-            index={props.canUnqueue ? index : undefined}
-            canEnqueue={props.canEnqueue}
-            canUnqueue={props.canUnqueue}
+            index={props.act === "unqueue" ? index : undefined}
+            act={props.act}
           />
         </div>
       ))}

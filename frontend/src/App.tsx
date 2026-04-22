@@ -315,8 +315,8 @@ export function App() {
   const trackQueue = c.queueCollapsed ? null : (
     <TrackList
       tracks={c.queue.tracks}
-      canUnqueue={true}
       parentElement={appRightSide}
+      act={"unqueue"}
       queue={c.queue}
     />
   );
@@ -508,11 +508,15 @@ export function App() {
             {!c.tracksListCollapsed && (
               <>
                 {confirmBoxes.map((b) => (
-                  <ConfirmBoxContext value={{
-                    remove: () => {
-                      setConfirmBoxes(list => list.filter(data => data.key !== b.key));
-                    }
-                  }}>
+                  <ConfirmBoxContext
+                    value={{
+                      remove: () => {
+                        setConfirmBoxes((list) =>
+                          list.filter((data) => data.key !== b.key),
+                        );
+                      },
+                    }}
+                  >
                     <div key={b.key}>{b.el}</div>
                   </ConfirmBoxContext>
                 ))}

@@ -27,14 +27,12 @@ export function Track({
   track,
   highlighted,
   index,
-  canEnqueue,
-  canUnqueue,
+  act,
 }: {
   track: TrackData;
   highlighted?: boolean;
   index?: number;
-  canEnqueue?: boolean;
-  canUnqueue?: boolean;
+  act?: "enqueue" | "unqueue";
 }) {
   const c = useContext(AppContext)!;
   const isHighlighted =
@@ -154,7 +152,7 @@ export function Track({
           )}
         </p>
       </div>
-      {canEnqueue && (
+      {act === "enqueue" && (
         <button
           className="icon-btn track-queue-btn"
           onClick={() => c.queue.add(track)}
@@ -162,7 +160,7 @@ export function Track({
           <FontAwesomeIcon icon={faPlus} />
         </button>
       )}
-      {canUnqueue && index !== undefined && (
+      {act === "unqueue" && index !== undefined && (
         <button
           className="icon-btn track-queue-btn"
           onClick={() => c.queue.remove(index)}

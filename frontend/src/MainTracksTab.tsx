@@ -171,8 +171,8 @@ export function MainTracksTab({
       {controls}
       <TrackList
         tracks={tracks}
-        canEnqueue={true}
         parentElement={parentElement}
+        act={"enqueue"}
         queue={c.queue}
       />
       {controls}
