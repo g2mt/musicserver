@@ -43,7 +43,6 @@ export function useAudio({
 
   const ended = useRef(false);
   const repeated = useRef(false);
-  const loadedFromSerialization = useRef(false);
 
   const audio = useMemo(() => new apiAudio(), []);
 
@@ -60,10 +59,6 @@ export function useAudio({
   }, [currentTrack]);
 
   useEffect(() => {
-    if (loadedFromSerialization.current) {
-      loadedFromSerialization.current = false;
-      return;
-    }
     if (!url) {
       setIsPlaying(false);
       return;
@@ -76,7 +71,7 @@ export function useAudio({
     setIsPlaying(true);
     ended.current = false;
     repeated.current = false;
-  }, [url, loadedFromSerialization.current]);
+  }, [url]);
 
   useEffect(() => {
     function onTimeUpdate() {
@@ -139,14 +134,13 @@ export function useAudio({
       if (state.path !== "") {
         const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
         if (data && !data.error) {
-          loadedFromSerialization.current = true;
-          setCurrentTrack(data);
+          if (data.path !== currentTrack?.path)
+            setCurrentTrack(data);
         } else {
           console.error(`Invalid loadSerializedState: ${data}`);
           return;
         }
       } else {
-        loadedFromSerialization.current = true;
         setCurrentTrack(null);
       }
       setIsPlaying(state.isPlaying);

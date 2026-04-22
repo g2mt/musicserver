@@ -87,7 +87,7 @@ else()
   set(FRONTEND_COMMAND npm run build)
 endif()
 
-set(FRONTEND_STAMP "${CMAKE_BINARY_DIR}/frontend.stamp")
+set(FRONTEND_STAMP "${CMAKE_SOURCE_DIR}/frontend/dist-android/stamp")
 
 add_custom_command(
   OUTPUT ${FRONTEND_STAMP}
