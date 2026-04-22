@@ -189,7 +189,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				if !ok {
 					return nil, "", errors.New("missing urls parameter")
 				}
-				urls := strings.Split(urlsParam, ",")
+				urls := strings.Split(urlsParam, "\n")
 				for i := range urls {
 					urls[i] = strings.TrimSpace(urls[i])
 				}

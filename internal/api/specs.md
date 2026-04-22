@@ -199,7 +199,7 @@ Returns a list of track metadata for the URL `url` using the media downloader sp
 
 ### POST `/track/:external`
 
-Starts downloading every urls listed in the `urls` parameter using the media downloader specified in the config file.
+Starts downloading every urls listed in the `urls` parameter using the media downloader specified in the config file. The `urls` in the parameter will be separated by newline characters `%0A`.
 
 Returns a JSON string containing the output captured from the media downloader.
 
