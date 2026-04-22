@@ -63,11 +63,11 @@ export function TrackList(props: TrackListProps) {
 
   useEffect(() => {
     // Only scroll the queue
-    if (props.canUnqueue && props.queue?.trackNavigated && props.queue.index !== null) {
+    if (props.canUnqueue && props.queue.trackNavigated && props.queue.index !== null) {
       scrollToTrack(props.queue.index);
       props.queue.setTrackNavigated(false);
     }
-  }, [props.canUnqueue && props.queue?.trackNavigated]);
+  }, [props.canUnqueue && props.queue.trackNavigated]);
 
   // Displayed count
 
@@ -136,13 +136,13 @@ export function TrackList(props: TrackListProps) {
     <div className="track-list" ref={listRef}>
       {props.canUnqueue && (
         <div className="track-list-buttons">
-          <button className="btn" onClick={() => props.queue!.remove()}>
+          <button className="btn" onClick={() => props.queue.remove()}>
             <FontAwesomeIcon icon={faMinus} />
             Remove all from queue
           </button>
           <button
             className="btn"
-            onClick={() => props.queue!.setTracks(shuffled(tracks))}
+            onClick={() => props.queue.setTracks(shuffled(tracks))}
           >
             <FontAwesomeIcon icon={faShuffle} />
             Shuffle queue
