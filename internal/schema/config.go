@@ -26,6 +26,8 @@ type Config struct {
 	CacheDbMaxBytes int `json:"cover_cache_max_bytes" yaml:"cover_cache_max_bytes"`
 	// path to generic media downloader binary
 	MediaDownloader string `json:"media_downloader" yaml:"media_downloader"`
+	// arguments to pass to the media downloader. can be a string (shell-style) or a list of strings
+	MediaDownloaderArgs CmdArgsConfig `json:"media_downloader_args" yaml:"media_downloader_args"`
 
 	// internal: flag to disable file operations on tracks for testing
 	IgnoreTrackPath bool
