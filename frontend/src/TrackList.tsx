@@ -17,8 +17,7 @@ import { shuffled } from "./utils";
 const PAGE_SIZE = 50;
 const TRACK_HEIGHT_PX = 72;
 
-type TrackListContainerProps =
-  | {
+type TrackListContainerProps = {
       canEnqueue: true;
       queue: TrackQueue;
     }
@@ -30,8 +29,7 @@ type TrackListContainerProps =
 export type TrackListProps = {
   tracks: TrackData[];
   parentElement: RefObject<HTMLElement | null>;
-} & TrackListContainerProps &
-  Record<string, undefined>;
+} & TrackListContainerProps;
 
 export function TrackList(props: TrackListProps) {
   const { tracks, parentElement } = props;
