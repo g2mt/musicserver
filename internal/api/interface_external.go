@@ -84,7 +84,7 @@ func (i *Interface) GetExternalTrackByURL(u string) ([]schema.Track, error) {
 	return tracks, nil
 }
 
-func (i *Interface) DownloadExternalTrack(url string) (string, error) {
+func (i *Interface) DownloadExternalTracks(urls []string) (string, error) {
 	if i.config.DebugExternal {
 		return "", nil
 	}
@@ -93,40 +93,51 @@ func (i *Interface) DownloadExternalTrack(url string) (string, error) {
 		return "", errors.New("no media downloader configured")
 	}
 
+	if len(urls) == 0 {
+		return "", errors.New("no urls provided")
+	}
+
 	i.dlExternalMu.Lock()
-	defer i.dlExternalMu.Unlock()
 
 	// Check if already downloading
 	if i.dlExternal == nil {
 		i.dlExternal = make(map[string]dlExternal)
 	}
-	if _, exists := i.dlExternal[url]; exists {
-		return "", nil
+	for _, u := range urls {
+		if _, exists := i.dlExternal[u]; exists {
+			i.dlExternalMu.Unlock()
+			return "", errors.New("already downloading: " + u)
+		}
 	}
+
+	// Create a new ticker for this download
+	// Use the first URL as the primary identifier for the ticker
+	tickerName := "dl:" + urls[0]
+	ticker, err := i.prog.Bind(tickerName)
+	if err != nil {
+		i.dlExternalMu.Unlock()
+		return "", err
+	}
+
+	// Store in map for all URLs
+	dlState := dlExternal{ticker: ticker, done: make(chan struct{})}
+	for _, u := range urls {
+		i.dlExternal[u] = dlState
+	}
+
+	i.dlExternalMu.Unlock()
+
 	defer func() {
+		i.prog.Unbind(tickerName)
 		i.dlExternalMu.Lock()
-		delete(i.dlExternal, url)
+		for _, u := range urls {
+			delete(i.dlExternal, u)
+		}
 		i.dlExternalMu.Unlock()
 	}()
 
-	// Create a new ticker for this download
-	tickerName := "dl:" + url
-	ticker, err := i.prog.Bind(tickerName)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		i.prog.Unbind(tickerName)
-	}()
-
-	// Store in map
-	i.dlExternal[url] = struct {
-		ticker *progress.ProgressTicker
-		done   chan struct{}
-	}{ticker: ticker, done: make(chan struct{})}
-
-	// Spawn the command
-	cmd := exec.Command(i.config.MediaDownloader, url)
+	// Spawn the command with all URLs
+	cmd := exec.Command(i.config.MediaDownloader, urls...)
 	cmd.Dir = i.config.DataPath
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
