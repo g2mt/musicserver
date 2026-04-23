@@ -3,6 +3,7 @@ package api
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -20,12 +21,13 @@ type TrackListResult struct {
 }
 
 func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackListResult, error) {
-	query := "SELECT id, short_id, name, path, artist, album FROM tracks"
+	var err error
 	args := []interface{}{}
+
 	whereClauses := []string{}
 
 	var longBeforeId string
-	var err error
+	var longAfterId string
 
 	// Sorting variables
 	sortColumn := "id"
@@ -53,22 +55,12 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 		for _, op := range search.Operators {
 			switch op.Key {
 			case "after":
-				longAfterId, err := i.resolveTrackShortId(op.Value, nil)
-				if err != nil {
-					longAfterId = ""
-				}
-				if longAfterId != "" {
-					whereClauses = append(whereClauses, "id > ?")
-					args = append(args, longAfterId)
+				if id, err := i.resolveTrackShortId(op.Value, nil); err == nil {
+					longAfterId = id
 				}
 			case "before":
-				longBeforeId, err = i.resolveTrackShortId(op.Value, nil)
-				if err != nil {
-					longBeforeId = ""
-				}
-				if longBeforeId != "" {
-					whereClauses = append(whereClauses, "id < ?")
-					args = append(args, longBeforeId)
+				if id, err := i.resolveTrackShortId(op.Value, nil); err == nil {
+					longBeforeId = id
 				}
 			case "album":
 				whereClauses = append(whereClauses, "(album LIKE ?)")
@@ -93,42 +85,76 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 		}
 	}
 
-	// Combine WHERE clauses if any exist
-	if len(whereClauses) > 0 {
-		query += " WHERE " + strings.Join(whereClauses, " AND ")
-	}
-
 	// Ordering
 	if limit == 0 {
 		limit = MaxPageCount
 	}
 
+	// Ordering
 	orderByClause := "ORDER BY " + sortColumn
 	if sortDesc {
 		orderByClause += " DESC"
 	}
 
-	if longBeforeId != "" {
-		if limit > 0 {
-			query = "SELECT * FROM (" +
-				query + " LIMIT ?) as sub " + orderByClause
-			args = append(args, limit)
-		} else {
-			query = "SELECT * FROM (" +
-				query +
-				") as sub " + orderByClause
-		}
-	} else {
-		if limit > 0 {
-			query += " " + orderByClause + " LIMIT ?"
-			args = append(args, limit)
-		} else {
-			query += " " + orderByClause
-		}
+	// Build SQL query
+	SelectedColsFromTracks := "id, short_id, name, path, artist, album"
+	var query string
+
+	var whereClause string
+	if len(whereClauses) > 0 {
+		whereClause = " WHERE " + strings.Join(whereClauses, " AND ")
 	}
+	var limitClause string
+	if limit > 0 {
+		limitClause = fmt.Sprintf("LIMIT %d", limit)
+		args = append(args, limit)
+	}
+
+	if longBeforeId == "" && longAfterId == "" {
+		// no range specified
+		query = fmt.Sprintf("SELECT %s FROM tracks %s %s %s",
+			SelectedColsFromTracks,
+			whereClause,
+			orderByClause,
+			limitClause)
+	} else {
+		// before/after ID specified
+		var outerWhereClauses []string
+		if longBeforeId != "" {
+			outerWhereClauses = append(outerWhereClauses,
+				"_rank < (SELECT _rank FROM _ranked WHERE id = ?)")
+			args = append(args, longBeforeId)
+		}
+		if longAfterId != "" {
+			outerWhereClauses = append(outerWhereClauses,
+				"_rank > (SELECT _rank FROM _ranked WHERE id = ?)")
+			args = append(args, longAfterId)
+		}
+		query = fmt.Sprintf(`
+			WITH _ranked AS (
+				SELECT
+					%s, -- SelectedColsFromTracks
+					ROW_NUMBER() OVER (%s) AS _rank -- orderByClause
+				FROM tracks
+			)
+			SELECT %s FROM (
+				SELECT * FROM _ranked
+				AS _sub
+				WHERE %s -- outerWhereClauses
+				ORDER BY _rank
+			)
+		`, SelectedColsFromTracks,
+			orderByClause,
+			SelectedColsFromTracks,
+			strings.Join(outerWhereClauses, " "),
+		)
+	}
+	slog.Debug("SQL query for search: ")
+	slog.Debug(query)
 
 	rows, err := i.db.Query(query, args...)
 	if err != nil {
+		slog.Debug("Unable to query", "err", err)
 		return TrackListResult{}, err
 	}
 	defer rows.Close()
