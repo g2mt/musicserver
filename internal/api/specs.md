@@ -228,7 +228,13 @@ May return an error.
 
 ### DELETE `/track`
 
-Deletes (forgets) every track and album in the database. This does *NOT* remove the files corresponding to the tracks.
+Deletes (forgets) every track and album from the database. This does *NOT* remove the files corresponding to the tracks.
+
+Returns the JSON value `true`.
+
+### DELETE `/track/[id]`
+
+Deletes (forgets) the track by the ID from the database. This does *NOT* remove the file corresponding to the track.
 
 Returns the JSON value `true`.
 

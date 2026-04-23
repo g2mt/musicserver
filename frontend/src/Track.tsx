@@ -40,7 +40,6 @@ export function Track({
   const isHighlighted =
     highlighted || (index !== undefined && index === c.queue.index);
 
-  // Inner function to handle the context menu creation
   const handleContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
     toggleContextMenu(
       e.currentTarget,
@@ -102,16 +101,15 @@ export function Track({
         >
           Path
         </ContextMenuItem>
-        {/* New option to forget (delete) the track */}
         <ContextMenuItem
           icon={faTrash}
-          onClick={async () => {
-            try {
-              await fetchAPI(`/track/${track.id}`, undefined, "DELETE");
+          onClick={() => {
+            fetchAPI(`/track/${track.id}`, undefined, "DELETE")
+            .then(() => {
               toast.success(`Track "${track.name}" forgotten`);
-            } catch (err) {
+            }).catch(err => {
               toast.error(`Failed to forget track: ${err}`);
-            }
+            });
           }}
         >
           Forget track
