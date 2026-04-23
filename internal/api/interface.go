@@ -174,11 +174,7 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			force := params["force"] == "true"
 			response, err = i.ScanTracks(params["path"], force)
 		} else if method == "DELETE" {
-			success, err := i.ForgetAllTracks()
-			if err != nil {
-				return nil, "", err
-			}
-			response = success
+			response, err = i.ForgetAllTracks()
 		} else {
 			return nil, "", errors.New("method not allowed")
 		}
@@ -209,6 +205,11 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			} else {
 				return nil, "", errors.New("method not allowed")
 			}
+		} else if method == "DELETE" {
+			if err := i.ForgetTrackById(id); err != nil {
+				return nil, "", err
+			}
+			response = true
 		} else if method != "GET" {
 			return nil, "", errors.New("method not allowed")
 		} else if path, ok := strings.CutPrefix(id, ":by-path/"); ok {
