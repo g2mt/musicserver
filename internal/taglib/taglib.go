@@ -44,10 +44,16 @@ func LoadTrack(path string) (schema.Track, error) {
 	}
 
 	// Convert C struct to Go struct
+	title := strings.TrimSpace(C.GoString(cTrack.title))
+	if title == "" {
+		base := filepath.Base(path)
+		title = strings.TrimSuffix(base, filepath.Ext(base))
+	}
+
 	track := schema.Track{
 		LongID:  "",
 		ShortID: "",
-		Name:    C.GoString(cTrack.title),
+		Name:    title,
 		Path:    path,
 		Artist:  C.GoString(cTrack.artist),
 		Album:   C.GoString(cTrack.album),
