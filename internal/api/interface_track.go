@@ -106,13 +106,13 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 		whereClause = " WHERE " + strings.Join(whereClauses, " AND ")
 	}
 
+	var limitClause string
+	if limit > 0 {
+		limitClause = fmt.Sprintf("LIMIT %d", limit)
+	}
+
 	if longBeforeId == "" && longAfterId == "" {
 		// no range specified
-		var limitClause string
-		if limit > 0 {
-			limitClause = fmt.Sprintf("LIMIT %d", limit)
-			args = append(args, limit)
-		}
 		query = fmt.Sprintf("SELECT %s FROM tracks %s %s %s",
 			SelectedColsFromTracks,
 			whereClause,
@@ -133,33 +133,44 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 			args = append(args, longAfterId)
 		}
 
-		// limit clause is appended to outer select
-		var limitClause string
-		if limit > 0 {
-			limitClause = fmt.Sprintf("LIMIT %d", limit)
-			args = append(args, limit)
-		}
-
 		query = fmt.Sprintf(`
 			WITH _ranked AS (
 				SELECT
 					%s, -- SelectedColsFromTracks
 					ROW_NUMBER() OVER (%s) AS _rank -- orderByClause
 				FROM tracks
-				%s -- whereClauses
+				%s -- whereClause
 			)
-			SELECT %s FROM ( -- SelectedColsFromTracks
-				SELECT * FROM _ranked
-				WHERE %s -- outerWhereClauses
-				ORDER BY _rank
-			) %s
 		`, SelectedColsFromTracks,
 			orderByClause,
-			whereClauses,
-			SelectedColsFromTracks,
-			strings.Join(outerWhereClauses, " "),
-			limitClause,
+			whereClause,
 		)
+		if longBeforeId != "" && limitClause != "" {
+			// if before is set then take the last n elements instead for pagination
+			query += fmt.Sprintf(`
+				SELECT %s FROM ( -- SelectedColsFromTracks
+					SELECT * FROM _ranked
+					WHERE %s -- outerWhereClauses
+					ORDER BY _rank DESC
+					%s  -- limitClause
+				) ORDER BY _rank ASC
+			`,
+				SelectedColsFromTracks,
+				strings.Join(outerWhereClauses, " "),
+				limitClause,
+			)
+		} else {
+			query += fmt.Sprintf(`
+				SELECT %s FROM _ranked -- SelectedColsFromTracks
+				WHERE %s -- outerWhereClauses
+				ORDER BY _rank
+				%s -- limitClause
+			`,
+				SelectedColsFromTracks,
+				strings.Join(outerWhereClauses, " "),
+				limitClause,
+			)
+		}
 	}
 	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
 		slog.Debug("SQL query for search: ")
