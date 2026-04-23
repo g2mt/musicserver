@@ -40,10 +40,7 @@ export function Track({
   const isHighlighted =
     highlighted || (index !== undefined && index === c.queue.index);
 
-  // State to track whether the track has been successfully forgotten
   const [forgotten, setForgotten] = useState(false);
-
-  // If the track is forgotten, render nothing
   if (forgotten) {
     return null;
   }
