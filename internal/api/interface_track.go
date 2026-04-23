@@ -13,7 +13,13 @@ import (
 	"musicserver/internal/taglib"
 )
 
-func (i *Interface) GetTracks(search *searchparser.Result, limit int) ([]schema.Track, error) {
+type TrackListResult struct {
+	Filters map[string]string `json:"filters"`
+	Limit   int               `json:"limit"`
+	Tracks  []schema.Track    `json:"tracks"`
+}
+
+func (i *Interface) GetTracks(search *searchparser.Result, limit int) (*TrackListResult, error) {
 	query := "SELECT id, short_id, name, path, artist, album FROM tracks"
 	args := []interface{}{}
 	whereClauses := []string{}
@@ -110,15 +116,28 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) ([]schema.
 	}
 	defer rows.Close()
 
-	var result []schema.Track
+	var tracks []schema.Track
 	for rows.Next() {
 		var track schema.Track
 		if err := rows.Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Artist, &track.Album); err != nil {
 			return nil, err
 		}
-		result = append(result, track)
+		tracks = append(tracks, track)
 	}
-	return result, nil
+
+	// Prepare filters map for response
+	filters := make(map[string]string)
+	if search != nil {
+		for _, op := range search.Operators {
+			filters[op.Key] = op.Value
+		}
+	}
+
+	return &TrackListResult{
+		Filters: filters,
+		Limit:   limit,
+		Tracks:  tracks,
+	}, nil
 }
 
 func (i *Interface) GetAllTrackPaths() ([]string, error) {
@@ -560,3 +579,4 @@ func (i *Interface) ForgetTrackByPath(path string) error {
 
 	return nil
 }
+```
