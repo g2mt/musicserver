@@ -3,8 +3,13 @@ import type { TrackData, TrackListResult } from "./TrackData";
 import {
   faChevronLeft,
   faChevronRight,
+  faCompactDisc,
+  faFileLines,
+  faFolder,
+  faHashtag,
   faPlay,
   faPlus,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useRef, type RefObject } from "react";
@@ -139,11 +144,11 @@ export function MainTracksTab({
       </div>
       <div className="main-tracks-controls-right">
         <Select onChange={handleSortChange} defaultValue={c.resultSort} isIconRight={true}>
-          <Option value="id">ID</Option>
-          <Option value="name">Name</Option>
-          <Option value="path">Path</Option>
-          <Option value="artist">Artist</Option>
-          <Option value="album">Album</Option>
+          <Option value="id"><FontAwesomeIcon icon={faHashtag} /> ID</Option>
+          <Option value="name"><FontAwesomeIcon icon={faFileLines} /> Name</Option>
+          <Option value="path"><FontAwesomeIcon icon={faFolder} /> Path</Option>
+          <Option value="artist"><FontAwesomeIcon icon={faUser} /> Artist</Option>
+          <Option value="album"><FontAwesomeIcon icon={faCompactDisc} /> Album</Option>
         </Select>
         <Select onChange={handleLimitChange} defaultValue={c.resultLimit}>
           <Option value="" disabled={true}>
