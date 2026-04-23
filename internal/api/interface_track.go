@@ -112,7 +112,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 
 	rows, err := i.db.Query(query, args...)
 	if err != nil {
-		return nil, err
+		return TrackListResult{}, err
 	}
 	defer rows.Close()
 
@@ -120,7 +120,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 	for rows.Next() {
 		var track schema.Track
 		if err := rows.Scan(&track.LongID, &track.ShortID, &track.Name, &track.Path, &track.Artist, &track.Album); err != nil {
-			return nil, err
+			return TrackListResult{}, err
 		}
 		tracks = append(tracks, track)
 	}
