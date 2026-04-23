@@ -156,6 +156,7 @@ export function App() {
   });
   [c.resultSort, c.setResultSort] = useState("");
   [c.resultDesc, c.setResultDesc] = useState(false);
+  [c.resultLimit, c.setResultLimit] = useState(-1);
   c.oldSearchQuery = useRef<SearchQuery | null>(null);
   c.refreshSearch = () => {
     // https://react.dev/learn/you-might-not-need-an-effect#fetching-data
@@ -184,6 +185,7 @@ export function App() {
         }
         c.setResultSort(result.filters.sort ?? "");
         c.setResultDesc(result.filters.desc === "1");
+        c.setResultLimit(result.limit);
       })
       .catch((e) => {
         if (ignored) return;

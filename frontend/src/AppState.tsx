@@ -67,6 +67,8 @@ export interface AppState extends AppStateData {
   setResultSort: Dispatch<SetStateAction<string>>;
   resultDesc: boolean;
   setResultDesc: Dispatch<SetStateAction<boolean>>;
+  resultLimit: number;
+  setResultLimit: Dispatch<SetStateAction<number>>;
 
   // search history
   setSearchHistoryLimit: Dispatch<SetStateAction<number>>;

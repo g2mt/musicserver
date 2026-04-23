@@ -138,14 +138,14 @@ export function MainTracksTab({
         </button>
       </div>
       <div className="main-tracks-controls-right">
-        <Select onChange={handleSortChange}>
+        <Select onChange={handleSortChange} defaultValue={c.resultSort}>
           <Option value="id">ID</Option>
           <Option value="name">Name</Option>
           <Option value="path">Path</Option>
           <Option value="artist">Artist</Option>
           <Option value="album">Album</Option>
         </Select>
-        <Select onChange={handleLimitChange}>
+        <Select onChange={handleLimitChange} defaultValue={c.resultLimit}>
           <Option value="" disabled={true}>
             limit
           </Option>
