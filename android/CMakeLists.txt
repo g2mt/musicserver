@@ -128,8 +128,9 @@ add_custom_command(
   COMMENT "Compiling Java code"
 )
 
+add_custom_target(FORCE)
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk FORCE
   COMMAND ${CMAKE_COMMAND} 
     -E copy
     ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
@@ -147,7 +148,12 @@ add_custom_command(
     --key-pass pass:android 
     --out ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.apk
     ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
-  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resource.apk ${CMAKE_CURRENT_BINARY_DIR}/classes.dex ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks ${NATIVE_LIB_TARGETS}
+  DEPENDS
+    ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
+    ${CMAKE_CURRENT_BINARY_DIR}/classes.dex
+    ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
+    ${NATIVE_LIB_TARGETS}
+    FORCE
   COMMENT "Packaging APK"
 )
 
