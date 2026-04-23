@@ -23,14 +23,26 @@ export function Option({ onClick, children, disabled }: OptionProps) {
 }
 
 type SelectProps = {
+  /** Callback when a new option is selected */
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  /** List of <Option> elements */
   children: React.ReactElement<OptionProps>[];
+  /** Value of the initially selected option */
   defaultValue?: any;
+  /** If true, the chevron icon is rendered on the right side of the button */
+  isIconRight?: boolean;
 };
 
-export function Select({ onChange, children, defaultValue }: SelectProps) {
+export function Select({
+  onChange,
+  children,
+  defaultValue,
+  isIconRight = false,
+}: SelectProps) {
   const selectedOption =
     children.find((child) => child.props.value === defaultValue) ?? children[0];
+
+  const chevron = <FontAwesomeIcon icon={faChevronDown} />;
 
   return (
     <button
@@ -56,8 +68,17 @@ export function Select({ onChange, children, defaultValue }: SelectProps) {
         );
       }}
     >
-      <FontAwesomeIcon icon={faChevronDown} />
-      {selectedOption ? selectedOption.props.children : ""}
+      {isIconRight ? (
+        <>
+          {selectedOption ? selectedOption.props.children : ""}
+          {chevron}
+        </>
+      ) : (
+        <>
+          {chevron}
+          {selectedOption ? selectedOption.props.children : ""}
+        </>
+      )}
     </button>
   );
 }
