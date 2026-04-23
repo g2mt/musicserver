@@ -27,8 +27,8 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 
 	whereClauses := []string{}
 
-	var longBeforeId string
-	var longAfterId string
+	var beforeId string
+	var afterId string
 
 	// Sorting variables
 	sortColumn := "id"
@@ -57,11 +57,11 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 			switch op.Key {
 			case "after":
 				if id, err := i.resolveTrackShortId(op.Value, nil); err == nil {
-					longAfterId = id
+					afterId = id
 				}
 			case "before":
 				if id, err := i.resolveTrackShortId(op.Value, nil); err == nil {
-					longBeforeId = id
+					beforeId = id
 				}
 			case "album":
 				whereClauses = append(whereClauses, "(album LIKE ?)")
@@ -111,7 +111,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 		limitClause = fmt.Sprintf("LIMIT %d", limit)
 	}
 
-	if longBeforeId == "" && longAfterId == "" {
+	if beforeId == "" && afterId == "" {
 		// no range specified
 		query = fmt.Sprintf("SELECT %s FROM tracks %s %s %s",
 			SelectedColsFromTracks,
@@ -122,15 +122,15 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 		// before/after ID specified
 
 		var outerWhereClauses []string
-		if longBeforeId != "" {
+		if beforeId != "" {
 			outerWhereClauses = append(outerWhereClauses,
 				"_rank < (SELECT _rank FROM _ranked WHERE id = ?)")
-			args = append(args, longBeforeId)
+			args = append(args, beforeId)
 		}
-		if longAfterId != "" {
+		if afterId != "" {
 			outerWhereClauses = append(outerWhereClauses,
 				"_rank > (SELECT _rank FROM _ranked WHERE id = ?)")
-			args = append(args, longAfterId)
+			args = append(args, afterId)
 		}
 
 		query = fmt.Sprintf(`
@@ -145,7 +145,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 			orderByClause,
 			whereClause,
 		)
-		if longBeforeId != "" && limitClause != "" {
+		if beforeId != "" && limitClause != "" {
 			// if before is set then take the last n elements instead for pagination
 			query += fmt.Sprintf(`
 				SELECT %s FROM ( -- SelectedColsFromTracks
