@@ -138,7 +138,7 @@ export function MainTracksTab({
         </button>
       </div>
       <div className="main-tracks-controls-right">
-        <Select onChange={handleSortChange} defaultValue={c.resultSort}>
+        <Select onChange={handleSortChange} defaultValue={c.resultSort} isIconRight={true}>
           <Option value="id">ID</Option>
           <Option value="name">Name</Option>
           <Option value="path">Path</Option>
