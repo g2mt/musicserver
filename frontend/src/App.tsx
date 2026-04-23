@@ -25,7 +25,7 @@ import {
   type SearchQuery,
 } from "./AppState";
 import { useAudio, type SerializedAudioState } from "./AudioState";
-import type { TrackData } from "./TrackData";
+import type { TrackData, TrackListResult } from "./TrackData";
 import { useTrackQueue, type SerializedTrackQueue } from "./TrackQueue";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
 import { SearchSuggestions } from "./SearchSuggestions";
@@ -162,7 +162,8 @@ export function App() {
       q: c.searchQuery.q,
       limit: c.searchQuery.limit.toString(),
     })
-      .then((data) => {
+      .then((result: TrackListResult) => {
+        const data = result.tracks;
         if (ignored) return;
         if (data === null || data.length === 0) {
           if (c.oldSearchQuery.current !== null) {
@@ -200,7 +201,7 @@ export function App() {
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
   c.onRescanned = () => {
     fetchAPI("/track")
-      .then((data) => setFullTracks(data))
+      .then((result: TrackListResult) => setFullTracks(result.tracks))
       .catch(() => setFullTracks([]));
   };
 

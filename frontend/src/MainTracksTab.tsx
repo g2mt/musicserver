@@ -1,5 +1,5 @@
 import { TrackList } from "./TrackList";
-import type { TrackData } from "./TrackData";
+import type { TrackData, TrackListResult } from "./TrackData";
 import {
   faChevronLeft,
   faChevronRight,
@@ -61,7 +61,8 @@ export function MainTracksTab({
 
   const handlePlayAll = () => {
     fetchAPI("/track", { q: c.searchQuery.q, limit: "-1" })
-      .then((tracks) => {
+      .then((result: TrackListResult) => {
+        const tracks = result.tracks;
         if (tracks === null || tracks.length === 0) {
           toast.warn(<>No tracks found</>);
         } else {
@@ -85,7 +86,8 @@ export function MainTracksTab({
 
   const handleAddAllToQueue = () => {
     fetchAPI("/track", { q: c.searchQuery.q, limit: "-1" })
-      .then((tracks) => {
+      .then((result: TrackListResult) => {
+        const tracks = result.tracks;
         if (tracks === null || tracks.length === 0) {
           toast.warn(<>No tracks found</>);
         } else {
