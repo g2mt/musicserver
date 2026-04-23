@@ -53,6 +53,12 @@ export function MainTracksTab({
     });
   };
 
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.preventDefault();
+    const newSort = e.target.value;
+    updateQuery(newSort ? `sort:${newSort}` : "", "sort");
+  };
+
   const handlePlayAll = () => {
     fetchAPI("/track", { q: c.searchQuery.q, limit: "-1" })
       .then((tracks) => {
@@ -130,6 +136,16 @@ export function MainTracksTab({
         </button>
       </div>
       <div className="main-tracks-controls-right">
+        <Select onChange={handleSortChange}>
+          <Option value="" disabled={true}>
+            sort
+          </Option>
+          <Option value="id">id</Option>
+          <Option value="name">name</Option>
+          <Option value="path">path</Option>
+          <Option value="artist">artist</Option>
+          <Option value="album">album</Option>
+        </Select>
         <Select onChange={handleLimitChange}>
           <Option value="" disabled={true}>
             limit
