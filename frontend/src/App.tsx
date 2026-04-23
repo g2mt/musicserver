@@ -206,9 +206,7 @@ export function App() {
   // Tracks
   const [fullTracks, setFullTracks] = useState<TrackData[]>([]);
   c.onRescanned = () => {
-    fetchAPI("/track")
-      .then((result: TrackListResult) => setFullTracks(result.tracks))
-      .catch(() => setFullTracks([]));
+    c.refreshSearch();
   };
 
   // Audio
