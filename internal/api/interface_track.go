@@ -111,13 +111,12 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 	if longBeforeId != "" {
 		if limit > 0 {
 			query = "SELECT * FROM (" +
-				query +
-				" " + orderByClause + " LIMIT ?) as sub ORDER BY " + sortColumn + " ASC"
+				query + " LIMIT ?) as sub " + orderByClause
 			args = append(args, limit)
 		} else {
 			query = "SELECT * FROM (" +
 				query +
-				" " + orderByClause + ") as sub ORDER BY " + sortColumn + " ASC"
+				") as sub " + orderByClause
 		}
 	} else {
 		if limit > 0 {
