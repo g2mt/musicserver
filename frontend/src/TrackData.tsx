@@ -12,11 +12,9 @@ export const TrackDataSchema = z.object({
 
 export type TrackData = z.infer<typeof TrackDataSchema>;
 
-export const TrackListResultSchema = z.object({
-  filters: z.record(z.string()),
-  limit: z.number(),
-  tracks: TrackDataSchema.array(),
-});
-
-export type TrackListResult = z.infer<typeof TrackListResultSchema>;
+export interface TrackListResult {
+  filters: Record<string, string>;
+  limit: number;
+  tracks: TrackData[];
+}
 
