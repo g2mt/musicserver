@@ -27,6 +27,10 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 	var longBeforeId string
 	var err error
 
+	// Sorting variables
+	sortColumn := "id"
+	sortDesc := false
+
 	// Apply search filters if search is not nil
 	if search != nil {
 		// Apply word filters
@@ -76,6 +80,15 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 				path := filepath.Join(i.config.DataPath, op.Value)
 				whereClauses = append(whereClauses, "(path LIKE ?)")
 				args = append(args, path+"%")
+			case "sort":
+				switch op.Value {
+				case "id", "name", "path", "artist", "album":
+					sortColumn = op.Value
+				}
+			case "desc":
+				if op.Value == "1" {
+					sortDesc = true
+				}
 			}
 		}
 	}
@@ -86,27 +99,32 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 	}
 
 	// Ordering
-
 	if limit == 0 {
 		limit = MaxPageCount
 	}
+
+	orderByClause := "ORDER BY " + sortColumn
+	if sortDesc {
+		orderByClause += " DESC"
+	}
+
 	if longBeforeId != "" {
 		if limit > 0 {
 			query = "SELECT * FROM (" +
 				query +
-				" ORDER BY id DESC LIMIT ?) as sub ORDER BY id ASC"
+				" " + orderByClause + " LIMIT ?) as sub ORDER BY " + sortColumn + " ASC"
 			args = append(args, limit)
 		} else {
 			query = "SELECT * FROM (" +
 				query +
-				" ORDER BY id DESC) as sub ORDER BY id ASC"
+				" " + orderByClause + ") as sub ORDER BY " + sortColumn + " ASC"
 		}
 	} else {
 		if limit > 0 {
-			query += " ORDER BY id LIMIT ?"
+			query += " " + orderByClause + " LIMIT ?"
 			args = append(args, limit)
 		} else {
-			query += " ORDER BY id"
+			query += " " + orderByClause
 		}
 	}
 
