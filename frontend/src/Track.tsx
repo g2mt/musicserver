@@ -8,10 +8,12 @@ import {
   faCompactDisc,
   faUser,
   faFolder,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { getTrackCoverFromId, getTrackCoverFromPath } from "./apiServer";
+import { getTrackCoverFromId, getTrackCoverFromPath, fetchAPI } from "./apiServer";
 import { AppContext } from "./AppState";
 import { toggleContextMenu, ContextMenuItem } from "./ContextMenu";
+import { toast } from "react-toastify";
 import type { TrackData } from "./TrackData";
 
 import "./Track.css";
@@ -37,75 +39,93 @@ export function Track({
   const c = useContext(AppContext)!;
   const isHighlighted =
     highlighted || (index !== undefined && index === c.queue.index);
+
+  // Inner function to handle the context menu creation
+  const handleContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
+    toggleContextMenu(
+      e.currentTarget,
+      <>
+        <ContextMenuItem
+          icon={faPlay}
+          onClick={() => {
+            if (index !== undefined) c.queue.setIndex(index);
+            c.as.setCurrentTrack(track);
+          }}
+        >
+          Play
+        </ContextMenuItem>
+        <ContextMenuItem
+          icon={faCopy}
+          onClick={() => {
+            navigator.clipboard.writeText(
+              `${track.name} - ${track.artist}`,
+            );
+          }}
+        >
+          Copy info
+        </ContextMenuItem>
+        <ContextMenuItem disabled={true}>Go to...</ContextMenuItem>
+        {track.album !== "" && (
+          <ContextMenuItem
+            icon={faCompactDisc}
+            onClick={() => {
+              c.setSearchQuery((old) => ({
+                ...old,
+                q: `album:"${track.album}"`,
+              }));
+            }}
+          >
+            Album
+          </ContextMenuItem>
+        )}
+        {track.artist !== "" && (
+          <ContextMenuItem
+            icon={faUser}
+            onClick={() => {
+              c.setSearchQuery((old) => ({
+                ...old,
+                q: `artist:"${track.artist}"`,
+              }));
+            }}
+          >
+            Artist
+          </ContextMenuItem>
+        )}
+        <ContextMenuItem
+          icon={faFolder}
+          onClick={() => {
+            const parts = track.path.split("/");
+            parts.pop();
+            c.setFbPath(parts);
+            c.setLeftTab("files");
+          }}
+        >
+          Path
+        </ContextMenuItem>
+        {/* New option to forget (delete) the track */}
+        <ContextMenuItem
+          icon={faTrash}
+          onClick={async () => {
+            try {
+              await fetchAPI(`/track/${track.id}`, undefined, "DELETE");
+              toast.success(`Track "${track.name}" forgotten`);
+            } catch (err) {
+              toast.error(`Failed to forget track: ${err}`);
+            }
+          }}
+        >
+          Forget track
+        </ContextMenuItem>
+      </>,
+    );
+  };
+
   return (
     <div className={`track ${isHighlighted ? "highlighted" : ""}`}>
       <img
         className="track-cover"
         src={getTrackCover(track)}
-        onClick={(e) => {
-          toggleContextMenu(
-            e.currentTarget,
-            <>
-              <ContextMenuItem
-                icon={faPlay}
-                onClick={() => {
-                  if (index !== undefined) c.queue.setIndex(index);
-                  c.as.setCurrentTrack(track);
-                }}
-              >
-                Play
-              </ContextMenuItem>
-              <ContextMenuItem
-                icon={faCopy}
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    `${track.name} - ${track.artist}`,
-                  );
-                }}
-              >
-                Copy info
-              </ContextMenuItem>
-              <ContextMenuItem disabled={true}>Go to...</ContextMenuItem>
-              {track.album !== "" && (
-                <ContextMenuItem
-                  icon={faCompactDisc}
-                  onClick={() => {
-                    c.setSearchQuery((old) => ({
-                      ...old,
-                      q: `album:"${track.album}"`,
-                    }));
-                  }}
-                >
-                  Album
-                </ContextMenuItem>
-              )}
-              {track.artist !== "" && (
-                <ContextMenuItem
-                  icon={faUser}
-                  onClick={() => {
-                    c.setSearchQuery((old) => ({
-                      ...old,
-                      q: `artist:"${track.artist}"`,
-                    }));
-                  }}
-                >
-                  Artist
-                </ContextMenuItem>
-              )}
-              <ContextMenuItem
-                icon={faFolder}
-                onClick={() => {
-                  const parts = track.path.split("/");
-                  parts.pop();
-                  c.setFbPath(parts);
-                  c.setLeftTab("files");
-                }}
-              >
-                Path
-              </ContextMenuItem>
-            </>,
-          );
-        }}
+        onClick={handleContextMenu}
       />
       <div className="track-info">
         <a
