@@ -19,7 +19,7 @@ type TrackListResult struct {
 	Tracks  []schema.Track    `json:"tracks"`
 }
 
-func (i *Interface) GetTracks(search *searchparser.Result, limit int) (*TrackListResult, error) {
+func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackListResult, error) {
 	query := "SELECT id, short_id, name, path, artist, album FROM tracks"
 	args := []interface{}{}
 	whereClauses := []string{}
@@ -133,7 +133,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (*TrackLis
 		}
 	}
 
-	return &TrackListResult{
+	return TrackListResult{
 		Filters: filters,
 		Limit:   limit,
 		Tracks:  tracks,
@@ -579,4 +579,3 @@ func (i *Interface) ForgetTrackByPath(path string) error {
 
 	return nil
 }
-```
