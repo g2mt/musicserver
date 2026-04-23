@@ -42,6 +42,9 @@ export function Select({
   const selectedOption =
     children.find((child) => child.props.value === defaultValue) ?? children[0];
 
+  // Extract the display content of the selected option into a variable
+  const selectedContent = selectedOption ? selectedOption.props.children : "";
+
   const chevron = <FontAwesomeIcon icon={faChevronDown} />;
 
   return (
@@ -70,13 +73,13 @@ export function Select({
     >
       {isIconRight ? (
         <>
-          {selectedOption ? selectedOption.props.children : ""}
+          {selectedContent}
           {chevron}
         </>
       ) : (
         <>
           {chevron}
-          {selectedOption ? selectedOption.props.children : ""}
+          {selectedContent}
         </>
       )}
     </button>
