@@ -97,10 +97,10 @@ export function rescanFiles(force: boolean, path?: string): Promise<void> {
       )
         .then((resData) => {
           toast.success(
-            <>
+            <p>
               Scanning complete: <b>{resData.added}</b> added,{" "}
               <b>{resData.removed}</b> removed
-            </>,
+            </p>,
           );
           res();
         })

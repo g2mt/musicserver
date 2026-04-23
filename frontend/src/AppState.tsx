@@ -62,6 +62,12 @@ export interface AppState extends AppStateData {
   oldSearchQuery: RefObject<SearchQuery | null>;
   refreshSearch: () => () => void;
 
+  // filter/sorting
+  resultSort: string;
+  setResultSort: Dispatch<SetStateAction<string>>;
+  resultDesc: boolean;
+  setResultDesc: Dispatch<SetStateAction<boolean>>;
+
   // search history
   setSearchHistoryLimit: Dispatch<SetStateAction<number>>;
 

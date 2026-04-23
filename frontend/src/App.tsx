@@ -154,6 +154,8 @@ export function App() {
     q: locationHash.get("q") ?? "",
     limit: parseInt(locationHash.get("limit") ?? "0"),
   });
+  [c.resultSort, c.setResultSort] = useState("");
+  [c.resultDesc, c.setResultDesc] = useState(false);
   c.oldSearchQuery = useRef<SearchQuery | null>(null);
   c.refreshSearch = () => {
     // https://react.dev/learn/you-might-not-need-an-effect#fetching-data
@@ -180,6 +182,8 @@ export function App() {
           setHashSearchQuery(c.searchQuery); // save on success
           c.oldSearchQuery.current = null;
         }
+        c.setResultSort(result.filters.sort ?? "");
+        c.setResultDesc(result.filters.desc === "1");
       })
       .catch((e) => {
         if (ignored) return;
