@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -104,14 +105,14 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 	if len(whereClauses) > 0 {
 		whereClause = " WHERE " + strings.Join(whereClauses, " AND ")
 	}
-	var limitClause string
-	if limit > 0 {
-		limitClause = fmt.Sprintf("LIMIT %d", limit)
-		args = append(args, limit)
-	}
 
 	if longBeforeId == "" && longAfterId == "" {
 		// no range specified
+		var limitClause string
+		if limit > 0 {
+			limitClause = fmt.Sprintf("LIMIT %d", limit)
+			args = append(args, limit)
+		}
 		query = fmt.Sprintf("SELECT %s FROM tracks %s %s %s",
 			SelectedColsFromTracks,
 			whereClause,
@@ -119,6 +120,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 			limitClause)
 	} else {
 		// before/after ID specified
+
 		var outerWhereClauses []string
 		if longBeforeId != "" {
 			outerWhereClauses = append(outerWhereClauses,
@@ -130,35 +132,53 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 				"_rank > (SELECT _rank FROM _ranked WHERE id = ?)")
 			args = append(args, longAfterId)
 		}
+
+		// limit clause is appended to outer select
+		var limitClause string
+		if limit > 0 {
+			limitClause = fmt.Sprintf("LIMIT %d", limit)
+			args = append(args, limit)
+		}
+
 		query = fmt.Sprintf(`
 			WITH _ranked AS (
 				SELECT
 					%s, -- SelectedColsFromTracks
 					ROW_NUMBER() OVER (%s) AS _rank -- orderByClause
 				FROM tracks
+				%s -- whereClauses
 			)
-			SELECT %s FROM (
+			SELECT %s FROM ( -- SelectedColsFromTracks
 				SELECT * FROM _ranked
-				AS _sub
 				WHERE %s -- outerWhereClauses
 				ORDER BY _rank
-			)
+			) %s
 		`, SelectedColsFromTracks,
 			orderByClause,
+			whereClauses,
 			SelectedColsFromTracks,
 			strings.Join(outerWhereClauses, " "),
+			limitClause,
 		)
 	}
-	slog.Debug("SQL query for search: ")
-	slog.Debug(query)
+	if slog.Default().Enabled(context.Background(), slog.LevelDebug) {
+		slog.Debug("SQL query for search: ")
+		slog.Debug(query)
+		sargs := ""
+		for _, arg := range args {
+			sargs += fmt.Sprint(arg)
+			sargs += ","
+		}
+		slog.Debug("Args", "args", sargs)
+	}
 
+	// Query tracks from database
 	rows, err := i.db.Query(query, args...)
 	if err != nil {
 		slog.Debug("Unable to query", "err", err)
 		return TrackListResult{}, err
 	}
 	defer rows.Close()
-
 	var tracks []schema.Track
 	for rows.Next() {
 		var track schema.Track
