@@ -25,9 +25,13 @@ export function Option({ onClick, children, disabled }: OptionProps) {
 type SelectProps = {
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   children: React.ReactElement<OptionProps>[];
+  defaultValue?: any;
 };
 
-export function Select({ onChange, children }: SelectProps) {
+export function Select({ onChange, children, defaultValue }: SelectProps) {
+  const selectedOption =
+    children.find((child) => child.props.value === defaultValue) ?? children[0];
+
   return (
     <button
       className="btn"
@@ -53,7 +57,7 @@ export function Select({ onChange, children }: SelectProps) {
       }}
     >
       <FontAwesomeIcon icon={faChevronDown} />
-      {children.length > 0 ? children[0].props.children : ""}
+      {selectedOption ? selectedOption.props.children : ""}
     </button>
   );
 }
