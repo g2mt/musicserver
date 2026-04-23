@@ -530,6 +530,36 @@ func (i *Interface) ForgetAllTracks() (bool, error) {
 	return true, nil
 }
 
+func (i *Interface) forgetTrack(tx *sql.Tx, longID, shortID string) error {
+	var album string
+	err := tx.QueryRow("SELECT album FROM tracks WHERE id = ?", longID).Scan(&album)
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec("DELETE FROM tracks WHERE id = ?", longID); err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec("DELETE FROM short_ids WHERE short_id = ?", shortID); err != nil {
+		return err
+	}
+
+	var albumTrackCount int
+	err = tx.QueryRow("SELECT COUNT(*) FROM tracks WHERE album = ?", album).Scan(&albumTrackCount)
+	if err != nil {
+		return err
+	}
+
+	if albumTrackCount == 0 {
+		if _, err := tx.Exec("DELETE FROM albums WHERE name = ?", album); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (i *Interface) ForgetTrackById(id string) error {
 	tx, err := i.db.Begin()
 	if err != nil {
@@ -592,34 +622,4 @@ func (i *Interface) ForgetTrackByPath(path string) error {
 	}
 
 	return tx.Commit()
-}
-
-func (i *Interface) forgetTrack(tx *sql.Tx, longID, shortID string) error {
-	var album string
-	err := tx.QueryRow("SELECT album FROM tracks WHERE id = ?", longID).Scan(&album)
-	if err != nil {
-		return err
-	}
-
-	if _, err := tx.Exec("DELETE FROM tracks WHERE id = ?", longID); err != nil {
-		return err
-	}
-
-	if _, err := tx.Exec("DELETE FROM short_ids WHERE short_id = ?", shortID); err != nil {
-		return err
-	}
-
-	var albumTrackCount int
-	err = tx.QueryRow("SELECT COUNT(*) FROM tracks WHERE album = ?", album).Scan(&albumTrackCount)
-	if err != nil {
-		return err
-	}
-
-	if albumTrackCount == 0 {
-		if _, err := tx.Exec("DELETE FROM albums WHERE name = ?", album); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
