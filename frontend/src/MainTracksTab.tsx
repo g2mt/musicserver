@@ -137,14 +137,11 @@ export function MainTracksTab({
       </div>
       <div className="main-tracks-controls-right">
         <Select onChange={handleSortChange}>
-          <Option value="" disabled={true}>
-            sort
-          </Option>
-          <Option value="id">id</Option>
-          <Option value="name">name</Option>
-          <Option value="path">path</Option>
-          <Option value="artist">artist</Option>
-          <Option value="album">album</Option>
+          <Option value="id">ID</Option>
+          <Option value="name">Name</Option>
+          <Option value="path">Path</Option>
+          <Option value="artist">Artist</Option>
+          <Option value="album">Album</Option>
         </Select>
         <Select onChange={handleLimitChange}>
           <Option value="" disabled={true}>
