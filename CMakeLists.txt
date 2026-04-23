@@ -82,12 +82,12 @@ list(APPEND FRONTEND_SOURCES
 if(MS_BUILD_ANDROID)
   set(FRONTEND_CONFIG "frontend/vite-android.config.ts")
   set(FRONTEND_COMMAND npm run build-android)
+  set(FRONTEND_STAMP "${CMAKE_SOURCE_DIR}/frontend/dist/stamp")
 else()
   set(FRONTEND_CONFIG "frontend/vite.config.ts")
   set(FRONTEND_COMMAND npm run build)
+  set(FRONTEND_STAMP "${CMAKE_SOURCE_DIR}/frontend/dist-android/stamp")
 endif()
-
-set(FRONTEND_STAMP "${CMAKE_SOURCE_DIR}/frontend/dist-android/stamp")
 
 add_custom_command(
   OUTPUT ${FRONTEND_STAMP}
