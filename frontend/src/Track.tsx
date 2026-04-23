@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPlus,
@@ -39,6 +39,14 @@ export function Track({
   const c = useContext(AppContext)!;
   const isHighlighted =
     highlighted || (index !== undefined && index === c.queue.index);
+
+  // State to track whether the track has been successfully forgotten
+  const [forgotten, setForgotten] = useState(false);
+
+  // If the track is forgotten, render nothing
+  if (forgotten) {
+    return null;
+  }
 
   const handleContextMenu = (e: React.MouseEvent<HTMLImageElement>) => {
     toggleContextMenu(
@@ -107,6 +115,7 @@ export function Track({
             fetchAPI(`/track/${track.id}`, undefined, "DELETE")
             .then(() => {
               toast.success(`Track "${track.name}" forgotten`);
+              setForgotten(true);
             }).catch(err => {
               toast.error(`Failed to forget track: ${err}`);
             });
