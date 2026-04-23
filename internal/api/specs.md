@@ -143,13 +143,19 @@ A track has the following fields:
 
 ### GET `/track`
 
-Returns a list of tracks, with a maximum of 50 items per page:
+Returns a result object containing the list of filtered tracks, with a default maximum of 50 items per page:
 
 ```json
-[
-  {"id": ..., "name": "track name 1", ...},
-  {"id": ..., "name": "track name 2", ...},
-]
+{
+  "filters": {
+    "after": ...,
+  },
+  "limit": 50,
+  "tracks": [
+    {"id": ..., "name": "track name 1", ...},
+    {"id": ..., "name": "track name 2", ...},
+  ]
+}
 ```
 
 If the `q` parameter is provided, then the tracks will be filtered based on the query `q`. When searching, keywords and the negation operator targets the word. The query supports the following named operators, which shows only tracks matching the filter:
@@ -159,6 +165,11 @@ If the `q` parameter is provided, then the tracks will be filtered based on the 
   - `album`: album title contains the value specified
   - `artist`: artist name contains the value specified
   - `path`: path of track file starts with the specified directory
+
+The query `q` supports sorting through the filters:
+
+  - `sort`: one of `id`, `name`, `path`, `artist`, `album`. Controls the sorting behavior of the search
+  - `desc`: if set to `1`, then overrides the default ascending sort to become descending sort
 
 If the `limit` parameter is provided, show only this amount of tracks in the list. This defaults to the constant MaxPageCount (50) if not set. If set to a value less than 1, then returns all tracks without limits.
 
