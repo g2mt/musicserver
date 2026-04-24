@@ -54,6 +54,32 @@ export function SettingsTab() {
     );
   };
 
+  // ---- Playback Section ----------------------------------------------------
+  const playbackSection = (
+    <Section title="Playback">
+      <div>
+        <label htmlFor="setting-amplification">
+          Amplification (dB):
+        </label>
+        <input
+          type="range"
+          id="setting-amplification"
+          min={-10}
+          max={10}
+          step={0.1}
+          value={c.as.amplification}
+          onChange={(e) => {
+            c.as.setAmplification(parseFloat(e.target.value));
+          }}
+        />
+        <span style={{ marginLeft: "0.5rem" }}>
+          {c.as.amplification.toFixed(1)} dB
+        </span>
+      </div>
+    </Section>
+  );
+
+  // ---- General Settings Section -------------------------------------------
   const settingsSection = (
     <Section title="General settings">
       <div>
@@ -278,6 +304,7 @@ export function SettingsTab() {
 
   return (
     <div className="settings-tab">
+      {playbackSection}
       {settingsSection}
       {serverPropertiesSection}
       {ongoingProcessesSection}
