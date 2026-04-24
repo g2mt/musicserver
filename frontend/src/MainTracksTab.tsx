@@ -1,5 +1,3 @@
-import { TrackList } from "src/TrackList";
-import type { TrackData, TrackListResult } from "src/TrackData";
 import {
   faChevronLeft,
   faChevronRight,
@@ -12,12 +10,15 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useRef, type RefObject } from "react";
-import { AppContext } from "src/AppState";
-import { Select, Option } from "src/Select";
-import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
-import { fetchAPI } from "src/apiServer";
+import { type RefObject, useContext, useRef } from "react";
 import { toast } from "react-toastify";
+
+import { AppContext } from "src/AppState";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
+import { Option, Select } from "src/Select";
+import type { TrackData, TrackListResult } from "src/TrackData";
+import { TrackList } from "src/TrackList";
+import { fetchAPI } from "src/apiServer";
 import { shuffled } from "src/utils";
 
 import "./MainTracksTab.css";
@@ -143,12 +144,26 @@ export function MainTracksTab({
         </button>
       </div>
       <div className="main-tracks-controls-right">
-        <Select onChange={handleSortChange} defaultValue={c.resultSort} isIconRight={true}>
-          <Option value="id"><FontAwesomeIcon icon={faHashtag} /> ID</Option>
-          <Option value="name"><FontAwesomeIcon icon={faFileLines} /> Name</Option>
-          <Option value="path"><FontAwesomeIcon icon={faFolder} /> Path</Option>
-          <Option value="artist"><FontAwesomeIcon icon={faUser} /> Artist</Option>
-          <Option value="album"><FontAwesomeIcon icon={faCompactDisc} /> Album</Option>
+        <Select
+          onChange={handleSortChange}
+          defaultValue={c.resultSort}
+          isIconRight={true}
+        >
+          <Option value="id">
+            <FontAwesomeIcon icon={faHashtag} /> ID
+          </Option>
+          <Option value="name">
+            <FontAwesomeIcon icon={faFileLines} /> Name
+          </Option>
+          <Option value="path">
+            <FontAwesomeIcon icon={faFolder} /> Path
+          </Option>
+          <Option value="artist">
+            <FontAwesomeIcon icon={faUser} /> Artist
+          </Option>
+          <Option value="album">
+            <FontAwesomeIcon icon={faCompactDisc} /> Album
+          </Option>
         </Select>
         <Select onChange={handleLimitChange} defaultValue={c.resultLimit}>
           <Option value="" disabled={true}>

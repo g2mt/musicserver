@@ -1,16 +1,17 @@
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  type RefObject,
-} from "react";
-import { Track } from "src/Track";
-import { type TrackData } from "src/TrackData";
 import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  type RefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { Track } from "src/Track";
+import { type TrackData } from "src/TrackData";
 import type { TrackQueue } from "src/TrackQueue";
-import { shuffled, type OptionalUnion } from "src/utils";
+import { type OptionalUnion, shuffled } from "src/utils";
 
 import "./TrackList.css";
 

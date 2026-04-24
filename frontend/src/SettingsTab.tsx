@@ -1,15 +1,16 @@
-import { useContext, useState } from "react";
-import { rescanFiles } from "src/apiServer";
-import { toast } from "react-toastify";
 import {
-  faRotate,
   faMoon,
-  faSun,
+  faRotate,
   faSave,
+  faSun,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ProgressTable from "src/ProgressTable";
+import { useContext, useState } from "react";
+import { toast } from "react-toastify";
+
 import { AppContext, saveConfig } from "src/AppState";
+import ProgressTable from "src/ProgressTable";
+import { rescanFiles } from "src/apiServer";
 
 import "./SettingsTab.css";
 

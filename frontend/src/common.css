@@ -125,7 +125,8 @@ body.dark-mode {
 input {
   color: var(--content-color);
 
-  &[type="text"], &[type="search"] {
+  &[type="text"],
+  &[type="search"] {
     display: block;
     width: 100%;
     padding: var(--s2) var(--s3);
@@ -140,7 +141,8 @@ input {
     }
   }
 
-  &[type="checkbox"], &[type="number"] {
+  &[type="checkbox"],
+  &[type="number"] {
     margin: 0 var(--s1);
   }
 }
@@ -199,7 +201,8 @@ a {
       border-bottom: 1px solid var(--gray);
     }
 
-    &:hover, &.highlighted {
+    &:hover,
+    &.highlighted {
       background: var(--accent-color-light);
       color: var(--accent-color-light-text);
     }

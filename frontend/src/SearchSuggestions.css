@@ -13,7 +13,9 @@
     left: 0;
     transform: none;
     max-width: 100%;
-    max-height: calc(100vh - var(--search-bar-height) - var(--music-player-height));
+    max-height: calc(
+      100vh - var(--search-bar-height) - var(--music-player-height)
+    );
     border-left: none;
     border-right: none;
   }

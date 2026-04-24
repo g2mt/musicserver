@@ -1,19 +1,20 @@
-import { useEffect, useContext, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faPlay,
-  faPause,
-  faVolumeHigh,
-  faVolumeXmark,
   faBackwardStep,
   faForwardStep,
+  faPause,
+  faPlay,
   faRepeat,
+  faVolumeHigh,
+  faVolumeXmark,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import { getTrackCover, Track } from "src/Track";
-import { useWindowWidth, COLLAPSE_AT_WIDTH } from "src/responsive";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext, useEffect, useState } from "react";
+
 import { AppContext } from "src/AppState";
 import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
+import { Track, getTrackCover } from "src/Track";
+import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
 
 import "./MusicPlayer.css";
 

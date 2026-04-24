@@ -1,38 +1,39 @@
-import { TrackList } from "src/TrackList";
-import { MainTracksTab } from "src/MainTracksTab";
-import { SettingsTab } from "src/SettingsTab";
-import FileBrowserTab from "src/FileBrowserTab";
-import { MusicPlayer } from "src/MusicPlayer";
-import SearchBar from "src/SearchBar";
-import React, { useEffect, useRef, useState } from "react";
-import { getTrackCover } from "src/Track";
-import { fetchAPI } from "src/apiServer";
 import {
-  faMusic,
-  faGear,
   faFolder,
-  faPlus,
+  faGear,
   faMinus,
+  faMusic,
+  faPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { toast, ToastContainer } from "react-toastify";
-import { ContextMenu } from "src/ContextMenu";
+import React, { useEffect, useRef, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+
 import {
   AppContext,
-  mergeConfig,
-  saveConfig,
   type AppState,
   type SearchQuery,
+  mergeConfig,
+  saveConfig,
 } from "src/AppState";
-import { useAudio, type SerializedAudioState } from "src/AudioState";
-import type { TrackData, TrackListResult } from "src/TrackData";
-import { useTrackQueue, type SerializedTrackQueue } from "src/TrackQueue";
-import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
-import { SearchSuggestions } from "src/SearchSuggestions";
-
-import "react-toastify/dist/ReactToastify.css";
-import "./App.css";
+import { type SerializedAudioState, useAudio } from "src/AudioState";
 import { ConfirmBoxContext } from "src/ConfirmBox";
+import { ContextMenu } from "src/ContextMenu";
+import FileBrowserTab from "src/FileBrowserTab";
+import { MainTracksTab } from "src/MainTracksTab";
+import { MusicPlayer } from "src/MusicPlayer";
+import SearchBar from "src/SearchBar";
+import { SearchSuggestions } from "src/SearchSuggestions";
+import { SettingsTab } from "src/SettingsTab";
+import { getTrackCover } from "src/Track";
+import type { TrackData, TrackListResult } from "src/TrackData";
+import { TrackList } from "src/TrackList";
+import { type SerializedTrackQueue, useTrackQueue } from "src/TrackQueue";
+import { fetchAPI } from "src/apiServer";
+import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
+
+import "./App.css";
+import "react-toastify/dist/ReactToastify.css";
 
 declare global {
   interface NativeAudioBridge {

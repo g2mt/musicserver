@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from "react";
-import type { Dispatch, SetStateAction, RefObject } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
+
 import type { TrackData } from "src/TrackData";
 import { apiAudio, useAbsoluteAudioPath } from "src/apiAudio";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";
@@ -134,8 +135,7 @@ export function useAudio({
       if (state.path !== "") {
         const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
         if (data && !data.error) {
-          if (data.path !== currentTrack?.path)
-            setCurrentTrack(data);
+          if (data.path !== currentTrack?.path) setCurrentTrack(data);
         } else {
           console.error(`Invalid loadSerializedState: ${data}`);
           return;

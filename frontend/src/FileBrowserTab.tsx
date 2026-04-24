@@ -1,15 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faFolder,
   faFile,
+  faFolder,
   faFolderOpen,
-  faSearch,
   faReceipt,
+  faSearch,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { fetchAPI, rescanFiles } from "src/apiServer";
+
 import { AppContext } from "src/AppState";
+import { fetchAPI, rescanFiles } from "src/apiServer";
 
 import "./FileBrowserTab.css";
 

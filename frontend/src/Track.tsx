@@ -1,20 +1,25 @@
-import { useContext, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faPlus,
+  faCompactDisc,
+  faCopy,
+  faFolder,
   faMinus,
   faPlay,
-  faCopy,
-  faCompactDisc,
-  faUser,
-  faFolder,
+  faPlus,
   faTrash,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { getTrackCoverFromId, getTrackCoverFromPath, fetchAPI } from "src/apiServer";
-import { AppContext } from "src/AppState";
-import { toggleContextMenu, ContextMenuItem } from "src/ContextMenu";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useContext, useState } from "react";
 import { toast } from "react-toastify";
+
+import { AppContext } from "src/AppState";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
 import type { TrackData } from "src/TrackData";
+import {
+  fetchAPI,
+  getTrackCoverFromId,
+  getTrackCoverFromPath,
+} from "src/apiServer";
 
 import "./Track.css";
 
@@ -61,9 +66,7 @@ export function Track({
         <ContextMenuItem
           icon={faCopy}
           onClick={() => {
-            navigator.clipboard.writeText(
-              `${track.name} - ${track.artist}`,
-            );
+            navigator.clipboard.writeText(`${track.name} - ${track.artist}`);
           }}
         >
           Copy info
@@ -110,12 +113,13 @@ export function Track({
           icon={faTrash}
           onClick={() => {
             fetchAPI(`/track/${track.id}`, undefined, "DELETE")
-            .then(() => {
-              toast.success(`Track "${track.name}" forgotten`);
-              setForgotten(true);
-            }).catch(err => {
-              toast.error(`Failed to forget track: ${err}`);
-            });
+              .then(() => {
+                toast.success(`Track "${track.name}" forgotten`);
+                setForgotten(true);
+              })
+              .catch((err) => {
+                toast.error(`Failed to forget track: ${err}`);
+              });
           }}
         >
           Forget track

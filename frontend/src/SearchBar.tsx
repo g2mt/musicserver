@@ -1,25 +1,26 @@
 import {
-  useContext,
-  useState,
+  faChevronDown,
+  faChevronUp,
+  faDownload,
+  faHome,
+  faSearch,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
   type Dispatch,
   type RefObject,
   type SetStateAction,
+  useContext,
+  useState,
 } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSearch,
-  faDownload,
-  faTimes,
-  faHome,
-  faChevronUp,
-  faChevronDown,
-} from "@fortawesome/free-solid-svg-icons";
-import { AppContext, type AppState } from "src/AppState";
-import { TrackList } from "src/TrackList";
-import { fetchAPI } from "src/apiServer";
 import { toast } from "react-toastify";
+
+import { AppContext, type AppState } from "src/AppState";
 import ConfirmBox from "src/ConfirmBox";
 import type { TrackData } from "src/TrackData";
+import { TrackList } from "src/TrackList";
+import { fetchAPI } from "src/apiServer";
 
 import "./SearchBar.css";
 
@@ -70,7 +71,9 @@ function TrackConfirmBox({
     >
       <p>Download these tracks?</p>
       {externalTracksCollapsed ? (
-        <p><em>{tracks.map(t => t.name).join(", ")}</em></p>
+        <p>
+          <em>{tracks.map((t) => t.name).join(", ")}</em>
+        </p>
       ) : (
         <TrackList tracks={tracks} parentElement={{ current: null }} />
       )}

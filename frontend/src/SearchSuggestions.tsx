@@ -1,9 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
-import { AppContext } from "src/AppState";
-import { Settings } from "src/settings";
+import { faHistory, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faHistory } from "@fortawesome/free-solid-svg-icons";
+import React, { useContext, useEffect, useState } from "react";
+
+import { AppContext } from "src/AppState";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
+import { Settings } from "src/settings";
+
 import "./SearchSuggestions.css";
 
 interface Suggestion {
