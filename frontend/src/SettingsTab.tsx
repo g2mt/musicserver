@@ -14,11 +14,11 @@ import { rescanFiles } from "src/apiServer";
 
 import "./SettingsTab.css";
 
-const Section = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const Section = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 
 const Title = ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>;
 
-const Body = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+const Body = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 
 export function SettingsTab() {
   const c = useContext(AppContext)!;
@@ -250,12 +250,7 @@ export function SettingsTab() {
     <Section>
       <Title>Ongoing processes</Title>
       <Body>
-        {!import.meta.env.NO_PROGRESS_SUPPORT && (
-          <>
-            <hr />
-            <ProgressTable />
-          </>
-        )}
+        {!import.meta.env.NO_PROGRESS_SUPPORT && (<ProgressTable />)}
       </Body>
     </Section>
   );
@@ -263,7 +258,6 @@ export function SettingsTab() {
   return (
     <div className="settings-tab">
       {settingsSection}
-      <hr />
       {serverPropertiesSection}
       {ongoingProcessesSection}
     </div>
