@@ -40,22 +40,17 @@ list(APPEND GOFLAGS "-v")
 list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
 
 # Collect build tags in a list
-set(GO_TAGS_LIST "")
+set(GO_TAGS "")
 
 if(MS_EMB_EBUR128)
-  # Append ebur128 tag
-  list(APPEND GO_TAGS_LIST "has_ebur128")
+  list(APPEND GO_TAGS "has_ebur128")
 endif()
-
 if(MS_USE_SNDFILE)
-  # Append sndfile tag
-  list(APPEND GO_TAGS_LIST "has_sndfile")
+  list(APPEND GO_TAGS "has_sndfile")
 endif()
-
-# Convert the list to a space‑separated string and add as a single -tags argument
-if(GO_TAGS_LIST)
-  string(JOIN " " GO_TAGS "${GO_TAGS_LIST}")
-  list(APPEND GOFLAGS "-tags=${GO_TAGS}")
+if(GO_TAGS)
+  string(JOIN " " GO_TAGS_STR ${GO_TAGS})
+  list(APPEND GOFLAGS -tags=${GO_TAGS_STR})
 endif()
 
 set(MS_GOENV "")

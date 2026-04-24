@@ -1,9 +1,13 @@
 package libsndfile
 
 // #cgo pkg-config: sndfile
+// #include <sndfile.h>
+// #include <stdlib.h>
+// #include <string.h>
 import "C"
 import (
 	"errors"
+	"log/slog"
 	"unsafe"
 
 	"musicserver/internal/audio/base"
@@ -48,6 +52,7 @@ func (r *sfReader) ReadFrames(nframes uint) (uint, []float64) {
 // NewSfReader opens the file at the given path and returns an AudioReader.
 // It returns an error if the file cannot be opened.
 func NewSfReader(path string) (audio.AudioReader, error) {
+	slog.Debug("opening sfReader", "path", path)
 	cpath := C.CString(path)
 	defer C.free(unsafe.Pointer(cpath))
 

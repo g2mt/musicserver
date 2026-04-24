@@ -6,7 +6,9 @@
       "binaryDir": "${sourceDir}/build/bin",
       "cacheVariables": {
         "MS_BUILD_BIN": "ON",
-        "MS_BUILD_LIB": "OFF"
+        "MS_BUILD_LIB": "OFF",
+        "MS_EMB_EBUR128": "ON",
+        "MS_USE_SNDFILE": "ON"
       }
     },
     {
