@@ -1,3 +1,5 @@
+//go:build has_ebur128
+
 package ebur128
 
 // #cgo pkg-config: libebur128

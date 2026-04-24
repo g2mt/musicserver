@@ -74,6 +74,7 @@ if(MS_EMB_TAGLIB)
     URL https://github.com/taglib/taglib/releases/download/v${MS_TAGLIB_VERSION}/taglib-${MS_TAGLIB_VERSION}.tar.gz
     URL_HASH SHA256=7e76b5299dcef427c486bffe455098470c8da91cf3ccb9ea804893df57389b5e
     CMAKE_ARGS
+      -DENABLE_CCACHE=${MS_USE_CCACHE}
       -DBUILD_SHARED_LIBS=ON
       -DBUILD_TESTING=OFF
       -DCMAKE_BUILD_TYPE=MinSizeRel
@@ -101,12 +102,10 @@ endif()
 
 ### Dep: sndfile
 if(MS_USE_SNDFILE)
-  # Ensure pkg-config is available (if not already found above)
   if(NOT TARGET PkgConfig::PkgConfig)
     find_package(PkgConfig REQUIRED)
   endif()
   pkg_check_modules(SNDFILE REQUIRED sndfile)
-  # Add the pkg-config path for sndfile to the PKG_CONFIG_PATH used by Go builds
   list(APPEND MS_PKG_CONFIG_PATH "${SNDFILE_PREFIX}/lib/pkgconfig")
 endif()
 
