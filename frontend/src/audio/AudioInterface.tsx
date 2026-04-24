@@ -1,8 +1,3 @@
-// AudioInterface.tsx
-// Defines the TypeScript interface that abstracts the audio functionality
-// used by the application. Both the native implementation (NativeAudio)
-// and the fallback browser Audio class conform to this interface.
-
 export interface AudioInterface {
   /** The source URL of the audio track. */
   src: string;
