@@ -13,8 +13,10 @@ execute_process(
 )
 
 set(MS_TAGLIB_VERSION "2.2.1")
+
 option(MS_EMB_TAGLIB "Build taglib from source for embedding" OFF)
 option(MS_EMB_EBUR128 "Build ebur128 from source for embedding" ON)
+option(MS_USE_SNDFILE "Link sndfile as source" ON)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
@@ -83,7 +85,7 @@ if(MS_EMB_EBUR128)
   set(EBUR128_DEP ebur128)
 endif()
 
-# Consolidate PKG_CONFIG_PATH
+### Consolidate PKG_CONFIG_PATH
 if(MS_PKG_CONFIG_PATH)
   string(JOIN ":" MS_PKG_CONFIG_PATH_STR ${MS_PKG_CONFIG_PATH})
   list(APPEND MS_GOENV "PKG_CONFIG_PATH=${MS_PKG_CONFIG_PATH_STR}")

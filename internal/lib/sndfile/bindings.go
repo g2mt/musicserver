@@ -1,14 +1,12 @@
 package libsndfile
 
-/*
 // #cgo pkg-config: sndfile
-*/
 import "C"
 import (
 	"errors"
 	"unsafe"
 
-	"musicserver/internal/audio"
+	"musicserver/internal/audio/base"
 )
 
 // sfReader implements the audio.AudioReader interface using libsndfile.
