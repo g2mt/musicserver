@@ -89,9 +89,7 @@ export function SettingsTab() {
     </Section>
   ), [
     c.as.amplification,
-    c.as.setAmplification,
     c.as.normalize,
-    c.as.setNormalize,
   ]);
 
   const settingsSection = useMemo(() => (
@@ -234,21 +232,13 @@ export function SettingsTab() {
     </Section>
   ), [
     c.showBlurredCover,
-    c.setShowBlurredCover,
     c.showOnlyQueueAfterEnqueue,
-    c.setShowOnlyQueueAfterEnqueue,
     c.shuffleBeforePlayingAll,
-    c.setShuffleBeforePlayingAll,
     c.showTracksListOnTabChange,
-    c.setShowTracksListOnTabChange,
     c.targetNormalizationDbs,
-    c.setTargetNormalizationDbs,
     c.searchHistoryLimit,
-    c.setSearchHistoryLimit,
     c.darkMode,
-    c.setDarkMode,
     unsaved,
-    c,
   ]);
 
   const serverPropertiesSection = useMemo(() => (
