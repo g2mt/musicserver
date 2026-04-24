@@ -1,4 +1,4 @@
-export interface AudioInterface {
+export interface AudioInterface extends EventTarget {
   /** The source URL of the audio track. */
   src: string;
 

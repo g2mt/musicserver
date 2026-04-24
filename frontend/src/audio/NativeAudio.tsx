@@ -100,5 +100,7 @@ export class NativeAudio extends EventTarget implements AudioInterface {
     if (!this.isActive) return;
     NativeAudio.bridge.pause(this.instanceId);
   }
+
+  amplify(_decibels: number): void {}
 }
 
