@@ -103,4 +103,3 @@ export class NativeAudio extends EventTarget implements AudioInterface {
 
   amplify(_decibels: number): void {}
 }
-

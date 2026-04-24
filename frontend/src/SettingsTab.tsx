@@ -57,216 +57,216 @@ export function SettingsTab() {
   const settingsSection = (
     <Section title="General settings">
       <div>
-          <input
-            type="checkbox"
-            id="setting-show-blurred-cover"
-            checked={c.showBlurredCover}
-            onChange={() => {
-              c.setShowBlurredCover(!c.showBlurredCover);
-              setUnsaved(true);
-            }}
-          />
-          <label htmlFor="setting-show-blurred-cover">
-            Show blurred album cover as background in dark mode
-          </label>
-        </div>
-        <div>
-          <input
-            type="checkbox"
-            id="setting-show-only-queue-after-enqueue"
-            checked={c.showOnlyQueueAfterEnqueue}
-            onChange={() => {
-              c.setShowOnlyQueueAfterEnqueue(!c.showOnlyQueueAfterEnqueue);
-              setUnsaved(true);
-            }}
-          />
-          <label htmlFor="setting-show-only-queue-after-enqueue">
-            Show only queue after adding tracks
-          </label>
-        </div>
-        <div>
-          <input
-            type="checkbox"
-            id="setting-shuffle-before-playing-all"
-            checked={c.shuffleBeforePlayingAll}
-            onChange={() => {
-              c.setShuffleBeforePlayingAll(!c.shuffleBeforePlayingAll);
-              setUnsaved(true);
-            }}
-          />
-          <label htmlFor="setting-shuffle-before-playing-all">
-            Shuffle before playing all tracks
-          </label>
-        </div>
-        <div>
-          <input
-            type="checkbox"
-            id="setting-show-tracks-list-on-tab-change"
-            checked={c.showTracksListOnTabChange}
-            onChange={() => {
-              c.setShowTracksListOnTabChange(!c.showTracksListOnTabChange);
-              setUnsaved(true);
-            }}
-          />
-          <label htmlFor="setting-show-tracks-list-on-tab-change">
-            Show tracks list when switching tabs
-          </label>
-        </div>
-        <div>
-          <label htmlFor="setting-search-history-limit">
-            Search history limit:
-          </label>
-          <input
-            type="number"
-            id="setting-search-history-limit"
-            min={0}
-            max={9999}
-            value={c.searchHistoryLimit}
-            onChange={(e) => {
-              c.setSearchHistoryLimit(parseInt(e.target.value) || 0);
-              setUnsaved(true);
-            }}
-          />
-        </div>
-        <p>
-          <button
-            className="btn"
-            style={{
-              background: "var(--color-success)",
-              color: "var(--color-success-text)",
-            }}
-            disabled={!unsaved}
-            onClick={() => {
-              saveConfig(c);
-              setUnsaved(false);
-              toast.success("Settings saved");
-            }}
-          >
-            <FontAwesomeIcon icon={faSave} /> Save
-          </button>
-          <button
-            className="btn"
-            onClick={() => {
-              c.setDarkMode((b) => !b);
-              setUnsaved(true);
-            }}
-          >
-            <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
-            {c.darkMode ? "Light Mode" : "Dark Mode"}
-          </button>
-        </p>
-        <p>
-          <button
-            className="btn"
-            onClick={() => rescanFiles(false).then(() => c.onRescanned())}
-          >
-            <FontAwesomeIcon icon={faRotate} /> Rescan Music
-          </button>
-          <button
-            className="btn"
-            onClick={() => rescanFiles(true).then(() => c.onRescanned())}
-          >
-            <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
-          </button>
-        </p>
+        <input
+          type="checkbox"
+          id="setting-show-blurred-cover"
+          checked={c.showBlurredCover}
+          onChange={() => {
+            c.setShowBlurredCover(!c.showBlurredCover);
+            setUnsaved(true);
+          }}
+        />
+        <label htmlFor="setting-show-blurred-cover">
+          Show blurred album cover as background in dark mode
+        </label>
+      </div>
+      <div>
+        <input
+          type="checkbox"
+          id="setting-show-only-queue-after-enqueue"
+          checked={c.showOnlyQueueAfterEnqueue}
+          onChange={() => {
+            c.setShowOnlyQueueAfterEnqueue(!c.showOnlyQueueAfterEnqueue);
+            setUnsaved(true);
+          }}
+        />
+        <label htmlFor="setting-show-only-queue-after-enqueue">
+          Show only queue after adding tracks
+        </label>
+      </div>
+      <div>
+        <input
+          type="checkbox"
+          id="setting-shuffle-before-playing-all"
+          checked={c.shuffleBeforePlayingAll}
+          onChange={() => {
+            c.setShuffleBeforePlayingAll(!c.shuffleBeforePlayingAll);
+            setUnsaved(true);
+          }}
+        />
+        <label htmlFor="setting-shuffle-before-playing-all">
+          Shuffle before playing all tracks
+        </label>
+      </div>
+      <div>
+        <input
+          type="checkbox"
+          id="setting-show-tracks-list-on-tab-change"
+          checked={c.showTracksListOnTabChange}
+          onChange={() => {
+            c.setShowTracksListOnTabChange(!c.showTracksListOnTabChange);
+            setUnsaved(true);
+          }}
+        />
+        <label htmlFor="setting-show-tracks-list-on-tab-change">
+          Show tracks list when switching tabs
+        </label>
+      </div>
+      <div>
+        <label htmlFor="setting-search-history-limit">
+          Search history limit:
+        </label>
+        <input
+          type="number"
+          id="setting-search-history-limit"
+          min={0}
+          max={9999}
+          value={c.searchHistoryLimit}
+          onChange={(e) => {
+            c.setSearchHistoryLimit(parseInt(e.target.value) || 0);
+            setUnsaved(true);
+          }}
+        />
+      </div>
+      <p>
+        <button
+          className="btn"
+          style={{
+            background: "var(--color-success)",
+            color: "var(--color-success-text)",
+          }}
+          disabled={!unsaved}
+          onClick={() => {
+            saveConfig(c);
+            setUnsaved(false);
+            toast.success("Settings saved");
+          }}
+        >
+          <FontAwesomeIcon icon={faSave} /> Save
+        </button>
+        <button
+          className="btn"
+          onClick={() => {
+            c.setDarkMode((b) => !b);
+            setUnsaved(true);
+          }}
+        >
+          <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
+          {c.darkMode ? "Light Mode" : "Dark Mode"}
+        </button>
+      </p>
+      <p>
+        <button
+          className="btn"
+          onClick={() => rescanFiles(false).then(() => c.onRescanned())}
+        >
+          <FontAwesomeIcon icon={faRotate} /> Rescan Music
+        </button>
+        <button
+          className="btn"
+          onClick={() => rescanFiles(true).then(() => c.onRescanned())}
+        >
+          <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
+        </button>
+      </p>
     </Section>
   );
 
   const serverPropertiesSection = (
     <Section title="Server properties">
       {c.props && (
+        <div>
           <div>
-            <div>
-              <label htmlFor="setting-sr-version">Version:</label>
-              <input
-                type="text"
-                id="setting-sr-version"
-                readOnly
-                value={c.props.version}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
-              <input
-                type="text"
-                id="setting-sr-http-bind"
-                readOnly
-                value={c.props.config.http_bind}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-unix-enabled">
-                Unix Socket Enabled:
-              </label>
-              <input
-                type="checkbox"
-                id="setting-sr-unix-enabled"
-                readOnly
-                checked={c.props.config.unix_bind_enabled}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
-              <input
-                type="text"
-                id="setting-sr-unix-path"
-                readOnly
-                value={c.props.config.unix_bind}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-data-path">Data Path:</label>
-              <input
-                type="text"
-                id="setting-sr-data-path"
-                readOnly
-                value={c.props.config.data_path}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-db-dir">Database Directory:</label>
-              <input
-                type="text"
-                id="setting-sr-db-dir"
-                readOnly
-                value={c.props.config.db_dir}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-cache-db-enabled">
-                Cache database enabled:
-              </label>
-              <input
-                type="checkbox"
-                id="setting-sr-cache-db-enabled"
-                readOnly
-                checked={c.props.config.cache_db_enabled}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-cover-cache-max-bytes">
-                Cover cache max bytes:
-              </label>
-              <input
-                type="number"
-                id="setting-sr-cover-cache-max-bytes"
-                readOnly
-                value={c.props.config.cover_cache_max_bytes}
-              />
-            </div>
-            <div>
-              <label htmlFor="setting-sr-media-downloader">
-                Media Downloader:
-              </label>
-              <input
-                type="text"
-                id="setting-sr-media-downloader"
-                readOnly
-                value={c.props.config.media_downloader}
-              />
-            </div>
+            <label htmlFor="setting-sr-version">Version:</label>
+            <input
+              type="text"
+              id="setting-sr-version"
+              readOnly
+              value={c.props.version}
+            />
           </div>
-        )}
+          <div>
+            <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
+            <input
+              type="text"
+              id="setting-sr-http-bind"
+              readOnly
+              value={c.props.config.http_bind}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-unix-enabled">
+              Unix Socket Enabled:
+            </label>
+            <input
+              type="checkbox"
+              id="setting-sr-unix-enabled"
+              readOnly
+              checked={c.props.config.unix_bind_enabled}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
+            <input
+              type="text"
+              id="setting-sr-unix-path"
+              readOnly
+              value={c.props.config.unix_bind}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-data-path">Data Path:</label>
+            <input
+              type="text"
+              id="setting-sr-data-path"
+              readOnly
+              value={c.props.config.data_path}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-db-dir">Database Directory:</label>
+            <input
+              type="text"
+              id="setting-sr-db-dir"
+              readOnly
+              value={c.props.config.db_dir}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-cache-db-enabled">
+              Cache database enabled:
+            </label>
+            <input
+              type="checkbox"
+              id="setting-sr-cache-db-enabled"
+              readOnly
+              checked={c.props.config.cache_db_enabled}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-cover-cache-max-bytes">
+              Cover cache max bytes:
+            </label>
+            <input
+              type="number"
+              id="setting-sr-cover-cache-max-bytes"
+              readOnly
+              value={c.props.config.cover_cache_max_bytes}
+            />
+          </div>
+          <div>
+            <label htmlFor="setting-sr-media-downloader">
+              Media Downloader:
+            </label>
+            <input
+              type="text"
+              id="setting-sr-media-downloader"
+              readOnly
+              value={c.props.config.media_downloader}
+            />
+          </div>
+        </div>
+      )}
     </Section>
   );
 

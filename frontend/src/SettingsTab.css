@@ -1,10 +1,5 @@
 .settings-tab {
-  padding: var(--s3);
-
-  h2 {
-    margin: 0;
-    text-align: left;
-  }
+  padding: var(--s2);
 
   .settings-section {
     margin-bottom: var(--s3);
@@ -26,7 +21,7 @@
     }
 
     .settings-section-body {
-      padding: var(--s2);
+      padding: var(--s3);
 
       & > div,
       & > p {
