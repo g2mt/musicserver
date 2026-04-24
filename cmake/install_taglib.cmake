@@ -1,3 +1,7 @@
+if(NOT DEFINED MS_READELF)
+  message(FATAL_ERROR "MS_READELF must be set")
+endif()
+
 execute_process(
   COMMAND ${MS_READELF} ${CMAKE_BINARY_DIR}/libmusicserver.so --elf-output-style=JSON --needed-libs
   OUTPUT_VARIABLE READELF_JSON
@@ -8,13 +12,13 @@ if(NOT READELF_RESULT EQUAL 0)
   message(FATAL_ERROR "Failed to run readelf on libmusicserver.so")
 endif()
 
-string(JSON LIBTAG_SONAME_LIST GET "${READELF_JSON}" 0 "NeededLibraries")
-string(JSON LIBTAG_COUNT LENGTH "${LIBTAG_SONAME_LIST}")
-math(EXPR LIBTAG_MAX "${LIBTAG_COUNT} - 1")
+string(JSON NEEDED_LIBS GET "${READELF_JSON}" 0 "NeededLibraries")
+string(JSON NEEDED_LIBS_COUNT LENGTH "${NEEDED_LIBS}")
+math(EXPR NEEDED_LIBS_MAX "${NEEDED_LIBS_COUNT} - 1")
 
 set(MS_TAGLIB_SONAME "")
-foreach(I RANGE ${LIBTAG_MAX})
-  string(JSON LIB_NAME GET "${LIBTAG_SONAME_LIST}" ${I})
+foreach(I RANGE ${NEEDED_LIBS_MAX})
+  string(JSON LIB_NAME GET "${NEEDED_LIBS}" ${I})
   if(LIB_NAME MATCHES "^libtag\\.so")
     set(MS_TAGLIB_SONAME ${LIB_NAME})
     break()

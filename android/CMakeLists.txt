@@ -72,6 +72,7 @@ foreach(ARCH ${TARGET_ARCHS})
   set(AN_NDK_BIN ${AN_NDK_PREFIX}/bin)
   set(AN_NDK_CC ${AN_NDK_BIN}/${ARCH}-linux-android${AN_SDK_EABI}${AN_SDK_VER_MAJOR}-clang)
   set(AN_NDK_CXX ${AN_NDK_BIN}/${ARCH}-linux-android${AN_SDK_EABI}${AN_SDK_VER_MAJOR}-clang++)
+  set(AN_NDK_READELF ${AN_NDK_BIN}/llvm-readelf)
 
   add_custom_target(
     native_${ARCH}
@@ -80,6 +81,7 @@ foreach(ARCH ${TARGET_ARCHS})
       -DCMAKE_C_COMPILER=${AN_NDK_CC}
       -DCMAKE_CXX_COMPILER=${AN_NDK_CXX}
       -DMS_SYSROOT=${AN_NDK_PREFIX}/sysroot
+      -DMS_READELF=${AN_NDK_READELF}
     COMMAND ${CMAKE_COMMAND} 
       --build ${MS_DIR}/build/${ARCH}-android
     COMMAND ${CMAKE_COMMAND} 
