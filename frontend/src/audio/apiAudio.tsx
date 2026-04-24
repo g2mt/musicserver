@@ -12,5 +12,5 @@ export const apiAudio = (() => {
     return BrowserAudio;
   }
 })() as {
-  new(path: string): AudioInterface;
+  new(): AudioInterface;
 };
