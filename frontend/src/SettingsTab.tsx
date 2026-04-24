@@ -75,6 +75,17 @@ export function SettingsTab() {
           </span>
         </p>
       </div>
+      <div>
+        <input
+          type="checkbox"
+          id="setting-normalize"
+          checked={c.as.normalize}
+          onChange={() => {
+            c.as.setNormalize(!c.as.normalize);
+          }}
+        />
+        <label htmlFor="setting-normalize">Normalize audio</label>
+      </div>
     </Section>
   );
 

@@ -25,6 +25,8 @@ export interface AudioState {
   setDuration: Dispatch<SetStateAction<number>>;
   amplification: number;
   setAmplification: Dispatch<SetStateAction<number>>;
+  normalize: boolean;
+  setNormalize: Dispatch<SetStateAction<boolean>>;
   ended: RefObject<boolean>; // ended signal to request next audio in queue (see App.tsx)
   repeated: RefObject<boolean>; // signal request the current audio again
   loadSerializedState: (state: SerializedAudioState) => Promise<void>;
@@ -44,6 +46,7 @@ export function useAudio({
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
   const [amplification, setAmplification] = useState(0);
+  const [normalize, setNormalize] = useState(false);
 
   const ended = useRef(false);
   const repeated = useRef(false);
@@ -103,6 +106,13 @@ export function useAudio({
   }, [amplification]);
 
   useEffect(() => {
+    // @ts-ignore: normalize might not be implemented in all audio backends yet
+    if (typeof audio.setNormalize === "function") {
+      audio.setNormalize(normalize);
+    }
+  }, [normalize]);
+
+  useEffect(() => {
     // auto play or pause based on state
     if (repeated.current) {
       repeated.current = false;
@@ -138,6 +148,8 @@ export function useAudio({
     setDuration,
     amplification,
     setAmplification,
+    normalize,
+    setNormalize,
     ended,
     repeated,
     loadSerializedState: async (state: SerializedAudioState) => {
