@@ -48,6 +48,8 @@ export const AppStateSchema = z.object({
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
 
+export type SelectedLeftTab = "tracks" | "settings" | "files";
+
 // Full state of the App
 export interface AppState extends AppStateData {
   // audio
@@ -90,8 +92,8 @@ export interface AppState extends AppStateData {
   // ### UI
 
   // left tab
-  leftTab: "tracks" | "settings" | "files";
-  setLeftTab: Dispatch<SetStateAction<"tracks" | "settings" | "files">>;
+  leftTab: SelectedLeftTab;
+  setLeftTab: Dispatch<SetStateAction<SelectedLeftTab>>;
 
   // track list
   tracksListCollapsed: boolean;
