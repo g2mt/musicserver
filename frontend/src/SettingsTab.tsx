@@ -362,9 +362,9 @@ export function SettingsTab() {
     </Section>
   ), [c.props]);
 
-  const ongoingProcessesSection = useMemo(() => (
+  const ongoingProcessesSection = import.meta.env.NO_PROGRESS_SUPPORT ? null: useMemo(() => (
     <Section title="Ongoing processes">
-      {!import.meta.env.NO_PROGRESS_SUPPORT && <ProgressTable />}
+      <ProgressTable />
     </Section>
   ), []);
 
