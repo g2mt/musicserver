@@ -6,6 +6,12 @@ export class BrowserAudio extends Audio implements AudioInterface {
   private source?: MediaElementAudioSourceNode;
 
   amplify(decibels: number) {
+    if (decibels === 0) {
+      return;
+    }
+
+    console.log(`Amplify by ${decibels}`);
+
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
       this.source = this.audioContext.createMediaElementSource(this);
