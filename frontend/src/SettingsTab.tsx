@@ -14,14 +14,20 @@ import { rescanFiles } from "src/apiServer";
 
 import "./SettingsTab.css";
 
+const Section = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
+const Title = ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>;
+
+const Body = ({ children }: { children: React.ReactNode }) => <>{children}</>;
+
 export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
 
   const settingsSection = (
-    <>
-      <h2>Settings</h2>
-      <form onSubmit={(e) => e.preventDefault()}>
+    <Section>
+      <Title>Settings</Title>
+      <Body>
         <div>
           <input
             type="checkbox"
@@ -135,125 +141,129 @@ export function SettingsTab() {
             <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
           </button>
         </p>
-      </form>
-      <hr />
-    </>
+      </Body>
+    </Section>
   );
 
   const serverPropertiesSection = (
-    <>
-      <h2>Server properties</h2>
-      {c.props && (
-        <form>
+    <Section>
+      <Title>Server properties</Title>
+      <Body>
+        {c.props && (
           <div>
-            <label htmlFor="setting-sr-version">Version:</label>
-            <input
-              type="text"
-              id="setting-sr-version"
-              readOnly
-              value={c.props.version}
-            />
+            <div>
+              <label htmlFor="setting-sr-version">Version:</label>
+              <input
+                type="text"
+                id="setting-sr-version"
+                readOnly
+                value={c.props.version}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
+              <input
+                type="text"
+                id="setting-sr-http-bind"
+                readOnly
+                value={c.props.config.http_bind}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-unix-enabled">
+                Unix Socket Enabled:
+              </label>
+              <input
+                type="checkbox"
+                id="setting-sr-unix-enabled"
+                readOnly
+                checked={c.props.config.unix_bind_enabled}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
+              <input
+                type="text"
+                id="setting-sr-unix-path"
+                readOnly
+                value={c.props.config.unix_bind}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-data-path">Data Path:</label>
+              <input
+                type="text"
+                id="setting-sr-data-path"
+                readOnly
+                value={c.props.config.data_path}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-db-dir">Database Directory:</label>
+              <input
+                type="text"
+                id="setting-sr-db-dir"
+                readOnly
+                value={c.props.config.db_dir}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-cache-db-enabled">
+                Cache database enabled:
+              </label>
+              <input
+                type="checkbox"
+                id="setting-sr-cache-db-enabled"
+                readOnly
+                checked={c.props.config.cache_db_enabled}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-cover-cache-max-bytes">
+                Cover cache max bytes:
+              </label>
+              <input
+                type="number"
+                id="setting-sr-cover-cache-max-bytes"
+                readOnly
+                value={c.props.config.cover_cache_max_bytes}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-media-downloader">
+                Media Downloader:
+              </label>
+              <input
+                type="text"
+                id="setting-sr-media-downloader"
+                readOnly
+                value={c.props.config.media_downloader}
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
-            <input
-              type="text"
-              id="setting-sr-http-bind"
-              readOnly
-              value={c.props.config.http_bind}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-unix-enabled">
-              Unix Socket Enabled:
-            </label>
-            <input
-              type="checkbox"
-              id="setting-sr-unix-enabled"
-              readOnly
-              checked={c.props.config.unix_bind_enabled}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
-            <input
-              type="text"
-              id="setting-sr-unix-path"
-              readOnly
-              value={c.props.config.unix_bind}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-data-path">Data Path:</label>
-            <input
-              type="text"
-              id="setting-sr-data-path"
-              readOnly
-              value={c.props.config.data_path}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-db-dir">Database Directory:</label>
-            <input
-              type="text"
-              id="setting-sr-db-dir"
-              readOnly
-              value={c.props.config.db_dir}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-cache-db-enabled">
-              Cache database enabled:
-            </label>
-            <input
-              type="checkbox"
-              id="setting-sr-cache-db-enabled"
-              readOnly
-              checked={c.props.config.cache_db_enabled}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-cover-cache-max-bytes">
-              Cover cache max bytes:
-            </label>
-            <input
-              type="number"
-              id="setting-sr-cover-cache-max-bytes"
-              readOnly
-              value={c.props.config.cover_cache_max_bytes}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-media-downloader">
-              Media Downloader:
-            </label>
-            <input
-              type="text"
-              id="setting-sr-media-downloader"
-              readOnly
-              value={c.props.config.media_downloader}
-            />
-          </div>
-        </form>
-      )}
-    </>
+        )}
+      </Body>
+    </Section>
   );
 
   const ongoingProcessesSection = (
-    <>
-      {!import.meta.env.NO_PROGRESS_SUPPORT && (
-        <>
-          <hr />
-          <h2>Ongoing processes</h2>
-          <ProgressTable />
-        </>
-      )}
-    </>
+    <Section>
+      <Title>Ongoing processes</Title>
+      <Body>
+        {!import.meta.env.NO_PROGRESS_SUPPORT && (
+          <>
+            <hr />
+            <ProgressTable />
+          </>
+        )}
+      </Body>
+    </Section>
   );
 
   return (
     <div className="settings-tab">
       {settingsSection}
+      <hr />
       {serverPropertiesSection}
       {ongoingProcessesSection}
     </div>
