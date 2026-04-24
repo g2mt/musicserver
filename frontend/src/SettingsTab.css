@@ -3,27 +3,36 @@
 }
 
 .settings-tab h2 {
-  margin: var(--s2);
-  text-align: center;
+  margin: 0;
+  text-align: left;
 }
 
 /* Section styling */
 .settings-section {
   margin-bottom: var(--s3);
-  padding: var(--s2);
   border: 1px solid var(--color-border);
   border-radius: var(--s1);
   background: var(--color-background);
+  overflow: hidden;
 }
 
 /* Title styling */
 .settings-section-title {
-  margin: 0 0 var(--s2) 0;
+  padding: var(--s2);
   font-size: large;
   color: var(--color-primary);
+  background: var(--color-border);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
 }
 
 /* Body styling */
+.settings-section-body {
+  padding: var(--s2);
+}
+
 .settings-section-body > div,
 .settings-section-body > p {
   margin-bottom: var(--s2);

@@ -1,4 +1,6 @@
 import {
+  faChevronDown,
+  faChevronRight,
   faMoon,
   faRotate,
   faSave,
@@ -17,23 +19,49 @@ import "./SettingsTab.css";
 export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+
+  const toggleCollapse = (title: string) => {
+    setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
 
   const Section = ({ children }: { children: React.ReactNode }) => (
     <div className="settings-section">{children}</div>
   );
 
-  const Title = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="settings-section-title">{children}</h2>
-  );
+  const Title = ({ children }: { children: React.ReactNode }) => {
+    const titleText = typeof children === "string" ? children : "";
+    const isCollapsed = collapsed[titleText];
+    return (
+      <h2
+        className="settings-section-title"
+        onClick={() => toggleCollapse(titleText)}
+      >
+        <FontAwesomeIcon icon={isCollapsed ? faChevronRight : faChevronDown} />
+        <span>{children}</span>
+      </h2>
+    );
+  };
 
-  const Body = ({ children }: { children: React.ReactNode }) => (
-    <div className="settings-section-body">{children}</div>
+  const Body = ({
+    children,
+    title,
+  }: {
+    children: React.ReactNode;
+    title: string;
+  }) => (
+    <div
+      className="settings-section-body"
+      style={{ display: collapsed[title] ? "none" : "block" }}
+    >
+      {children}
+    </div>
   );
 
   const settingsSection = (
     <Section>
       <Title>Settings</Title>
-      <Body>
+      <Body title="Settings">
         <div>
           <input
             type="checkbox"
@@ -154,7 +182,7 @@ export function SettingsTab() {
   const serverPropertiesSection = (
     <Section>
       <Title>Server properties</Title>
-      <Body>
+      <Body title="Server properties">
         {c.props && (
           <div>
             <div>
@@ -255,8 +283,8 @@ export function SettingsTab() {
   const ongoingProcessesSection = (
     <Section>
       <Title>Ongoing processes</Title>
-      <Body>
-        {!import.meta.env.NO_PROGRESS_SUPPORT && (<ProgressTable />)}
+      <Body title="Ongoing processes">
+        {!import.meta.env.NO_PROGRESS_SUPPORT && <ProgressTable />}
       </Body>
     </Section>
   );
