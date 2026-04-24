@@ -106,6 +106,16 @@ export function useAudio({
   }, [amplification]);
 
   useEffect(() => {
+    if (!normalize || !currentTrack) {
+      setAmplification(0);
+      return;
+    }
+
+    fetchAPI(`/track/${currentTrack.id}/loudness`).then((loudness) => {
+      if (typeof loudness === "number") {
+        setAmplification(-loudness);
+      }
+    });
   }, [currentTrack, normalize]);
 
   useEffect(() => {
