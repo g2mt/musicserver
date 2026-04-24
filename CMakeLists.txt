@@ -143,10 +143,6 @@ if(MS_BUILD_LIB)
     install(TARGETS musicserverbind DESTINATION lib/${MS_APKARCH})
     if(MS_INSTALL_SHARED)
       # install the true, non-symlinked version
-      if(NOT DEFINED MS_READELF)
-        message(FATAL_ERROR "MS_READELF must be set")
-      endif()
-
       install(SCRIPT cmake/install_taglib.cmake)
     endif()
   else()
