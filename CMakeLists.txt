@@ -46,7 +46,7 @@ endif()
 
 ### Dep: taglib
 if(MS_EMB_TAGLIB)
-  set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
+  set(MS_TAGLIB_PREFIX ${CMAKE_BINARY_DIR}/taglib_install)
   ExternalProject_Add(taglib_project
     URL https://github.com/taglib/taglib/releases/download/v${MS_TAGLIB_VERSION}/taglib-${MS_TAGLIB_VERSION}.tar.gz
     URL_HASH SHA256=7e76b5299dcef427c486bffe455098470c8da91cf3ccb9ea804893df57389b5e
@@ -54,14 +54,14 @@ if(MS_EMB_TAGLIB)
       -DBUILD_SHARED_LIBS=ON
       -DBUILD_TESTING=OFF
       -DCMAKE_BUILD_TYPE=MinSizeRel
-      -DCMAKE_INSTALL_PREFIX=${TAGLIB_INSTALL_DIR}
+      -DCMAKE_INSTALL_PREFIX=${MS_TAGLIB_PREFIX}
       -DWITH_ZLIB=OFF
       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
       -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
       -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
   )
-  list(APPEND MS_GOENV "PKG_CONFIG_PATH=${TAGLIB_INSTALL_DIR}/lib/pkgconfig")
+  list(APPEND MS_GOENV "PKG_CONFIG_PATH=${MS_TAGLIB_PREFIX}/lib/pkgconfig")
   set(TAGLIB_DEP taglib_project)
 else()
   find_package(PkgConfig REQUIRED)
