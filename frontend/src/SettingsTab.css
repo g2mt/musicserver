@@ -1,40 +1,37 @@
 .settings-tab {
   padding: var(--s3);
-}
 
-.settings-tab h2 {
-  margin: 0;
-  text-align: left;
-}
+  h2 {
+    margin: 0;
+    text-align: left;
+  }
 
-/* Section styling */
-.settings-section {
-  margin-bottom: var(--s3);
-  border: 1px solid var(--gray);
-  border-radius: var(--border-radius);
-  background: var(--front-bg);
-  overflow: hidden;
-}
+  .settings-section {
+    margin-bottom: var(--s3);
+    border: 1px solid var(--gray);
+    border-radius: var(--border-radius);
+    background: var(--front-bg);
+    overflow: hidden;
 
-/* Title styling */
-.settings-section-title {
-  padding: var(--s2);
-  font-size: large;
-  color: var(--content-color);
-  background: var(--shadow);
-  border-bottom: 1px solid var(--gray);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: var(--s2);
-}
+    .settings-section-title {
+      padding: var(--s2);
+      font-size: large;
+      color: var(--content-color);
+      background: var(--shadow);
+      border-bottom: 1px solid var(--gray);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+    }
 
-/* Body styling */
-.settings-section-body {
-  padding: var(--s2);
-}
+    .settings-section-body {
+      padding: var(--s2);
 
-.settings-section-body > div,
-.settings-section-body > p {
-  margin-bottom: var(--s2);
+      & > div,
+      & > p {
+        margin-bottom: var(--s2);
+      }
+    }
+  }
 }
