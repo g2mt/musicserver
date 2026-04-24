@@ -38,6 +38,9 @@ list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HA
 if(MS_EMB_EBUR128)
   list(APPEND GOFLAGS "-tags=has_ebur128")
 endif()
+if(MS_USE_SNDFILE)
+  list(APPEND GOFLAGS "-tags=has_sndfile")
+endif()
 
 set(MS_GOENV "")
 list(APPEND MS_GOENV "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}")
@@ -83,6 +86,17 @@ if(MS_EMB_EBUR128)
   add_subdirectory(vendored/libebur128)
   list(APPEND MS_PKG_CONFIG_PATH "${CMAKE_BINARY_DIR}/vendored/libebur128/ebur128")
   set(EBUR128_DEP ebur128)
+endif()
+
+### Dep: sndfile
+if(MS_USE_SNDFILE)
+  # Ensure pkg-config is available (if not already found above)
+  if(NOT TARGET PkgConfig::PkgConfig)
+    find_package(PkgConfig REQUIRED)
+  endif()
+  pkg_check_modules(SNDFILE REQUIRED sndfile)
+  # Add the pkg-config path for sndfile to the PKG_CONFIG_PATH used by Go builds
+  list(APPEND MS_PKG_CONFIG_PATH "${SNDFILE_PREFIX}/lib/pkgconfig")
 endif()
 
 ### Consolidate PKG_CONFIG_PATH
