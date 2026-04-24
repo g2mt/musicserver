@@ -2,6 +2,8 @@ package audio
 
 // AudioReader is an interface for reading audio data.
 type AudioReader interface {
+	// Close closes the interface
+	Close() error
 	// GetChannels returns the number of audio channels.
 	GetChannels() uint
 	// GetSampleRate returns the sample rate of the audio.

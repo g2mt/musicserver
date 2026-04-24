@@ -61,8 +61,8 @@ import (
 	"encoding/json"
 	"io"
 	"musicserver/internal/api"
+	"musicserver/internal/lib/taglib"
 	"musicserver/internal/schema"
-	"musicserver/internal/taglib"
 	"runtime/cgo"
 	"unsafe"
 

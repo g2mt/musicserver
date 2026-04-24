@@ -1,11 +1,7 @@
 package libsndfile
 
 /*
-#cgo LDFLAGS: -lsndfile
-#cgo CFLAGS: -I../../vendored/libebur128/ebur128 -I../../vendored/libebur128/ebur128
-#include <sndfile.h>
-#include <stdlib.h>
-#include <string.h>
+// #cgo pkg-config: sndfile
 */
 import "C"
 import (
@@ -76,7 +72,6 @@ func NewSfReader(path string) (audio.AudioReader, error) {
 }
 
 // Close releases the underlying libsndfile resources.
-// It is optional for callers, but provided for completeness.
 func (r *sfReader) Close() error {
 	if r.file != nil {
 		if C.sf_close(r.file) != 0 {

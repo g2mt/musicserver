@@ -8,9 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"musicserver/internal/taglib"
-
 	"github.com/fsnotify/fsnotify"
+	"musicserver/internal/lib/taglib"
 )
 
 const WatchDirInterval = 1 * time.Second

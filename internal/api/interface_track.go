@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"musicserver/internal/lib/taglib"
 	"musicserver/internal/schema"
 	"musicserver/internal/searchparser"
-	"musicserver/internal/taglib"
 )
 
 type TrackListResult struct {
