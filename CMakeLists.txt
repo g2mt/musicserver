@@ -32,14 +32,37 @@ if(MS_USE_CCACHE)
   endif()
 endif()
 
+# ----------------------------------------------------------------------
+# Build flags for Go
+# ----------------------------------------------------------------------
 set(GOFLAGS "")
 list(APPEND GOFLAGS "-v")
 list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
+
+# Collect build tags in a space‑separated string
+set(GO_TAGS "")
+
 if(MS_EMB_EBUR128)
-  list(APPEND GOFLAGS "-tags=has_ebur128")
+  # Append ebur128 tag
+  if(GO_TAGS STREQUAL "")
+    set(GO_TAGS "has_ebur128")
+  else()
+    set(GO_TAGS "${GO_TAGS} has_ebur128")
+  endif()
 endif()
+
 if(MS_USE_SNDFILE)
-  list(APPEND GOFLAGS "-tags=has_sndfile")
+  # Append sndfile tag
+  if(GO_TAGS STREQUAL "")
+    set(GO_TAGS "has_sndfile")
+  else()
+    set(GO_TAGS "${GO_TAGS} has_sndfile")
+  endif()
+endif()
+
+# If any tags were collected, add them as a single -tags argument
+if(NOT GO_TAGS STREQUAL "")
+  list(APPEND GOFLAGS "-tags=${GO_TAGS}")
 endif()
 
 set(MS_GOENV "")
