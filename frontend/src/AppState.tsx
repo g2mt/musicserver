@@ -8,8 +8,8 @@ import type React from "react";
 import { toast } from "react-toastify";
 import * as z from "zod";
 
-import type { AudioState } from "src/AudioState";
 import { type TrackQueue } from "src/TrackQueue";
+import type { AudioState } from "src/audio/AudioState";
 import { Settings } from "src/settings";
 
 export const SearchQuerySchema = z.object({

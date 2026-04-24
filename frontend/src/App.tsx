@@ -16,7 +16,6 @@ import {
   mergeConfig,
   saveConfig,
 } from "src/AppState";
-import { type SerializedAudioState, useAudio } from "src/AudioState";
 import { ConfirmBoxContext } from "src/ConfirmBox";
 import { ContextMenu } from "src/ContextMenu";
 import FileBrowserTab from "src/FileBrowserTab";
@@ -30,6 +29,7 @@ import type { TrackData, TrackListResult } from "src/TrackData";
 import { TrackList } from "src/TrackList";
 import { type SerializedTrackQueue, useTrackQueue } from "src/TrackQueue";
 import { fetchAPI } from "src/apiServer";
+import { type SerializedAudioState, useAudio } from "src/audio/AudioState";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
 
 import "./App.css";
