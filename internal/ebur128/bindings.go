@@ -48,4 +48,3 @@ func GetLoudness(reader AudioReader) (float64, error) {
 
 	return float64(loudness), nil
 }
-```

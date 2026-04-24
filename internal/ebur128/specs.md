@@ -4,7 +4,7 @@ Go bindings to the ebur128 library for replay gain.
 
 Exports the following function:
 
-`GetLoudness(AudioReader) -> f64`, returning the integrated loudness in LUFS
+`GetLoudness(AudioReader) -> f64, error`, returning the integrated loudness in LUFS
 
 where AudioReader is an interface with in the following functions:
 
