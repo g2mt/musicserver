@@ -18,8 +18,8 @@ export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
 
-  return (
-    <div className="settings-tab">
+  const settingsSection = (
+    <>
       <h2>Settings</h2>
       <form onSubmit={(e) => e.preventDefault()}>
         <div>
@@ -137,7 +137,11 @@ export function SettingsTab() {
         </p>
       </form>
       <hr />
+    </>
+  );
 
+  const serverPropertiesSection = (
+    <>
       <h2>Server properties</h2>
       {c.props && (
         <form>
@@ -232,7 +236,11 @@ export function SettingsTab() {
           </div>
         </form>
       )}
+    </>
+  );
 
+  const ongoingProcessesSection = (
+    <>
       {!import.meta.env.NO_PROGRESS_SUPPORT && (
         <>
           <hr />
@@ -240,6 +248,14 @@ export function SettingsTab() {
           <ProgressTable />
         </>
       )}
+    </>
+  );
+
+  return (
+    <div className="settings-tab">
+      {settingsSection}
+      {serverPropertiesSection}
+      {ongoingProcessesSection}
     </div>
   );
 }
