@@ -5,15 +5,19 @@ export class BrowserAudio extends Audio implements AudioInterface {
   private gainNode?: GainNode;
   private source?: MediaElementAudioSourceNode;
 
+  constructor() {
+    super();
+    this.crossOrigin = "anonymous";
+  }
+
   amplify(decibels: number) {
-    if (decibels === 0) {
+    if (decibels === 0 && !this.audioContext) {
       return;
     }
 
     console.log(`Amplify by ${decibels}`);
 
     if (!this.audioContext) {
-      this.crossOrigin = "anonymous";
       this.audioContext = new AudioContext();
       if (this.audioContext.state === "suspended") {
         this.audioContext.resume();

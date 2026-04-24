@@ -120,6 +120,7 @@ export function useAudio({
       }
     }).catch(err => {
       toast.error(`Failed to get track loudness: ${err}`);
+      setAmplification(0);
     });
   }, [currentTrack, normalize, targetNormalizationDbs]);
 
