@@ -7,7 +7,7 @@ import {
   faSun,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useState } from "react";
+import { useContext, useState, useMemo } from "react";
 import { toast } from "react-toastify";
 
 import { AppContext, saveConfig } from "src/AppState";
@@ -54,7 +54,7 @@ export function SettingsTab() {
     );
   };
 
-  const playbackSection = (
+  const playbackSection = useMemo(() => (
     <Section title="Playback">
       <div>
         <label htmlFor="setting-amplification">Amplification (dB):</label>
@@ -87,9 +87,14 @@ export function SettingsTab() {
         <label htmlFor="setting-normalize">Normalize audio</label>
       </div>
     </Section>
-  );
+  ), [
+    c.as.amplification,
+    c.as.setAmplification,
+    c.as.normalize,
+    c.as.setNormalize,
+  ]);
 
-  const settingsSection = (
+  const settingsSection = useMemo(() => (
     <Section title="General settings">
       <div>
         <input
@@ -227,9 +232,26 @@ export function SettingsTab() {
         </button>
       </p>
     </Section>
-  );
+  ), [
+    c.showBlurredCover,
+    c.setShowBlurredCover,
+    c.showOnlyQueueAfterEnqueue,
+    c.setShowOnlyQueueAfterEnqueue,
+    c.shuffleBeforePlayingAll,
+    c.setShuffleBeforePlayingAll,
+    c.showTracksListOnTabChange,
+    c.setShowTracksListOnTabChange,
+    c.targetNormalizationDbs,
+    c.setTargetNormalizationDbs,
+    c.searchHistoryLimit,
+    c.setSearchHistoryLimit,
+    c.darkMode,
+    c.setDarkMode,
+    unsaved,
+    c,
+  ]);
 
-  const serverPropertiesSection = (
+  const serverPropertiesSection = useMemo(() => (
     <Section title="Server properties">
       {c.props && (
         <div>
@@ -325,13 +347,13 @@ export function SettingsTab() {
         </div>
       )}
     </Section>
-  );
+  ), [c.props]);
 
-  const ongoingProcessesSection = (
+  const ongoingProcessesSection = useMemo(() => (
     <Section title="Ongoing processes">
       {!import.meta.env.NO_PROGRESS_SUPPORT && <ProgressTable />}
     </Section>
-  );
+  ), []);
 
   return (
     <div className="settings-tab">
