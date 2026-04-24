@@ -106,11 +106,7 @@ export function useAudio({
   }, [amplification]);
 
   useEffect(() => {
-    // @ts-ignore: normalize might not be implemented in all audio backends yet
-    if (typeof audio.setNormalize === "function") {
-      audio.setNormalize(normalize);
-    }
-  }, [normalize]);
+  }, [currentTrack, normalize]);
 
   useEffect(() => {
     // auto play or pause based on state
