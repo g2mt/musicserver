@@ -31,6 +31,8 @@ if(MS_TAGLIB_SONAME STREQUAL "")
   message(FATAL_ERROR "Could not find libtag.so in libmusicserver.so dependencies")
 endif()
 
+message(STATUS "Installing taglib as: ${MS_TAGLIB_SONAME}")
+
 file(INSTALL
   FILES "${MS_TAGLIB_PREFIX}/lib/libtag.so.${MS_TAGLIB_VERSION}"
   DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/${MS_APKARCH}"
