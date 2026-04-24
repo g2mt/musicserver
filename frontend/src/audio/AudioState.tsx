@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
+import { toast } from "react-toastify";
 
 import type { TrackData } from "src/TrackData";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";
@@ -35,9 +36,11 @@ export interface AudioState {
 export function useAudio({
   volume,
   muted,
+  targetNormalizationDbs,
 }: {
   volume: number;
   muted: boolean;
+  targetNormalizationDbs: number;
 }): AudioState {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -113,10 +116,12 @@ export function useAudio({
 
     fetchAPI(`/track/${currentTrack.id}/loudness`).then((loudness) => {
       if (typeof loudness === "number") {
-        setAmplification(-loudness);
+        setAmplification(targetNormalizationDbs - loudness);
       }
+    }).catch(err => {
+      toast.error(`Failed to get track loudness: ${err}`);
     });
-  }, [currentTrack, normalize]);
+  }, [currentTrack, normalize, targetNormalizationDbs]);
 
   useEffect(() => {
     // auto play or pause based on state

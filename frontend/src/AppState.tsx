@@ -82,8 +82,6 @@ export interface AppState extends AppStateData {
   setShowTracksListOnTabChange: Dispatch<SetStateAction<boolean>>;
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
-
-  // new setter for target normalization
   setTargetNormalizationDbs: Dispatch<SetStateAction<number>>;
 
   // server props

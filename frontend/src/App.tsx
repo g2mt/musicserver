@@ -119,6 +119,7 @@ export function App() {
     null,
   );
   [c.fbPath, c.setFbPath] = useState<string[]>([]);
+  [c.targetNormalizationDbs, c.setTargetNormalizationDbs] = useState<number>(0);
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", c.darkMode);
@@ -221,6 +222,7 @@ export function App() {
   c.as = useAudio({
     volume: c.volume,
     muted: c.muted,
+    targetNormalizationDbs: c.targetNormalizationDbs,
   });
 
   // Track queue
