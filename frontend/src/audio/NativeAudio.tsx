@@ -10,6 +10,7 @@ declare global {
     getCurrentTime(instanceId: number): number;
     getDuration(instanceId: number): number;
     setVolume(instanceId: number, volume: number): void;
+    setAmplification(instanceId: number, decibels: number): void;
   }
   interface Window {
     _native_audio_bridge?: NativeAudioBridge;
@@ -101,5 +102,8 @@ export class NativeAudio extends EventTarget implements AudioInterface {
     NativeAudio.bridge.pause(this.instanceId);
   }
 
-  amplify(_decibels: number): void {}
+  amplify(decibels: number): void {
+    if (!this.isActive) return;
+    NativeAudio.bridge.setAmplification(this.instanceId, decibels);
+  }
 }

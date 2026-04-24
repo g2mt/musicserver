@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
+import android.media.audiofx.LoudnessEnhancer;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.widget.Toast;
@@ -30,6 +31,7 @@ public class NativeAudioBridge {
 	private MainActivity activity;
 	private WebView webView;
 	private MediaPlayer mediaPlayer;
+	private LoudnessEnhancer loudnessEnhancer;
 
 	private WebMessagePort messagePort;
 
@@ -120,6 +122,10 @@ public class NativeAudioBridge {
 	}
 
 	public void terminate() {
+		if (loudnessEnhancer != null) {
+			loudnessEnhancer.release();
+			loudnessEnhancer = null;
+		}
 		if (mediaPlayer != null) {
 			mediaPlayer.stop();
 			mediaPlayer.release();
@@ -402,6 +408,25 @@ public class NativeAudioBridge {
 	public void setVolume(int instanceId, float volume) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.setVolume(volume, volume);
+	}
+
+	@JavascriptInterface
+	public void setAmplification(int instanceId, float decibels) {
+		if (!isActive(instanceId)) return;
+		if (decibels == 0) {
+			if (loudnessEnhancer != null) {
+				loudnessEnhancer.setEnabled(false);
+				loudnessEnhancer.release();
+				loudnessEnhancer = null;
+			}
+			return;
+		}
+
+		if (loudnessEnhancer == null) {
+			loudnessEnhancer = new LoudnessEnhancer(mediaPlayer.getAudioSessionId());
+		}
+		loudnessEnhancer.setTargetGain((int) (decibels * 100));
+		loudnessEnhancer.setEnabled(true);
 	}
 
 	@JavascriptInterface
