@@ -1,9 +1,6 @@
 package ebur128
 
-/*
-#cgo CFLAGS: -I../../vendored/libebur128/ebur128
-#include "ebur128.h"
-*/
+// #include "ebur128.h"
 import "C"
 import (
 	"errors"
