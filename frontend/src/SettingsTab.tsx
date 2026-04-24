@@ -19,15 +19,15 @@ export function SettingsTab() {
   const [unsaved, setUnsaved] = useState(false);
 
   const Section = ({ children }: { children: React.ReactNode }) => (
-    <div className="section">{children}</div>
+    <div className="settings-section">{children}</div>
   );
 
   const Title = ({ children }: { children: React.ReactNode }) => (
-    <h2 className="section-title">{children}</h2>
+    <h2 className="settings-section-title">{children}</h2>
   );
 
   const Body = ({ children }: { children: React.ReactNode }) => (
-    <div className="section-body">{children}</div>
+    <div className="settings-section-body">{children}</div>
   );
 
   const settingsSection = (
