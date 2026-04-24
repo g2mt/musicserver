@@ -173,6 +173,28 @@ export function SettingsTab() {
         </p>
       </div>
       <div>
+        <label htmlFor="setting-max-normalization-db">
+          Max Normalization (dB):
+        </label>
+        <p>
+          <input
+            type="range"
+            id="setting-max-normalization-db"
+            min={-20.0}
+            max={20.0}
+            step={0.1}
+            value={c.maxNormalizationDbs ?? 0}
+            onChange={(e) => {
+              c.setMaxNormalizationDbs(parseFloat(e.target.value));
+              setUnsaved(true);
+            }}
+          />
+          <span style={{ marginLeft: "0.5rem" }}>
+            {c.maxNormalizationDbs.toFixed(1)} dB
+          </span>
+        </p>
+      </div>
+      <div>
         <label htmlFor="setting-search-history-limit">
           Search history limit:
         </label>
@@ -236,6 +258,7 @@ export function SettingsTab() {
     c.shuffleBeforePlayingAll,
     c.showTracksListOnTabChange,
     c.targetNormalizationDbs,
+    c.maxNormalizationDbs,
     c.searchHistoryLimit,
     c.darkMode,
     unsaved,
