@@ -12,7 +12,8 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-option(MS_STATIC_TAGLIB "Build taglib statically from source" OFF)
+set(MS_TAGLIB_VERSION "2.2.1")
+option(MS_EMB_TAGLIB "Build taglib from source for embedding" OFF)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
@@ -44,12 +45,13 @@ if(MS_BUILD_ANDROID)
 endif()
 
 ### Dep: taglib
-if(MS_STATIC_TAGLIB)
+if(MS_EMB_TAGLIB)
   set(TAGLIB_INSTALL_DIR ${CMAKE_BINARY_DIR}/taglib_install)
   ExternalProject_Add(taglib_project
-    URL https://github.com/taglib/taglib/releases/download/v2.2.1/taglib-2.2.1.tar.gz
+    URL https://github.com/taglib/taglib/releases/download/v${MS_TAGLIB_VERSION}/taglib-${MS_TAGLIB_VERSION}.tar.gz
     URL_HASH SHA256=7e76b5299dcef427c486bffe455098470c8da91cf3ccb9ea804893df57389b5e
     CMAKE_ARGS
+      -DBUILD_SHARED_LIBS=ON
       -DBUILD_TESTING=OFF
       -DCMAKE_BUILD_TYPE=MinSizeRel
       -DCMAKE_INSTALL_PREFIX=${TAGLIB_INSTALL_DIR}
@@ -139,6 +141,15 @@ if(MS_BUILD_LIB)
 
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib/${MS_APKARCH})
     install(TARGETS musicserverbind DESTINATION lib/${MS_APKARCH})
+    if(MS_INSTALL_SHARED)
+      # install the true, non-symlinked version
+      if(NOT DEFINED MS_READELF)
+        message(FATAL_ERROR "MS_READELF must be set")
+      endif()
+      install(FILES ${TAGLIB_INSTALL_DIR}/lib/libtag.so.${MS_TAGLIB_VERSION}
+          DESTINATION lib/${MS_APKARCH}
+          RENAME libtag.so.2)
+    endif()
   else()
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.h DESTINATION include)
@@ -147,7 +158,7 @@ endif()
 
 add_custom_target(FORCE)
 
-### Related libraries
+### Related libraries for android
 if(MS_INSTALL_SHARED)
   if(MS_SYSROOT STREQUAL "")
     message(FATAL_ERROR "MS_SYSROOT must be set")
