@@ -100,7 +100,7 @@ class NativeAudio extends EventTarget {
   }
 }
 
-export const useAbsoluteAudioPath = window._native_audio_bridge ? true : false;
+export const usesAbsoluteAudioPath = window._native_audio_bridge ? true : false;
 
 export const apiAudio = (() => {
   if (window._native_audio_bridge) {

@@ -3,7 +3,7 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 
 import type { TrackData } from "src/TrackData";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";
-import { apiAudio, useAbsoluteAudioPath } from "src/audio/apiAudio";
+import { apiAudio, usesAbsoluteAudioPath } from "src/audio/apiAudio";
 
 export interface SerializedAudioState {
   path: string; // get the track using the `/track/:by-path` endpoint
@@ -52,7 +52,7 @@ export function useAudio({
     // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
     // without adding additional functions, so use the absolute path directly.
     // the path is checked in NativeAudioBridge
-    if (currentTrack.path && useAbsoluteAudioPath)
+    if (currentTrack.path && usesAbsoluteAudioPath)
       return `file://${encodeURI(currentTrack.path)}`;
     if (currentTrack.id) return getTrackFileFromId(currentTrack.id);
     if (currentTrack.path) return getFilePath(currentTrack.path);
