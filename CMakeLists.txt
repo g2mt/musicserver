@@ -32,6 +32,7 @@ endif()
 set(GOFLAGS "")
 list(APPEND GOFLAGS "-v")
 list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
+list(APPEND GOFLAGS "-tags=has_ebur128")
 
 set(MS_GOENV "")
 list(APPEND MS_GOENV "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}")
@@ -43,6 +44,9 @@ if(MS_BUILD_ANDROID)
   endif()
   list(APPEND MS_GOENV "GOARCH=${MS_GOARCH}")
 endif()
+
+# Helper for PKG_CONFIG_PATH
+set(MS_PKG_CONFIG_PATH "")
 
 ### Dep: taglib
 if(MS_EMB_TAGLIB)
@@ -61,12 +65,25 @@ if(MS_EMB_TAGLIB)
       -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
       -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
   )
-  list(APPEND MS_GOENV "PKG_CONFIG_PATH=${MS_TAGLIB_PREFIX}/lib/pkgconfig")
+  list(APPEND MS_PKG_CONFIG_PATH "${MS_TAGLIB_PREFIX}/lib/pkgconfig")
   set(TAGLIB_DEP taglib_project)
 else()
   find_package(PkgConfig REQUIRED)
   pkg_check_modules(TAGLIB REQUIRED taglib)
   set(TAGLIB_DEP "")
+endif()
+
+### Dep: ebur128
+add_subdirectory(vendored/libebur128)
+# The ebur128 CMakeLists generates a pkg-config file in its binary dir.
+# We need to add that to PKG_CONFIG_PATH so Go/cgo can find it.
+list(APPEND MS_PKG_CONFIG_PATH "${CMAKE_BINARY_DIR}/vendored/libebur128/ebur128")
+set(EBUR128_DEP ebur128)
+
+# Consolidate PKG_CONFIG_PATH
+if(MS_PKG_CONFIG_PATH)
+  string(JOIN ":" MS_PKG_CONFIG_PATH_STR ${MS_PKG_CONFIG_PATH})
+  list(APPEND MS_GOENV "PKG_CONFIG_PATH=${MS_PKG_CONFIG_PATH_STR}")
 endif()
 
 ### Frontend
@@ -108,7 +125,7 @@ if(MS_BUILD_BIN)
   add_custom_target(musicserver ALL
     COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend ${TAGLIB_DEP} FORCE
+    DEPENDS frontend ${TAGLIB_DEP} ${EBUR128_DEP} FORCE
     COMMENT "Building musicserver"
     VERBATIM
   )
@@ -122,7 +139,7 @@ if(MS_BUILD_LIB)
     OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h FORCE
     COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend ${TAGLIB_DEP} FORCE
+    DEPENDS frontend ${TAGLIB_DEP} ${EBUR128_DEP} FORCE
     COMMENT "Building libmusicserver.so and libmusicserver.h"
     VERBATIM
   )
