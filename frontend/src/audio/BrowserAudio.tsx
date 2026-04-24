@@ -14,6 +14,9 @@ export class BrowserAudio extends Audio implements AudioInterface {
 
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
+      if (this.audioContext.state === "suspended") {
+        this.audioContext.resume();
+      }
       this.source = this.audioContext.createMediaElementSource(this);
       this.gainNode = this.audioContext.createGain();
       this.source.connect(this.gainNode);
