@@ -60,8 +60,8 @@ export function SettingsTab() {
 
   const settingsSection = (
     <Section>
-      <Title>Settings</Title>
-      <Body title="Settings">
+      <Title>General settings</Title>
+      <Body title="General settings">
         <div>
           <input
             type="checkbox"
