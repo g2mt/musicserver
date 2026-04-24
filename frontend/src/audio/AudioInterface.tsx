@@ -17,4 +17,7 @@ export interface AudioInterface {
 
   /** Pauses playback. */
   pause(): void;
+
+  /** Amplifies the track uniformly by decibels. */
+  amplify(decibels: number): void;
 }
