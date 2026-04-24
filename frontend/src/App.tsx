@@ -120,6 +120,7 @@ export function App() {
   );
   [c.fbPath, c.setFbPath] = useState<string[]>([]);
   [c.targetNormalizationDbs, c.setTargetNormalizationDbs] = useState<number>(0);
+  [c.maxNormalizationDbs, c.setMaxNormalizationDbs] = useState<number>(0);
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", c.darkMode);

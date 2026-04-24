@@ -45,6 +45,7 @@ export const AppStateSchema = z.object({
   searchHistoryLimit: z.number().min(0).max(9999).default(10),
   showTracksListOnTabChange: z.boolean().default(false),
   targetNormalizationDbs: z.number().default(0),
+  maxNormalizationDbs: z.number().default(0),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
@@ -83,6 +84,7 @@ export interface AppState extends AppStateData {
   setDarkMode: Dispatch<SetStateAction<boolean>>;
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
   setTargetNormalizationDbs: Dispatch<SetStateAction<number>>;
+  setMaxNormalizationDbs: Dispatch<SetStateAction<number>>;
 
   // server props
   props: ServerConfig | null;
@@ -142,6 +144,8 @@ export function mergeConfig(dest: AppState) {
         dest.setShowTracksListOnTabChange(config.showTracksListOnTabChange);
       if (config.targetNormalizationDbs !== undefined)
         dest.setTargetNormalizationDbs(config.targetNormalizationDbs);
+      if (config.maxNormalizationDbs !== undefined)
+        dest.setMaxNormalizationDbs(config.maxNormalizationDbs);
     } catch (e: any) {
       toast.error(
         <p>
@@ -164,6 +168,7 @@ export function saveConfig(state: AppState) {
     searchHistoryLimit: state.searchHistoryLimit,
     showTracksListOnTabChange: state.showTracksListOnTabChange,
     targetNormalizationDbs: state.targetNormalizationDbs,
+    maxNormalizationDbs: state.maxNormalizationDbs,
   };
   Settings.setItem(CONFIG_KEY, JSON.stringify(config));
 }
