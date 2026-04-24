@@ -1,10 +1,10 @@
 //go:build !has_ebur128
 
-package audionorm
+package audio
 
 import (
 	"errors"
-	"musicserver/internal/audio"
+	"musicserver/internal/audio/base"
 )
 
 func GetLoudness(reader audio.AudioReader) (float64, error) {

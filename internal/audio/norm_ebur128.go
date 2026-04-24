@@ -1,6 +1,6 @@
 //go:build has_ebur128
 
-package audionorm
+package audio
 
 import (
 	"musicserver/internal/audio"

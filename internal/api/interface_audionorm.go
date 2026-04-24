@@ -1,8 +1,7 @@
 package api
 
 import (
-	"musicserver/internal/audionorm"
-	"os"
+	"musicserver/internal/audio"
 )
 
 // GetTrackLoudness returns the loudness (LUF) of a track identified by its short or long ID.
@@ -28,21 +27,14 @@ func (i *Interface) GetTrackLoudness(id string) (float64, error) {
 		return 0, err
 	}
 
-	// Open the audio file
-	f, err := os.Open(path)
-	if err != nil {
-		return 0, err
-	}
-	defer f.Close()
-
 	// Create an audio reader (implementation dependent)
-	reader, err := audio.NewReader(f)
+	reader, err := audio.NewReader(path)
 	if err != nil {
 		return 0, err
 	}
 
 	// Compute loudness using the audionorm package
-	loudness, err := audionorm.GetLoudness(reader)
+	loudness, err := audio.GetLoudness(reader)
 	if err != nil {
 		return 0, err
 	}
