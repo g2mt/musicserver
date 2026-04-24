@@ -8,19 +8,12 @@ import "C"
 import (
 	"errors"
 	"unsafe"
+
+	"musicserver/internal/audio"
 )
 
-// AudioReader is an interface for reading audio data.
-type AudioReader interface {
-	GetChannels() uint
-	GetSampleRate() uint
-	// ReadFrames reads up to nframes and returns the number of frames read and the buffer.
-	// The number of float64 items in buffer = frames * number of channels.
-	ReadFrames(nframes uint) (uint, []float64)
-}
-
 // GetLoudness returns the integrated loudness in LUFS.
-func GetLoudness(reader AudioReader) (float64, error) {
+func GetLoudness(reader audio.AudioReader) (float64, error) {
 	channels := reader.GetChannels()
 	rate := reader.GetSampleRate()
 
