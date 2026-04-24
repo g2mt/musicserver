@@ -44,6 +44,7 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	reader.HandleHTTP(w, req)
 	reader.Close()
 }
