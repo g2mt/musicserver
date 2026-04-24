@@ -224,6 +224,7 @@ export function App() {
     volume: c.volume,
     muted: c.muted,
     targetNormalizationDbs: c.targetNormalizationDbs,
+    maxNormalizationDbs: c.maxNormalizationDbs,
   });
 
   // Track queue

@@ -37,10 +37,12 @@ export function useAudio({
   volume,
   muted,
   targetNormalizationDbs,
+  maxNormalizationDbs,
 }: {
   volume: number;
   muted: boolean;
   targetNormalizationDbs: number;
+  maxNormalizationDbs: number;
 }): AudioState {
   const [currentTrack, setCurrentTrack] = useState<TrackData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -116,7 +118,7 @@ export function useAudio({
 
     fetchAPI(`/track/${currentTrack.id}/loudness`).then((loudness) => {
       if (typeof loudness === "number") {
-        setAmplification(targetNormalizationDbs - loudness);
+        setAmplification(Math.min(targetNormalizationDbs - loudness, maxNormalizationDbs));
       }
     }).catch(err => {
       toast.error(`Failed to get track loudness: ${err}`);

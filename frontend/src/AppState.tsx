@@ -45,7 +45,7 @@ export const AppStateSchema = z.object({
   searchHistoryLimit: z.number().min(0).max(9999).default(10),
   showTracksListOnTabChange: z.boolean().default(false),
   targetNormalizationDbs: z.number().default(0),
-  maxNormalizationDbs: z.number().default(0),
+  maxNormalizationDbs: z.number().default(8),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;

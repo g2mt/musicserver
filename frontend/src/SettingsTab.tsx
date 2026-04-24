@@ -70,7 +70,7 @@ export function SettingsTab() {
               c.as.setAmplification(parseFloat(e.target.value));
             }}
           />
-          <span style={{ marginLeft: "0.5rem" }}>
+          <span style={{ marginLeft: "var(--s1)" }}>
             {c.as.amplification.toFixed(1)} dB
           </span>
         </p>
@@ -167,7 +167,7 @@ export function SettingsTab() {
               setUnsaved(true);
             }}
           />
-          <span style={{ marginLeft: "0.5rem" }}>
+          <span style={{ marginLeft: "var(--s1)" }}>
             {c.targetNormalizationDbs.toFixed(1)} dB
           </span>
         </p>
@@ -189,7 +189,7 @@ export function SettingsTab() {
               setUnsaved(true);
             }}
           />
-          <span style={{ marginLeft: "0.5rem" }}>
+          <span style={{ marginLeft: "var(--s1)" }}>
             {c.maxNormalizationDbs.toFixed(1)} dB
           </span>
         </p>
