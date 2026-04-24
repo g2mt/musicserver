@@ -10,11 +10,11 @@ import {
   faFolder,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { getTrackCoverFromId, getTrackCoverFromPath, fetchAPI } from "./apiServer";
-import { AppContext } from "./AppState";
-import { toggleContextMenu, ContextMenuItem } from "./ContextMenu";
+import { getTrackCoverFromId, getTrackCoverFromPath, fetchAPI } from "src/apiServer";
+import { AppContext } from "src/AppState";
+import { toggleContextMenu, ContextMenuItem } from "src/ContextMenu";
 import { toast } from "react-toastify";
-import type { TrackData } from "./TrackData";
+import type { TrackData } from "src/TrackData";
 
 import "./Track.css";
 

@@ -1,5 +1,5 @@
-import { TrackList } from "./TrackList";
-import type { TrackData, TrackListResult } from "./TrackData";
+import { TrackList } from "src/TrackList";
+import type { TrackData, TrackListResult } from "src/TrackData";
 import {
   faChevronLeft,
   faChevronRight,
@@ -13,12 +13,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useRef, type RefObject } from "react";
-import { AppContext } from "./AppState";
-import { Select, Option } from "./Select";
-import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
-import { fetchAPI } from "./apiServer";
+import { AppContext } from "src/AppState";
+import { Select, Option } from "src/Select";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
+import { fetchAPI } from "src/apiServer";
 import { toast } from "react-toastify";
-import { shuffled } from "./utils";
+import { shuffled } from "src/utils";
 
 import "./MainTracksTab.css";
 

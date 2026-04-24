@@ -10,10 +10,10 @@ import {
   faRepeat,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import { getTrackCover, Track } from "./Track";
-import { useWindowWidth, COLLAPSE_AT_WIDTH } from "./responsive";
-import { AppContext } from "./AppState";
-import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
+import { getTrackCover, Track } from "src/Track";
+import { useWindowWidth, COLLAPSE_AT_WIDTH } from "src/responsive";
+import { AppContext } from "src/AppState";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
 
 import "./MusicPlayer.css";
 

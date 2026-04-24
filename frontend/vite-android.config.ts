@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
-import { reactOptions } from './vite-common.config';
+import { reactOptions, resolveOptions } from './vite-common.config';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,4 +10,5 @@ export default defineConfig({
   define: {
     'import.meta.env.NO_PROGRESS_SUPPORT': true,
   },
+  resolve: resolveOptions,
 });

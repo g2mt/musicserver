@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction, RefObject } from "react";
-import type { TrackData } from "./TrackData";
-import { apiAudio, useAbsoluteAudioPath } from "./apiAudio";
-import { fetchAPI, getFilePath, getTrackFileFromId } from "./apiServer";
+import type { TrackData } from "src/TrackData";
+import { apiAudio, useAbsoluteAudioPath } from "src/apiAudio";
+import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";
 
 export interface SerializedAudioState {
   path: string; // get the track using the `/track/:by-path` endpoint

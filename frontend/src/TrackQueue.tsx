@@ -1,6 +1,6 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { type TrackData } from "./TrackData";
-import type { AudioState } from "./AudioState";
+import { type TrackData } from "src/TrackData";
+import type { AudioState } from "src/AudioState";
 
 declare global {
   interface NativeAudioBridge {

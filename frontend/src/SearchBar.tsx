@@ -14,12 +14,12 @@ import {
   faChevronUp,
   faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
-import { AppContext, type AppState } from "./AppState";
-import { TrackList } from "./TrackList";
-import { fetchAPI } from "./apiServer";
+import { AppContext, type AppState } from "src/AppState";
+import { TrackList } from "src/TrackList";
+import { fetchAPI } from "src/apiServer";
 import { toast } from "react-toastify";
-import ConfirmBox from "./ConfirmBox";
-import type { TrackData } from "./TrackData";
+import ConfirmBox from "src/ConfirmBox";
+import type { TrackData } from "src/TrackData";
 
 import "./SearchBar.css";
 

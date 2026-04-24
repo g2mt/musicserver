@@ -7,9 +7,9 @@ import {
 import * as z from "zod";
 import type React from "react";
 import { toast } from "react-toastify";
-import { type TrackQueue } from "./TrackQueue";
-import { Settings } from "./settings";
-import type { AudioState } from "./AudioState";
+import { type TrackQueue } from "src/TrackQueue";
+import { Settings } from "src/settings";
+import type { AudioState } from "src/AudioState";
 
 export const SearchQuerySchema = z.object({
   q: z.string().default(""),

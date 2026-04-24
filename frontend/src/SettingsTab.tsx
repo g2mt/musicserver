@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { rescanFiles } from "./apiServer";
+import { rescanFiles } from "src/apiServer";
 import { toast } from "react-toastify";
 import {
   faRotate,
@@ -8,8 +8,8 @@ import {
   faSave,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import ProgressTable from "./ProgressTable";
-import { AppContext, saveConfig } from "./AppState";
+import ProgressTable from "src/ProgressTable";
+import { AppContext, saveConfig } from "src/AppState";
 
 import "./SettingsTab.css";
 

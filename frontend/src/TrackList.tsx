@@ -5,12 +5,12 @@ import {
   useCallback,
   type RefObject,
 } from "react";
-import { Track } from "./Track";
-import { type TrackData } from "./TrackData";
+import { Track } from "src/Track";
+import { type TrackData } from "src/TrackData";
 import { faMinus, faShuffle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { TrackQueue } from "./TrackQueue";
-import { shuffled, type OptionalUnion } from "./utils";
+import type { TrackQueue } from "src/TrackQueue";
+import { shuffled, type OptionalUnion } from "src/utils";
 
 import "./TrackList.css";
 

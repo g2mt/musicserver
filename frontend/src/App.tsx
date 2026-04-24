@@ -1,12 +1,12 @@
-import { TrackList } from "./TrackList";
-import { MainTracksTab } from "./MainTracksTab";
-import { SettingsTab } from "./SettingsTab";
-import FileBrowserTab from "./FileBrowserTab";
-import { MusicPlayer } from "./MusicPlayer";
-import SearchBar from "./SearchBar";
+import { TrackList } from "src/TrackList";
+import { MainTracksTab } from "src/MainTracksTab";
+import { SettingsTab } from "src/SettingsTab";
+import FileBrowserTab from "src/FileBrowserTab";
+import { MusicPlayer } from "src/MusicPlayer";
+import SearchBar from "src/SearchBar";
 import React, { useEffect, useRef, useState } from "react";
-import { getTrackCover } from "./Track";
-import { fetchAPI } from "./apiServer";
+import { getTrackCover } from "src/Track";
+import { fetchAPI } from "src/apiServer";
 import {
   faMusic,
   faGear,
@@ -16,23 +16,23 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { toast, ToastContainer } from "react-toastify";
-import { ContextMenu } from "./ContextMenu";
+import { ContextMenu } from "src/ContextMenu";
 import {
   AppContext,
   mergeConfig,
   saveConfig,
   type AppState,
   type SearchQuery,
-} from "./AppState";
-import { useAudio, type SerializedAudioState } from "./AudioState";
-import type { TrackData, TrackListResult } from "./TrackData";
-import { useTrackQueue, type SerializedTrackQueue } from "./TrackQueue";
-import { COLLAPSE_AT_WIDTH, useWindowWidth } from "./responsive";
-import { SearchSuggestions } from "./SearchSuggestions";
+} from "src/AppState";
+import { useAudio, type SerializedAudioState } from "src/AudioState";
+import type { TrackData, TrackListResult } from "src/TrackData";
+import { useTrackQueue, type SerializedTrackQueue } from "src/TrackQueue";
+import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
+import { SearchSuggestions } from "src/SearchSuggestions";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
-import { ConfirmBoxContext } from "./ConfirmBox";
+import { ConfirmBoxContext } from "src/ConfirmBox";
 
 declare global {
   interface NativeAudioBridge {

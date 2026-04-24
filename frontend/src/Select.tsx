@@ -1,5 +1,5 @@
 import React from "react";
-import { ContextMenuItem, toggleContextMenu } from "./ContextMenu";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
