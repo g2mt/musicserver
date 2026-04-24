@@ -232,6 +232,7 @@ export function SettingsTab() {
           </div>
         </form>
       )}
+
       {!import.meta.env.NO_PROGRESS_SUPPORT && (
         <>
           <hr />
