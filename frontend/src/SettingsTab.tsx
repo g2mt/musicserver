@@ -7,7 +7,7 @@ import {
   faSun,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useState, useMemo } from "react";
+import { useContext, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 
 import { AppContext, saveConfig } from "src/AppState";
@@ -54,319 +54,330 @@ export function SettingsTab() {
     );
   };
 
-  const playbackSection = useMemo(() => (
-    <Section title="Playback">
-      <div>
-        <label htmlFor="setting-amplification">Amplification (dB):</label>
-        <p>
-          <input
-            type="range"
-            id="setting-amplification"
-            min={-20.0}
-            max={20.0}
-            step={0.1}
-            value={c.as.amplification ?? 0.0}
-            onChange={(e) => {
-              c.as.setAmplification(parseFloat(e.target.value));
-            }}
-          />
-          <span style={{ marginLeft: "var(--s1)" }}>
-            {c.as.amplification.toFixed(1)} dB
-          </span>
-        </p>
-      </div>
-      <div>
-        <input
-          type="checkbox"
-          id="setting-normalize"
-          checked={c.as.normalize}
-          onChange={() => {
-            c.as.setNormalize(!c.as.normalize);
-          }}
-        />
-        <label htmlFor="setting-normalize">Normalize audio</label>
-      </div>
-    </Section>
-  ), [
-    c.as.amplification,
-    c.as.normalize,
-  ]);
-
-  const settingsSection = useMemo(() => (
-    <Section title="General settings">
-      <div>
-        <input
-          type="checkbox"
-          id="setting-show-blurred-cover"
-          checked={c.showBlurredCover}
-          onChange={() => {
-            c.setShowBlurredCover(!c.showBlurredCover);
-            setUnsaved(true);
-          }}
-        />
-        <label htmlFor="setting-show-blurred-cover">
-          Show blurred album cover as background in dark mode
-        </label>
-      </div>
-      <div>
-        <input
-          type="checkbox"
-          id="setting-show-only-queue-after-enqueue"
-          checked={c.showOnlyQueueAfterEnqueue}
-          onChange={() => {
-            c.setShowOnlyQueueAfterEnqueue(!c.showOnlyQueueAfterEnqueue);
-            setUnsaved(true);
-          }}
-        />
-        <label htmlFor="setting-show-only-queue-after-enqueue">
-          Show only queue after adding tracks
-        </label>
-      </div>
-      <div>
-        <input
-          type="checkbox"
-          id="setting-shuffle-before-playing-all"
-          checked={c.shuffleBeforePlayingAll}
-          onChange={() => {
-            c.setShuffleBeforePlayingAll(!c.shuffleBeforePlayingAll);
-            setUnsaved(true);
-          }}
-        />
-        <label htmlFor="setting-shuffle-before-playing-all">
-          Shuffle before playing all tracks
-        </label>
-      </div>
-      <div>
-        <input
-          type="checkbox"
-          id="setting-show-tracks-list-on-tab-change"
-          checked={c.showTracksListOnTabChange}
-          onChange={() => {
-            c.setShowTracksListOnTabChange(!c.showTracksListOnTabChange);
-            setUnsaved(true);
-          }}
-        />
-        <label htmlFor="setting-show-tracks-list-on-tab-change">
-          Show tracks list when switching tabs
-        </label>
-      </div>
-      <div>
-        <label htmlFor="setting-target-normalization-db">
-          Target Normalization (dB):
-        </label>
-        <p>
-          <input
-            type="range"
-            id="setting-target-normalization-db"
-            min={-20.0}
-            max={20.0}
-            step={0.1}
-            value={c.targetNormalizationDbs ?? 0}
-            onChange={(e) => {
-              c.setTargetNormalizationDbs(parseFloat(e.target.value));
-              setUnsaved(true);
-            }}
-          />
-          <span style={{ marginLeft: "var(--s1)" }}>
-            {c.targetNormalizationDbs.toFixed(1)} dB
-          </span>
-        </p>
-      </div>
-      <div>
-        <label htmlFor="setting-max-normalization-db">
-          Max Normalization (dB):
-        </label>
-        <p>
-          <input
-            type="range"
-            id="setting-max-normalization-db"
-            min={-20.0}
-            max={20.0}
-            step={0.1}
-            value={c.maxNormalizationDbs ?? 0}
-            onChange={(e) => {
-              c.setMaxNormalizationDbs(parseFloat(e.target.value));
-              setUnsaved(true);
-            }}
-          />
-          <span style={{ marginLeft: "var(--s1)" }}>
-            {c.maxNormalizationDbs.toFixed(1)} dB
-          </span>
-        </p>
-      </div>
-      <div>
-        <label htmlFor="setting-search-history-limit">
-          Search history limit:
-        </label>
-        <input
-          type="number"
-          id="setting-search-history-limit"
-          min={0}
-          max={9999}
-          value={c.searchHistoryLimit}
-          onChange={(e) => {
-            c.setSearchHistoryLimit(parseInt(e.target.value) || 0);
-            setUnsaved(true);
-          }}
-        />
-      </div>
-      <p>
-        <button
-          className="btn"
-          style={{
-            background: "var(--color-success)",
-            color: "var(--color-success-text)",
-          }}
-          disabled={!unsaved}
-          onClick={() => {
-            saveConfig(c);
-            setUnsaved(false);
-            toast.success("Settings saved");
-          }}
-        >
-          <FontAwesomeIcon icon={faSave} /> Save
-        </button>
-        <button
-          className="btn"
-          onClick={() => {
-            c.setDarkMode((b) => !b);
-            setUnsaved(true);
-          }}
-        >
-          <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
-          {c.darkMode ? "Light Mode" : "Dark Mode"}
-        </button>
-      </p>
-      <p>
-        <button
-          className="btn"
-          onClick={() => rescanFiles(false).then(() => c.onRescanned())}
-        >
-          <FontAwesomeIcon icon={faRotate} /> Rescan Music
-        </button>
-        <button
-          className="btn"
-          onClick={() => rescanFiles(true).then(() => c.onRescanned())}
-        >
-          <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
-        </button>
-      </p>
-    </Section>
-  ), [
-    c.showBlurredCover,
-    c.showOnlyQueueAfterEnqueue,
-    c.shuffleBeforePlayingAll,
-    c.showTracksListOnTabChange,
-    c.targetNormalizationDbs,
-    c.maxNormalizationDbs,
-    c.searchHistoryLimit,
-    c.darkMode,
-    unsaved,
-  ]);
-
-  const serverPropertiesSection = useMemo(() => (
-    <Section title="Server properties">
-      {c.props && (
+  const playbackSection = useMemo(
+    () => (
+      <Section title="Playback">
         <div>
-          <div>
-            <label htmlFor="setting-sr-version">Version:</label>
+          <label htmlFor="setting-amplification">Amplification (dB):</label>
+          <p>
             <input
-              type="text"
-              id="setting-sr-version"
-              readOnly
-              value={c.props.version}
+              type="range"
+              id="setting-amplification"
+              min={-20.0}
+              max={20.0}
+              step={0.1}
+              value={c.as.amplification ?? 0.0}
+              onChange={(e) => {
+                c.as.setAmplification(parseFloat(e.target.value));
+              }}
             />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
-            <input
-              type="text"
-              id="setting-sr-http-bind"
-              readOnly
-              value={c.props.config.http_bind}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-unix-enabled">
-              Unix Socket Enabled:
-            </label>
-            <input
-              type="checkbox"
-              id="setting-sr-unix-enabled"
-              readOnly
-              checked={c.props.config.unix_bind_enabled}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
-            <input
-              type="text"
-              id="setting-sr-unix-path"
-              readOnly
-              value={c.props.config.unix_bind}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-data-path">Data Path:</label>
-            <input
-              type="text"
-              id="setting-sr-data-path"
-              readOnly
-              value={c.props.config.data_path}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-db-dir">Database Directory:</label>
-            <input
-              type="text"
-              id="setting-sr-db-dir"
-              readOnly
-              value={c.props.config.db_dir}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-cache-db-enabled">
-              Cache database enabled:
-            </label>
-            <input
-              type="checkbox"
-              id="setting-sr-cache-db-enabled"
-              readOnly
-              checked={c.props.config.cache_db_enabled}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-cover-cache-max-bytes">
-              Cover cache max bytes:
-            </label>
-            <input
-              type="number"
-              id="setting-sr-cover-cache-max-bytes"
-              readOnly
-              value={c.props.config.cover_cache_max_bytes}
-            />
-          </div>
-          <div>
-            <label htmlFor="setting-sr-media-downloader">
-              Media Downloader:
-            </label>
-            <input
-              type="text"
-              id="setting-sr-media-downloader"
-              readOnly
-              value={c.props.config.media_downloader}
-            />
-          </div>
+            <span style={{ marginLeft: "var(--s1)" }}>
+              {c.as.amplification.toFixed(1)} dB
+            </span>
+          </p>
         </div>
-      )}
-    </Section>
-  ), [c.props]);
+        <div>
+          <input
+            type="checkbox"
+            id="setting-normalize"
+            checked={c.as.normalize}
+            onChange={() => {
+              c.as.setNormalize(!c.as.normalize);
+            }}
+          />
+          <label htmlFor="setting-normalize">Normalize audio</label>
+        </div>
+      </Section>
+    ),
+    [c.as.amplification, c.as.normalize],
+  );
 
-  const ongoingProcessesSection = import.meta.env.NO_PROGRESS_SUPPORT ? null: useMemo(() => (
-    <Section title="Ongoing processes">
-      <ProgressTable />
-    </Section>
-  ), []);
+  const settingsSection = useMemo(
+    () => (
+      <Section title="General settings">
+        <div>
+          <input
+            type="checkbox"
+            id="setting-show-blurred-cover"
+            checked={c.showBlurredCover}
+            onChange={() => {
+              c.setShowBlurredCover(!c.showBlurredCover);
+              setUnsaved(true);
+            }}
+          />
+          <label htmlFor="setting-show-blurred-cover">
+            Show blurred album cover as background in dark mode
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            id="setting-show-only-queue-after-enqueue"
+            checked={c.showOnlyQueueAfterEnqueue}
+            onChange={() => {
+              c.setShowOnlyQueueAfterEnqueue(!c.showOnlyQueueAfterEnqueue);
+              setUnsaved(true);
+            }}
+          />
+          <label htmlFor="setting-show-only-queue-after-enqueue">
+            Show only queue after adding tracks
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            id="setting-shuffle-before-playing-all"
+            checked={c.shuffleBeforePlayingAll}
+            onChange={() => {
+              c.setShuffleBeforePlayingAll(!c.shuffleBeforePlayingAll);
+              setUnsaved(true);
+            }}
+          />
+          <label htmlFor="setting-shuffle-before-playing-all">
+            Shuffle before playing all tracks
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            id="setting-show-tracks-list-on-tab-change"
+            checked={c.showTracksListOnTabChange}
+            onChange={() => {
+              c.setShowTracksListOnTabChange(!c.showTracksListOnTabChange);
+              setUnsaved(true);
+            }}
+          />
+          <label htmlFor="setting-show-tracks-list-on-tab-change">
+            Show tracks list when switching tabs
+          </label>
+        </div>
+        <div>
+          <label htmlFor="setting-target-normalization-db">
+            Target Normalization (dB):
+          </label>
+          <p>
+            <input
+              type="range"
+              id="setting-target-normalization-db"
+              min={-20.0}
+              max={20.0}
+              step={0.1}
+              value={c.targetNormalizationDbs ?? 0}
+              onChange={(e) => {
+                c.setTargetNormalizationDbs(parseFloat(e.target.value));
+                setUnsaved(true);
+              }}
+            />
+            <span style={{ marginLeft: "var(--s1)" }}>
+              {c.targetNormalizationDbs.toFixed(1)} dB
+            </span>
+          </p>
+        </div>
+        <div>
+          <label htmlFor="setting-max-normalization-db">
+            Max Normalization (dB):
+          </label>
+          <p>
+            <input
+              type="range"
+              id="setting-max-normalization-db"
+              min={-20.0}
+              max={20.0}
+              step={0.1}
+              value={c.maxNormalizationDbs ?? 0}
+              onChange={(e) => {
+                c.setMaxNormalizationDbs(parseFloat(e.target.value));
+                setUnsaved(true);
+              }}
+            />
+            <span style={{ marginLeft: "var(--s1)" }}>
+              {c.maxNormalizationDbs.toFixed(1)} dB
+            </span>
+          </p>
+        </div>
+        <div>
+          <label htmlFor="setting-search-history-limit">
+            Search history limit:
+          </label>
+          <input
+            type="number"
+            id="setting-search-history-limit"
+            min={0}
+            max={9999}
+            value={c.searchHistoryLimit}
+            onChange={(e) => {
+              c.setSearchHistoryLimit(parseInt(e.target.value) || 0);
+              setUnsaved(true);
+            }}
+          />
+        </div>
+        <p>
+          <button
+            className="btn"
+            style={{
+              background: "var(--color-success)",
+              color: "var(--color-success-text)",
+            }}
+            disabled={!unsaved}
+            onClick={() => {
+              saveConfig(c);
+              setUnsaved(false);
+              toast.success("Settings saved");
+            }}
+          >
+            <FontAwesomeIcon icon={faSave} /> Save
+          </button>
+          <button
+            className="btn"
+            onClick={() => {
+              c.setDarkMode((b) => !b);
+              setUnsaved(true);
+            }}
+          >
+            <FontAwesomeIcon icon={c.darkMode ? faSun : faMoon} />{" "}
+            {c.darkMode ? "Light Mode" : "Dark Mode"}
+          </button>
+        </p>
+        <p>
+          <button
+            className="btn"
+            onClick={() => rescanFiles(false).then(() => c.onRescanned())}
+          >
+            <FontAwesomeIcon icon={faRotate} /> Rescan Music
+          </button>
+          <button
+            className="btn"
+            onClick={() => rescanFiles(true).then(() => c.onRescanned())}
+          >
+            <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
+          </button>
+        </p>
+      </Section>
+    ),
+    [
+      c.showBlurredCover,
+      c.showOnlyQueueAfterEnqueue,
+      c.shuffleBeforePlayingAll,
+      c.showTracksListOnTabChange,
+      c.targetNormalizationDbs,
+      c.maxNormalizationDbs,
+      c.searchHistoryLimit,
+      c.darkMode,
+      unsaved,
+    ],
+  );
+
+  const serverPropertiesSection = useMemo(
+    () => (
+      <Section title="Server properties">
+        {c.props && (
+          <div>
+            <div>
+              <label htmlFor="setting-sr-version">Version:</label>
+              <input
+                type="text"
+                id="setting-sr-version"
+                readOnly
+                value={c.props.version}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-http-bind">HTTP Bind:</label>
+              <input
+                type="text"
+                id="setting-sr-http-bind"
+                readOnly
+                value={c.props.config.http_bind}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-unix-enabled">
+                Unix Socket Enabled:
+              </label>
+              <input
+                type="checkbox"
+                id="setting-sr-unix-enabled"
+                readOnly
+                checked={c.props.config.unix_bind_enabled}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
+              <input
+                type="text"
+                id="setting-sr-unix-path"
+                readOnly
+                value={c.props.config.unix_bind}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-data-path">Data Path:</label>
+              <input
+                type="text"
+                id="setting-sr-data-path"
+                readOnly
+                value={c.props.config.data_path}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-db-dir">Database Directory:</label>
+              <input
+                type="text"
+                id="setting-sr-db-dir"
+                readOnly
+                value={c.props.config.db_dir}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-cache-db-enabled">
+                Cache database enabled:
+              </label>
+              <input
+                type="checkbox"
+                id="setting-sr-cache-db-enabled"
+                readOnly
+                checked={c.props.config.cache_db_enabled}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-cover-cache-max-bytes">
+                Cover cache max bytes:
+              </label>
+              <input
+                type="number"
+                id="setting-sr-cover-cache-max-bytes"
+                readOnly
+                value={c.props.config.cover_cache_max_bytes}
+              />
+            </div>
+            <div>
+              <label htmlFor="setting-sr-media-downloader">
+                Media Downloader:
+              </label>
+              <input
+                type="text"
+                id="setting-sr-media-downloader"
+                readOnly
+                value={c.props.config.media_downloader}
+              />
+            </div>
+          </div>
+        )}
+      </Section>
+    ),
+    [c.props],
+  );
+
+  const ongoingProcessesSection = import.meta.env.NO_PROGRESS_SUPPORT
+    ? null
+    : useMemo(
+        () => (
+          <Section title="Ongoing processes">
+            <ProgressTable />
+          </Section>
+        ),
+        [],
+      );
 
   return (
     <div className="settings-tab">

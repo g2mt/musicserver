@@ -116,14 +116,18 @@ export function useAudio({
       return;
     }
 
-    fetchAPI(`/track/${currentTrack.id}/loudness`).then((loudness) => {
-      if (typeof loudness === "number") {
-        setAmplification(Math.min(targetNormalizationDbs - loudness, maxNormalizationDbs));
-      }
-    }).catch(err => {
-      toast.error(`Failed to get track loudness: ${err}`);
-      setAmplification(0);
-    });
+    fetchAPI(`/track/${currentTrack.id}/loudness`)
+      .then((loudness) => {
+        if (typeof loudness === "number") {
+          setAmplification(
+            Math.min(targetNormalizationDbs - loudness, maxNormalizationDbs),
+          );
+        }
+      })
+      .catch((err) => {
+        toast.error(`Failed to get track loudness: ${err}`);
+        setAmplification(0);
+      });
   }, [currentTrack, normalize, targetNormalizationDbs]);
 
   useEffect(() => {
