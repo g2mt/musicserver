@@ -7,7 +7,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"musicserver/internal/audio"
+	"musicserver/internal/audio/base"
 )
 
 // GetLoudness returns the integrated loudness in LUFS.

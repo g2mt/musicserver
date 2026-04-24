@@ -3,7 +3,7 @@
 package audio
 
 import (
-	"musicserver/internal/audio"
+	"musicserver/internal/audio/base"
 	"musicserver/internal/lib/ebur128"
 )
 
