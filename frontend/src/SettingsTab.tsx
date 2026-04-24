@@ -14,15 +14,21 @@ import { rescanFiles } from "src/apiServer";
 
 import "./SettingsTab.css";
 
-const Section = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-
-const Title = ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>;
-
-const Body = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-
 export function SettingsTab() {
   const c = useContext(AppContext)!;
   const [unsaved, setUnsaved] = useState(false);
+
+  const Section = ({ children }: { children: React.ReactNode }) => (
+    <div className="section">{children}</div>
+  );
+
+  const Title = ({ children }: { children: React.ReactNode }) => (
+    <h2 className="section-title">{children}</h2>
+  );
+
+  const Body = ({ children }: { children: React.ReactNode }) => (
+    <div className="section-body">{children}</div>
+  );
 
   const settingsSection = (
     <Section>

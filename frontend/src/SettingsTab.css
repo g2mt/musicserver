@@ -1,8 +1,30 @@
 .settings-tab {
   padding: var(--s3);
+}
 
-  h2 {
-    margin: var(--s2);
-    text-align: center;
-  }
+.settings-tab h2 {
+  margin: var(--s2);
+  text-align: center;
+}
+
+/* Section styling */
+.section {
+  margin-bottom: var(--s3);
+  padding: var(--s2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--s1);
+  background: var(--color-background);
+}
+
+/* Title styling */
+.section-title {
+  margin: 0 0 var(--s2) 0;
+  font-size: large;
+  color: var(--color-primary);
+}
+
+/* Body styling */
+.section-body > div,
+.section-body > p {
+  margin-bottom: var(--s2);
 }
