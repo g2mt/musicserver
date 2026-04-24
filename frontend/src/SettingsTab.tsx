@@ -62,10 +62,10 @@ export function SettingsTab() {
           <input
             type="range"
             id="setting-amplification"
-            min={-10}
-            max={10}
+            min={-20.0}
+            max={20.0}
             step={0.1}
-            value={c.as.amplification}
+            value={c.as.amplification ?? 0.0}
             onChange={(e) => {
               c.as.setAmplification(parseFloat(e.target.value));
             }}
@@ -78,7 +78,6 @@ export function SettingsTab() {
     </Section>
   );
 
-  // ---- General Settings Section -------------------------------------------
   const settingsSection = (
     <Section title="General settings">
       <div>
