@@ -148,6 +148,28 @@ export function SettingsTab() {
         </label>
       </div>
       <div>
+        <label htmlFor="setting-target-normalization-db">
+          Target Normalization (dB):
+        </label>
+        <p>
+          <input
+            type="range"
+            id="setting-target-normalization-db"
+            min={-20.0}
+            max={20.0}
+            step={0.1}
+            value={c.targetNormalizationDbs ?? 0}
+            onChange={(e) => {
+              c.setTargetNormalizationDbs(parseFloat(e.target.value));
+              setUnsaved(true);
+            }}
+          />
+          <span style={{ marginLeft: "0.5rem" }}>
+            {c.targetNormalizationDbs.toFixed(1)} dB
+          </span>
+        </p>
+      </div>
+      <div>
         <label htmlFor="setting-search-history-limit">
           Search history limit:
         </label>
