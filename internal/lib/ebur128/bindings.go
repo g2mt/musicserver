@@ -1,5 +1,6 @@
 package ebur128
 
+// #cgo pkg-config: libebur128
 // #include "ebur128.h"
 import "C"
 import (

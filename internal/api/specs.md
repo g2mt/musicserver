@@ -204,6 +204,10 @@ Returns the audio of the track as a raw stream of bytes.
 
 Returns the cover art image of the track as a raw stream of bytes.
 
+### GET `/track/[id]/loudness`
+
+Returns the loudness of the track in LUFs (equivalent to decibels).
+
 ### GET `/track/:external/[url]`
 
 Returns a list of track metadata for the URL `url` using the media downloader specified in the config file.

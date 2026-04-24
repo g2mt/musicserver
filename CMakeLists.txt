@@ -14,6 +14,7 @@ execute_process(
 
 set(MS_TAGLIB_VERSION "2.2.1")
 option(MS_EMB_TAGLIB "Build taglib from source for embedding" OFF)
+option(MS_EMB_EBUR128 "Build ebur128 from source for embedding" ON)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
@@ -32,7 +33,9 @@ endif()
 set(GOFLAGS "")
 list(APPEND GOFLAGS "-v")
 list(APPEND GOFLAGS "-ldflags=-X musicserver/internal/api.Version=${GIT_SHORT_HASH}")
-list(APPEND GOFLAGS "-tags=has_ebur128")
+if(MS_EMB_EBUR128)
+  list(APPEND GOFLAGS "-tags=has_ebur128")
+endif()
 
 set(MS_GOENV "")
 list(APPEND MS_GOENV "CC=${CMAKE_C_COMPILER}" "CXX=${CMAKE_CXX_COMPILER}")
@@ -74,11 +77,11 @@ else()
 endif()
 
 ### Dep: ebur128
-add_subdirectory(vendored/libebur128)
-# The ebur128 CMakeLists generates a pkg-config file in its binary dir.
-# We need to add that to PKG_CONFIG_PATH so Go/cgo can find it.
-list(APPEND MS_PKG_CONFIG_PATH "${CMAKE_BINARY_DIR}/vendored/libebur128/ebur128")
-set(EBUR128_DEP ebur128)
+if(MS_EMB_EBUR128)
+  add_subdirectory(vendored/libebur128)
+  list(APPEND MS_PKG_CONFIG_PATH "${CMAKE_BINARY_DIR}/vendored/libebur128/ebur128")
+  set(EBUR128_DEP ebur128)
+endif()
 
 # Consolidate PKG_CONFIG_PATH
 if(MS_PKG_CONFIG_PATH)
