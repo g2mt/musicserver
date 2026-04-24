@@ -1,6 +1,8 @@
 import { NativeAudio, onNativeMessagePort } from "src/audio/NativeAudio";
 import type { AudioInterface } from "./AudioInterface";
 
+export const usesAbsoluteAudioPath = window._native_audio_bridge ? true : false;
+
 export const apiAudio = (() => {
   if (window._native_audio_bridge) {
     window.addEventListener("message", onNativeMessagePort);
