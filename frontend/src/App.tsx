@@ -155,6 +155,13 @@ export function App() {
     q: locationHash.get("q") ?? "",
     limit: parseInt(locationHash.get("limit") ?? "0"),
   });
+  useEffect(() => {
+    const newQ = locationHash.get("q") ?? "";
+    const newLimit = parseInt(locationHash.get("limit") ?? "0");
+    if (c.searchQuery.q !== newQ || c.searchQuery.limit !== newLimit) {
+      c.setSearchQuery({ q: newQ, limit: newLimit });
+    }
+  }, [locationHash]);
   [c.resultSort, c.setResultSort] = useState("");
   [c.resultDesc, c.setResultDesc] = useState(false);
   [c.resultLimit, c.setResultLimit] = useState(-1);
