@@ -14,9 +14,9 @@ import (
 type AudioReader interface {
 	GetChannels() uint
 	GetSampleRate() uint
-	// ReadFrames reads nframes and returns the samples.
-	// The number of double items actually read = frames * number of channels.
-	ReadFrames(nframes uint) []float64
+	// ReadFrames reads up to nframes and returns the number of frames read and the buffer.
+	// The number of float64 items in buffer = frames * number of channels.
+	ReadFrames(nframes uint) (uint, []float64)
 }
 
 // GetLoudness returns the integrated loudness in LUFS.
@@ -31,17 +31,12 @@ func GetLoudness(reader AudioReader) float64 {
 	defer C.ebur128_destroy(&state)
 
 	for {
-		frames := reader.ReadFrames(rate)
-		if len(frames) == 0 {
-			break
-		}
-
-		numFrames := len(frames) / int(channels)
+		numFrames, buffer := reader.ReadFrames(rate)
 		if numFrames == 0 {
 			break
 		}
 
-		C.ebur128_add_frames_double(state, (*C.double)(unsafe.Pointer(&frames[0])), C.size_t(numFrames))
+		C.ebur128_add_frames_double(state, (*C.double)(unsafe.Pointer(&buffer[0])), C.size_t(numFrames))
 	}
 
 	var loudness C.double
