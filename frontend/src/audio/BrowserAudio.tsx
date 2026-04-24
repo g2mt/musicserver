@@ -13,6 +13,7 @@ export class BrowserAudio extends Audio implements AudioInterface {
     console.log(`Amplify by ${decibels}`);
 
     if (!this.audioContext) {
+      this.crossOrigin = "anonymous";
       this.audioContext = new AudioContext();
       if (this.audioContext.state === "suspended") {
         this.audioContext.resume();
