@@ -1,5 +1,6 @@
 import { NativeAudio, onNativeMessagePort } from "src/audio/NativeAudio";
 import type { AudioInterface } from "./AudioInterface";
+import { BrowserAudio } from "./BrowserAudio";
 
 export const usesAbsoluteAudioPath = window._native_audio_bridge ? true : false;
 
@@ -8,7 +9,7 @@ export const apiAudio = (() => {
     window.addEventListener("message", onNativeMessagePort);
     return NativeAudio;
   } else {
-    return Audio;
+    return BrowserAudio;
   }
 })() as {
   new(path: string): AudioInterface;
