@@ -25,44 +25,38 @@ export function SettingsTab() {
     setCollapsed((prev) => ({ ...prev, [title]: !prev[title] }));
   };
 
-  const Section = ({ children }: { children: React.ReactNode }) => (
-    <div className="settings-section">{children}</div>
-  );
-
-  const Title = ({ children }: { children: React.ReactNode }) => {
-    const titleText = typeof children === "string" ? children : "";
-    const isCollapsed = collapsed[titleText];
+  const Section = ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => {
+    const isCollapsed = collapsed[title];
     return (
-      <h2
-        className="settings-section-title"
-        onClick={() => toggleCollapse(titleText)}
-      >
-        <FontAwesomeIcon icon={isCollapsed ? faChevronRight : faChevronDown} />
-        <span>{children}</span>
-      </h2>
+      <div className="settings-section">
+        <h2
+          className="settings-section-title"
+          onClick={() => toggleCollapse(title)}
+        >
+          <FontAwesomeIcon
+            icon={isCollapsed ? faChevronRight : faChevronDown}
+          />
+          <span>{title}</span>
+        </h2>
+        <div
+          className="settings-section-body"
+          style={{ display: isCollapsed ? "none" : "block" }}
+        >
+          {children}
+        </div>
+      </div>
     );
   };
 
-  const Body = ({
-    children,
-    title,
-  }: {
-    children: React.ReactNode;
-    title: string;
-  }) => (
-    <div
-      className="settings-section-body"
-      style={{ display: collapsed[title] ? "none" : "block" }}
-    >
-      {children}
-    </div>
-  );
-
   const settingsSection = (
-    <Section>
-      <Title>General settings</Title>
-      <Body title="General settings">
-        <div>
+    <Section title="General settings">
+      <div>
           <input
             type="checkbox"
             id="setting-show-blurred-cover"
@@ -175,15 +169,12 @@ export function SettingsTab() {
             <FontAwesomeIcon icon={faRotate} /> Rescan Music (force update)
           </button>
         </p>
-      </Body>
     </Section>
   );
 
   const serverPropertiesSection = (
-    <Section>
-      <Title>Server properties</Title>
-      <Body title="Server properties">
-        {c.props && (
+    <Section title="Server properties">
+      {c.props && (
           <div>
             <div>
               <label htmlFor="setting-sr-version">Version:</label>
@@ -276,16 +267,12 @@ export function SettingsTab() {
             </div>
           </div>
         )}
-      </Body>
     </Section>
   );
 
   const ongoingProcessesSection = (
-    <Section>
-      <Title>Ongoing processes</Title>
-      <Body title="Ongoing processes">
-        {!import.meta.env.NO_PROGRESS_SUPPORT && <ProgressTable />}
-      </Body>
+    <Section title="Ongoing processes">
+      {!import.meta.env.NO_PROGRESS_SUPPORT && <ProgressTable />}
     </Section>
   );
 
