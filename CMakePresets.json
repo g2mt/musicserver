@@ -19,7 +19,8 @@
         "MS_BUILD_BIN": "OFF",
         "MS_BUILD_LIB": "ON",
         "MS_INSTALL_SHARED": "ON",
-        "MS_EMB_EBUR128": "ON",
+        "MS_EMB_EBUR128": "OFF",
+        "MS_EMB_EBUR128_JNI": "ON",
         "MS_USE_SNDFILE": "OFF"
       }
     },

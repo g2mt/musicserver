@@ -16,6 +16,7 @@ set(MS_TAGLIB_VERSION "2.2.1")
 
 option(MS_EMB_TAGLIB "Build taglib from source for embedding" OFF)
 option(MS_EMB_EBUR128 "Build ebur128 from source for embedding" ON)
+option(MS_EMB_EBUR128_JNI "Build ebur128 from source for embedding with JNI" OFF)
 option(MS_USE_SNDFILE "Link sndfile as source" ON)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
@@ -94,8 +95,10 @@ else()
 endif()
 
 ### Dep: ebur128
-if(MS_EMB_EBUR128)
+if(MS_EMB_EBUR128 OR MS_EMB_EBUR128_JNI)
+  set(BUILD_SHARED_LIBS OFF)
   add_subdirectory(vendored/libebur128)
+  unset(BUILD_SHARED_LIBS)
   list(APPEND MS_PKG_CONFIG_PATH "${CMAKE_BINARY_DIR}/vendored/libebur128/ebur128")
   set(EBUR128_DEP ebur128)
 endif()
@@ -179,10 +182,15 @@ if(MS_BUILD_LIB)
 
   if(MS_BUILD_ANDROID)
     set(MSRV_BIND_SOURCES jni/libmusicserver.c)
-    if(MS_EMB_EBUR128)
+    if(MS_EMB_EBUR128_JNI)
       list(APPEND MSRV_BIND_SOURCES jni/libebur128.c)
     endif()
     add_library(musicserverbind SHARED ${MSRV_BIND_SOURCES})
+    if(MS_EMB_EBUR128_JNI)
+      target_include_directories(musicserverbind PRIVATE "vendored/libebur128/ebur128")
+      add_dependencies(musicserverbind ebur128)
+    endif()
+
     set_target_properties(musicserverbind PROPERTIES PREFIX "lib" IMPORT_PREFIX "lib")
     target_include_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR}) # libmusicserver.h
     target_link_directories(musicserverbind PRIVATE ${CMAKE_BINARY_DIR}) # libmusicserver.so
