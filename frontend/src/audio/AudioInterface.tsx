@@ -20,4 +20,7 @@ export interface AudioInterface extends EventTarget {
 
   /** Amplifies the track uniformly by decibels. */
   amplify(decibels: number): void;
+
+  /** Retrieves the loudness of the currently playing track */
+  loudness?: () => number;
 }

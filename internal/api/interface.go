@@ -257,7 +257,6 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 			}
 			return &byteHandler{b: data}, mimeType, nil
 		} else if id, ok = strings.CutSuffix(id, "/loudness"); ok {
-			// New endpoint: GET /track/[id]/loudness
 			loudness, err := i.GetTrackLoudness(id)
 			if err != nil {
 				return nil, "", err
