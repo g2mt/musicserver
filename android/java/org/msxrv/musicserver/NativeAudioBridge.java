@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.audiofx.LoudnessEnhancer;
+import android.media.audiofx.Visualizer;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.widget.Toast;
@@ -32,6 +33,8 @@ public class NativeAudioBridge {
 	private WebView webView;
 	private MediaPlayer mediaPlayer;
 	private LoudnessEnhancer loudnessEnhancer;
+	private Visualizer visualizer;
+	private long eburHandle = 0;
 
 	private WebMessagePort messagePort;
 
@@ -122,6 +125,14 @@ public class NativeAudioBridge {
 	}
 
 	public void terminate() {
+		if (visualizer != null) {
+			visualizer.release();
+			visualizer = null;
+		}
+		if (eburHandle != 0) {
+			ebur128Destroy(eburHandle);
+			eburHandle = 0;
+		}
 		if (loudnessEnhancer != null) {
 			loudnessEnhancer.release();
 			loudnessEnhancer = null;
@@ -315,6 +326,28 @@ public class NativeAudioBridge {
 
 		mediaPlayer = new MediaPlayer();
 
+		if (eburHandle != 0) ebur128Destroy(eburHandle);
+		// Defaulting to 2 channels, 44100Hz for the analyzer
+		eburHandle = ebur128Init(2, 44100);
+
+		if (visualizer != null) visualizer.release();
+		visualizer = new Visualizer(mediaPlayer.getAudioSessionId());
+		visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+		visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+			@Override
+			public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
+				if (eburHandle != 0) {
+					// Visualizer provides mono or interleaved data depending on device, 
+					// but ebur128Init was called with 2 channels. 
+					// nr_frames = length / channels
+					ebur128AddFrames(eburHandle, waveform, waveform.length / 2);
+				}
+			}
+			@Override
+			public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {}
+		}, Visualizer.getMaxCaptureRate() / 2, true, false);
+		visualizer.setEnabled(true);
+
 		final int instanceId = currentInstanceId;
 
 		mediaPlayer.setOnInfoListener((mp, what, extra) -> {
@@ -408,6 +441,17 @@ public class NativeAudioBridge {
 	public void setVolume(int instanceId, float volume) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.setVolume(volume, volume);
+	}
+
+	private native long ebur128Init(int channels, int samplerate);
+	private native void ebur128Destroy(long handle);
+	private native void ebur128AddFrames(long handle, byte[] frames, int nr_frames);
+	private native double ebur128LoudnessGlobal(long handle);
+
+	@JavascriptInterface
+	public float loudness(int instanceId) {
+		if (!isActive(instanceId) || eburHandle == 0) return -70.0f;
+		return (float) ebur128LoudnessGlobal(eburHandle);
 	}
 
 	@JavascriptInterface
