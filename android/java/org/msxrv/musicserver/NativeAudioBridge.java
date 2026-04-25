@@ -450,7 +450,7 @@ public class NativeAudioBridge {
 
 	@JavascriptInterface
 	public float loudness(int instanceId) {
-		if (!isActive(instanceId) || eburHandle == 0) return -70.0f;
+		if (!isActive(instanceId) || eburHandle == 0) return 0.0f;
 		return (float) ebur128LoudnessGlobal(eburHandle);
 	}
 

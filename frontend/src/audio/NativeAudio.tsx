@@ -109,7 +109,7 @@ export class NativeAudio extends EventTarget implements AudioInterface {
   }
 
   loudness(): number {
-    if (!this.isActive) return -70;
+    if (!this.isActive) return 0;
     return (NativeAudio.bridge as any).loudness(this.instanceId);
   }
 }
