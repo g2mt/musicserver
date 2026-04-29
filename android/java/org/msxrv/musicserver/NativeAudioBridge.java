@@ -446,37 +446,49 @@ public class NativeAudioBridge {
 
 			handle = ebur128Init(channels, sampleRate);
 			MediaCodec codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+			// Request low-latency decoding where supported to reduce per-buffer overhead.
+			format.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
 			codec.configure(format, null, null, 0);
 			codec.start();
 
 			MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
 			boolean sawInputEOS = false;
 			boolean sawOutputEOS = false;
+			final int frameBytes = 2 * channels;
+			byte[] chunk = null;
 
 			while (!sawOutputEOS) {
 				if (!sawInputEOS) {
-					int inputBufferIndex = codec.dequeueInputBuffer(10000);
-					if (inputBufferIndex >= 0) {
+					// Feed as many input buffers as the codec will accept without blocking.
+					while (true) {
+						int inputBufferIndex = codec.dequeueInputBuffer(0);
+						if (inputBufferIndex < 0) break;
 						ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferIndex);
 						int sampleSize = extractor.readSampleData(inputBuffer, 0);
 						if (sampleSize < 0) {
 							codec.queueInputBuffer(inputBufferIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
 							sawInputEOS = true;
-						} else {
-							codec.queueInputBuffer(inputBufferIndex, 0, sampleSize, extractor.getSampleTime(), 0);
-							extractor.advance();
+							break;
 						}
+						// Pass 0 for presentationTimeUs - EBU R128 doesn't need timestamps.
+						codec.queueInputBuffer(inputBufferIndex, 0, sampleSize, 0, 0);
+						extractor.advance();
 					}
 				}
 
-				int outputBufferIndex = codec.dequeueOutputBuffer(info, 10000);
+				int outputBufferIndex = codec.dequeueOutputBuffer(info, 100000);
 				if (outputBufferIndex >= 0) {
 					if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) sawOutputEOS = true;
-					ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
-					byte[] chunk = new byte[info.size];
-					outputBuffer.get(chunk);
-					outputBuffer.clear();
-					ebur128AddFrames(handle, chunk, info.size / (2 * channels));
+					if (info.size > 0) {
+						ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
+						// Reuse the chunk buffer across iterations, growing only when needed.
+						if (chunk == null || chunk.length < info.size) {
+							chunk = new byte[info.size];
+						}
+						outputBuffer.position(info.offset);
+						outputBuffer.get(chunk, 0, info.size);
+						ebur128AddFrames(handle, chunk, info.size / frameBytes);
+					}
 					codec.releaseOutputBuffer(outputBufferIndex, false);
 				}
 			}
