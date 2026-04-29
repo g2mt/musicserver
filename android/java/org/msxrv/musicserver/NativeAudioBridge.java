@@ -6,10 +6,12 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaCodec;
+import android.media.MediaExtractor;
+import android.media.MediaFormat;
 import android.media.MediaMetadata;
 import android.media.MediaPlayer;
 import android.media.audiofx.LoudnessEnhancer;
-import android.media.audiofx.Visualizer;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.widget.Toast;
@@ -23,6 +25,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.util.Log;
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -33,8 +36,6 @@ public class NativeAudioBridge {
 	private WebView webView;
 	private MediaPlayer mediaPlayer;
 	private LoudnessEnhancer loudnessEnhancer;
-	private Visualizer visualizer;
-	private long eburHandle = 0;
 
 	private WebMessagePort messagePort;
 
@@ -125,14 +126,6 @@ public class NativeAudioBridge {
 	}
 
 	public void terminate() {
-		if (visualizer != null) {
-			visualizer.release();
-			visualizer = null;
-		}
-		if (eburHandle != 0) {
-			ebur128Destroy(eburHandle);
-			eburHandle = 0;
-		}
 		if (loudnessEnhancer != null) {
 			loudnessEnhancer.release();
 			loudnessEnhancer = null;
@@ -326,33 +319,6 @@ public class NativeAudioBridge {
 
 		mediaPlayer = new MediaPlayer();
 
-		if (eburHandle != 0) ebur128Destroy(eburHandle);
-		// Defaulting to 2 channels, 44100Hz for the analyzer
-		eburHandle = ebur128Init(2, 44100);
-
-		if (visualizer != null) visualizer.release();
-		try {
-			visualizer = new Visualizer(mediaPlayer.getAudioSessionId());
-			visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-			visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-				@Override
-				public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-					if (eburHandle != 0) {
-						// Visualizer provides mono or interleaved data depending on device, 
-						// but ebur128Init was called with 2 channels. 
-						// nr_frames = length / channels
-						ebur128AddFrames(eburHandle, waveform, waveform.length / 2);
-					}
-				}
-				@Override
-				public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {}
-			}, Visualizer.getMaxCaptureRate() / 2, true, false);
-			visualizer.setEnabled(true);
-		} catch (RuntimeException e) {
-			Log.e(TAG, "Failed to load visualizer", e);
-			visualizer = null;
-		}
-
 		final int instanceId = currentInstanceId;
 
 		mediaPlayer.setOnInfoListener((mp, what, extra) -> {
@@ -455,10 +421,75 @@ public class NativeAudioBridge {
 
 	@JavascriptInterface
 	public float loudness(int instanceId) {
-		if (!isActive(instanceId) || eburHandle == 0) return 0.0f;
-		float loudnessGlobal = (float) ebur128LoudnessGlobal(eburHandle);
-		Log.d(TAG, "loudnessGlobal=" + loudnessGlobal);
-		return loudnessGlobal;
+		if (!isActive(instanceId) || currentFilePath == null) return 0.0f;
+
+		MediaExtractor extractor = new MediaExtractor();
+		long handle = 0;
+		try {
+			extractor.setDataSource(currentFilePath);
+			int trackIndex = -1;
+			for (int i = 0; i < extractor.getTrackCount(); i++) {
+				MediaFormat format = extractor.getTrackFormat(i);
+				if (format.getString(MediaFormat.KEY_MIME).startsWith("audio/")) {
+					trackIndex = i;
+					break;
+				}
+			}
+			if (trackIndex < 0) return 0.0f;
+
+			extractor.selectTrack(trackIndex);
+			MediaFormat format = extractor.getTrackFormat(trackIndex);
+			int channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
+			int sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+
+			handle = ebur128Init(channels, sampleRate);
+			MediaCodec codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
+			codec.configure(format, null, null, 0);
+			codec.start();
+
+			MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
+			boolean sawInputEOS = false;
+			boolean sawOutputEOS = false;
+
+			while (!sawOutputEOS) {
+				if (!sawInputEOS) {
+					int inputBufferIndex = codec.dequeueInputBuffer(10000);
+					if (inputBufferIndex >= 0) {
+						ByteBuffer inputBuffer = codec.getInputBuffer(inputBufferIndex);
+						int sampleSize = extractor.readSampleData(inputBuffer, 0);
+						if (sampleSize < 0) {
+							codec.queueInputBuffer(inputBufferIndex, 0, 0, 0, MediaCodec.BUFFER_FLAG_END_OF_STREAM);
+							sawInputEOS = true;
+						} else {
+							codec.queueInputBuffer(inputBufferIndex, 0, sampleSize, extractor.getSampleTime(), 0);
+							extractor.advance();
+						}
+					}
+				}
+
+				int outputBufferIndex = codec.dequeueOutputBuffer(info, 10000);
+				if (outputBufferIndex >= 0) {
+					if ((info.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) sawOutputEOS = true;
+					ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferIndex);
+					byte[] chunk = new byte[info.size];
+					outputBuffer.get(chunk);
+					outputBuffer.clear();
+					ebur128AddFrames(handle, chunk, info.size / (2 * channels));
+					codec.releaseOutputBuffer(outputBufferIndex, false);
+				}
+			}
+
+			codec.stop();
+			codec.release();
+			float result = (float) ebur128LoudnessGlobal(handle);
+			return result;
+		} catch (Exception e) {
+			Log.e(TAG, "Loudness calculation failed", e);
+			return 0.0f;
+		} finally {
+			if (handle != 0) ebur128Destroy(handle);
+			extractor.release();
+		}
 	}
 
 	@JavascriptInterface
