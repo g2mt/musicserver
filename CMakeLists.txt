@@ -13,11 +13,13 @@ execute_process(
 )
 
 set(MS_TAGLIB_VERSION "2.2.1")
+set(MS_SNDFILE_VERSION "1.2.2")
 
 option(MS_EMB_TAGLIB "Build taglib from source for embedding" OFF)
 option(MS_EMB_EBUR128 "Build ebur128 from source for embedding" ON)
 option(MS_EMB_EBUR128_JNI "Build ebur128 from source for embedding with JNI" OFF)
 option(MS_USE_SNDFILE "Link sndfile as source" ON)
+option(MS_EMB_SNDFILE "Build sndfile from source for embedding" OFF)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
 option(MS_BUILD_LIB "Build the music server shared library" OFF)
@@ -46,7 +48,7 @@ set(GO_TAGS "")
 if(MS_EMB_EBUR128)
   list(APPEND GO_TAGS "has_ebur128")
 endif()
-if(MS_USE_SNDFILE)
+if(MS_USE_SNDFILE OR MS_EMB_SNDFILE)
   list(APPEND GO_TAGS "has_sndfile")
 endif()
 if(GO_TAGS)
@@ -105,12 +107,31 @@ if(MS_EMB_EBUR128)
 endif()
 
 ### Dep: sndfile
-if(MS_USE_SNDFILE)
-  if(NOT TARGET PkgConfig::PkgConfig)
-    find_package(PkgConfig REQUIRED)
-  endif()
+if(MS_EMB_SNDFILE)
+  set(MS_SNDFILE_PREFIX ${CMAKE_BINARY_DIR}/sndfile_install)
+  ExternalProject_Add(sndfile_project
+    URL  https://github.com/libsndfile/libsndfile/releases/download/${MS_SNDFILE_VERSION}/libsndfile-${MS_SNDFILE_VERSION}.tar.xz
+    URL_HASH SHA256=3799ca9924d3125038880367bf1468e53a1b7e3686a934f098b7e1d286cdb80e
+    CMAKE_ARGS
+      -DENABLE_CCACHE=${MS_USE_CCACHE}
+      -DENABLE_STATIC_RUNTIME=ON
+      -DBUILD_SHARED_LIBS=OFF
+      -DBUILD_TESTING=OFF
+      -DCMAKE_BUILD_TYPE=MinSizeRel
+      -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+      -DCMAKE_INSTALL_PREFIX=${MS_SNDFILE_PREFIX}
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+      -DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}
+      -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  )
+  list(APPEND MS_PKG_CONFIG_PATH "${MS_SNDFILE_PREFIX}/lib/pkgconfig")
+  set(SNDFILE_DEP sndfile_project)
+elseif(MS_USE_SNDFILE)
+  find_package(PkgConfig REQUIRED)
   pkg_check_modules(SNDFILE REQUIRED sndfile)
   list(APPEND MS_PKG_CONFIG_PATH "${SNDFILE_PREFIX}/lib/pkgconfig")
+  set(SNDFILE_DEP "")
 endif()
 
 ### Consolidate PKG_CONFIG_PATH
@@ -153,12 +174,14 @@ add_custom_command(
 
 add_custom_target(frontend DEPENDS ${FRONTEND_STAMP})
 
+set(BACKEND_DEPS frontend ${TAGLIB_DEP} ${SNDFILE_DEP} ${EBUR128_DEP})
+
 ### Music Server executable
 if(MS_BUILD_BIN)
   add_custom_target(musicserver ALL
     COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -o ${CMAKE_BINARY_DIR}/musicserver ${GOFLAGS} .
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend ${TAGLIB_DEP} ${EBUR128_DEP} FORCE
+    DEPENDS ${BACKEND_DEPS} FORCE
     COMMENT "Building musicserver"
     VERBATIM
   )
@@ -172,7 +195,7 @@ if(MS_BUILD_LIB)
     OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h FORCE
     COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS frontend ${TAGLIB_DEP} ${EBUR128_DEP} FORCE
+    DEPENDS ${BACKEND_DEPS} FORCE
     COMMENT "Building libmusicserver.so and libmusicserver.h"
     VERBATIM
   )

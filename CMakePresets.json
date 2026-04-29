@@ -21,7 +21,7 @@
         "MS_INSTALL_SHARED": "ON",
         "MS_EMB_EBUR128": "OFF",
         "MS_EMB_EBUR128_JNI": "ON",
-        "MS_USE_SNDFILE": "OFF"
+        "MS_EMB_SNDFILE": "OFF"
       }
     },
 

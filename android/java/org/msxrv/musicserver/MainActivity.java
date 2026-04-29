@@ -244,6 +244,14 @@ public class MainActivity extends Activity {
 				new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
 				0);
 		});
+		// 3. Visualizer
+		addPermissionHandler(result -> {
+			requestPermissions(
+				new String[]{
+					android.Manifest.permission.RECORD_AUDIO,
+				},
+				0);
+		});
 		addPermissionHandler(result -> {
 			getApp().loadWebView();
 		});
