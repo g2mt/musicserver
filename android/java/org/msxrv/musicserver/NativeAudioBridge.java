@@ -422,6 +422,7 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public float loudness(int instanceId) {
 		if (!isActive(instanceId) || currentFilePath == null) return 0.0f;
+		Log.d(TAG, "Calculating loudness for: " + currentFilePath);
 
 		MediaExtractor extractor = new MediaExtractor();
 		long handle = 0;
@@ -441,6 +442,7 @@ public class NativeAudioBridge {
 			MediaFormat format = extractor.getTrackFormat(trackIndex);
 			int channels = format.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
 			int sampleRate = format.getInteger(MediaFormat.KEY_SAMPLE_RATE);
+			Log.d(TAG, "Format: " + channels + " channels, " + sampleRate + "Hz");
 
 			handle = ebur128Init(channels, sampleRate);
 			MediaCodec codec = MediaCodec.createDecoderByType(format.getString(MediaFormat.KEY_MIME));
@@ -482,6 +484,7 @@ public class NativeAudioBridge {
 			codec.stop();
 			codec.release();
 			float result = (float) ebur128LoudnessGlobal(handle);
+			Log.d(TAG, "Loudness result: " + result + " LUFS");
 			return result;
 		} catch (Exception e) {
 			Log.e(TAG, "Loudness calculation failed", e);
