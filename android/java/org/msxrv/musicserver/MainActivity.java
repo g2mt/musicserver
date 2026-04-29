@@ -221,6 +221,7 @@ public class MainActivity extends Activity {
 
 	private void requestAllPermissions() {
 		Log.d(TAG, "requestAllPermissions");
+		// 1. External storage
 		requestPermissions(
 			new String[]{android.Manifest.permission.MANAGE_EXTERNAL_STORAGE},
 			0);
@@ -237,6 +238,7 @@ public class MainActivity extends Activity {
 				runNextPermissionHandler(result);
 			}
 		});
+		// 2. Post notifications
 		addPermissionHandler(result -> {
 			requestPermissions(
 				new String[]{android.Manifest.permission.POST_NOTIFICATIONS},
