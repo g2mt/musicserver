@@ -76,7 +76,7 @@ if(MS_EMB_TAGLIB)
     URL_HASH SHA256=7e76b5299dcef427c486bffe455098470c8da91cf3ccb9ea804893df57389b5e
     CMAKE_ARGS
       -DENABLE_CCACHE=${MS_USE_CCACHE}
-      -DBUILD_SHARED_LIBS=ON
+      -DBUILD_SHARED_LIBS=OFF
       -DBUILD_TESTING=OFF
       -DCMAKE_BUILD_TYPE=MinSizeRel
       -DCMAKE_INSTALL_PREFIX=${MS_TAGLIB_PREFIX}
@@ -95,8 +95,9 @@ else()
 endif()
 
 ### Dep: ebur128
-if(MS_EMB_EBUR128 OR MS_EMB_EBUR128_JNI)
+if(MS_EMB_EBUR128)
   set(BUILD_SHARED_LIBS OFF)
+  set(BUILD_STATIC_LIBS ON)
   add_subdirectory(vendored/libebur128)
   unset(BUILD_SHARED_LIBS)
   list(APPEND MS_PKG_CONFIG_PATH "${CMAKE_BINARY_DIR}/vendored/libebur128/ebur128")
@@ -184,11 +185,11 @@ if(MS_BUILD_LIB)
     set(MSRV_BIND_SOURCES jni/libmusicserver.c)
     if(MS_EMB_EBUR128_JNI)
       list(APPEND MSRV_BIND_SOURCES jni/libebur128.c)
+      list(APPEND MSRV_BIND_SOURCES vendored/libebur128/ebur128/ebur128.c)
     endif()
     add_library(musicserverbind SHARED ${MSRV_BIND_SOURCES})
     if(MS_EMB_EBUR128_JNI)
       target_include_directories(musicserverbind PRIVATE "vendored/libebur128/ebur128")
-      add_dependencies(musicserverbind ebur128)
     endif()
 
     set_target_properties(musicserverbind PROPERTIES PREFIX "lib" IMPORT_PREFIX "lib")
@@ -200,9 +201,9 @@ if(MS_BUILD_LIB)
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib/${MS_APKARCH})
     install(TARGETS musicserverbind DESTINATION lib/${MS_APKARCH})
     if(MS_INSTALL_SHARED)
-      configure_file(cmake/install_taglib.cmake.in cmake/install_taglib.cmake @ONLY)
+      # configure_file(cmake/install_taglib.cmake.in cmake/install_taglib.cmake @ONLY)
       # install the true, non-symlinked version
-      install(SCRIPT ${CMAKE_BINARY_DIR}/cmake/install_taglib.cmake)
+      # install(SCRIPT ${CMAKE_BINARY_DIR}/cmake/install_taglib.cmake)
     endif()
   else()
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)

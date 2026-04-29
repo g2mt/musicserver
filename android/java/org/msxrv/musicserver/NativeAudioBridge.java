@@ -331,22 +331,27 @@ public class NativeAudioBridge {
 		eburHandle = ebur128Init(2, 44100);
 
 		if (visualizer != null) visualizer.release();
-		visualizer = new Visualizer(mediaPlayer.getAudioSessionId());
-		visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
-		visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
-			@Override
-			public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
-				if (eburHandle != 0) {
-					// Visualizer provides mono or interleaved data depending on device, 
-					// but ebur128Init was called with 2 channels. 
-					// nr_frames = length / channels
-					ebur128AddFrames(eburHandle, waveform, waveform.length / 2);
+		try {
+			visualizer = new Visualizer(mediaPlayer.getAudioSessionId());
+			visualizer.setCaptureSize(Visualizer.getCaptureSizeRange()[1]);
+			visualizer.setDataCaptureListener(new Visualizer.OnDataCaptureListener() {
+				@Override
+				public void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate) {
+					if (eburHandle != 0) {
+						// Visualizer provides mono or interleaved data depending on device, 
+						// but ebur128Init was called with 2 channels. 
+						// nr_frames = length / channels
+						ebur128AddFrames(eburHandle, waveform, waveform.length / 2);
+					}
 				}
-			}
-			@Override
-			public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {}
-		}, Visualizer.getMaxCaptureRate() / 2, true, false);
-		visualizer.setEnabled(true);
+				@Override
+				public void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate) {}
+			}, Visualizer.getMaxCaptureRate() / 2, true, false);
+			visualizer.setEnabled(true);
+		} catch (RuntimeException e) {
+			Log.e(TAG, "Failed to load visualizer", e);
+			visualizer = null;
+		}
 
 		final int instanceId = currentInstanceId;
 
