@@ -204,12 +204,12 @@ func TestInterface_GetTracks(t *testing.T) {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
 
-	if len(result) != len(tracks) {
-		t.Errorf("Expected %d tracks, got %d", len(tracks), len(result))
+	if len(result.Tracks) != len(tracks) {
+		t.Errorf("Expected %d tracks, got %d", len(tracks), len(result.Tracks))
 	}
 
 	// Verify result ids maps to correct track metadata
-	for _, track := range result {
+	for _, track := range result.Tracks {
 		found := false
 		for _, t := range tracks {
 			if t.Name == track.Name && t.Path == track.Path && t.Album == track.Album {
@@ -254,8 +254,8 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
 	// Should find "Rock Song" and "Rock Anthem"
-	if len(result1) != 2 {
-		t.Errorf("Expected 2 tracks with 'Rock', got %d", len(result1))
+	if len(result1.Tracks) != 2 {
+		t.Errorf("Expected 2 tracks with 'Rock', got %d", len(result1.Tracks))
 	}
 
 	// Test 2: Search for word "Jazz" in name or album
@@ -267,8 +267,8 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
 	// Should find "Jazz Tune" and "Jazz Improv"
-	if len(result2) != 2 {
-		t.Errorf("Expected 2 tracks with 'Jazz', got %d", len(result2))
+	if len(result2.Tracks) != 2 {
+		t.Errorf("Expected 2 tracks with 'Jazz', got %d", len(result2.Tracks))
 	}
 
 	// Test 3: Search with multiple words (OR logic)
@@ -280,8 +280,8 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
 	// Should find "Rock Song", "Rock Anthem", and "Classical Symphony"
-	if len(result3) != 3 {
-		t.Errorf("Expected 3 tracks with 'Rock' or 'Classical', got %d", len(result3))
+	if len(result3.Tracks) != 3 {
+		t.Errorf("Expected 3 tracks with 'Rock' or 'Classical', got %d", len(result3.Tracks))
 	}
 
 	// Test 4: Search with negated word
@@ -297,8 +297,8 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 	// "Jazz Collection" has both "Collection" and "Jazz", so should be excluded
 	// Only "Classical Masterpieces" has "Collection"? Wait, none have "Collection" except "Jazz Collection"
 	// Actually "Jazz Collection" should be excluded, so result should be 0
-	if len(result4) != 0 {
-		t.Errorf("Expected 0 tracks with 'Collection' and not 'Jazz', got %d", len(result4))
+	if len(result4.Tracks) != 0 {
+		t.Errorf("Expected 0 tracks with 'Collection' and not 'Jazz', got %d", len(result4.Tracks))
 	}
 
 	// Test 5: Search with album operator
@@ -310,8 +310,8 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
 	// Should find tracks with "Rock" in album name: "Rock Song" and "Rock Anthem"
-	if len(result5) != 2 {
-		t.Errorf("Expected 2 tracks with album containing 'Rock', got %d", len(result5))
+	if len(result5.Tracks) != 2 {
+		t.Errorf("Expected 2 tracks with album containing 'Rock', got %d", len(result5.Tracks))
 	}
 
 	// Test 6: Combined search with words and operator
@@ -324,8 +324,8 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks with search failed: %v", err)
 	}
 	// Should find "Rock Song" (has "Song" in name and "Rock" in album)
-	if len(result6) != 1 {
-		t.Errorf("Expected 1 track with 'Song' and album containing 'Rock', got %d", len(result6))
+	if len(result6.Tracks) != 1 {
+		t.Errorf("Expected 1 track with 'Song' and album containing 'Rock', got %d", len(result6.Tracks))
 	}
 
 	// Test 7: Search with afterId and search
@@ -335,7 +335,7 @@ func TestInterface_GetTracksWithSearch(t *testing.T) {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
 	// Get the first track's ID to use as afterId
-	firstID := allTracks[0].LongID
+	firstID := allTracks.Tracks[0].LongID
 
 	search7 := &searchparser.Result{
 		Words:     []string{"Rock"},
@@ -372,8 +372,8 @@ func TestInterface_GetTracksWithLimit(t *testing.T) {
 		t.Fatalf("GetTracks failed: %v", err)
 	}
 
-	if len(result) != 5 {
-		t.Errorf("Expected 5 tracks, got %d", len(result))
+	if len(result.Tracks) != 5 {
+		t.Errorf("Expected 5 tracks, got %d", len(result.Tracks))
 	}
 }
 
