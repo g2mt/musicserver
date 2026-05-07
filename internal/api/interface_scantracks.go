@@ -64,6 +64,12 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct 
 	toRemove := make(map[string]struct{})
 	if toRemoveArray, err := i.GetAllTrackPaths(); err == nil {
 		for _, path := range toRemoveArray {
+			if requestedPath != "" {
+				rel, err := filepath.Rel(scannedPath, path)
+				if err != nil || (len(rel) >= 3 && rel[:3] == ".."+string(filepath.Separator)) {
+					continue
+				}
+			}
 			toRemove[path] = struct{}{}
 		}
 	} else {

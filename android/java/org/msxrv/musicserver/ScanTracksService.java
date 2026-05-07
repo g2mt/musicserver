@@ -77,7 +77,13 @@ public class ScanTracksService extends Service {
 				Set<String> toRemove = new HashSet<>();
 				String[] existingPaths = bridge.getAllTrackPaths();
 				if (existingPaths != null) {
+					String baseDirPrefix = baseDir.getAbsolutePath() + File.separator;
 					for (String path : existingPaths) {
+						if (scanPath != null && !scanPath.isEmpty()) {
+							if (!path.startsWith(baseDirPrefix)) {
+								continue;
+							}
+						}
 						toRemove.add(path);
 					}
 				}
