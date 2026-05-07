@@ -6,10 +6,12 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"musicserver/internal/lib/taglib"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 const WatchDirInterval = 1 * time.Second
@@ -66,7 +68,7 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct 
 		for _, path := range toRemoveArray {
 			if requestedPath != "" {
 				rel, err := filepath.Rel(scannedPath, path)
-				if err != nil || (len(rel) >= 3 && rel[:3] == ".."+string(filepath.Separator)) {
+				if err != nil || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 					continue
 				}
 			}
