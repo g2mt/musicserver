@@ -121,7 +121,7 @@ func (s *IPCServer) handleConnection(conn net.Conn) {
 		}
 
 		reader.HandleWriter(conn)
-		reader.Close()
+		conn.Close()
 	}
 }
 
