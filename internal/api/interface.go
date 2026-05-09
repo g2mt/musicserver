@@ -157,7 +157,10 @@ func (i *Interface) getQueryRow(tx *sql.Tx) interface {
 	}
 }
 
-func (i *Interface) handleRequest(path string, method string, params map[string]string) (out handler, contentType string, err error) {
+func (i *Interface) HandleRequest(req *Request) (out handler, contentType string, err error) {
+	path := req.Path
+	method := req.Method
+	params := req.Params
 	var response interface{}
 
 	if path == "/track" {
@@ -374,15 +377,15 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 	return &byteHandler{b: data}, "text/json", nil
 }
 
-func (i *Interface) HandleRequestByteStream(path string, method string, params map[string]string) (r io.Reader, contentType string, err error) {
+func (i *Interface) HandleRequestByteStream(req *Request) (r io.Reader, contentType string, err error) {
 	buf := &bytes.Buffer{}
-	reader, contentType, err := i.handleRequest(path, method, params)
+	reader, contentType, err := i.HandleRequest(req)
 	if err != nil {
 		return nil, "", err
 	}
 	for {
 		if re, ok := reader.(*redirectHandler); ok {
-			reader, contentType, err = i.handleRequest(re.path, method, params)
+			reader, contentType, err = i.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: req.Params})
 		} else {
 			break
 		}

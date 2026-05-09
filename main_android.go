@@ -123,7 +123,7 @@ func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, pa
 		}
 	}
 
-	reader, contentType, err := iface.HandleRequestByteStream(C.GoString(path), C.GoString(method), params)
+	reader, contentType, err := iface.HandleRequestByteStream(&api.Request{Path: C.GoString(path), Method: C.GoString(method), Params: params})
 	if err != nil {
 		return C.struct_MsrvHandleRequestResult{
 			ReaderHandle: 0,

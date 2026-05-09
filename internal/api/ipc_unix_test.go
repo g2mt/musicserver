@@ -13,11 +13,11 @@ import (
 
 // testGenericIface implements GenericInterface for testing.
 type testGenericIface struct {
-	handleRequestFn func(path string, method string, params map[string]string) (handler, string, error)
+	handleRequestFn func(req *Request) (handler, string, error)
 }
 
-func (t *testGenericIface) handleRequest(path string, method string, params map[string]string) (handler, string, error) {
-	return t.handleRequestFn(path, method, params)
+func (t *testGenericIface) HandleRequest(req *Request) (handler, string, error) {
+	return t.handleRequestFn(req)
 }
 
 func TestIPC_RoundTrip(t *testing.T) {
@@ -25,8 +25,8 @@ func TestIPC_RoundTrip(t *testing.T) {
 	socketPath := filepath.Join(tmpDir, "test.sock")
 
 	iface := &testGenericIface{
-		handleRequestFn: func(path string, method string, params map[string]string) (handler, string, error) {
-			if path == "/ping" && method == "GET" {
+		handleRequestFn: func(req *Request) (handler, string, error) {
+			if req.Path == "/ping" && req.Method == "GET" {
 				data, _ := json.Marshal(map[string]string{"status": "ok"})
 				return &byteHandler{b: data}, "text/json", nil
 			}
@@ -105,7 +105,7 @@ func TestIPC_ErrorResponse(t *testing.T) {
 	socketPath := filepath.Join(tmpDir, "test.sock")
 
 	iface := &testGenericIface{
-		handleRequestFn: func(path string, method string, params map[string]string) (handler, string, error) {
+		handleRequestFn: func(req *Request) (handler, string, error) {
 			return nil, "", os.ErrNotExist
 		},
 	}
@@ -163,7 +163,7 @@ func TestIPC_MultipleRequests(t *testing.T) {
 
 	callCount := 0
 	iface := &testGenericIface{
-		handleRequestFn: func(path string, method string, params map[string]string) (handler, string, error) {
+		handleRequestFn: func(req *Request) (handler, string, error) {
 			callCount++
 			data, _ := json.Marshal(map[string]int{"count": callCount})
 			return &byteHandler{b: data}, "text/json", nil
