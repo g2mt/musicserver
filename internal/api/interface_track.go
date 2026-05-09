@@ -70,9 +70,8 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 				whereClauses = append(whereClauses, "(artist LIKE ?)")
 				args = append(args, "%"+op.Value+"%")
 			case "path":
-				path := filepath.Join(i.config.DataPath, op.Value)
 				whereClauses = append(whereClauses, "(path LIKE ?)")
-				args = append(args, path+"%")
+				args = append(args, op.Value+"%")
 			case "sort":
 				switch op.Value {
 				case "id", "name", "path", "artist", "album":
@@ -248,12 +247,23 @@ func (i *Interface) resolveTrackShortId(id string, tx *sql.Tx) (string, error) {
 	return longID, nil
 }
 
-// Resolves a path to long ID. Requires path to be in the data directory
+// Resolves a path to long ID. Accepts either an absolute path (which must be under
+// DataPath) or a path already relative to DataPath.
 func (i *Interface) resolveTrackFromPath(path string, tx *sql.Tx) (string, error) {
 	db := i.getQueryRow(tx)
 
+	// Strip DataPath prefix if the path is absolute
+	relPath := path
+	if strings.HasPrefix(path, i.config.DataPath) {
+		var err error
+		relPath, err = filepath.Rel(i.config.DataPath, path)
+		if err != nil {
+			return "", errors.New("track not found")
+		}
+	}
+
 	var longID string
-	err := db.QueryRow("SELECT id FROM tracks WHERE path = ?", path).Scan(&longID)
+	err := db.QueryRow("SELECT id FROM tracks WHERE path = ?", relPath).Scan(&longID)
 	if err != nil {
 		return "", errors.New("track not found")
 	}
@@ -282,9 +292,6 @@ func (i *Interface) GetTrackById(id string) (schema.Track, error) {
 	if err != nil {
 		return schema.Track{}, err
 	}
-	if !strings.HasPrefix(track.Path, i.config.DataPath) {
-		panic("track.Path stores invalid prefix")
-	}
 
 	err = tx.Commit()
 	if err != nil {
@@ -310,19 +317,10 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	var path string
-	err = tx.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
+	var relPath string
+	err = tx.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&relPath)
 	if err != nil {
 		return nil, err
-	}
-
-	path = filepath.Clean(path)
-	relPath, err := filepath.Rel(i.config.DataPath, path)
-	if err != nil {
-		return nil, err
-	}
-	if strings.HasPrefix(relPath, "..") {
-		return nil, errors.New("unexpected path outside of data directory")
 	}
 
 	err = tx.Commit()
@@ -330,7 +328,8 @@ func (i *Interface) GetTrackData(id string) ([]byte, error) {
 		return nil, err
 	}
 
-	bytes, err := os.ReadFile(path)
+	absPath := filepath.Join(i.config.DataPath, relPath)
+	bytes, err := os.ReadFile(absPath)
 	if err != nil {
 		return nil, err
 	}
@@ -353,8 +352,8 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		return nil, "", err
 	}
 
-	var path string
-	err = tx.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&path)
+	var relPath string
+	err = tx.QueryRow("SELECT path FROM tracks WHERE id = ?", longID).Scan(&relPath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -364,17 +363,19 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 		return nil, "", err
 	}
 
+	absPath := filepath.Join(i.config.DataPath, relPath)
+
 	// Check cache first
-	cachedData, mimeType, cErr := i.getTrackCoverCached(path)
+	cachedData, mimeType, cErr := i.getTrackCoverCached(absPath)
 	if cachedData != nil {
-		slog.Debug("Cover cache hit", "path", path)
+		slog.Debug("Cover cache hit", "path", absPath)
 		return cachedData, mimeType, nil
 	} else if cErr != nil {
 		slog.Warn("Unable to complete cache transaction", "err", cErr)
 	}
 
 	// Use taglib to extract cover art
-	data, mimeType, err := taglib.ExtractCoverArt(path)
+	data, mimeType, err := taglib.ExtractCoverArt(absPath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -383,7 +384,7 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	if i.ccacheDb != nil && data != nil {
 		select {
 		case i.ccacheChan <- coverCacheData{
-			path:     path,
+			path:     absPath,
 			data:     data,
 			mimeType: mimeType,
 		}:
@@ -399,7 +400,12 @@ func (i *Interface) GetTrackFileChecksumInfo(path string) (
 	ckSize int64,
 	err error,
 ) {
-	err = i.db.QueryRow("SELECT ck_last_modified, ck_size FROM tracks WHERE path = ?", path).Scan(&ckLastModified, &ckSize)
+	// Convert absolute path to relative for DB lookup
+	relPath, err := filepath.Rel(i.config.DataPath, path)
+	if err != nil {
+		return 0, 0, err
+	}
+	err = i.db.QueryRow("SELECT ck_last_modified, ck_size FROM tracks WHERE path = ?", relPath).Scan(&ckLastModified, &ckSize)
 	if err != nil {
 		return 0, 0, err
 	}
@@ -422,6 +428,11 @@ func (i *Interface) AddTrack(track *schema.Track) (string, error) {
 		} else {
 			slog.Warn("cannot open track.Path", "path", track.Path)
 		}
+	}
+
+	// Convert absolute path to relative before storing in DB
+	if relPath, err := filepath.Rel(i.config.DataPath, track.Path); err == nil && !strings.HasPrefix(relPath, "..") {
+		track.Path = relPath
 	}
 
 	// Start a single transaction for the entire operation
@@ -647,7 +658,8 @@ func (i *Interface) ForgetTrackById(id string) error {
 }
 
 func (i *Interface) ForgetTrackByPath(path string) error {
-	absPath, err := filepath.Abs(path)
+	// Convert absolute path to relative for DB lookup
+	relPath, err := filepath.Rel(i.config.DataPath, path)
 	if err != nil {
 		return err
 	}
@@ -655,7 +667,7 @@ func (i *Interface) ForgetTrackByPath(path string) error {
 	var longID, shortID string
 	err = i.db.QueryRow(
 		"SELECT id, short_id FROM tracks WHERE (path = ?) OR (substr(path, ?) = ?)",
-		absPath, -(len(absPath)+1), absPath+"/",
+		relPath, -(len(relPath)+1), relPath+"/",
 	).Scan(&longID, &shortID)
 	if err == sql.ErrNoRows {
 		return nil

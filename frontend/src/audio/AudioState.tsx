@@ -60,9 +60,8 @@ export function useAudio({
 
   const url = useMemo(() => {
     if (!currentTrack) return null;
-    // HACK: the audio path cannot be cleanly obtained by the Android audio bridge without
-    // without adding additional functions, so use the absolute path directly.
-    // the path is checked in NativeAudioBridge
+    // The path is relative to the configured data path; NativeAudioBridge.setSrc
+    // resolves relative paths against the music directory on Android.
     if (currentTrack.path && usesAbsoluteAudioPath)
       return `file://${encodeURI(currentTrack.path)}`;
     if (currentTrack.id) return getTrackFileFromId(currentTrack.id);

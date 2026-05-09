@@ -4,7 +4,7 @@ import "database/sql"
 
 type MigratorV2 struct{}
 
-func (m MigratorV2) Migrate(tx *sql.Tx) error {
+func (m MigratorV2) Migrate(tx *sql.Tx, opts *MigrationOptions) error {
 	if !columnExists(tx, "tracks", "ck_last_modified") {
 		_, err := tx.Exec(`
 			ALTER TABLE tracks ADD COLUMN ck_last_modified INTEGER NOT NULL DEFAULT 0;

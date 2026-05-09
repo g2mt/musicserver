@@ -116,7 +116,9 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 }
 
 func (i *Interface) InitDb() error {
-	err := migration.Migrate(i.db)
+	err := migration.Migrate(i.db, &migration.MigrationOptions{
+		DataPath: i.config.DataPath,
+	})
 	if err != nil {
 		return err
 	}
@@ -218,14 +220,13 @@ func (i *Interface) handleRequest(path string, method string, params map[string]
 				return nil, "", err
 			}
 			path = filepath.Clean(path)
-			fullPath := filepath.Join(i.config.DataPath, path)
 
-			id, err = i.resolveTrackFromPath(fullPath, nil)
+			id, err = i.resolveTrackFromPath(path, nil)
 			if err != nil {
 				if schema.AudioExts[strings.ToLower(filepath.Ext(path))] {
 					track := schema.Track{
 						Name: strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)),
-						Path: fullPath,
+						Path: path,
 					}
 					data, err := json.Marshal(track)
 					if err != nil {

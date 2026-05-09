@@ -79,12 +79,14 @@ public class ScanTracksService extends Service {
 				if (existingPaths != null) {
 					String baseDirPrefix = baseDir.getAbsolutePath() + File.separator;
 					for (String path : existingPaths) {
+						// paths from getAllTrackPaths are relative to musicDir; convert to absolute
+						String absPath = new File(musicDir, path).getAbsolutePath();
 						if (scanPath != null && !scanPath.isEmpty()) {
-							if (!path.startsWith(baseDirPrefix)) {
+							if (!absPath.startsWith(baseDirPrefix)) {
 								continue;
 							}
 						}
-						toRemove.add(path);
+						toRemove.add(absPath);
 					}
 				}
 

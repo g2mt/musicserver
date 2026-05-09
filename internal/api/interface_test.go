@@ -59,7 +59,7 @@ func TestInterface_AddTrack(t *testing.T) {
 
 	track := &schema.Track{
 		Name:  "Test Track",
-		Path:  "/music/test.mp3",
+		Path:  "music/test.mp3",
 		Album: "Test Album",
 	}
 
@@ -122,7 +122,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	// Create two tracks with same first 6 characters of hash
 	track1 := &schema.Track{
 		Name:  "Track One",
-		Path:  "/music/one.mp3",
+		Path:  "music/one.mp3",
 		Album: "Album One",
 	}
 
@@ -134,7 +134,7 @@ func TestInterface_AddTrackConflictResolution(t *testing.T) {
 	// Add a different track - it should get a different short ID
 	track2 := &schema.Track{
 		Name:  "Track Two",
-		Path:  "/music/two.mp3",
+		Path:  "music/two.mp3",
 		Album: "Album Two",
 	}
 
@@ -385,7 +385,7 @@ func TestInterface_GetTrackById(t *testing.T) {
 
 	track := &schema.Track{
 		Name:  "Test Track",
-		Path:  "/music/test.mp3",
+		Path:  "music/test.mp3",
 		Album: "Test Album",
 	}
 
@@ -423,9 +423,9 @@ func TestInterface_ForgetTracks(t *testing.T) {
 
 	// Add some tracks
 	tracks := []*schema.Track{
-		{Name: "Track 1", Path: "/music/1.mp3", Album: "Album A"},
-		{Name: "Track 2", Path: "/music/2.mp3", Album: "Album B"},
-		{Name: "Track 3", Path: "/music/3.mp3", Album: "Album C"},
+		{Name: "Track 1", Path: "music/1.mp3", Album: "Album A"},
+		{Name: "Track 2", Path: "music/2.mp3", Album: "Album B"},
+		{Name: "Track 3", Path: "music/3.mp3", Album: "Album C"},
 	}
 
 	for _, track := range tracks {

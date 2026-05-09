@@ -8,7 +8,12 @@ import (
 )
 
 type Migrator interface {
-	Migrate(tx *sql.Tx) error
+	Migrate(tx *sql.Tx, opts *MigrationOptions) error
+}
+
+// MigrationOptions holds extra configuration passed to migrations.
+type MigrationOptions struct {
+	DataPath string
 }
 
 // change this whenever a new version is added
@@ -16,6 +21,7 @@ var Migrators = []Migrator{
 	MigratorV0{},
 	MigratorV1{},
 	MigratorV2{},
+	MigratorV3{},
 }
 
 func getVersion(db *sql.DB) int {
@@ -36,7 +42,7 @@ func setVersion(tx *sql.Tx, version int) error {
 	return err
 }
 
-func Migrate(db *sql.DB) error {
+func Migrate(db *sql.DB, opts *MigrationOptions) error {
 	current := getVersion(db)
 
 	tx, err := db.Begin()
@@ -50,7 +56,7 @@ func Migrate(db *sql.DB) error {
 	}()
 
 	for idx := current + 1; idx < len(Migrators); idx++ {
-		if err = Migrators[idx].Migrate(tx); err != nil {
+		if err = Migrators[idx].Migrate(tx, opts); err != nil {
 			return fmt.Errorf("migration v%d failed: %w", idx, err)
 		}
 		if err = setVersion(tx, idx); err != nil {

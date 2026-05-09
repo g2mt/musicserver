@@ -65,14 +65,15 @@ func (i *Interface) ScanTracks(requestedPath string, force bool) (result struct 
 
 	toRemove := make(map[string]struct{})
 	if toRemoveArray, err := i.GetAllTrackPaths(); err == nil {
-		for _, path := range toRemoveArray {
+		for _, relPath := range toRemoveArray {
+			absPath := filepath.Join(i.config.DataPath, relPath)
 			if requestedPath != "" {
-				rel, err := filepath.Rel(scannedPath, path)
+				rel, err := filepath.Rel(scannedPath, absPath)
 				if err != nil || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 					continue
 				}
 			}
-			toRemove[path] = struct{}{}
+			toRemove[absPath] = struct{}{}
 		}
 	} else {
 		return result, err

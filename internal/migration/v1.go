@@ -4,7 +4,7 @@ import "database/sql"
 
 type MigratorV1 struct{}
 
-func (m MigratorV1) Migrate(tx *sql.Tx) error {
+func (m MigratorV1) Migrate(tx *sql.Tx, opts *MigrationOptions) error {
 	_, err := tx.Exec(`
 	CREATE TABLE IF NOT EXISTS prefs (
 	  key TEXT PRIMARY KEY,

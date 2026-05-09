@@ -4,10 +4,10 @@ type Track struct {
 	LongID        string `json:"id"`
 	ShortID       string `json:"short_id"`
 	Name          string `json:"name"`
-	Path          string `json:"path"` // absolute path to file
+	Path          string `json:"path"`           // path relative to the config DataPath
 	Artist        string `json:"artist"`
 	Album         string `json:"album"`
-	ThumbnailPath string `json:"thumbnail_path,omitempty"`
+	ThumbnailPath string `json:"thumbnail_path,omitempty"` // path relative to the config DataPath
 }
 
 type Album struct {

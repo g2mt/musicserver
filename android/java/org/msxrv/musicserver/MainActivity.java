@@ -100,10 +100,12 @@ public class MainActivity extends Activity {
 				String url = request.getUrl().toString();
 				if (url.startsWith("track-cover://")) {
 					String filepath = request.getUrl().getPath();
+					// Path is now relative to musicDir; resolve to absolute
+					String absPath = musicDir.resolve(filepath.substring(1)).toString();
 					String[] outContentType = new String[1];
-					byte[] data = TrackUtils.getTrackCover(filepath, outContentType);
+					byte[] data = TrackUtils.getTrackCover(absPath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";
-					Log.d(TAG, "cover for path=" + filepath + ", mimeType=" + mimeType + ", bytes=" + data.length);
+					Log.d(TAG, "cover for path=" + absPath + ", mimeType=" + mimeType + ", bytes=" + data.length);
 
 					Map<String, String> responseHeaders = new HashMap<>();
 					responseHeaders.put("Access-Control-Allow-Origin", "*");

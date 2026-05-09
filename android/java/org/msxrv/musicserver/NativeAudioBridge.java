@@ -148,26 +148,34 @@ public class NativeAudioBridge {
 		if (encFilePath == null) return;
 		final String filePath = BridgeUtils.decodeURI(encFilePath);
 
-		Log.d(TAG, "updateMediaSession: filePath=" + filePath);
+		// Resolve relative paths to absolute
+		String absPath = filePath;
+		java.nio.file.Path p = Paths.get(filePath).normalize();
+		if (!p.isAbsolute()) {
+			p = activity.getMusicDir().resolve(p);
+		}
+		absPath = p.toString();
+
+		Log.d(TAG, "updateMediaSession: filePath=" + absPath);
 		try {
 			mediaPlayer.reset();
-			mediaPlayer.setDataSource(filePath);
+			mediaPlayer.setDataSource(absPath);
 			mediaPlayer.prepare();
 		} catch (Exception e) {
 			e.printStackTrace();
 			Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
 		}
-		currentFilePath = filePath;
+		currentFilePath = absPath;
 
 		NativeBridge bridge = activity.getApp().getNativeBridge();
 
-		TrackUtils.TrackMetadata metadata = TrackUtils.getTrackMetadata(filePath);
-		String title  = (metadata != null && metadata.title  != null && !metadata.title.isEmpty()) ? metadata.title  : Paths.get(filePath).getFileName().toString();
+		TrackUtils.TrackMetadata metadata = TrackUtils.getTrackMetadata(absPath);
+		String title  = (metadata != null && metadata.title  != null && !metadata.title.isEmpty()) ? metadata.title  : Paths.get(absPath).getFileName().toString();
 		String artist = (metadata != null && metadata.artist != null) ? metadata.artist : "";
 		String album  = (metadata != null && metadata.album  != null) ? metadata.album  : "";
 
 		String[] outContentType = new String[1];
-		byte[] coverBytes = TrackUtils.getTrackCover(filePath, outContentType);
+		byte[] coverBytes = TrackUtils.getTrackCover(absPath, outContentType);
 		Bitmap coverBitmap = null;
 		if (coverBytes != null && coverBytes.length > 0) {
 			coverBitmap = BitmapFactory.decodeByteArray(coverBytes, 0, coverBytes.length);
