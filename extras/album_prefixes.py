@@ -55,8 +55,8 @@ def main():
             print(f"  }}")
             print(f"  Common prefix: (empty)")
             print(f"}}")
-        else:
-            print(f"{album}: {prefix}")
+        # else:
+        #     print(f"{album}: {prefix}")
 
     if empty_prefix_albums:
         print(
