@@ -5,7 +5,6 @@ package api
 import (
 	"bufio"
 	"encoding/json"
-	"io"
 	"log/slog"
 	"net"
 	"os"
@@ -125,11 +124,12 @@ func (s *IPCServer) handleConnection(conn net.Conn) {
 				Error string `json:"error"`
 			}{Error: err.Error()})
 			conn.Write(data)
+			conn.Write([]byte{0})
 			continue
 		}
 
 		reader.HandleWriter(conn)
-		conn.Close()
+		conn.Write([]byte{0})
 	}
 }
 
@@ -162,15 +162,21 @@ func (iface *Interface) WriteToIPC(path, method string, params map[string]string
 	data = append(data, '\n')
 
 	// Write the request
-	if _, err := conn.Write(data); err != nil {
+	slog.Debug("Preparing to write", "data", data)
+	n := 0
+	if n, err = conn.Write(data); err != nil {
 		return nil, err
 	}
+	slog.Debug("Wrote to IPC", "n", n)
 
 	// Read all response until socket closes
-	response, err := io.ReadAll(conn)
+	slog.Debug("Preparing to read")
+	reader := bufio.NewReader(conn)
+	response, err := reader.ReadBytes(byte(0))
 	if err != nil {
 		return nil, err
 	}
+	response = response[:len(response)-1]
 
 	return response, nil
 }

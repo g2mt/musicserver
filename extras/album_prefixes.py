@@ -3,16 +3,18 @@
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 
-MUSICSERVER = os.environ.get("MUSICSERVER", "musicserver")
+MUSICSERVER = shlex.split(os.environ.get("MUSICSERVER", "musicserver"))
 
 
 def run_do(path: str, method: str, params: list[str] | None = None) -> dict:
-    cmd = [MUSICSERVER, "do", path, method]
+    cmd = [*MUSICSERVER, "-d", "do", path, method]
     if params:
         cmd.extend(params)
+    print("Running", cmd)
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"Error running '{' '.join(cmd)}': {result.stderr}")

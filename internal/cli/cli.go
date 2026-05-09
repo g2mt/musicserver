@@ -17,6 +17,8 @@ func (c *CLI) Parse() Cmd {
 	kctx := kong.Parse(c)
 	switch kctx.Command() {
 	case "do <path> <method>":
+		fallthrough
+	case "do <path> <method> <params>":
 		return &c.Do
 	default:
 		return &c.Serve
