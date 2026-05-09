@@ -3,7 +3,7 @@ import { BrowserAudio } from "./BrowserAudio";
 
 import { NativeAudio, onNativeMessagePort } from "src/audio/NativeAudio";
 
-export const usesAbsoluteAudioPath = window._native_audio_bridge ? true : false;
+export const usesAudioPath = window._native_audio_bridge ? true : false;
 
 export const apiAudio = (() => {
   if (window._native_audio_bridge) {

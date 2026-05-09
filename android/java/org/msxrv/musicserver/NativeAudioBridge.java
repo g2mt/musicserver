@@ -32,6 +32,7 @@ import java.util.ArrayList;
 
 public class NativeAudioBridge {
 	private static final String TAG = "[msxrv] NativeAudioBridge";
+	private static final String MUSIC_SCHEME = "music://";
 
 	private MainActivity activity;
 	private WebView webView;
@@ -359,18 +360,9 @@ public class NativeAudioBridge {
 		if (!isActive(instanceId)) return;
 		Log.d(TAG, "src=" + src);
 
-		if (src.startsWith("file://")) {
-			src = src.substring("file://".length());
-			java.nio.file.Path path = Paths.get(src).normalize();
-			if (path.isAbsolute()) {
-				if (!path.startsWith(activity.getMusicDir())) {
-					src = null;
-				} else {
-					src = path.toString();
-				}
-			} else {
-				src = activity.getMusicDir().resolve(path).toString();
-			}
+		if (src.startsWith(MUSIC_SCHEME)) {
+			src = src.substring(MUSIC_SCHEME.length());
+			src = activity.getMusicDir().resolve("."+src).toString();
 			if (src != null) {
 				Log.d(TAG, "resolved src=" + src);
 			}

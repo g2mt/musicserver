@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 
 import type { TrackData } from "src/TrackData";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";
-import { apiAudio, usesAbsoluteAudioPath } from "src/audio/apiAudio";
+import { apiAudio, usesAudioPath } from "src/audio/apiAudio";
 
 export interface SerializedAudioState {
   path: string; // get the track using the `/track/:by-path` endpoint
@@ -62,8 +62,8 @@ export function useAudio({
     if (!currentTrack) return null;
     // The path is relative to the configured data path; NativeAudioBridge.setSrc
     // resolves relative paths against the music directory on Android.
-    if (currentTrack.path && usesAbsoluteAudioPath)
-      return `file://${encodeURI(currentTrack.path)}`;
+    if (currentTrack.path && usesAudioPath)
+      return `music://${encodeURI(currentTrack.path)}`;
     if (currentTrack.id) return getTrackFileFromId(currentTrack.id);
     if (currentTrack.path) return getFilePath(currentTrack.path);
     return null;
