@@ -144,19 +144,29 @@ public class NativeAudioBridge {
 		}
 	}
 
-	// ### Media session
+	// ### Path resolution
 
-	private void updateMediaSession(String encFilePath) {
-		if (encFilePath == null) return;
-		final String filePath = BridgeUtils.decodeURI(encFilePath);
+	private Path resolveMusicPath(String src) {
+		if (src == null) return null;
 
-		// Resolve relative paths to absolute
-		String absPath = filePath;
-		Path p = Paths.get(filePath).normalize();
+		if (src.startsWith(MUSIC_SCHEME)) {
+			src = src.substring(MUSIC_SCHEME.length());
+		}
+
+		src = BridgeUtils.decodeURI(src);
+
+		Path p = Paths.get(src).normalize();
 		if (!p.isAbsolute()) {
 			p = activity.getMusicDir().resolve(p);
 		}
-		absPath = p.toString();
+		return p;
+	}
+
+	// ### Media session
+
+	private void updateMediaSession(Path path) {
+		if (path == null) return;
+		String absPath = path.toString();
 
 		Log.d(TAG, "updateMediaSession: filePath=" + absPath);
 		try {
@@ -245,7 +255,7 @@ public class NativeAudioBridge {
 	// ### Playback queue
 
 	private class Queue {
-		public ArrayList<String> paths = new ArrayList<>();
+		public ArrayList<Path> paths = new ArrayList<>();
 		public int index = -1;
 
 		public void next() {
@@ -264,7 +274,7 @@ public class NativeAudioBridge {
 
 		public void loadTrack() {
 			if (index < 0 || index >= paths.size()) return;
-			String path = paths.get(index);
+			Path path = paths.get(index);
 			mainHandler.post(() -> {
 				updateMediaSession(path);
 				mediaPlayer.start();
@@ -359,16 +369,7 @@ public class NativeAudioBridge {
 	public void setSrc(int instanceId, String src) {
 		if (!isActive(instanceId)) return;
 		Log.d(TAG, "src=" + src);
-
-		if (src.startsWith(MUSIC_SCHEME)) {
-			src = src.substring(MUSIC_SCHEME.length());
-			src = activity.getMusicDir().resolve("."+src).toString();
-			if (src != null) {
-				Log.d(TAG, "resolved src=" + src);
-			}
-		}
-
-		updateMediaSession(src);
+		updateMediaSession(resolveMusicPath(src));
 	}
 
 	@JavascriptInterface
@@ -538,7 +539,7 @@ public class NativeAudioBridge {
 
 			Queue newQueue = new Queue();
 			for (int i = 0; i < pathsArr.length(); i++) {
-				newQueue.paths.add(pathsArr.getString(i));
+				newQueue.paths.add(resolveMusicPath(pathsArr.getString(i)));
 			}
 			newQueue.index = index;
 			this.queue = newQueue;
