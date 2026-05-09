@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import android.util.Log;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class NativeAudioBridge {
@@ -150,7 +151,7 @@ public class NativeAudioBridge {
 
 		// Resolve relative paths to absolute
 		String absPath = filePath;
-		java.nio.file.Path p = Paths.get(filePath).normalize();
+		Path p = Paths.get(filePath).normalize();
 		if (!p.isAbsolute()) {
 			p = activity.getMusicDir().resolve(p);
 		}
