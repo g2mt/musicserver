@@ -81,7 +81,6 @@ func (s *UnixSocketServer) Stop() error {
 func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 	defer conn.Close()
 
-	// Set a read timeout of 1 minute
 	conn.SetReadDeadline(time.Now().Add(time.Minute))
 
 	reader := bufio.NewReader(conn)
@@ -89,7 +88,6 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 		// Read until newline
 		line, err := reader.ReadBytes('\n')
 		if err != nil {
-			// Timeout or other error, stop reading
 			return
 		}
 
