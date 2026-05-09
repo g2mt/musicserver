@@ -23,8 +23,8 @@ export interface ServerConfig {
   version: string;
   config: {
     http_bind: string;
-    unix_bind_enabled: boolean;
-    unix_bind: string;
+    ipc_bind_enabled: boolean;
+    ipc_bind: string;
     data_path: string;
     db_dir: string;
     cache_db_enabled: boolean;
