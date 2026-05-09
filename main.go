@@ -27,10 +27,8 @@ type CLI struct {
 	Debug    bool   `kong:"short='d',help='enable debug mode'"`
 	Loglevel string `kong:"default='info',help='log level (debug, info, warn, error)'"`
 
-	// serve the server (default command if not set)
 	Serve ServeCmd `kong:"cmd,help='serve the server',default='1'"`
-	// do a unix socket call
-	Do DoCmd `kong:"cmd,help='do a unix socket call'"`
+	Do    DoCmd    `kong:"cmd,help='do a unix socket call'"`
 }
 
 type ServeCmd struct {
