@@ -41,6 +41,20 @@ Returns a JSON object containing the keys:
   - `version`: the version number, or Git commit of the compiled binary
   - `config`: a JSON object containing the server configuration
 
+## Database
+
+Internal access to the database is only allowed for requests from the IPC. If made from any other medium, then all endpoints will return an "Access denied" error.
+
+### POST `/db`
+
+Requires the `query` parameter to be provided. Returns a JSON string for the result of the query on the database file.
+
+For SQL implementations, only read-only SQL queries are allowed.
+
+### GET `/db/schema`
+
+Returns the internal schema of the database. In practice, the SQL schema for every table of the database is returned as a non-JSON-encoded string.
+
 ## Progress
 
 ### GET `/progress`

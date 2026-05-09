@@ -103,10 +103,10 @@ func (s *IPCServer) handleConnection(conn net.Conn) {
 		}
 		slog.Debug("Received IPC request", "request", req)
 
-		reader, _, err := s.iface.HandleRequest(&Request{Path: req.Path, Method: req.Method, Params: req.Params})
+		reader, _, err := s.iface.HandleRequest(&Request{Path: req.Path, Method: req.Method, Params: req.Params, FromIPC: true})
 		for {
 			if re, ok := reader.(*redirectHandler); ok {
-				reader, _, err = s.iface.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: req.Params})
+				reader, _, err = s.iface.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: req.Params, FromIPC: true})
 			} else {
 				break
 			}

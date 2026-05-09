@@ -310,6 +310,31 @@ func (i *Interface) HandleRequest(req *Request) (out handler, contentType string
 			}
 			return &byteHandler{b: data}, "text/json", nil
 		}
+	} else if path == "/db" {
+		if !req.FromIPC {
+			return nil, "", errors.New("Access denied")
+		}
+		if method == "POST" {
+			query, ok := params["query"]
+			if !ok {
+				return nil, "", errors.New("missing query parameter")
+			}
+			response, err = i.ExecDbQuery(query)
+		} else {
+			return nil, "", errors.New("method not allowed")
+		}
+	} else if path == "/db/schema" {
+		if !req.FromIPC {
+			return nil, "", errors.New("Access denied")
+		}
+		if method != "GET" {
+			return nil, "", errors.New("method not allowed")
+		}
+		result, err := i.GetDbSchema()
+		if err != nil {
+			return nil, "", err
+		}
+		return &byteHandler{b: []byte(result)}, "text/plain", nil
 	} else if path == "/props" {
 		if method != "GET" {
 			return nil, "", errors.New("method not allowed")
@@ -385,7 +410,7 @@ func (i *Interface) HandleRequestByteStream(req *Request) (r io.Reader, contentT
 	}
 	for {
 		if re, ok := reader.(*redirectHandler); ok {
-			reader, contentType, err = i.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: req.Params})
+			reader, contentType, err = i.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: req.Params, FromIPC: req.FromIPC})
 		} else {
 			break
 		}
