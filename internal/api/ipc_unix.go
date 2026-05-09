@@ -89,24 +89,32 @@ func (s *IPCServer) handleConnection(conn net.Conn) {
 		// Read until newline
 		line, err := reader.ReadBytes('\n')
 		if err != nil {
+			slog.Error("Error reading IPC", "err", err)
 			return
 		}
 
-		var req struct {
+		var jsonReq struct {
 			Path   string            `json:"path"`
 			Method string            `json:"method"`
 			Params map[string]string `json:"params,omitempty"`
 		}
-		if err := json.Unmarshal(line, &req); err != nil {
+		if err := json.Unmarshal(line, &jsonReq); err != nil {
 			// Invalid JSON, skip this line
 			continue
 		}
-		slog.Debug("Received IPC request", "request", req)
+		slog.Debug("Received IPC request", "request", jsonReq)
 
-		reader, _, err := s.iface.HandleRequest(&Request{Path: req.Path, Method: req.Method, Params: req.Params, FromIPC: true})
+		req := &Request{
+			Path:    jsonReq.Path,
+			Method:  jsonReq.Method,
+			Params:  jsonReq.Params,
+			FromIPC: true,
+		}
+		reader, _, err := s.iface.HandleRequest(req)
 		for {
-			if re, ok := reader.(*redirectHandler); ok {
-				reader, _, err = s.iface.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: req.Params, FromIPC: true})
+			if redirected, ok := reader.(*redirectHandler); ok {
+				req.Path = redirected.path
+				reader, _, err = s.iface.HandleRequest(req)
 			} else {
 				break
 			}

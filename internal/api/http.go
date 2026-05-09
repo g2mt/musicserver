@@ -26,10 +26,12 @@ func (r *HTTPRouter) Serve(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	reader, contentType, err := r.iface.HandleRequest(&Request{Path: req.URL.Path, Method: req.Method, Params: params})
+	request := &Request{Path: req.URL.Path, Method: req.Method, Params: params}
+	reader, contentType, err := r.iface.HandleRequest(request)
 	for {
-		if re, ok := reader.(*redirectHandler); ok {
-			reader, contentType, err = r.iface.HandleRequest(&Request{Path: re.path, Method: req.Method, Params: params})
+		if redirected, ok := reader.(*redirectHandler); ok {
+			request.Path = redirected.path
+			reader, contentType, err = r.iface.HandleRequest(request)
 		} else {
 			break
 		}
