@@ -48,11 +48,13 @@ def main():
         prefix = common_prefix(paths)
         if not prefix:
             empty_prefix_albums.append(album)
-            print(f"ALBUM: {album}")
-            print(f"  TRACKS:")
+            print(f"ALBUM: {album} {{")
+            print(f"  TRACKS: {{")
             for p in paths:
                 print(f"    {p}")
+            print(f"  }}")
             print(f"  Common prefix: (empty)")
+            print(f"}}")
         else:
             print(f"{album}: {prefix}")
 
