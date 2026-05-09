@@ -291,23 +291,23 @@ export function SettingsTab() {
               />
             </div>
             <div>
-              <label htmlFor="setting-sr-unix-enabled">
-                Unix Socket Enabled:
+              <label htmlFor="setting-sr-ipc-enabled">
+                IPC Enabled:
               </label>
               <input
                 type="checkbox"
-                id="setting-sr-unix-enabled"
+                id="setting-sr-ipc-enabled"
                 readOnly
-                checked={c.props.config.unix_bind_enabled}
+                checked={c.props.config.ipc_bind_enabled}
               />
             </div>
             <div>
-              <label htmlFor="setting-sr-unix-path">Unix Socket Path:</label>
+              <label htmlFor="setting-sr-ipc-path">IPC Socket Path:</label>
               <input
                 type="text"
-                id="setting-sr-unix-path"
+                id="setting-sr-ipc-path"
                 readOnly
-                value={c.props.config.unix_bind}
+                value={c.props.config.ipc_bind}
               />
             </div>
             <div>

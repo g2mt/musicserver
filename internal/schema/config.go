@@ -14,10 +14,10 @@ type Config struct {
 	HTTPBindEnabled bool `json:"http_bind_enabled" yaml:"http_bind_enabled"`
 	// binds the HTTP API backend to this path. defaults to localhost:8000
 	HTTPBind string `json:"http_bind" yaml:"http_bind"`
-	// If set, then enable the local unix socket
-	UnixBindEnabled bool `json:"unix_bind_enabled" yaml:"unix_bind_enabled"`
-	// binds the Unix socket API backend to this path. By default, binds to /run/musicserver/socket for root, ~/.musicserver/socket for non-root
-	UnixBind string `json:"unix_bind" yaml:"unix_bind"`
+	// If set, then enable the local IPC socket
+	IPCBindEnabled bool `json:"ipc_bind_enabled" yaml:"ipc_bind_enabled"`
+	// binds the IPC API backend to this path. By default, binds to /run/musicserver/socket for root, ~/.musicserver/socket for non-root
+	IPCBind string `json:"ipc_bind" yaml:"ipc_bind"`
 	// path where music data is stored
 	DataPath string `json:"data_path" yaml:"data_path"`
 	// path where database and other info is stored. defaults to /var/lib/musicserver for root users, ~/.musicserver/db if non-root
@@ -61,12 +61,12 @@ func LoadConfig(path string) (*Config, error) {
 		config.HTTPBind = "localhost:8000"
 	}
 
-	// Only set default UnixBind if Unix socket is enabled
-	if config.UnixBindEnabled && config.UnixBind == "" {
+	// Only set default IPCBind if IPC is enabled
+	if config.IPCBindEnabled && config.IPCBind == "" {
 		if currentUser.Uid == "0" {
-			config.UnixBind = "/run/musicserver/socket"
+			config.IPCBind = "/run/musicserver/socket"
 		} else {
-			config.UnixBind = currentUser.HomeDir + "/.musicserver/socket"
+			config.IPCBind = currentUser.HomeDir + "/.musicserver/socket"
 		}
 	}
 

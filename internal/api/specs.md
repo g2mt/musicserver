@@ -39,10 +39,10 @@ Under the UNIX endpoint, the response will be transferred as a stream of bytes w
 >     - `NewHTTPRouter(Interface)`
 >     - `HTTPRouter.Serve(w http.ResponseWriter, r *http.Request)`
 >   - `unix.go`: UNIX socket handling code containing:
->     - a struct `UnixSocketServer` with methods:
->       - `NewUnixSocketServer(Interface)`
->       - `UnixSocketServer.Start(path)`: binds to the path and processes requests, blocking the current running thread
->       - `UnixSocketServer.Stop()`: stops the socket server, may be used in another goroutine
+>     - a struct `IPCServer` with methods:
+>       - `NewIPCServer(Interface)`
+>       - `IPCServer.Start(path)`: binds to the path and processes requests, blocking the current running thread
+>       - `IPCServer.Stop()`: stops the socket server, may be used in another goroutine
 >   - `interface_*.go`: common interface code with:
 >     - struct Interface with methods for handling each request
 >       - `NewInterface(sqlite database connection)`

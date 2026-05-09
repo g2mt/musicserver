@@ -13,20 +13,20 @@ import (
 	"time"
 )
 
-type UnixSocketServer struct {
-	iface  *Interface
+type IPCServer struct {
+	iface  GenericInterface
 	socket net.Listener
 	done   chan struct{}
 }
 
-func NewUnixSocketServer(iface *Interface) *UnixSocketServer {
-	return &UnixSocketServer{
+func NewIPCServer(iface GenericInterface) *IPCServer {
+	return &IPCServer{
 		iface: iface,
 		done:  make(chan struct{}),
 	}
 }
 
-func (s *UnixSocketServer) Start(path string) error {
+func (s *IPCServer) Start(path string) error {
 	if err := os.RemoveAll(path); err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (s *UnixSocketServer) Start(path string) error {
 	}
 }
 
-func (s *UnixSocketServer) Stop() error {
+func (s *IPCServer) Stop() error {
 	close(s.done)
 	if s.socket != nil {
 		return s.socket.Close()
@@ -78,7 +78,7 @@ func (s *UnixSocketServer) Stop() error {
 	return nil
 }
 
-func (s *UnixSocketServer) handleConnection(conn net.Conn) {
+func (s *IPCServer) handleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	conn.SetReadDeadline(time.Now().Add(time.Minute))
@@ -123,7 +123,7 @@ func (s *UnixSocketServer) handleConnection(conn net.Conn) {
 	}
 }
 
-func (iface *Interface) WriteToUnixSocket(path, method string, params map[string]string) ([]byte, error) {
+func (iface *Interface) WriteToIPC(path, method string, params map[string]string) ([]byte, error) {
 	// Connect to the unix socket
 	conn, err := net.Dial("unix", path)
 	if err != nil {

@@ -27,7 +27,7 @@ type CLI struct {
 	Loglevel string `kong:"default='info',help='log level (debug, info, warn, error)'"`
 
 	Serve ServeCmd `kong:"cmd,help='serve the server',default='1'"`
-	Do    DoCmd    `kong:"cmd,help='do a unix socket call'"`
+	Do    DoCmd    `kong:"cmd,help='do an ipc call'"`
 }
 
 type ServeCmd struct {
@@ -94,22 +94,22 @@ func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CL
 		}()
 	}
 
-	if config.UnixBindEnabled {
-		// Bind unix socket in another socket
-		unixServer := api.NewUnixSocketServer(iface)
+	if config.IPCBindEnabled {
+		// Bind IPC socket
+		unixServer := api.NewIPCServer(iface)
 		if unixServer == nil {
-			slog.Warn("OS does not support unix sockets, not starting socket server")
+			slog.Warn("OS does not support IPC sockets, not starting socket server")
 		} else {
 			// Ensure the socket directory exists
-			socketDir := filepath.Dir(config.UnixBind)
+			socketDir := filepath.Dir(config.IPCBind)
 			if err := os.MkdirAll(socketDir, 0755); err != nil {
-				slog.Error("Error creating Unix socket directory", "err", err)
+				slog.Error("Error creating IPC socket directory", "err", err)
 				os.Exit(1)
 			}
 
-			slog.Info("Starting Unix socket server", "bind", config.UnixBind)
-			if err := unixServer.Start(config.UnixBind); err != nil {
-				slog.Error("Unix socket server error", "err", err)
+			slog.Info("Starting IPC server", "bind", config.IPCBind)
+			if err := unixServer.Start(config.IPCBind); err != nil {
+				slog.Error("IPC server error", "err", err)
 				os.Exit(1)
 			}
 			return
@@ -121,19 +121,19 @@ func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CL
 }
 
 type DoCmd struct {
-	Path   string            `kong:"optional,help='path for unix socket call'"`
-	Method string            `kong:"arg,help='method for unix socket call'"`
-	Params map[string]string `kong:"arg,optional,help='params for unix socket call'"`
+	Path   string            `kong:"optional,help='path for ipc call'"`
+	Method string            `kong:"arg,help='method for ipc call'"`
+	Params map[string]string `kong:"arg,optional,help='params for ipc call'"`
 }
 
 func (d *DoCmd) cmdDo(config *schema.Config, iface *api.Interface) {
 	path := d.Path
 	if path == "" {
-		path = config.UnixBind
+		path = config.IPCBind
 	}
-	result, err := iface.WriteToUnixSocket(path, d.Method, d.Params)
+	result, err := iface.WriteToIPC(path, d.Method, d.Params)
 	if err != nil {
-		slog.Error("WriteToUnixSocket error", "err", err)
+		slog.Error("WriteToIPC error", "err", err)
 		os.Exit(1)
 	}
 	fmt.Println(string(result))
