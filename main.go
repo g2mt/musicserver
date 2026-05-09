@@ -4,7 +4,6 @@ package main
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -36,10 +35,108 @@ type ServeCmd struct {
 	FrontendDir   string `kong:"help='custom frontend directory path (debug mode only)'"`
 }
 
+func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CLI) {
+	if s.DebugExternal {
+		config.DebugExternal = true
+	}
+
+	// Initialize database
+	if err := iface.InitDb(); err != nil {
+		slog.Error("Error initializing database", "err", err)
+		os.Exit(1)
+	}
+
+	go func() {
+		if err := iface.WatchDataDir(); err != nil {
+			slog.Error("WatchDataDir error", "err", err)
+			os.Exit(1)
+		}
+	}()
+
+	if config.HTTPBindEnabled {
+		// Bind http server to http_bind
+		httpRouter := api.NewHTTPRouter(iface)
+		http.Handle("/api/", http.StripPrefix("/api", http.HandlerFunc(httpRouter.Serve)))
+
+		if cli.Debug {
+			// Mount frontend from filesystem in debug mode
+			workingPath, err := os.Getwd()
+			if err != nil {
+				slog.Error("Error getting working directory", "err", err)
+				os.Exit(1)
+			}
+			frontendDir := s.FrontendDir
+			if frontendDir == "" {
+				frontendDir = filepath.Join(workingPath, "frontend", "dist")
+			}
+			if info, err := os.Stat(frontendDir); err != nil || !info.IsDir() {
+				slog.Error("Expected path to be a directory", "path", frontendDir)
+				os.Exit(1)
+			}
+			slog.Debug("Serving frontend from filesystem", "path", frontendDir)
+			http.Handle("/", http.FileServer(http.Dir(frontendDir)))
+		} else {
+			// Serve embedded frontend in production
+			slog.Info("Serving embedded frontend")
+			sub, err := fs.Sub(embeddedFrontend, "frontend/dist")
+			if err != nil {
+				panic(err)
+			}
+			http.Handle("/", http.FileServer(http.FS(sub)))
+		}
+
+		go func() {
+			slog.Info("Starting HTTP server", "bind", config.HTTPBind)
+			if err := http.ListenAndServe(config.HTTPBind, nil); err != nil {
+				slog.Error("HTTP server error", "err", err)
+				os.Exit(1)
+			}
+		}()
+	}
+
+	if config.UnixBindEnabled {
+		// Bind unix socket in another socket
+		unixServer := api.NewUnixSocketServer(iface)
+		if unixServer == nil {
+			slog.Warn("OS does not support unix sockets, not starting socket server")
+		} else {
+			// Ensure the socket directory exists
+			socketDir := filepath.Dir(config.UnixBind)
+			if err := os.MkdirAll(socketDir, 0755); err != nil {
+				slog.Error("Error creating Unix socket directory", "err", err)
+				os.Exit(1)
+			}
+
+			slog.Info("Starting Unix socket server", "bind", config.UnixBind)
+			if err := unixServer.Start(config.UnixBind); err != nil {
+				slog.Error("Unix socket server error", "err", err)
+				os.Exit(1)
+			}
+			return
+		}
+	}
+
+	// Wait indefinitely for other threads
+	select {}
+}
+
 type DoCmd struct {
-	Path   string `kong:"optional,help='path for unix socket call'"`
-	Method string `kong:"arg,help='method for unix socket call'"`
-	Params string `kong:"default='{}',help='params for unix socket call (json encoded)'"`
+	Path   string            `kong:"optional,help='path for unix socket call'"`
+	Method string            `kong:"arg,help='method for unix socket call'"`
+	Params map[string]string `kong:"arg,optional,help='params for unix socket call'"`
+}
+
+func (d *DoCmd) cmdDo(config *schema.Config, iface *api.Interface) {
+	path := d.Path
+	if path == "" {
+		path = config.UnixBind
+	}
+	result, err := iface.WriteToUnixSocket(path, d.Method, d.Params)
+	if err != nil {
+		slog.Error("WriteToUnixSocket error", "err", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(result))
 }
 
 func main() {
@@ -83,105 +180,10 @@ func main() {
 	}
 	defer iface.Close()
 
-	// Handle unix socket call if path and method are provided
 	switch ctx.Command() {
 	case "do <method>":
-		var paramsMap map[string]string
-		if err := json.Unmarshal([]byte(cli.Do.Params), &paramsMap); err != nil {
-			slog.Error("Error parsing params", "err", err)
-			os.Exit(1)
-		}
-		path := cli.Do.Path
-		if path == "" {
-			path = config.UnixBind
-		}
-		result, err := iface.WriteToUnixSocket(path, cli.Do.Method, paramsMap)
-		if err != nil {
-			slog.Error("WriteToUnixSocket error", "err", err)
-			os.Exit(1)
-		}
-		fmt.Println(string(result))
-		return
+		cli.Do.cmdDo(config, iface)
 	default:
-		if cli.Serve.DebugExternal {
-			config.DebugExternal = true
-		}
-
-		// Initialize database
-		if err := iface.InitDb(); err != nil {
-			slog.Error("Error initializing database", "err", err)
-			os.Exit(1)
-		}
-
-		go func() {
-			if err := iface.WatchDataDir(); err != nil {
-				slog.Error("WatchDataDir error", "err", err)
-				os.Exit(1)
-			}
-		}()
-
-		// Bind http server to http_bind
-		httpRouter := api.NewHTTPRouter(iface)
-		http.Handle("/api/", http.StripPrefix("/api", http.HandlerFunc(httpRouter.Serve)))
-
-		if cli.Debug {
-			// Mount frontend from filesystem in debug mode
-			workingPath, err := os.Getwd()
-			if err != nil {
-				slog.Error("Error getting working directory", "err", err)
-				os.Exit(1)
-			}
-			frontendDir := cli.Serve.FrontendDir
-			if frontendDir == "" {
-				frontendDir = filepath.Join(workingPath, "frontend", "dist")
-			}
-			if info, err := os.Stat(frontendDir); err != nil || !info.IsDir() {
-				slog.Error("Expected path to be a directory", "path", frontendDir)
-				os.Exit(1)
-			}
-			slog.Debug("Serving frontend from filesystem", "path", frontendDir)
-			http.Handle("/", http.FileServer(http.Dir(frontendDir)))
-		} else {
-			// Serve embedded frontend in production
-			slog.Info("Serving embedded frontend")
-			sub, err := fs.Sub(embeddedFrontend, "frontend/dist")
-			if err != nil {
-				panic(err)
-			}
-			http.Handle("/", http.FileServer(http.FS(sub)))
-		}
-
-		go func() {
-			slog.Info("Starting HTTP server", "bind", config.HTTPBind)
-			if err := http.ListenAndServe(config.HTTPBind, nil); err != nil {
-				slog.Error("HTTP server error", "err", err)
-				os.Exit(1)
-			}
-		}()
-
-		if config.UnixBindEnabled {
-			// Bind unix socket in another socket
-			unixServer := api.NewUnixSocketServer(iface)
-			if unixServer == nil {
-				slog.Warn("OS does not support unix sockets, not starting socket server")
-			} else {
-				// Ensure the socket directory exists
-				socketDir := filepath.Dir(config.UnixBind)
-				if err := os.MkdirAll(socketDir, 0755); err != nil {
-					slog.Error("Error creating Unix socket directory", "err", err)
-					os.Exit(1)
-				}
-
-				slog.Info("Starting Unix socket server", "bind", config.UnixBind)
-				if err := unixServer.Start(config.UnixBind); err != nil {
-					slog.Error("Unix socket server error", "err", err)
-					os.Exit(1)
-				}
-				return
-			}
-		}
-
-		// Wait indefinitely if only HTTP server is running
-		select {}
+		cli.Serve.cmdServe(config, iface, &cli)
 	}
 }

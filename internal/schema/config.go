@@ -10,6 +10,8 @@ import (
 
 // Config stores the configuration for the server. Internal keys are not exposed as JSON/YAML.
 type Config struct {
+	// If set, then enable the HTTP server
+	HTTPBindEnabled bool `json:"http_bind_enabled" yaml:"http_bind_enabled"`
 	// binds the HTTP API backend to this path. defaults to localhost:8000
 	HTTPBind string `json:"http_bind" yaml:"http_bind"`
 	// If set, then enable the local unix socket
@@ -55,7 +57,7 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	// Set default values if not provided
-	if config.HTTPBind == "" {
+	if config.HTTPBindEnabled && config.HTTPBind == "" {
 		config.HTTPBind = "localhost:8000"
 	}
 
