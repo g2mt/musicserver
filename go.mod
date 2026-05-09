@@ -3,6 +3,7 @@ module musicserver
 go 1.26.1
 
 require (
+	github.com/alecthomas/kong v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
