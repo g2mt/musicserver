@@ -30,25 +30,7 @@ Alternatively, the API can be mounted as a UNIX endpoint for administrative purp
 }
 ```
 
-Under the UNIX endpoint, the response will be transferred as a stream of bytes with no content type information.
-
-> [!NOTE]
-> The Go module should contain the following files:
->
->   - `http.go`: router code with:
->     - `NewHTTPRouter(Interface)`
->     - `HTTPRouter.Serve(w http.ResponseWriter, r *http.Request)`
->   - `unix.go`: UNIX socket handling code containing:
->     - a struct `IPCServer` with methods:
->       - `NewIPCServer(Interface)`
->       - `IPCServer.Start(path)`: binds to the path and processes requests, blocking the current running thread
->       - `IPCServer.Stop()`: stops the socket server, may be used in another goroutine
->   - `interface_*.go`: common interface code with:
->     - struct Interface with methods for handling each request
->       - `NewInterface(sqlite database connection)`
->       - `Interface.InitDb`: initializes every relevant table
->       - additional methods for handling each API request: `getTracks`, `getTrackById(id)`,...
->   - `external.go`: external interface code with methods for handling each API request involving external resources
+Under the IPC endpoint, the response will be transferred as a stream of bytes with no content type information.
 
 ## General
 

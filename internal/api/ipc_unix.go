@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -100,6 +101,7 @@ func (s *IPCServer) handleConnection(conn net.Conn) {
 			// Invalid JSON, skip this line
 			continue
 		}
+		slog.Debug("Received IPC request", "request", req)
 
 		reader, _, err := s.iface.handleRequest(req.Path, req.Method, req.Params)
 		for {
@@ -125,7 +127,7 @@ func (s *IPCServer) handleConnection(conn net.Conn) {
 
 func (iface *Interface) WriteToIPC(path, method string, params map[string]string) ([]byte, error) {
 	// Connect to the unix socket
-	conn, err := net.Dial("unix", path)
+	conn, err := net.Dial("unix", iface.config.IPCBind)
 	if err != nil {
 		return nil, err
 	}

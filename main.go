@@ -35,7 +35,7 @@ type ServeCmd struct {
 	FrontendDir   string `kong:"help='custom frontend directory path (debug mode only)'"`
 }
 
-func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CLI) {
+func (s *ServeCmd) exec(config *schema.Config, iface *api.Interface, cli *CLI) {
 	if s.DebugExternal {
 		config.DebugExternal = true
 	}
@@ -131,17 +131,13 @@ func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CL
 }
 
 type DoCmd struct {
-	Path   string            `kong:"optional,help='path for ipc call'"`
+	Path   string            `kong:"arg,help='path for ipc call'"`
 	Method string            `kong:"arg,help='method for ipc call'"`
 	Params map[string]string `kong:"arg,optional,help='params for ipc call'"`
 }
 
-func (d *DoCmd) cmdDo(config *schema.Config, iface *api.Interface) {
-	path := d.Path
-	if path == "" {
-		path = config.IPCBind
-	}
-	result, err := iface.WriteToIPC(path, d.Method, d.Params)
+func (d *DoCmd) exec(config *schema.Config, iface *api.Interface) {
+	result, err := iface.WriteToIPC(d.Path, d.Method, d.Params)
 	if err != nil {
 		slog.Error("WriteToIPC error", "err", err)
 		os.Exit(1)
@@ -191,9 +187,9 @@ func main() {
 	defer iface.Close()
 
 	switch ctx.Command() {
-	case "do <method>":
-		cli.Do.cmdDo(config, iface)
+	case "do <path> <method>":
+		cli.Do.exec(config, iface)
 	default:
-		cli.Serve.cmdServe(config, iface, &cli)
+		cli.Serve.exec(config, iface, &cli)
 	}
 }
