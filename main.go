@@ -53,6 +53,8 @@ func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CL
 		}
 	}()
 
+	started := false
+
 	if config.HTTPBindEnabled {
 		// Bind http server to http_bind
 		httpRouter := api.NewHTTPRouter(iface)
@@ -92,6 +94,8 @@ func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CL
 				os.Exit(1)
 			}
 		}()
+
+		started = true
 	}
 
 	if config.IPCBindEnabled {
@@ -114,6 +118,12 @@ func (s *ServeCmd) cmdServe(config *schema.Config, iface *api.Interface, cli *CL
 			}
 			return
 		}
+		started = true
+	}
+
+	if !started {
+		slog.Error("No servers started")
+		os.Exit(1)
 	}
 
 	// Wait indefinitely for other threads
