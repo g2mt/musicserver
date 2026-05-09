@@ -18,6 +18,11 @@ declare global {
 }
 
 export function getTrackCoverFromPath(path: string) {
+  if (!path.startsWith("/")) {
+    // force the path to be treated as the track-cover url's path rather than
+    // a hostname
+    path = "/" + path;
+  }
   return `track-cover://${path}`;
 }
 

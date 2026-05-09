@@ -25,6 +25,8 @@ import java.util.function.Consumer;
 
 public class MainActivity extends Activity {
 	private static final String TAG = "[msxrv] MainActivity";
+	private static final String TRACK_COVER_SCHEME = "track-cover://";
+
 	static {
 		System.loadLibrary("musicserver");
 		System.loadLibrary("musicserverbind");
@@ -52,6 +54,8 @@ public class MainActivity extends Activity {
 			finishAndRemoveTask();
 			return;
 		}
+
+		// WebView.setWebContentsDebuggingEnabled(true);
 
 		if (getActionBar() != null) {
 			getActionBar().hide();
@@ -98,10 +102,9 @@ public class MainActivity extends Activity {
 			@Override
 			public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
 				String url = request.getUrl().toString();
-				if (url.startsWith("track-cover://")) {
+				if (url.startsWith(TRACK_COVER_SCHEME)) {
 					String filepath = request.getUrl().getPath();
-					// Path is now relative to musicDir; resolve to absolute
-					String absPath = musicDir.resolve(filepath.substring(1)).toString();
+					String absPath = musicDir.resolve("./"+filepath).toString();
 					String[] outContentType = new String[1];
 					byte[] data = TrackUtils.getTrackCover(absPath, outContentType);
 					String mimeType = outContentType[0] != null ? outContentType[0] : "image/png";

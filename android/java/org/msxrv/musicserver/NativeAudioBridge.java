@@ -153,13 +153,9 @@ public class NativeAudioBridge {
 			src = src.substring(MUSIC_SCHEME.length());
 		}
 
-		src = BridgeUtils.decodeURI(src);
-
+		src = "./" + BridgeUtils.decodeURI(src);
 		Path p = Paths.get(src).normalize();
-		if (!p.isAbsolute()) {
-			p = activity.getMusicDir().resolve(p);
-		}
-		return p;
+		return activity.getMusicDir().resolve(p);
 	}
 
 	// ### Media session
