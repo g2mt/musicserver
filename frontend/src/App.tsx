@@ -164,13 +164,19 @@ export function App() {
       c.setSearchQuery({ q: newQ, limit: newLimit });
     }
   }, [locationHash]);
-  c.interactiveSetSearchQuery = (text: string, searchGroup: string = "after|before") => {
+  c.interactiveSetSearchQuery = (text: string, searchGroup?: string) => {
     c.oldSearchQuery.current = c.searchQuery;
     c.setSearchQuery((old) => ({
       ...old,
-      q: old.q
-        .replace(new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`), ` ${text}`)
-        .trim(),
+      q:
+        searchGroup === undefined
+          ? text
+          : old.q
+              .replace(
+                new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`),
+                ` ${text}`,
+              )
+              .trim(),
     }));
     c.scrollToTop();
   };
