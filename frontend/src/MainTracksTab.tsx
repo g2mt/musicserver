@@ -10,7 +10,7 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { type RefObject, useContext, useRef } from "react";
+import { type RefObject, useContext } from "react";
 import { toast } from "react-toastify";
 
 import { AppContext } from "src/AppState";
@@ -37,19 +37,6 @@ export function MainTracksTab({
   const c = useContext(AppContext)!;
   const firstTrack = tracks[0];
   const lastTrack = tracks[tracks.length - 1];
-  const elRef = useRef<HTMLDivElement | null>(null);
-
-  const updateQuery = (text: string, searchGroup: string = "after|before") => {
-    c.oldSearchQuery.current = c.searchQuery;
-    c.setSearchQuery((old) => ({
-      ...old,
-      q: old.q
-        .replace(new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`), ` ${text}`)
-        .trim(),
-    }));
-    elRef.current?.scrollIntoView({ block: "start" });
-  };
-
   const handleLimitChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
     const newLimit = Number(e.target.value);
@@ -62,7 +49,7 @@ export function MainTracksTab({
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
     const newSort = e.target.value;
-    updateQuery(newSort ? `sort:${newSort}` : "", "sort");
+    c.interactiveSetSearchQuery(newSort ? `sort:${newSort}` : "", "sort");
   };
 
   const handlePlayAll = () => {
@@ -123,7 +110,7 @@ export function MainTracksTab({
         <button
           className="btn"
           onClick={() =>
-            firstTrack && updateQuery(`before:${firstTrack.short_id}`)
+            firstTrack && c.interactiveSetSearchQuery(`before:${firstTrack.short_id}`)
           }
           disabled={!firstTrack}
           title="Previous"
@@ -134,7 +121,7 @@ export function MainTracksTab({
         <button
           className="btn"
           onClick={() =>
-            lastTrack && updateQuery(`after:${lastTrack.short_id}`)
+            lastTrack && c.interactiveSetSearchQuery(`after:${lastTrack.short_id}`)
           }
           disabled={!lastTrack}
           title="Next"
@@ -202,7 +189,7 @@ export function MainTracksTab({
   );
 
   return (
-    <div className="main-tracks-tab" ref={elRef}>
+    <div className="main-tracks-tab">
       {controls}
       <TrackList
         tracks={tracks}

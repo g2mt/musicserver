@@ -164,6 +164,16 @@ export function App() {
       c.setSearchQuery({ q: newQ, limit: newLimit });
     }
   }, [locationHash]);
+  c.interactiveSetSearchQuery = (text: string, searchGroup: string = "after|before") => {
+    c.oldSearchQuery.current = c.searchQuery;
+    c.setSearchQuery((old) => ({
+      ...old,
+      q: old.q
+        .replace(new RegExp(`\\s*((\\b(${searchGroup}):[^ ]+)|$)`), ` ${text}`)
+        .trim(),
+    }));
+    c.scrollToTop();
+  };
   [c.resultSort, c.setResultSort] = useState("");
   [c.resultDesc, c.setResultDesc] = useState(false);
   [c.resultLimit, c.setResultLimit] = useState(-1);
