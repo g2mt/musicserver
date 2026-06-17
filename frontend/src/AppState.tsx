@@ -19,6 +19,11 @@ export const SearchQuerySchema = z.object({
 
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
 
+export interface Bookmark {
+  name: string;
+  query: string;
+}
+
 export interface ServerConfig {
   version: string;
   config: {
@@ -46,11 +51,15 @@ export const AppStateSchema = z.object({
   showTracksListOnTabChange: z.boolean().default(false),
   targetNormalizationDbs: z.number().default(0),
   maxNormalizationDbs: z.number().default(8),
+  bookmarks: z.array(z.object({
+    name: z.string(),
+    query: z.string(),
+  })).default([]),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
 
-export type SelectedLeftTab = "tracks" | "settings" | "files";
+export type SelectedLeftTab = "tracks" | "settings" | "files" | "bookmarks";
 
 // Full state of the App
 export interface AppState extends AppStateData {
@@ -109,6 +118,10 @@ export interface AppState extends AppStateData {
   setQueueCollapsed: Dispatch<SetStateAction<boolean>>;
   setShowOnlyQueueAfterEnqueue: Dispatch<SetStateAction<boolean>>;
 
+  // bookmarks
+  bookmarks: Bookmark[];
+  setBookmarks: Dispatch<SetStateAction<Bookmark[]>>;
+
   // file browser path
   fbPath: string[];
   setFbPath: Dispatch<SetStateAction<string[]>>;
@@ -147,6 +160,8 @@ export function mergeConfig(dest: AppState) {
         dest.setTargetNormalizationDbs(config.targetNormalizationDbs);
       if (config.maxNormalizationDbs !== undefined)
         dest.setMaxNormalizationDbs(config.maxNormalizationDbs);
+      if (config.bookmarks !== undefined)
+        dest.setBookmarks(config.bookmarks);
     } catch (e: any) {
       toast.error(
         <p>
@@ -170,6 +185,7 @@ export function saveConfig(state: AppState) {
     showTracksListOnTabChange: state.showTracksListOnTabChange,
     targetNormalizationDbs: state.targetNormalizationDbs,
     maxNormalizationDbs: state.maxNormalizationDbs,
+    bookmarks: state.bookmarks,
   };
   Settings.setItem(CONFIG_KEY, JSON.stringify(config));
 }

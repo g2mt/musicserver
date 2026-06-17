@@ -4,6 +4,7 @@ import {
   faMinus,
   faMusic,
   faPlus,
+  faStar,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
@@ -12,12 +13,14 @@ import { ToastContainer, toast } from "react-toastify";
 import {
   AppContext,
   type AppState,
+  type Bookmark,
   type SearchQuery,
   mergeConfig,
   saveConfig,
 } from "src/AppState";
 import { ConfirmBoxContext } from "src/ConfirmBox";
 import { ContextMenu } from "src/ContextMenu";
+import { BookmarksTab } from "src/BookmarksTab";
 import FileBrowserTab from "src/FileBrowserTab";
 import { MainTracksTab } from "src/MainTracksTab";
 import { MusicPlayer } from "src/MusicPlayer";
@@ -121,6 +124,7 @@ export function App() {
   [c.fbPath, c.setFbPath] = useState<string[]>([]);
   [c.targetNormalizationDbs, c.setTargetNormalizationDbs] = useState<number>(0);
   [c.maxNormalizationDbs, c.setMaxNormalizationDbs] = useState<number>(0);
+  [c.bookmarks, c.setBookmarks] = useState<Bookmark[]>([]);
 
   useEffect(() => {
     document.body.classList.toggle("dark-mode", c.darkMode);
@@ -321,7 +325,7 @@ export function App() {
   };
 
   // Left/right sides
-  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files">(
+  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files" | "bookmarks">(
     "tracks",
   );
   useEffect(() => {
@@ -514,6 +518,13 @@ export function App() {
                 <FontAwesomeIcon icon={faMusic} />
               </button>
               <button
+                className={`tab-btn ${c.leftTab === "bookmarks" ? "active" : ""}`}
+                onClick={() => c.setLeftTab("bookmarks")}
+                title="Bookmarks"
+              >
+                <FontAwesomeIcon icon={faStar} />
+              </button>
+              <button
                 className={`tab-btn ${c.leftTab === "files" ? "active" : ""}`}
                 onClick={() => c.setLeftTab("files")}
                 title="Files"
@@ -553,6 +564,7 @@ export function App() {
                     <div key={b.key}>{b.el}</div>
                   </ConfirmBoxContext>
                 ))}
+                {c.leftTab === "bookmarks" && <BookmarksTab />}
                 {c.leftTab === "tracks" && (
                   <MainTracksTab
                     tracks={fullTracks}
