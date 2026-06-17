@@ -67,7 +67,10 @@ install(TARGETS ebur128
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 #### pkg-config
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libebur128.pc.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/libebur128.pc @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libebur128.pc"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+option(INSTALL_PKGCONFIG "Install pkg-config file" ON)
+if(INSTALL_PKGCONFIG)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libebur128.pc.cmake
+                 ${CMAKE_CURRENT_BINARY_DIR}/libebur128.pc @ONLY)
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libebur128.pc"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+endif()
