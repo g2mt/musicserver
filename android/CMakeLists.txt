@@ -62,6 +62,9 @@ add_custom_command(
   COMMENT "Generating keystore"
 )
 
+### Frontend — built once for all architectures
+add_subdirectory(${MS_DIR}/frontend ${CMAKE_CURRENT_BINARY_DIR}/frontend)
+
 set(NATIVE_LIB_TARGETS "")
 foreach(ARCH ${TARGET_ARCHS})
   set(AN_SDK_EABI "")
@@ -87,6 +90,7 @@ foreach(ARCH ${TARGET_ARCHS})
     COMMAND ${CMAKE_COMMAND} 
       --install ${MS_DIR}/build/${ARCH}-android 
       --prefix ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS frontend_android
     COMMENT "Building and installing native libraries for ${ARCH}"
     WORKING_DIRECTORY ${MS_DIR}
   )
