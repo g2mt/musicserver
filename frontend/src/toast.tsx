@@ -7,13 +7,28 @@ interface ToastMethods {
   info(content: ToastContent): void;
 }
 
+declare global {
+  interface Native {
+    showToast(level: string, content: string): void;
+  }
+  interface Window {
+    _native?: Native;
+  }
+}
+
 let toast: ToastMethods;
 let createToastContainer: () => React.ReactNode;
 
 if (import.meta.env.USE_NATIVE_TOAST) {
   function method(level: string) {
     return (content: ToastContent) => {
-      console.log(`[toast:${level}]`, content);
+      if (!content)
+        return;
+      if (window._native) {
+        window._native.showToast(level, content.toString());
+      } else {
+        console.log(`[toast:${level}]`, content);
+      }
     };
   }
 

@@ -207,8 +207,19 @@ public class NativeBridge {
 	// Javascript interface
 
 	@JavascriptInterface
+	public void showToast(String level, String content) {
+		mainHandler.post(() -> {
+			int duration = level.equals("success") || level.equals("info")
+				? Toast.LENGTH_SHORT : Toast.LENGTH_LONG;
+			Toast.makeText(activity, content, duration).show();
+		});
+	}
+
+	@JavascriptInterface
 	public void scanTracks(String path, boolean force) {
-		Toast.makeText(activity, "Scan tracks started...", Toast.LENGTH_SHORT).show();
+		mainHandler.post(() -> {
+			Toast.makeText(activity, "Scan tracks started...", Toast.LENGTH_SHORT).show();
+		});
 		String musicDir = ((MainActivity) activity).getMusicDir().toString();
 		Intent intent = new Intent(activity, ScanTracksService.class);
 		intent.putExtra(ScanTracksService.EXTRA_MUSIC_DIR, musicDir);
