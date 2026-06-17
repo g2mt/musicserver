@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { toast } from "react-toastify";
+import { toast } from "src/toast";
 
 import type { TrackData } from "src/TrackData";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";

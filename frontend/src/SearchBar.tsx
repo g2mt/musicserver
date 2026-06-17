@@ -14,7 +14,7 @@ import {
   useContext,
   useState,
 } from "react";
-import { toast } from "react-toastify";
+import { toast } from "src/toast";
 
 import { AppContext, type AppState } from "src/AppState";
 import ConfirmBox from "src/ConfirmBox";

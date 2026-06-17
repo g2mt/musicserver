@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast, createToastContainer } from "src/toast";
 
 import {
   AppContext,
@@ -36,7 +36,6 @@ import { type SerializedAudioState, useAudio } from "src/audio/AudioState";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
 
 import "./App.css";
-import "react-toastify/dist/ReactToastify.css";
 
 declare global {
   interface NativeAudioBridge {
@@ -488,11 +487,7 @@ export function App() {
 
   return (
     <AppContext value={c}>
-      <ToastContainer
-        className="toast-container"
-        position="bottom-right"
-        theme="dark"
-      />
+      {createToastContainer()}
       <ContextMenu />
       <SearchSuggestions
         searchInput={searchInput}

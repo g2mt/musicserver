@@ -5,7 +5,7 @@ import {
   createContext,
 } from "react";
 import type React from "react";
-import { toast } from "react-toastify";
+import { toast } from "src/toast";
 import * as z from "zod";
 
 import { type TrackQueue } from "src/TrackQueue";

@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useMemo, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "src/toast";
 
 import { AppContext, saveConfig } from "src/AppState";
 import ProgressTable from "src/ProgressTable";
