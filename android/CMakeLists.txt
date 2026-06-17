@@ -49,10 +49,10 @@ configure_file(
 file(GLOB_RECURSE PKG_SRCS "java/*.java")
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
+  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/keystore.jks
   COMMAND keytool 
     -genkeypair 
-    -keystore ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks 
+    -keystore ${CMAKE_CURRENT_SOURCE_DIR}/keystore.jks 
     -alias androidkey
     -validity 10000 
     -keyalg RSA 
@@ -148,7 +148,7 @@ add_custom_command(
     -f 4 ${CMAKE_CURRENT_BINARY_DIR}/resource_final.apk
     ${CMAKE_CURRENT_BINARY_DIR}/${PKG_NAME}.unsigned.apk
   COMMAND "${AN_BUILD_TOOLS}/apksigner" sign 
-    --ks ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
+    --ks ${CMAKE_CURRENT_SOURCE_DIR}/keystore.jks
     --ks-key-alias androidkey 
     --ks-pass pass:android
     --key-pass pass:android 
@@ -157,7 +157,7 @@ add_custom_command(
   DEPENDS
     ${CMAKE_CURRENT_BINARY_DIR}/resource.apk
     ${CMAKE_CURRENT_BINARY_DIR}/classes.dex
-    ${CMAKE_CURRENT_BINARY_DIR}/keystore.jks
+    ${CMAKE_CURRENT_SOURCE_DIR}/keystore.jks
     ${NATIVE_LIB_TARGETS}
     FORCE
   COMMENT "Packaging APK"
