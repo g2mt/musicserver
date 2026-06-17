@@ -253,16 +253,33 @@ public class NativeAudioBridge {
 	private class Queue {
 		public ArrayList<Path> paths = new ArrayList<>();
 		public int index = -1;
+		public String repeat = null; // null, "track", or "queue"
 
 		public void next() {
-			if (index < paths.size() - 1) {
+			final int size = paths.size();
+			if (size == 0) return;
+
+			if (repeat != null && repeat.equals("track")) {
+				loadTrack();
+			} else if (repeat != null && repeat.equals("queue") && index >= size - 1) {
+				index = 0;
+				loadTrack();
+			} else if (index < size - 1) {
 				index++;
 				loadTrack();
 			}
 		}
 
 		public void prev() {
-			if (index > 0) {
+			final int size = paths.size();
+			if (size == 0) return;
+
+			if (repeat != null && repeat.equals("track")) {
+				loadTrack();
+			} else if (repeat != null && repeat.equals("queue") && index <= 0) {
+				index = size - 1;
+				loadTrack();
+			} else if (index > 0) {
 				index--;
 				loadTrack();
 			}
@@ -532,12 +549,15 @@ public class NativeAudioBridge {
 			JSONObject obj = new JSONObject(serialized);
 			JSONArray pathsArr = obj.getJSONArray("paths");
 			int index = obj.optInt("index", -1);
+			String repeat = obj.optString("repeat", null);
+			if (repeat == null || repeat.isEmpty()) repeat = null;
 
 			Queue newQueue = new Queue();
 			for (int i = 0; i < pathsArr.length(); i++) {
 				newQueue.paths.add(resolveMusicPath(pathsArr.getString(i)));
 			}
 			newQueue.index = index;
+			newQueue.repeat = repeat;
 			this.queue = newQueue;
 		} catch (JSONException e) {
 			Log.e(TAG, "Failed to parse track queue", e);
@@ -566,6 +586,7 @@ public class NativeAudioBridge {
 
 			JSONObject queueObj = new JSONObject();
 			queueObj.put("index", queue != null ? queue.index : null);
+			queueObj.put("repeat", queue != null ? queue.repeat : JSONObject.NULL);
 
 			result.put("audio", audioObj);
 			result.put("queue", queueObj);

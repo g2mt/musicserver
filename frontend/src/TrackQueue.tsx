@@ -15,6 +15,7 @@ declare global {
 
 export interface SerializedTrackQueue {
   index: number | null;
+  repeat: "track" | "queue" | null;
 }
 
 export interface TrackQueue {
@@ -48,6 +49,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
         JSON.stringify({
           paths: tracks.map((track) => track.path),
           index,
+          repeat,
         }),
       );
     };
@@ -125,6 +127,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     setRepeat,
     loadSerializedState: (state: SerializedTrackQueue) => {
       setIndex(state.index);
+      setRepeat(state.repeat);
     },
   };
 }
