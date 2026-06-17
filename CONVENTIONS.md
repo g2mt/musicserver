@@ -39,7 +39,12 @@ if diff := cmp.Diff(fetched, *track); diff != "" {
 - Use functional components for React.
 - Each element should be in its own file. Source files storing element definition shall be in the format "TitleCase.tsx".
 
-- Use the `react-toastify` library for showing errors.
+- Use the `src/toast` module for showing notifications (toast.success, toast.error, toast.warn, toast.info). These functions have the same API as the `react-toastify` module:
+
+```ts
+toast.error("Sync failed");
+toast.info(<>Download for <b>{url}</b> started</>);
+```
 
 - Use the custom context menu element instead of the native one by importing the `./ContextMenu` file and using `toggleContextMenu`:
 ```ts
