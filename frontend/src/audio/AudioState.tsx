@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, RefObject, SetStateAction } from "react";
-import { toast } from "src/toast";
 
 import type { TrackData } from "src/TrackData";
 import { fetchAPI, getFilePath, getTrackFileFromId } from "src/apiServer";
 import { apiAudio, usesAudioPath } from "src/audio/apiAudio";
+import { toast } from "src/toast";
 
 export interface SerializedAudioState {
   path: string; // get the track using the `/track/:by-path` endpoint
@@ -122,7 +122,7 @@ export function useAudio({
       } else {
         try {
           loudness = await fetchAPI(`/track/${currentTrack.id}/loudness`);
-        } catch(err) {
+        } catch (err) {
           toast.error(`Failed to get track loudness: ${err}`);
           setAmplification(0);
           return;

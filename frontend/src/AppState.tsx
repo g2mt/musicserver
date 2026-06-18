@@ -5,12 +5,12 @@ import {
   createContext,
 } from "react";
 import type React from "react";
-import { toast } from "src/toast";
 import * as z from "zod";
 
 import { type TrackQueue } from "src/TrackQueue";
 import type { AudioState } from "src/audio/AudioState";
 import { Settings } from "src/settings";
+import { toast } from "src/toast";
 
 export const SearchQuerySchema = z.object({
   q: z.string().default(""),
@@ -51,10 +51,14 @@ export const AppStateSchema = z.object({
   showTracksListOnTabChange: z.boolean().default(false),
   targetNormalizationDbs: z.number().default(0),
   maxNormalizationDbs: z.number().default(8),
-  bookmarks: z.array(z.object({
-    name: z.string(),
-    query: z.string(),
-  })).default([]),
+  bookmarks: z
+    .array(
+      z.object({
+        name: z.string(),
+        query: z.string(),
+      }),
+    )
+    .default([]),
 });
 
 export type AppStateData = z.infer<typeof AppStateSchema>;
@@ -161,8 +165,7 @@ export function mergeConfig(dest: AppState) {
         dest.setTargetNormalizationDbs(config.targetNormalizationDbs);
       if (config.maxNormalizationDbs !== undefined)
         dest.setMaxNormalizationDbs(config.maxNormalizationDbs);
-      if (config.bookmarks !== undefined)
-        dest.setBookmarks(config.bookmarks);
+      if (config.bookmarks !== undefined) dest.setBookmarks(config.bookmarks);
     } catch (e: any) {
       toast.error(
         <p>

@@ -1,10 +1,15 @@
-import { faPencil, faPlus, faTimes, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPencil,
+  faPlus,
+  faTimes,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext, type Bookmark, saveConfig } from "src/AppState";
-import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
 import ConfirmBox from "src/ConfirmBox";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
 
 import "./BookmarksTab.css";
 
@@ -13,7 +18,13 @@ interface BookmarkRowProps {
   index: number;
 }
 
-function RenameBookmarkBox({ name, onAccept }: { name: string; onAccept: (newName: string) => void }) {
+function RenameBookmarkBox({
+  name,
+  onAccept,
+}: {
+  name: string;
+  onAccept: (newName: string) => void;
+}) {
   const [newName, setNewName] = useState(name);
   return (
     <ConfirmBox onAccept={() => onAccept(newName)}>
@@ -23,7 +34,7 @@ function RenameBookmarkBox({ name, onAccept }: { name: string; onAccept: (newNam
         <input
           type="text"
           value={newName}
-          onChange={e => setNewName(e.target.value)}
+          onChange={(e) => setNewName(e.target.value)}
           autoFocus
         />
       </label>
@@ -65,9 +76,10 @@ function BookmarkRow({ bookmark, index }: BookmarkRowProps) {
   return (
     <li
       className="bookmark-item"
-      onContextMenu={e => {
+      onContextMenu={(e) => {
         e.preventDefault();
-        toggleContextMenu(e.currentTarget, (
+        toggleContextMenu(
+          e.currentTarget,
           <>
             <ContextMenuItem onClick={handleRename} icon={faPencil}>
               Rename
@@ -75,13 +87,13 @@ function BookmarkRow({ bookmark, index }: BookmarkRowProps) {
             <ContextMenuItem onClick={handleDelete} icon={faTrash}>
               Delete
             </ContextMenuItem>
-          </>
-        ));
+          </>,
+        );
       }}
     >
       <button
         className="bookmark-content"
-        onClick={e => {
+        onClick={(e) => {
           e.preventDefault();
           c.interactiveSetSearchQuery(bookmark.query);
           c.setLeftTab("tracks");
@@ -133,11 +145,7 @@ export function BookmarksTab() {
           value={bookmarkName}
           onChange={(e) => setBookmarkName(e.target.value)}
         />
-        <button
-          className="btn"
-          onClick={handleAdd}
-          disabled={!c.searchQuery.q}
-        >
+        <button className="btn" onClick={handleAdd} disabled={!c.searchQuery.q}>
           <FontAwesomeIcon icon={faPlus} /> Add
         </button>
       </div>

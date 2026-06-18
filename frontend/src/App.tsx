@@ -8,7 +8,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
-import { toast, createToastContainer } from "src/toast";
 
 import {
   AppContext,
@@ -18,9 +17,9 @@ import {
   mergeConfig,
   saveConfig,
 } from "src/AppState";
+import { BookmarksTab } from "src/BookmarksTab";
 import { ConfirmBoxContext } from "src/ConfirmBox";
 import { ContextMenu } from "src/ContextMenu";
-import { BookmarksTab } from "src/BookmarksTab";
 import FileBrowserTab from "src/FileBrowserTab";
 import { MainTracksTab } from "src/MainTracksTab";
 import { MusicPlayer } from "src/MusicPlayer";
@@ -34,6 +33,7 @@ import { type SerializedTrackQueue, useTrackQueue } from "src/TrackQueue";
 import { fetchAPI } from "src/apiServer";
 import { type SerializedAudioState, useAudio } from "src/audio/AudioState";
 import { COLLAPSE_AT_WIDTH, useWindowWidth } from "src/responsive";
+import { createToastContainer, toast } from "src/toast";
 
 import "./App.css";
 
@@ -317,23 +317,18 @@ export function App() {
   let confirmBoxesCounter = useRef(0);
   c.addConfirmBox = (confirmBox: React.ReactNode) => {
     const index = confirmBoxesCounter.current;
-    setConfirmBoxes([
-      { key: index, el: confirmBox },
-      ...confirmBoxes,
-    ]);
+    setConfirmBoxes([{ key: index, el: confirmBox }, ...confirmBoxes]);
     confirmBoxesCounter.current += 1;
     return index;
   };
   c.removeConfirmBox = (index: number) => {
-    setConfirmBoxes((list) =>
-      list.filter((data) => data.key !== index),
-    );
+    setConfirmBoxes((list) => list.filter((data) => data.key !== index));
   };
 
   // Left/right sides
-  [c.leftTab, c.setLeftTab] = useState<"tracks" | "settings" | "files" | "bookmarks">(
-    "tracks",
-  );
+  [c.leftTab, c.setLeftTab] = useState<
+    "tracks" | "settings" | "files" | "bookmarks"
+  >("tracks");
   useEffect(() => {
     if (c.showTracksListOnTabChange) {
       c.setTracksListCollapsed(false);
@@ -554,9 +549,7 @@ export function App() {
             {!c.tracksListCollapsed && (
               <>
                 {confirmBoxes.map((b) => (
-                  <ConfirmBoxContext
-                    value={{ index: b.key }}
-                  >
+                  <ConfirmBoxContext value={{ index: b.key }}>
                     <div key={b.key}>{b.el}</div>
                   </ConfirmBoxContext>
                 ))}

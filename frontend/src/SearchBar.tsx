@@ -14,13 +14,13 @@ import {
   useContext,
   useState,
 } from "react";
-import { toast } from "src/toast";
 
 import { AppContext, type AppState } from "src/AppState";
 import ConfirmBox from "src/ConfirmBox";
 import type { TrackData } from "src/TrackData";
 import { TrackList } from "src/TrackList";
 import { fetchAPI } from "src/apiServer";
+import { toast } from "src/toast";
 
 import "./SearchBar.css";
 

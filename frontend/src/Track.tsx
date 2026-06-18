@@ -10,7 +10,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
-import { toast } from "src/toast";
 
 import { AppContext } from "src/AppState";
 import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
@@ -20,6 +19,7 @@ import {
   getTrackCoverFromId,
   getTrackCoverFromPath,
 } from "src/apiServer";
+import { toast } from "src/toast";
 
 import "./Track.css";
 

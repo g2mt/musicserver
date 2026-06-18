@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { createContext, useContext } from "react";
 
 import { AppContext } from "src/AppState";
+
 import "./ConfirmBox.css";
 
 interface ConfirmBoxState {

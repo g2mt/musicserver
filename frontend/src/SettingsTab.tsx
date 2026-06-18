@@ -8,11 +8,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useMemo, useState } from "react";
-import { toast } from "src/toast";
 
 import { AppContext, saveConfig } from "src/AppState";
 import ProgressTable from "src/ProgressTable";
 import { rescanFiles } from "src/apiServer";
+import { toast } from "src/toast";
 
 import "./SettingsTab.css";
 
@@ -291,9 +291,7 @@ export function SettingsTab() {
               />
             </div>
             <div>
-              <label htmlFor="setting-sr-ipc-enabled">
-                IPC Enabled:
-              </label>
+              <label htmlFor="setting-sr-ipc-enabled">IPC Enabled:</label>
               <input
                 type="checkbox"
                 id="setting-sr-ipc-enabled"

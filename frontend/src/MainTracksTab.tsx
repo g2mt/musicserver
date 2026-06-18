@@ -11,7 +11,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type RefObject, useContext } from "react";
-import { toast } from "src/toast";
 
 import { AppContext } from "src/AppState";
 import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
@@ -19,6 +18,7 @@ import { Option, Select } from "src/Select";
 import type { TrackData, TrackListResult } from "src/TrackData";
 import { TrackList } from "src/TrackList";
 import { fetchAPI } from "src/apiServer";
+import { toast } from "src/toast";
 import { shuffled } from "src/utils";
 
 import "./MainTracksTab.css";
@@ -110,7 +110,8 @@ export function MainTracksTab({
         <button
           className="btn"
           onClick={() =>
-            firstTrack && c.interactiveSetSearchQuery(`before:${firstTrack.short_id}`)
+            firstTrack &&
+            c.interactiveSetSearchQuery(`before:${firstTrack.short_id}`)
           }
           disabled={!firstTrack}
           title="Previous"
@@ -121,7 +122,8 @@ export function MainTracksTab({
         <button
           className="btn"
           onClick={() =>
-            lastTrack && c.interactiveSetSearchQuery(`after:${lastTrack.short_id}`)
+            lastTrack &&
+            c.interactiveSetSearchQuery(`after:${lastTrack.short_id}`)
           }
           disabled={!lastTrack}
           title="Next"

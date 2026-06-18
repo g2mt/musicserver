@@ -22,8 +22,7 @@ let createToastContainer: () => React.ReactNode;
 if (import.meta.env.USE_NATIVE_TOAST) {
   function method(level: string) {
     return (content: ToastContent) => {
-      if (!content)
-        return;
+      if (!content) return;
       if (window._native) {
         window._native.showToast(level, content.toString());
       } else {
