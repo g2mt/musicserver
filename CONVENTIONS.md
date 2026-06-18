@@ -73,9 +73,32 @@ import { Select, Option } from "./Select";
 </Select>
 ```
 
+- For confirmation, input dialog boxes, use the AppContext's `addConfirmBox`
+```ts
+import { AppContext } from "src/AppState";
+import ConfirmBox from "src/ConfirmBox";
+
+const c = useContext(AppContext)!;
+
+function CustomConfirmBox() {
+  return (<ConfirmBox>...</ConfirmBox>);
+}
+
+c.addConfirmBox(<CustomConfirmBox />);
+```
+
 ### CSS
 
-- Use modern CSS with nested selectors.
+- Use modern CSS with nested selectors:
+
+```css
+body {
+  main {
+    ...
+  }
+}
+```
+
 - Use color variables specified in common.css.
 - Animations and transitions should not be used.
 - Rather than specifying a specific padding/margin/spacing, use the spacing variable found in common.css (`var(--s1)` to `var(--s5)`):
