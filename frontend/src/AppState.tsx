@@ -128,7 +128,8 @@ export interface AppState extends AppStateData {
 
   // misc ui functions
   scrollToTop: () => void;
-  addConfirmBox: (confirmBox: React.ReactNode) => void;
+  addConfirmBox: (confirmBox: React.ReactNode) => number;
+  removeConfirmBox: (index: number) => void;
 }
 
 export const AppContext = createContext<AppState | null>(null);

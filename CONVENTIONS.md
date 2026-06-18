@@ -73,7 +73,7 @@ import { Select, Option } from "./Select";
 </Select>
 ```
 
-- For confirmation, input dialog boxes, use the AppContext's `addConfirmBox`
+- For confirmation, input dialog boxes, use the AppContext's `addConfirmBox` and `removeConfirmBox`.
 ```ts
 import { AppContext } from "src/AppState";
 import ConfirmBox from "src/ConfirmBox";
@@ -84,7 +84,9 @@ function CustomConfirmBox() {
   return (<ConfirmBox>...</ConfirmBox>);
 }
 
-c.addConfirmBox(<CustomConfirmBox />);
+const index = c.addConfirmBox(<CustomConfirmBox />);
+// To remove programmatically:
+// c.removeConfirmBox(index);
 ```
 
 ### CSS
@@ -119,4 +121,4 @@ body {
 
 - This application uses API 33 functionality.
 - For **Java code**: use tabs for indenting.
-- Use ONLY the native Java `android` library. Libraries like `androidx`, etc. are unavailable.
+- Use ONLY the native Java `android` library. Libraries like `androindex`, etc. are unavailable.

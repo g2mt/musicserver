@@ -2,14 +2,15 @@ import { faCircleQuestion } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { createContext, useContext } from "react";
 
+import { AppContext } from "src/AppState";
 import "./ConfirmBox.css";
 
 interface ConfirmBoxState {
-  remove: () => void;
+  index: number;
 }
 
 export const ConfirmBoxContext = createContext<ConfirmBoxState>({
-  remove: () => {},
+  index: -1,
 });
 
 interface ConfirmBoxProps {
@@ -25,7 +26,10 @@ function ConfirmBox({
   onDecline,
   titleButtons,
 }: ConfirmBoxProps) {
-  const c = useContext(ConfirmBoxContext)!;
+  const cc = useContext(ConfirmBoxContext)!;
+  const ac = useContext(AppContext)!;
+  const remove = () => ac.removeConfirmBox(cc.index);
+
   return (
     <div className="confirm-box">
       <div className="confirm-title">
@@ -40,7 +44,7 @@ function ConfirmBox({
           className="btn"
           onClick={() => {
             onAccept && onAccept();
-            c.remove();
+            remove();
           }}
         >
           Yes
@@ -49,7 +53,7 @@ function ConfirmBox({
           className="btn"
           onClick={() => {
             onDecline && onDecline();
-            c.remove();
+            remove();
           }}
         >
           No

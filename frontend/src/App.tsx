@@ -316,11 +316,18 @@ export function App() {
   >([]);
   let confirmBoxesCounter = useRef(0);
   c.addConfirmBox = (confirmBox: React.ReactNode) => {
+    const index = confirmBoxesCounter.current;
     setConfirmBoxes([
-      { key: confirmBoxesCounter.current, el: confirmBox },
+      { key: index, el: confirmBox },
       ...confirmBoxes,
     ]);
     confirmBoxesCounter.current += 1;
+    return index;
+  };
+  c.removeConfirmBox = (index: number) => {
+    setConfirmBoxes((list) =>
+      list.filter((data) => data.key !== index),
+    );
   };
 
   // Left/right sides
@@ -548,13 +555,7 @@ export function App() {
               <>
                 {confirmBoxes.map((b) => (
                   <ConfirmBoxContext
-                    value={{
-                      remove: () => {
-                        setConfirmBoxes((list) =>
-                          list.filter((data) => data.key !== b.key),
-                        );
-                      },
-                    }}
+                    value={{ index: b.key }}
                   >
                     <div key={b.key}>{b.el}</div>
                   </ConfirmBoxContext>
