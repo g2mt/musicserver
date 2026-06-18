@@ -13,11 +13,6 @@ import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
 
 import "./BookmarksTab.css";
 
-interface BookmarkRowProps {
-  bookmark: Bookmark;
-  index: number;
-}
-
 function RenameBookmarkBox({
   name,
   onAccept,
@@ -40,6 +35,11 @@ function RenameBookmarkBox({
       </label>
     </ConfirmBox>
   );
+}
+
+interface BookmarkRowProps {
+  bookmark: Bookmark;
+  index: number;
 }
 
 function BookmarkRow({ bookmark, index }: BookmarkRowProps) {
