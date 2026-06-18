@@ -1,8 +1,10 @@
-import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faPencil, faPlus, faTimes, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 import { AppContext, type Bookmark, saveConfig } from "src/AppState";
+import { ContextMenuItem, toggleContextMenu } from "src/ContextMenu";
+import ConfirmBox from "src/ConfirmBox";
 
 import "./BookmarksTab.css";
 
@@ -11,11 +13,72 @@ interface BookmarkRowProps {
   index: number;
 }
 
+function RenameBookmarkBox({ name, onAccept }: { name: string; onAccept: (newName: string) => void }) {
+  const [newName, setNewName] = useState(name);
+  return (
+    <ConfirmBox onAccept={() => onAccept(newName)}>
+      <label>
+        Rename bookmark:
+        <br />
+        <input
+          type="text"
+          value={newName}
+          onChange={e => setNewName(e.target.value)}
+          autoFocus
+        />
+      </label>
+    </ConfirmBox>
+  );
+}
+
 function BookmarkRow({ bookmark, index }: BookmarkRowProps) {
   const c = useContext(AppContext)!;
+  const confirmBoxIndexes = useRef(new Set<number>());
+
+  useEffect(() => {
+    return () => {
+      for (const idx of confirmBoxIndexes.current) {
+        c.removeConfirmBox(idx);
+      }
+      confirmBoxIndexes.current.clear();
+    };
+  }, [c.bookmarks]);
+
+  const handleRename = () => {
+    const idx = c.addConfirmBox(
+      <RenameBookmarkBox
+        name={bookmark.name}
+        onAccept={(newName) => {
+          const newBookmarks = [...c.bookmarks];
+          newBookmarks[index] = { ...newBookmarks[index], name: newName };
+          c.setBookmarks(newBookmarks);
+        }}
+      />,
+    );
+    confirmBoxIndexes.current.add(idx);
+  };
+
+  const handleDelete = () => {
+    c.setBookmarks(c.bookmarks.filter((_, i) => i !== index));
+  };
 
   return (
-    <li className="bookmark-item">
+    <li
+      className="bookmark-item"
+      onContextMenu={e => {
+        e.preventDefault();
+        toggleContextMenu(e.currentTarget, (
+          <>
+            <ContextMenuItem onClick={handleRename} icon={faPencil}>
+              Rename
+            </ContextMenuItem>
+            <ContextMenuItem onClick={handleDelete} icon={faTrash}>
+              Delete
+            </ContextMenuItem>
+          </>
+        ));
+      }}
+    >
       <button
         className="bookmark-content"
         onClick={e => {
@@ -35,9 +98,7 @@ function BookmarkRow({ bookmark, index }: BookmarkRowProps) {
       </button>
       <button
         className="icon-btn bookmark-remove"
-        onClick={() => {
-          c.setBookmarks(c.bookmarks.filter((_, i) => i !== index));
-        }}
+        onClick={handleDelete}
         title="Remove bookmark"
       >
         <FontAwesomeIcon icon={faTimes} />
