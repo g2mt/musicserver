@@ -1,15 +1,19 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
+#include "MusicPlayer.h"
 #include "QtAudioPlayer.h"
+#include "TrackDelegate.h"
 #include "TrackListModel.h"
 
 #include <QAction>
 #include <QApplication>
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QMenu>
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QShortcut>
@@ -25,6 +29,11 @@ AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
 
 	AppState *state = AppState::instance();
 
+	// Create search watcher early (refreshSearch depends on it)
+	m_searchWatcher = new QFutureWatcher<QJsonDocument>(this);
+	connect(m_searchWatcher, &QFutureWatcher<QJsonDocument>::finished,
+	        this, &AppMainWindow::onSearchResultFinished);
+
 	setupAudio();
 	setupToolbar();
 	setupLeftPanel();
@@ -32,10 +41,8 @@ AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
 	setupLayout();
 	setupShortcuts();
 
-	// Music player placeholder
-	m_musicPlayer = new QWidget();
-	m_musicPlayer->setFixedHeight(100);
-	m_musicPlayer->setStyleSheet("background: #1c1d20;");
+	// Music player
+	m_musicPlayer = new MusicPlayer();
 
 	// Status bar
 	statusBar()->showMessage("Ready");
@@ -43,10 +50,8 @@ AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
 	// Load config
 	state->loadConfig();
 
-	// Connect search watcher
-	m_searchWatcher = new QFutureWatcher<QJsonDocument>(this);
-	connect(m_searchWatcher, &QFutureWatcher<QJsonDocument>::finished,
-	        this, &AppMainWindow::onSearchResultFinished);
+	// Initial search to load all tracks on startup
+	refreshSearch();
 
 	// Connect state signals
 	connect(state, &AppState::currentTrackChanged, this, [this](const TrackData &track) {
@@ -150,6 +155,12 @@ void AppMainWindow::setupToolbar() {
 	m_toolbar->setMovable(false);
 	m_toolbar->setFloatable(false);
 
+	QAction *homeAction = m_toolbar->addAction("Home");
+	homeAction->setToolTip("Go to top");
+	connect(homeAction, &QAction::triggered, this, [this]() {
+		m_trackListView->scrollToTop();
+	});
+
 	m_searchInput = new QLineEdit();
 	m_searchInput->setPlaceholderText("Search tracks...");
 	m_searchInput->setClearButtonEnabled(true);
@@ -185,6 +196,37 @@ void AppMainWindow::setupLeftPanel() {
 	m_trackListView = new QListView();
 	m_trackListModel = new TrackListModel(this);
 	m_trackListView->setModel(m_trackListModel);
+	m_trackListView->setItemDelegate(new TrackDelegate(this));
+	m_trackListView->setAlternatingRowColors(true);
+	m_trackListView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(m_trackListView, &QListView::doubleClicked, this, [this](const QModelIndex &index) {
+		TrackData track = qvariant_cast<TrackData>(
+		    index.data(TrackListModel::TrackDataRole));
+		AppState *state = AppState::instance();
+		state->setCurrentTrack(track);
+		state->setIsPlaying(true);
+	});
+
+	connect(m_trackListView, &QListView::customContextMenuRequested, this,
+	        [this](const QPoint &pos) {
+		        QModelIndex index = m_trackListView->indexAt(pos);
+		        if (!index.isValid()) return;
+		        TrackData track = qvariant_cast<TrackData>(
+		            index.data(TrackListModel::TrackDataRole));
+		        AppState *state = AppState::instance();
+
+		        QMenu menu;
+		        menu.addAction("Play", this, [state, track]() {
+			        state->setCurrentTrack(track);
+			        state->setIsPlaying(true);
+		        });
+		        menu.addAction("Add to queue", this, [state, track]() {
+			        state->queueAdd(track);
+		        });
+		        menu.exec(m_trackListView->viewport()->mapToGlobal(pos));
+	        });
+
 	tracksLayout->addWidget(m_trackListView);
 	m_leftStack->addWidget(m_tracksTab);
 
@@ -329,26 +371,40 @@ void AppMainWindow::refreshSearch() {
 	AppState *state = AppState::instance();
 	QString q = state->searchQuery();
 
+	qDebug() << "refreshSearch: query=" << q
+	         << "limit=" << state->resultLimit();
+
 	QJsonObject params;
 	params["q"] = q;
 	params["limit"] = QString::number(state->resultLimit());
 
-	QFuture<QJsonDocument> future = m_api->get("/track", params);
-	m_searchWatcher->setFuture(future);
+	m_searchWatcher->setFuture(m_api->get("/track", params));
 }
 
 void AppMainWindow::onSearchResultFinished() {
 	QJsonDocument doc = m_searchWatcher->result();
-	if (doc.isNull()) return;
+	if (doc.isNull()) {
+		qDebug() << "onSearchResultFinished: null document";
+		statusBar()->showMessage("Search failed");
+		return;
+	}
 
 	QJsonObject obj = doc.object();
 	QJsonArray tracksArr = obj["tracks"].toArray();
 	QList<TrackData> tracks;
 	for (const auto &v : tracksArr) {
-		tracks.append(TrackData::fromJson(v.toObject()));
+		TrackData t = TrackData::fromJson(v.toObject());
+		qDebug() << "track:" << t.id << t.name
+		         << t.artist << t.album << t.path;
+		tracks.append(t);
 	}
 
+	qDebug() << "onSearchResultFinished: loaded" << tracks.size()
+	         << "tracks";
+
 	m_trackListModel->setTracks(tracks);
+	statusBar()->showMessage(
+	    QString("Loaded %1 tracks").arg(tracks.size()));
 
 	AppState *state = AppState::instance();
 	QJsonObject filters = obj["filters"].toObject();

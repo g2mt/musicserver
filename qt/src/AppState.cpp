@@ -1,5 +1,6 @@
 #include "AppState.h"
 
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -218,7 +219,7 @@ void AppState::setDarkMode(bool dark) {
 	if (m_darkMode == dark) return;
 	m_darkMode = dark;
 	emit darkModeChanged(dark);
-	fprintf(stderr, "darkMode set to %s\n", dark ? "true" : "false");
+	qDebug() << "darkMode set to" << dark;
 }
 
 void AppState::setShowBlurredCover(bool show) {

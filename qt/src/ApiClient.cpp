@@ -2,6 +2,7 @@
 #include "TrackData.h"
 
 #include <QtConcurrent>
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -22,7 +23,7 @@ bool ApiClient::initializeFromConfigFile(const QString &configPath) {
 	QByteArray utf8 = configPath.toUtf8();
 	MsrvNewInterfaceResult res = MsrvNewInterfaceFromConfigFile(utf8.data());
 	if (res.Err) {
-		fprintf(stderr, "ApiClient::initializeFromConfigFile failed: %s\n", res.Err);
+		qWarning() << "ApiClient::initializeFromConfigFile failed:" << res.Err;
 		free(res.Err);
 		return false;
 	}
@@ -63,8 +64,8 @@ QFuture<TrackData> ApiClient::loadTrackByPath(const QString &encodedPath) {
 		if (doc.isObject()) {
 			QJsonObject obj = doc.object();
 			if (obj.contains("error")) {
-				fprintf(stderr, "loadTrackByPath error: %s\n",
-				        qPrintable(obj["error"].toString()));
+				qWarning() << "loadTrackByPath error:"
+				           << obj["error"].toString();
 				return TrackData();
 			}
 			return TrackData::fromJson(obj);
@@ -98,8 +99,7 @@ QJsonDocument ApiClient::doRequest(const QString &path,
 	    m_ifaceHandle, pathUtf8.data(), methodUtf8.data(), paramsJson.data());
 
 	if (res.Err) {
-		fprintf(stderr, "handleRequest error for %s: %s\n",
-		        pathUtf8.data(), res.Err);
+		qWarning() << "handleRequest error for" << path << ":" << res.Err;
 		free(res.Err);
 		return QJsonDocument();
 	}
@@ -108,13 +108,13 @@ QJsonDocument ApiClient::doRequest(const QString &path,
 	MsrvDeleteHandle(res.ReaderHandle);
 
 	if (readRes.Err) {
-		fprintf(stderr, "readAll error for %s: %s\n", pathUtf8.data(),
-		        readRes.Err);
+		qWarning() << "readAll error for" << path << ":" << readRes.Err;
 		free(readRes.Err);
 		return QJsonDocument();
 	}
 
 	if (!readRes.Data || readRes.N == 0) {
+		qDebug() << "doRequest: empty response for" << path;
 		return QJsonDocument();
 	}
 
@@ -124,8 +124,8 @@ QJsonDocument ApiClient::doRequest(const QString &path,
 	free(readRes.Data);
 
 	if (parseError.error != QJsonParseError::NoError) {
-		fprintf(stderr, "JSON parse error for %s: %s\n", pathUtf8.data(),
-		        qPrintable(parseError.errorString()));
+		qWarning() << "JSON parse error for" << path << ":"
+		           << parseError.errorString();
 		return QJsonDocument();
 	}
 

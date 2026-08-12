@@ -14,6 +14,7 @@
 class ApiClient;
 class TrackListModel;
 class QtAudioPlayer;
+class MusicPlayer;
 
 class AppMainWindow : public QMainWindow {
 	Q_OBJECT
