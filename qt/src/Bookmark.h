@@ -3,6 +3,6 @@
 #include <QString>
 
 struct Bookmark {
-	QString name;
-	QString query;
+  QString name;
+  QString query;
 };
