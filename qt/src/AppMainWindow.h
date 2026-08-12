@@ -33,6 +33,7 @@ private slots:
   void onCollapseQueue();
   void refreshSearch();
   void onSearchResultFinished();
+  void onPropsResultFinished();
 
 private:
   void setupToolbar();
@@ -59,6 +60,7 @@ private:
   QListView *m_trackListView = nullptr;
   TrackListModel *m_trackListModel = nullptr;
   QFutureWatcher<QJsonDocument> *m_searchWatcher = nullptr;
+  QFutureWatcher<QJsonDocument> *m_propsWatcher = nullptr;
 
   // Right panel (queue)
   QWidget *m_rightPanel = nullptr;

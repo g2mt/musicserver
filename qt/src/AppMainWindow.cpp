@@ -21,6 +21,7 @@
 #include <QResizeEvent>
 #include <QShortcut>
 #include <QStatusBar>
+#include <QUrl>
 #include <QVBoxLayout>
 #include <QtMath>
 
@@ -36,6 +37,11 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   m_searchWatcher = new QFutureWatcher<QJsonDocument>(this);
   connect(m_searchWatcher, &QFutureWatcher<QJsonDocument>::finished, this,
           &AppMainWindow::onSearchResultFinished);
+
+  m_propsWatcher = new QFutureWatcher<QJsonDocument>(this);
+  connect(m_propsWatcher, &QFutureWatcher<QJsonDocument>::finished, this,
+          &AppMainWindow::onPropsResultFinished);
+  m_propsWatcher->setFuture(m_api->get("/props"));
 
   setupAudio();
   setupToolbar();
@@ -103,13 +109,8 @@ void AppMainWindow::setupAudio() {
           return;
         QString dataPath =
             state->serverProps()["config"].toObject()["data_path"].toString();
-        QString url;
-        if (dataPath.endsWith('/')) {
-          url = "file://" + dataPath + track.path;
-        } else {
-          url = "file://" + dataPath + "/" + track.path;
-        }
-        m_audioPlayer->setSource(url);
+        QString filePath = dataPath + "/" + track.path;
+        m_audioPlayer->setSource(QUrl::fromLocalFile(filePath).toString());
       });
 
   // AppState → Player: play/pause
@@ -242,8 +243,8 @@ void AppMainWindow::setupLeftPanel() {
                              state->setCurrentTrack(track);
                              state->setIsPlaying(true);
                            });
-            menu.addAction(QIcon::fromTheme("list-add"), "Add to queue",
-                           this, [state, track]() { state->queueAdd(track); });
+            menu.addAction(QIcon::fromTheme("list-add"), "Add to queue", this,
+                           [state, track]() { state->queueAdd(track); });
             menu.exec(m_trackListView->viewport()->mapToGlobal(pos));
           });
 
@@ -394,6 +395,13 @@ void AppMainWindow::refreshSearch() {
   params["limit"] = "-1";
 
   m_searchWatcher->setFuture(m_api->get("/track", params));
+}
+
+void AppMainWindow::onPropsResultFinished() {
+  QJsonDocument doc = m_propsWatcher->result();
+  if (doc.isObject()) {
+    AppState::instance()->setServerProps(doc.object());
+  }
 }
 
 void AppMainWindow::onSearchResultFinished() {
