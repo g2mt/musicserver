@@ -399,6 +399,12 @@ void AppMainWindow::onSearchResultFinished() {
 		tracks.append(t);
 	}
 
+	if (!tracks.isEmpty()) {
+		qDebug() << "first track thumbnail_path:"
+		         << tracks.first().thumbnailPath;
+		qDebug() << "first track path:" << tracks.first().path;
+	}
+
 	qDebug() << "onSearchResultFinished: loaded" << tracks.size()
 	         << "tracks";
 
