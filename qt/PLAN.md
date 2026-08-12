@@ -247,8 +247,8 @@ UI Update ← AppState signal ← AppState updates model ← parsed data
 ```
 qt/
 ├── CMakeLists.txt
-├── main.cpp
 ├── src/
+│   ├── main.cpp
 │   ├── AppMainWindow.h / .cpp          # QMainWindow subclass (toolbar + layout)
 │   ├── AppState.h / .cpp               # Central state + signals
 │   ├── ApiClient.h / .cpp              # libmusicserver wrapper

@@ -108,6 +108,39 @@ func MsrvNewInterfaceFromConfigJson(configJson *C.char) C.struct_MsrvNewInterfac
 	}
 }
 
+//export MsrvNewInterfaceFromConfigFile
+func MsrvNewInterfaceFromConfigFile(configPath *C.char) C.struct_MsrvNewInterfaceResult {
+	config, err := schema.LoadConfig(C.GoString(configPath))
+	if err != nil {
+		return C.struct_MsrvNewInterfaceResult{
+			Handle: 0,
+			Err:    C.CString(err.Error()),
+		}
+	}
+
+	iface, err := api.NewInterface(config)
+	if err != nil {
+		return C.struct_MsrvNewInterfaceResult{
+			Handle: 0,
+			Err:    C.CString(err.Error()),
+		}
+	}
+
+	err = iface.InitDb()
+	if err != nil {
+		return C.struct_MsrvNewInterfaceResult{
+			Handle: 0,
+			Err:    C.CString(err.Error()),
+		}
+	}
+
+	handle := cgo.NewHandle(iface)
+	return C.struct_MsrvNewInterfaceResult{
+		Handle: C.uintptr_t(handle),
+		Err:    nil,
+	}
+}
+
 //export MsrvHandleRequest
 func MsrvHandleRequest(ifaceHandle C.uintptr_t, path *C.char, method *C.char, paramsJson *C.char) C.struct_MsrvHandleRequestResult {
 	iface := cgo.Handle(ifaceHandle).Value().(*api.Interface)
