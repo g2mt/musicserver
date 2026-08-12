@@ -1,6 +1,7 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
+#include "QtAudioPlayer.h"
 #include "TrackListModel.h"
 
 #include <QAction>
@@ -14,6 +15,7 @@
 #include <QShortcut>
 #include <QStatusBar>
 #include <QVBoxLayout>
+#include <QtMath>
 
 static const int COLLAPSE_AT_WIDTH = 800;
 
@@ -23,6 +25,7 @@ AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
 
 	AppState *state = AppState::instance();
 
+	setupAudio();
 	setupToolbar();
 	setupLeftPanel();
 	setupRightPanel();
@@ -75,6 +78,71 @@ AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
 
 AppMainWindow::~AppMainWindow() {
 	AppState::instance()->saveConfig();
+}
+
+void AppMainWindow::setupAudio() {
+	AppState *state = AppState::instance();
+	m_audioPlayer = new QtAudioPlayer(this);
+
+	// Player → AppState: sync time, duration, ended
+	connect(m_audioPlayer, &QtAudioPlayer::timeChanged, this,
+	        [state](qint64 ms) { state->setProgress(ms / 1000.0); });
+	connect(m_audioPlayer, &QtAudioPlayer::durationChanged, this,
+	        [state](qint64 ms) { state->setDuration(ms / 1000.0); });
+	connect(m_audioPlayer, &QtAudioPlayer::ended, this, [state]() {
+		state->queueNext();
+	});
+
+	// AppState → Player: track changes
+	connect(state, &AppState::currentTrackChanged, this,
+	        [this, state](const TrackData &track) {
+		        if (state->serverProps().isEmpty()) return;
+		        QString dataPath =
+		            state->serverProps()["config"].toObject()["data_path"].toString();
+		        QString url;
+		        if (dataPath.endsWith('/')) {
+			        url = "file://" + dataPath + track.path;
+		        } else {
+			        url = "file://" + dataPath + "/" + track.path;
+		        }
+		        m_audioPlayer->setSource(url);
+	        });
+
+	// AppState → Player: play/pause
+	connect(state, &AppState::isPlayingChanged, this,
+	        [this](bool playing) {
+		        if (playing)
+			        m_audioPlayer->play();
+		        else
+			        m_audioPlayer->pause();
+	        });
+
+	// AppState → Player: seek
+	connect(state, &AppState::progressChanged, this,
+	        [this](double secs) {
+		        qint64 targetMs = static_cast<qint64>(secs * 1000.0);
+		        if (qAbs(m_audioPlayer->currentTime() - targetMs) > 500) {
+			        m_audioPlayer->seekTo(targetMs);
+		        }
+	        });
+
+	// AppState → Player: volume
+	connect(state, &AppState::volumeChanged, this,
+	        [this, state]() {
+		        m_audioPlayer->setVolume(state->muted() ? 0.0f :
+		                                         static_cast<float>(state->volume()));
+	        });
+	connect(state, &AppState::mutedChanged, this,
+	        [this, state]() {
+		        m_audioPlayer->setVolume(state->muted() ? 0.0f :
+		                                         static_cast<float>(state->volume()));
+	        });
+
+	// AppState → Player: amplification
+	connect(state, &AppState::amplificationChanged, this,
+	        [this](double db) {
+		        m_audioPlayer->setAmplification(static_cast<float>(db));
+	        });
 }
 
 void AppMainWindow::setupToolbar() {

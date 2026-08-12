@@ -13,6 +13,7 @@
 
 class ApiClient;
 class TrackListModel;
+class QtAudioPlayer;
 
 class AppMainWindow : public QMainWindow {
 	Q_OBJECT
@@ -22,6 +23,7 @@ public:
 
 protected:
 	void resizeEvent(QResizeEvent *event) override;
+	void setupAudio();
 
 private slots:
 	void onSearchSubmit();
@@ -63,7 +65,10 @@ private:
 	QListView *m_queueListView = nullptr;
 	TrackListModel *m_queueListModel = nullptr;
 
-	// Music player bar
+	// Audio
+	QtAudioPlayer *m_audioPlayer = nullptr;
+
+	// Music player bar (placeholder until Phase 3)
 	QWidget *m_musicPlayer = nullptr;
 
 	// Progress polling

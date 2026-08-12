@@ -43,6 +43,7 @@ set(QT_SOURCES
   src/ApiClient.cpp
   src/AppState.cpp
   src/AppMainWindow.cpp
+  src/QtAudioPlayer.cpp
   src/TrackListModel.cpp
 )
 
@@ -50,6 +51,7 @@ set(QT_HEADERS
   src/ApiClient.h
   src/AppState.h
   src/AppMainWindow.h
+  src/QtAudioPlayer.h
   src/TrackListModel.h
   src/TrackData.h
   src/Bookmark.h
