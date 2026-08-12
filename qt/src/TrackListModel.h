@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QList>
 #include <QPixmap>
+#include <QSet>
 
 class TrackListModel : public QAbstractListModel {
   Q_OBJECT
@@ -28,7 +29,11 @@ public:
 
   void setTracks(const QList<TrackData> &tracks);
   void setCoverPixmap(const QString &trackId, const QPixmap &pixmap);
+  void ensureCoverLoaded(int row);
   const QList<TrackData> &tracks() const;
+
+signals:
+  void coverRequested(int row, const QString &trackId);
 
 protected:
   QHash<int, QByteArray> roleNames() const override;
@@ -36,4 +41,5 @@ protected:
 private:
   QList<TrackData> m_tracks;
   QList<QPixmap> m_covers;
+  QSet<int> m_coverRequested;
 };

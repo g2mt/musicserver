@@ -7,6 +7,8 @@
 
 TrackDelegate::TrackDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
+void TrackDelegate::setModel(TrackListModel *model) { m_model = model; }
+
 void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const {
   painter->save();
@@ -27,6 +29,10 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                   option.rect.top() +
                       (option.rect.height() - coverSize.height()) / 2,
                   coverSize.width(), coverSize.height());
+
+  if (m_model) {
+    m_model->ensureCoverLoaded(index.row());
+  }
 
   QPixmap cover =
       index.data(TrackListModel::CoverPixmapRole).value<QPixmap>();

@@ -188,9 +188,31 @@ void AppMainWindow::setupLeftPanel() {
   m_trackListView = new QListView();
   m_trackListModel = new TrackListModel(this);
   m_trackListView->setModel(m_trackListModel);
-  m_trackListView->setItemDelegate(new TrackDelegate(this));
+
+  auto *trackDelegate = new TrackDelegate(this);
+  trackDelegate->setModel(m_trackListModel);
+  m_trackListView->setItemDelegate(trackDelegate);
+  m_trackListView->setUniformItemSizes(true);
   m_trackListView->setAlternatingRowColors(true);
   m_trackListView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+  connect(m_trackListModel, &TrackListModel::coverRequested, this,
+          [this](int row, const QString &trackId) {
+            Q_UNUSED(row);
+            QFuture<QByteArray> future =
+                m_api->getBytes(QString("/track/%1/cover").arg(trackId));
+            auto *watcher = new QFutureWatcher<QByteArray>(this);
+            connect(watcher, &QFutureWatcher<QByteArray>::finished, this,
+                    [this, watcher, trackId]() {
+                      QByteArray bytes = watcher->result();
+                      watcher->deleteLater();
+                      QPixmap pix;
+                      if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
+                        m_trackListModel->setCoverPixmap(trackId, pix);
+                      }
+                    });
+            watcher->setFuture(future);
+          });
 
   connect(m_trackListView, &QListView::doubleClicked, this,
           [this](const QModelIndex &index) {
@@ -359,11 +381,11 @@ void AppMainWindow::refreshSearch() {
   AppState *state = AppState::instance();
   QString q = state->searchQuery();
 
-  qDebug() << "refreshSearch: query=" << q << "limit=" << state->resultLimit();
+  qDebug() << "refreshSearch: query=" << q << "limit=-1";
 
   QJsonObject params;
   params["q"] = q;
-  params["limit"] = QString::number(state->resultLimit());
+  params["limit"] = "-1";
 
   m_searchWatcher->setFuture(m_api->get("/track", params));
 }
@@ -389,27 +411,6 @@ void AppMainWindow::onSearchResultFinished() {
   qDebug() << "onSearchResultFinished: loaded" << tracks.size() << "tracks";
 
   m_trackListModel->setTracks(tracks);
-
-  for (const TrackData &track : tracks) {
-    if (track.id.isEmpty())
-      continue;
-
-    QFuture<QByteArray> future =
-        m_api->getBytes(QString("/track/%1/cover").arg(track.id));
-    auto *watcher = new QFutureWatcher<QByteArray>(this);
-    const QString trackId = track.id;
-    connect(watcher, &QFutureWatcher<QByteArray>::finished, this,
-            [this, watcher, trackId]() {
-              QByteArray bytes = watcher->result();
-              watcher->deleteLater();
-              QPixmap pix;
-              if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
-                m_trackListModel->setCoverPixmap(trackId, pix);
-              }
-            });
-    watcher->setFuture(future);
-  }
-
   statusBar()->showMessage(QString("Loaded %1 tracks").arg(tracks.size()));
 
   AppState *state = AppState::instance();

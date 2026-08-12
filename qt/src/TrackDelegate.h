@@ -2,6 +2,8 @@
 
 #include <QStyledItemDelegate>
 
+class TrackListModel;
+
 class TrackDelegate : public QStyledItemDelegate {
   Q_OBJECT
 public:
@@ -12,6 +14,11 @@ public:
   QSize sizeHint(const QStyleOptionViewItem &option,
                  const QModelIndex &index) const override;
 
+  void setModel(TrackListModel *model);
+
   int highlightedRow = -1;
   QSize coverSize = QSize(48, 48);
+
+private:
+  TrackListModel *m_model = nullptr;
 };

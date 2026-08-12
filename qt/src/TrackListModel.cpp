@@ -44,6 +44,7 @@ void TrackListModel::setTracks(const QList<TrackData> &tracks) {
   beginResetModel();
   m_tracks = tracks;
   m_covers.clear();
+  m_coverRequested.clear();
   for (int i = 0; i < tracks.size(); ++i) {
     m_covers.append(QPixmap());
   }
@@ -60,6 +61,22 @@ void TrackListModel::setCoverPixmap(const QString &trackId,
       return;
     }
   }
+}
+
+void TrackListModel::ensureCoverLoaded(int row) {
+  if (row < 0 || row >= m_tracks.size())
+    return;
+  if (m_coverRequested.contains(row))
+    return;
+  if (!m_covers.value(row).isNull())
+    return;
+
+  const QString &trackId = m_tracks.at(row).id;
+  if (trackId.isEmpty())
+    return;
+
+  m_coverRequested.insert(row);
+  emit coverRequested(row, trackId);
 }
 
 const QList<TrackData> &TrackListModel::tracks() const { return m_tracks; }
