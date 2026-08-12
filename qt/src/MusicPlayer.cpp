@@ -5,6 +5,7 @@
 
 #include <QContextMenuEvent>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QMenu>
 #include <QPixmap>
 #include <QVBoxLayout>
@@ -22,7 +23,8 @@ MusicPlayer::MusicPlayer(QWidget *parent)
               m_trackCover->setPixmap(pix.scaled(
                   48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation));
             } else {
-              m_trackCover->setText("?");
+              m_trackCover->setPixmap(
+                  QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
             }
           });
 
@@ -61,11 +63,14 @@ void MusicPlayer::setupUi() {
   controlsLayout->setContentsMargins(0, 0, 0, 0);
 
   // Left: prev, play/pause, next
-  m_prevBtn = new QPushButton("|<");
+  m_prevBtn = new QPushButton();
+  m_prevBtn->setIcon(QIcon::fromTheme("media-skip-backward"));
   m_prevBtn->setFixedWidth(32);
-  m_playPauseBtn = new QPushButton(">");
+  m_playPauseBtn = new QPushButton();
+  m_playPauseBtn->setIcon(QIcon::fromTheme("media-playback-start"));
   m_playPauseBtn->setFixedWidth(32);
-  m_nextBtn = new QPushButton(">|");
+  m_nextBtn = new QPushButton();
+  m_nextBtn->setIcon(QIcon::fromTheme("media-skip-forward"));
   m_nextBtn->setFixedWidth(32);
 
   controlsLayout->addWidget(m_prevBtn);
@@ -106,10 +111,12 @@ void MusicPlayer::setupUi() {
   m_volumeSlider->setValue(100);
   m_volumeSlider->setFixedWidth(80);
 
-  m_muteBtn = new QPushButton("Vol");
+  m_muteBtn = new QPushButton();
+  m_muteBtn->setIcon(QIcon::fromTheme("audio-volume-high"));
   m_muteBtn->setFixedWidth(32);
 
-  m_repeatBtn = new QPushButton("R");
+  m_repeatBtn = new QPushButton();
+  m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
   m_repeatBtn->setFixedWidth(32);
 
   controlsLayout->addWidget(m_volumeSlider);
@@ -198,7 +205,8 @@ void MusicPlayer::updateDurationFromState(double) {
 void MusicPlayer::updateTrackFromState(const TrackData &track) {
   m_trackLabel->setText(track.name);
   m_trackCover->clear();
-  m_trackCover->setText("?");
+  m_trackCover->setPixmap(
+      QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
   if (!m_api || track.id.isEmpty()) {
     return;
   }
@@ -207,15 +215,18 @@ void MusicPlayer::updateTrackFromState(const TrackData &track) {
 }
 
 void MusicPlayer::updatePlayingFromState(bool playing) {
-  m_playPauseBtn->setText(playing ? "||" : ">");
+  m_playPauseBtn->setIcon(QIcon::fromTheme(
+      playing ? "media-playback-pause" : "media-playback-start"));
 }
 
 void MusicPlayer::updateVolumeFromState() {
   AppState *state = AppState::instance();
   if (state->muted()) {
     m_volumeSlider->setValue(0);
+    m_muteBtn->setIcon(QIcon::fromTheme("audio-volume-muted"));
   } else {
     m_volumeSlider->setValue(static_cast<int>(state->volume() * 100));
+    m_muteBtn->setIcon(QIcon::fromTheme("audio-volume-high"));
   }
 }
 
@@ -223,16 +234,16 @@ void MusicPlayer::updateRepeatFromState() {
   AppState *state = AppState::instance();
   switch (state->repeat()) {
   case RepeatMode::None:
-    m_repeatBtn->setText("R");
+    m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
     m_badgeLabel->hide();
     break;
   case RepeatMode::Track:
-    m_repeatBtn->setText("R");
+    m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-single"));
     m_badgeLabel->setText("Track");
     m_badgeLabel->show();
     break;
   case RepeatMode::Queue:
-    m_repeatBtn->setText("R");
+    m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
     m_badgeLabel->setText("Queue");
     m_badgeLabel->show();
     break;
@@ -244,30 +255,32 @@ void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
 
   QMenu menu(this);
 
-  QAction *playAction = menu.addAction(state->isPlaying() ? "Pause" : "Play");
+  QAction *playAction = menu.addAction(
+      QIcon::fromTheme(state->isPlaying() ? "media-playback-pause"
+                                          : "media-playback-start"),
+      state->isPlaying() ? "Pause" : "Play");
   connect(playAction, &QAction::triggered, this,
           &MusicPlayer::onPlayPauseClicked);
 
-  if (state->queueIndex() + 1 < state->queueTracks().size() ||
-      state->repeat() != RepeatMode::None) {
-    menu.addAction("Next")->setEnabled(true);
-  } else {
-    menu.addAction("Next")->setEnabled(false);
-  }
+  QAction *nextAction =
+      menu.addAction(QIcon::fromTheme("media-skip-forward"), "Next");
+  nextAction->setEnabled(state->queueIndex() + 1 <
+                             state->queueTracks().size() ||
+                         state->repeat() != RepeatMode::None);
 
-  if (state->queueIndex() > 0) {
-    menu.addAction("Previous")->setEnabled(true);
-  } else {
-    menu.addAction("Previous")->setEnabled(false);
-  }
+  QAction *prevAction =
+      menu.addAction(QIcon::fromTheme("media-skip-backward"), "Previous");
+  prevAction->setEnabled(state->queueIndex() > 0);
 
   menu.addSeparator()->setText("Repeat...");
 
-  QAction *repeatTrack = menu.addAction("Track");
+  QAction *repeatTrack =
+      menu.addAction(QIcon::fromTheme("media-repeat-single"), "Track");
   repeatTrack->setCheckable(true);
   repeatTrack->setChecked(state->repeat() == RepeatMode::Track);
 
-  QAction *repeatQueue = menu.addAction("Queue");
+  QAction *repeatQueue =
+      menu.addAction(QIcon::fromTheme("media-repeat-all"), "Queue");
   repeatQueue->setCheckable(true);
   repeatQueue->setChecked(state->repeat() == RepeatMode::Queue);
 

@@ -11,6 +11,7 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -147,8 +148,10 @@ void AppMainWindow::setupToolbar() {
   m_toolbar = addToolBar("Search");
   m_toolbar->setMovable(false);
   m_toolbar->setFloatable(false);
+  m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-  QAction *homeAction = m_toolbar->addAction("Home");
+  QAction *homeAction =
+      m_toolbar->addAction(QIcon::fromTheme("go-home"), "Home");
   homeAction->setToolTip("Go to top");
   connect(homeAction, &QAction::triggered, this,
           [this]() { m_trackListView->scrollToTop(); });
@@ -163,7 +166,8 @@ void AppMainWindow::setupToolbar() {
 
   m_toolbar->addWidget(m_searchInput);
 
-  QAction *searchAction = m_toolbar->addAction("Search");
+  QAction *searchAction =
+      m_toolbar->addAction(QIcon::fromTheme("system-search"), "Search");
   connect(searchAction, &QAction::triggered, this,
           &AppMainWindow::onSearchSubmit);
 }
@@ -233,12 +237,13 @@ void AppMainWindow::setupLeftPanel() {
             AppState *state = AppState::instance();
 
             QMenu menu;
-            menu.addAction("Play", this, [state, track]() {
-              state->setCurrentTrack(track);
-              state->setIsPlaying(true);
-            });
-            menu.addAction("Add to queue", this,
-                           [state, track]() { state->queueAdd(track); });
+            menu.addAction(QIcon::fromTheme("media-playback-start"), "Play",
+                           this, [state, track]() {
+                             state->setCurrentTrack(track);
+                             state->setIsPlaying(true);
+                           });
+            menu.addAction(QIcon::fromTheme("list-add"), "Add to queue",
+                           this, [state, track]() { state->queueAdd(track); });
             menu.exec(m_trackListView->viewport()->mapToGlobal(pos));
           });
 
@@ -290,7 +295,8 @@ void AppMainWindow::setupLayout() {
   leftLayout->setContentsMargins(0, 0, 0, 0);
 
   // Collapse button
-  QPushButton *collapseBtn = new QPushButton("-");
+  QPushButton *collapseBtn = new QPushButton();
+  collapseBtn->setIcon(QIcon::fromTheme("go-down"));
   collapseBtn->setFixedSize(24, 24);
   connect(collapseBtn, &QPushButton::clicked, this,
           &AppMainWindow::onCollapseTracksList);
