@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(musicserver_qt)
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(MS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
