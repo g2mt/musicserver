@@ -8,12 +8,14 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QByteArray>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMenu>
+#include <QPixmap>
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QShortcut>
@@ -23,8 +25,8 @@
 
 static const int COLLAPSE_AT_WIDTH = 800;
 
-AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
-    : QMainWindow(parent), m_api(api) {
+AppMainWindow::AppMainWindow(QWidget *parent)
+    : QMainWindow(parent), m_api(ApiClient::instance()) {
   setWindowTitle("Music Server");
 
   AppState *state = AppState::instance();
@@ -38,11 +40,9 @@ AppMainWindow::AppMainWindow(ApiClient *api, QWidget *parent)
   setupToolbar();
   setupLeftPanel();
   setupRightPanel();
+  m_musicPlayer = new MusicPlayer();
   setupLayout();
   setupShortcuts();
-
-  // Music player
-  m_musicPlayer = new MusicPlayer();
 
   // Status bar
   statusBar()->showMessage("Ready");
@@ -382,17 +382,34 @@ void AppMainWindow::onSearchResultFinished() {
   for (const auto &v : tracksArr) {
     TrackData t = TrackData::fromJson(v.toObject());
     qDebug() << "track:" << t.id << t.name << t.artist << t.album << t.path;
+    qDebug() << "track thumbnail_path:" << t.thumbnailPath;
     tracks.append(t);
-  }
-
-  if (!tracks.isEmpty()) {
-    qDebug() << "first track thumbnail_path:" << tracks.first().thumbnailPath;
-    qDebug() << "first track path:" << tracks.first().path;
   }
 
   qDebug() << "onSearchResultFinished: loaded" << tracks.size() << "tracks";
 
   m_trackListModel->setTracks(tracks);
+
+  for (const TrackData &track : tracks) {
+    if (track.id.isEmpty())
+      continue;
+
+    QFuture<QByteArray> future =
+        m_api->getBytes(QString("/track/%1/cover").arg(track.id));
+    auto *watcher = new QFutureWatcher<QByteArray>(this);
+    const QString trackId = track.id;
+    connect(watcher, &QFutureWatcher<QByteArray>::finished, this,
+            [this, watcher, trackId]() {
+              QByteArray bytes = watcher->result();
+              watcher->deleteLater();
+              QPixmap pix;
+              if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
+                m_trackListModel->setCoverPixmap(trackId, pix);
+              }
+            });
+    watcher->setFuture(future);
+  }
+
   statusBar()->showMessage(QString("Loaded %1 tracks").arg(tracks.size()));
 
   AppState *state = AppState::instance();

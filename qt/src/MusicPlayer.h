@@ -1,9 +1,14 @@
 #pragma once
 
+#include <QByteArray>
+#include <QFutureWatcher>
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
+#include <QString>
 #include <QWidget>
+
+class ApiClient;
 
 class MusicPlayer : public QWidget {
   Q_OBJECT
@@ -39,6 +44,9 @@ private:
   QLabel *m_trackCover;
   QLabel *m_trackLabel;
   QLabel *m_badgeLabel;
+
+  ApiClient *m_api = nullptr;
+  QFutureWatcher<QByteArray> *m_coverWatcher = nullptr;
 
   bool m_seeking = false;
 };

@@ -1,15 +1,30 @@
 #include "MusicPlayer.h"
+#include "ApiClient.h"
 #include "AppState.h"
 #include "TrackData.h"
 
 #include <QContextMenuEvent>
-#include <QFile>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QPixmap>
 #include <QVBoxLayout>
 
-MusicPlayer::MusicPlayer(QWidget *parent) : QWidget(parent) {
+MusicPlayer::MusicPlayer(QWidget *parent)
+    : QWidget(parent), m_api(ApiClient::instance()) {
   setupUi();
+
+  m_coverWatcher = new QFutureWatcher<QByteArray>(this);
+  connect(m_coverWatcher, &QFutureWatcher<QByteArray>::finished, this,
+          [this]() {
+            QByteArray bytes = m_coverWatcher->result();
+            QPixmap pix;
+            if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
+              m_trackCover->setPixmap(pix.scaled(
+                  48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            } else {
+              m_trackCover->setText("?");
+            }
+          });
 
   AppState *state = AppState::instance();
 
@@ -183,13 +198,12 @@ void MusicPlayer::updateDurationFromState(double) {
 void MusicPlayer::updateTrackFromState(const TrackData &track) {
   m_trackLabel->setText(track.name);
   m_trackCover->clear();
-  if (!track.thumbnailPath.isEmpty() && QFile::exists(track.thumbnailPath)) {
-    QPixmap pix(track.thumbnailPath);
-    m_trackCover->setPixmap(
-        pix.scaled(48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-  } else {
-    m_trackCover->setText("?");
+  m_trackCover->setText("?");
+  if (!m_api || track.id.isEmpty()) {
+    return;
   }
+  m_coverWatcher->setFuture(
+      m_api->getBytes(QString("/track/%1/cover").arg(track.id)));
 }
 
 void MusicPlayer::updatePlayingFromState(bool playing) {

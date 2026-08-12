@@ -19,7 +19,7 @@ class MusicPlayer;
 class AppMainWindow : public QMainWindow {
   Q_OBJECT
 public:
-  explicit AppMainWindow(ApiClient *api, QWidget *parent = nullptr);
+  explicit AppMainWindow(QWidget *parent = nullptr);
   ~AppMainWindow() override;
 
 protected:

@@ -28,6 +28,9 @@ QVariant TrackListModel::data(const QModelIndex &index, int role) const {
     return track.path;
   case ThumbnailPathRole:
     return track.thumbnailPath;
+  case CoverPixmapRole:
+  case Qt::DecorationRole:
+    return QVariant::fromValue(m_covers.value(index.row()));
   case TrackDataRole:
     return QVariant::fromValue(track);
   case Qt::DisplayRole:
@@ -40,7 +43,23 @@ QVariant TrackListModel::data(const QModelIndex &index, int role) const {
 void TrackListModel::setTracks(const QList<TrackData> &tracks) {
   beginResetModel();
   m_tracks = tracks;
+  m_covers.clear();
+  for (int i = 0; i < tracks.size(); ++i) {
+    m_covers.append(QPixmap());
+  }
   endResetModel();
+}
+
+void TrackListModel::setCoverPixmap(const QString &trackId,
+                                    const QPixmap &pixmap) {
+  for (int i = 0; i < m_tracks.size(); ++i) {
+    if (m_tracks.at(i).id == trackId) {
+      m_covers[i] = pixmap;
+      QModelIndex idx = index(i);
+      emit dataChanged(idx, idx, {CoverPixmapRole, Qt::DecorationRole});
+      return;
+    }
+  }
 }
 
 const QList<TrackData> &TrackListModel::tracks() const { return m_tracks; }
@@ -54,6 +73,7 @@ QHash<int, QByteArray> TrackListModel::roleNames() const {
   roles[AlbumRole] = "album";
   roles[PathRole] = "path";
   roles[ThumbnailPathRole] = "thumbnailPath";
+  roles[CoverPixmapRole] = "coverPixmap";
   roles[TrackDataRole] = "trackData";
   return roles;
 }

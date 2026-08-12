@@ -11,6 +11,14 @@ extern "C" {
 #include "libmusicserver.h"
 }
 
+ApiClient *ApiClient::s_instance = nullptr;
+
+ApiClient *ApiClient::instance() {
+  if (!s_instance)
+    s_instance = new ApiClient();
+  return s_instance;
+}
+
 ApiClient::ApiClient(QObject *parent) : QObject(parent) {}
 
 ApiClient::~ApiClient() {
@@ -36,6 +44,13 @@ QFuture<QJsonDocument> ApiClient::handleRequest(const QString &path,
                                                 const QJsonObject &params) {
   return QtConcurrent::run([this, path, method, params]() {
     return doRequest(path, method, params);
+  });
+}
+
+QFuture<QByteArray> ApiClient::getBytes(const QString &path,
+                                        const QJsonObject &params) {
+  return QtConcurrent::run([this, path, params]() {
+    return doRequestBytes(path, "GET", params);
   });
 }
 
@@ -128,4 +143,46 @@ QJsonDocument ApiClient::doRequest(const QString &path, const QString &method,
   }
 
   return doc;
+}
+
+QByteArray ApiClient::doRequestBytes(const QString &path,
+                                     const QString &method,
+                                     const QJsonObject &params) {
+  QByteArray pathUtf8 = path.toUtf8();
+  QByteArray methodUtf8 = method.toUtf8();
+  QByteArray paramsJson;
+
+  if (params.isEmpty()) {
+    paramsJson = QByteArray("{}");
+  } else {
+    QJsonDocument doc(params);
+    paramsJson = doc.toJson(QJsonDocument::Compact);
+  }
+
+  MsrvHandleRequestResult res = MsrvHandleRequest(
+      m_ifaceHandle, pathUtf8.data(), methodUtf8.data(), paramsJson.data());
+
+  if (res.Err) {
+    qWarning() << "handleRequest error for" << path << ":" << res.Err;
+    free(res.Err);
+    return QByteArray();
+  }
+
+  MsrvReadAllResult readRes = MsrvReadAll(res.ReaderHandle);
+  MsrvDeleteHandle(res.ReaderHandle);
+
+  if (readRes.Err) {
+    qWarning() << "readAll error for" << path << ":" << readRes.Err;
+    free(readRes.Err);
+    return QByteArray();
+  }
+
+  if (!readRes.Data || readRes.N == 0) {
+    qDebug() << "doRequestBytes: empty response for" << path;
+    return QByteArray();
+  }
+
+  QByteArray bytes(readRes.Data, readRes.N);
+  free(readRes.Data);
+  return bytes;
 }

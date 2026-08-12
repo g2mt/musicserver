@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QByteArray>
 #include <QFuture>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -16,7 +17,8 @@ struct MsrvLoadTrackByPathResult;
 class ApiClient : public QObject {
   Q_OBJECT
 public:
-  explicit ApiClient(QObject *parent = nullptr);
+  static ApiClient *instance();
+
   ~ApiClient() override;
 
   bool initializeFromConfigFile(const QString &configPath);
@@ -24,6 +26,8 @@ public:
   QFuture<QJsonDocument>
   handleRequest(const QString &path, const QString &method,
                 const QJsonObject &params = QJsonObject());
+  QFuture<QByteArray> getBytes(const QString &path,
+                               const QJsonObject &params = QJsonObject());
   QFuture<QJsonDocument> get(const QString &path,
                              const QJsonObject &params = QJsonObject());
   QFuture<QJsonDocument> post(const QString &path,
@@ -35,8 +39,13 @@ public:
   QFuture<void> scanTracks(const QString &path, bool force);
 
 private:
+  explicit ApiClient(QObject *parent = nullptr);
+
   QJsonDocument doRequest(const QString &path, const QString &method,
                           const QJsonObject &params);
+  QByteArray doRequestBytes(const QString &path, const QString &method,
+                            const QJsonObject &params);
 
+  static ApiClient *s_instance;
   uintptr_t m_ifaceHandle = 0;
 };

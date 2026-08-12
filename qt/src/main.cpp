@@ -24,14 +24,14 @@ int main(int argc, char *argv[]) {
     configPath = QDir::homePath() + "/.config/musicserver.yaml";
   }
 
-  ApiClient apiClient;
-  if (!apiClient.initializeFromConfigFile(configPath)) {
+  ApiClient *apiClient = ApiClient::instance();
+  if (!apiClient->initializeFromConfigFile(configPath)) {
     fprintf(stderr, "Failed to initialize backend from config: %s\n",
             qPrintable(configPath));
     return 1;
   }
 
-  AppMainWindow window(&apiClient);
+  AppMainWindow window;
   window.show();
 
   return app.exec();

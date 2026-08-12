@@ -2,7 +2,6 @@
 #include "TrackListModel.h"
 
 #include <QDebug>
-#include <QFile>
 #include <QPainter>
 #include <QPixmap>
 
@@ -29,17 +28,14 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                       (option.rect.height() - coverSize.height()) / 2,
                   coverSize.width(), coverSize.height());
 
-  QString thumbnailPath =
-      index.data(TrackListModel::ThumbnailPathRole).toString();
+  QPixmap cover =
+      index.data(TrackListModel::CoverPixmapRole).value<QPixmap>();
   bool hasCover = false;
-  if (!thumbnailPath.isEmpty() && QFile::exists(thumbnailPath)) {
-    QPixmap cover(thumbnailPath);
-    if (!cover.isNull()) {
-      painter->drawPixmap(coverRect,
-                          cover.scaled(coverSize, Qt::KeepAspectRatio,
-                                       Qt::SmoothTransformation));
-      hasCover = true;
-    }
+  if (!cover.isNull()) {
+    painter->drawPixmap(coverRect,
+                        cover.scaled(coverSize, Qt::KeepAspectRatio,
+                                     Qt::SmoothTransformation));
+    hasCover = true;
   }
   if (!hasCover) {
     painter->setPen(Qt::gray);

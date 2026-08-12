@@ -3,6 +3,7 @@
 #include "TrackData.h"
 #include <QAbstractListModel>
 #include <QList>
+#include <QPixmap>
 
 class TrackListModel : public QAbstractListModel {
   Q_OBJECT
@@ -15,6 +16,7 @@ public:
     AlbumRole,
     PathRole,
     ThumbnailPathRole,
+    CoverPixmapRole,
     TrackDataRole,
   };
 
@@ -25,6 +27,7 @@ public:
                 int role = Qt::DisplayRole) const override;
 
   void setTracks(const QList<TrackData> &tracks);
+  void setCoverPixmap(const QString &trackId, const QPixmap &pixmap);
   const QList<TrackData> &tracks() const;
 
 protected:
@@ -32,4 +35,5 @@ protected:
 
 private:
   QList<TrackData> m_tracks;
+  QList<QPixmap> m_covers;
 };
