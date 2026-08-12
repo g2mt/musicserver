@@ -230,7 +230,7 @@ When window width < 800px:
 
 ## Dark Mode
 
-- Toggle a global stylesheet. Persist preference in `QSettings`.
+- Persist preference in `QSettings`. For now, do not implement dark mode and just print to stderr.
 
 ## Data Flow
 
