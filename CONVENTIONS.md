@@ -122,3 +122,8 @@ body {
 - This application uses API 33 functionality.
 - For **Java code**: use tabs for indenting.
 - Use ONLY the native Java `android` library. Libraries like `androindex`, etc. are unavailable.
+
+### Qt
+
+- An optional Qt frontend is provided, linked to the musicserver library.
+- Use two spaces for indent
