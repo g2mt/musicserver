@@ -22,7 +22,8 @@ option(MS_USE_SNDFILE "Link sndfile as source" ON)
 option(MS_EMB_SNDFILE "Build sndfile from source for embedding" OFF)
 
 option(MS_BUILD_BIN "Build the music server executable" OFF)
-option(MS_BUILD_LIB "Build the music server shared library" OFF)
+option(MS_BUILD_LIB_SHARED "Build libmusicserver.so (shared library)" OFF)
+option(MS_BUILD_LIB_STATIC "Build libmusicserver.a (static library, c-archive)" OFF)
 option(MS_BUILD_ANDROID "Build for Android" OFF)
 option(MS_USE_CCACHE "Use ccache if available" ON)
 option(MS_INSTALL_SHARED "Install shared libraries" OFF)
@@ -50,6 +51,9 @@ if(MS_EMB_EBUR128)
 endif()
 if(MS_USE_SNDFILE OR MS_EMB_SNDFILE)
   list(APPEND GO_TAGS "has_sndfile")
+endif()
+if(MS_BUILD_LIB_SHARED OR MS_BUILD_LIB_STATIC)
+  list(APPEND GO_TAGS "msrv_lib")
 endif()
 if(GO_TAGS)
   string(JOIN " " GO_TAGS_STR ${GO_TAGS})
@@ -164,19 +168,31 @@ if(MS_BUILD_BIN)
   install(PROGRAMS ${CMAKE_BINARY_DIR}/musicserver DESTINATION bin)
 endif()
 
-### Music Server shared library
-if(MS_BUILD_LIB)
+### Music Server library
+if(MS_BUILD_ANDROID)
+  set(MS_LIB_MODE c-shared)
+  set(MS_LIB_FILENAME libmusicserver.so)
+elseif(MS_BUILD_LIB_STATIC)
+  set(MS_LIB_MODE c-archive)
+  set(MS_LIB_FILENAME libmusicserver.a)
+else()
+  set(MS_LIB_MODE c-shared)
+  set(MS_LIB_FILENAME libmusicserver.so)
+endif()
+
+if(MS_BUILD_LIB_SHARED OR MS_BUILD_LIB_STATIC)
+  list(APPEND MS_GOENV "CGO_ENABLED=1")
   add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h FORCE
-    COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -buildmode=c-shared -o ${CMAKE_BINARY_DIR}/libmusicserver.so ${GOFLAGS} musicserver
+    OUTPUT ${CMAKE_BINARY_DIR}/${MS_LIB_FILENAME} ${CMAKE_BINARY_DIR}/libmusicserver.h FORCE
+    COMMAND ${CMAKE_COMMAND} -E env ${MS_GOENV} go build -buildmode=${MS_LIB_MODE} -o ${CMAKE_BINARY_DIR}/${MS_LIB_FILENAME} ${GOFLAGS} musicserver
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS ${BACKEND_DEPS} FORCE
-    COMMENT "Building libmusicserver.so and libmusicserver.h"
+    COMMENT "Building ${MS_LIB_FILENAME} and libmusicserver.h"
     VERBATIM
   )
 
   add_custom_target(libmusicserver ALL
-    DEPENDS ${CMAKE_BINARY_DIR}/libmusicserver.so ${CMAKE_BINARY_DIR}/libmusicserver.h
+    DEPENDS ${CMAKE_BINARY_DIR}/${MS_LIB_FILENAME} ${CMAKE_BINARY_DIR}/libmusicserver.h
   )
 
   if(MS_BUILD_ANDROID)
@@ -204,7 +220,7 @@ if(MS_BUILD_LIB)
       # install(SCRIPT ${CMAKE_BINARY_DIR}/cmake/install_taglib.cmake)
     endif()
   else()
-    install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.so DESTINATION lib)
+    install(FILES ${CMAKE_BINARY_DIR}/${MS_LIB_FILENAME} DESTINATION lib)
     install(FILES ${CMAKE_BINARY_DIR}/libmusicserver.h DESTINATION include)
   endif()
 endif()

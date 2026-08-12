@@ -1,4 +1,4 @@
-//go:build android
+//go:build msrv_lib
 
 package main
 
