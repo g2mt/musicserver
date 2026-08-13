@@ -5,6 +5,7 @@
 #include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
+#include "SettingsWidget.h"
 #include "TrackListView.h"
 
 #include <QAction>
@@ -332,11 +333,17 @@ void AppMainWindow::setupLeftPanel() {
       m_fileBrowser, &FileBrowserWidget::statusMessage, this,
       [this](const QString &message) { statusBar()->showMessage(message); });
 
-  // Settings tab (placeholder)
-  m_settingsTab = new QWidget();
-  QVBoxLayout *settingsLayout = new QVBoxLayout(m_settingsTab);
-  settingsLayout->addWidget(new QLabel("Settings"));
+  // Settings tab
+  m_settingsWidget = new SettingsWidget();
+  m_settingsTab = m_settingsWidget;
   m_leftStack->addWidget(m_settingsTab);
+
+  connect(m_settingsWidget, &SettingsWidget::statusMessage, this,
+          [this](const QString &message) {
+            statusBar()->showMessage(message);
+          });
+  connect(m_settingsWidget, &SettingsWidget::rescanCompleted, this,
+          [this]() { refreshSearch(); });
 }
 
 void AppMainWindow::setupRightPanel() {

@@ -13,6 +13,7 @@
 class ApiClient;
 class BookmarksWidget;
 class FileBrowserWidget;
+class SettingsWidget;
 class TrackListView;
 class AudioPlayer;
 class MusicPlayer;
@@ -66,6 +67,7 @@ private:
   QWidget *m_filesTab = nullptr;
   FileBrowserWidget *m_fileBrowser = nullptr;
   QWidget *m_settingsTab = nullptr;
+  SettingsWidget *m_settingsWidget = nullptr;
   TrackListView *m_trackListView = nullptr;
   QFutureWatcher<QJsonDocument> *m_searchWatcher = nullptr;
   QFutureWatcher<QJsonDocument> *m_propsWatcher = nullptr;

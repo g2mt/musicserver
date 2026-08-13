@@ -46,6 +46,8 @@ set(QT_SOURCES
   src/AppMainWindow.cpp
   src/BookmarksWidget.cpp
   src/FileBrowserWidget.cpp
+  src/ProgressWidget.cpp
+  src/SettingsWidget.cpp
   src/MusicPlayer.cpp
   src/AudioPlayer.cpp
   src/TrackDelegate.cpp
@@ -59,6 +61,8 @@ set(QT_HEADERS
   src/AppMainWindow.h
   src/BookmarksWidget.h
   src/FileBrowserWidget.h
+  src/ProgressWidget.h
+  src/SettingsWidget.h
   src/MusicPlayer.h
   src/AudioPlayer.h
   src/TrackDelegate.h
