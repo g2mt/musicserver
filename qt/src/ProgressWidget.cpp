@@ -39,13 +39,11 @@ void ProgressWidget::setupUi() {
   m_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
   m_table->setSelectionMode(QAbstractItemView::NoSelection);
   m_table->verticalHeader()->setVisible(false);
-  m_table->horizontalHeader()->setSectionResizeMode(0,
-                                                    QHeaderView::Stretch);
-  m_table->horizontalHeader()->setSectionResizeMode(1,
-                                                    QHeaderView::Fixed);
+  m_table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+  m_table->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
   m_table->horizontalHeader()->resizeSection(1, 160);
-  m_table->horizontalHeader()->setSectionResizeMode(2,
-                                                    QHeaderView::ResizeToContents);
+  m_table->horizontalHeader()->setSectionResizeMode(
+      2, QHeaderView::ResizeToContents);
   layout->addWidget(m_table);
 }
 
@@ -92,8 +90,8 @@ void ProgressWidget::rebuild(const QJsonObject &progresses) {
     bar->setValue(value);
     m_table->setCellWidget(row, 1, bar);
 
-    auto *outputButton = new QPushButton(expanded ? tr("Hide") : tr("Show"),
-                                         m_table);
+    auto *outputButton =
+        new QPushButton(expanded ? tr("Hide") : tr("Show"), m_table);
     connect(outputButton, &QPushButton::clicked, this, [this, name]() {
       m_expanded[name] = !m_expanded.value(name, false);
       rebuild(m_lastProgresses);

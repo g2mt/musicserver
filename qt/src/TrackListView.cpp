@@ -10,9 +10,9 @@
 #include <QClipboard>
 #include <QFuture>
 #include <QFutureWatcher>
-#include <QJsonObject>
 #include <QHBoxLayout>
 #include <QIcon>
+#include <QJsonObject>
 #include <QListView>
 #include <QMenu>
 #include <QPixmap>
@@ -156,8 +156,7 @@ void TrackListView::setupUi() {
 
 void TrackListView::onForgetFinished() {
   const QJsonDocument doc = m_forgetWatcher->result();
-  if (doc.isNull() ||
-      (doc.isObject() && doc.object().contains("error"))) {
+  if (doc.isNull() || (doc.isObject() && doc.object().contains("error"))) {
     QString error = "Failed to forget track";
     if (doc.isObject() && doc.object().contains("error"))
       error += ": " + doc.object()["error"].toString();

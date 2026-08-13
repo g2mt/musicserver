@@ -34,8 +34,7 @@ QVariant TrackListModel::data(const QModelIndex &index, int role) const {
   case TrackDataRole:
     return QVariant::fromValue(track);
   case HighlightedRole:
-    return !m_highlightedTrackId.isEmpty() &&
-           track.id == m_highlightedTrackId;
+    return !m_highlightedTrackId.isEmpty() && track.id == m_highlightedTrackId;
   case Qt::DisplayRole:
     return track.name;
   default:
@@ -61,8 +60,7 @@ void TrackListModel::insertTracks(const QList<TrackData> &tracks,
     return;
   startIndex = qBound(0, startIndex, m_tracks.size());
 
-  beginInsertRows(QModelIndex(), startIndex,
-                  startIndex + tracks.size() - 1);
+  beginInsertRows(QModelIndex(), startIndex, startIndex + tracks.size() - 1);
   for (int i = 0; i < tracks.size(); ++i) {
     m_tracks.insert(startIndex + i, tracks.at(i));
     m_covers.insert(startIndex + i, QPixmap());

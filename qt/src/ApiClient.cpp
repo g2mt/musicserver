@@ -49,9 +49,8 @@ QFuture<QJsonDocument> ApiClient::handleRequest(const QString &path,
 
 QFuture<QByteArray> ApiClient::getBytes(const QString &path,
                                         const QJsonObject &params) {
-  return QtConcurrent::run([this, path, params]() {
-    return doRequestBytes(path, "GET", params);
-  });
+  return QtConcurrent::run(
+      [this, path, params]() { return doRequestBytes(path, "GET", params); });
 }
 
 QFuture<QJsonDocument> ApiClient::get(const QString &path,
@@ -72,10 +71,9 @@ QFuture<QJsonDocument> ApiClient::del(const QString &path,
 QFuture<QJsonDocument> ApiClient::getProgress() { return get("/progress"); }
 
 QFuture<double> ApiClient::getLoudness(const QString &trackId) {
-  return get(QString("/track/%1/loudness").arg(trackId)).then(
-      [](const QJsonDocument &doc) {
-        return doc.toVariant().toDouble();
-      });
+  return get(QString("/track/%1/loudness").arg(trackId))
+      .then(
+          [](const QJsonDocument &doc) { return doc.toVariant().toDouble(); });
 }
 
 QFuture<TrackData> ApiClient::loadTrackByPath(const QString &encodedPath) {
@@ -152,8 +150,7 @@ QJsonDocument ApiClient::doRequest(const QString &path, const QString &method,
   return doc;
 }
 
-QByteArray ApiClient::doRequestBytes(const QString &path,
-                                     const QString &method,
+QByteArray ApiClient::doRequestBytes(const QString &path, const QString &method,
                                      const QJsonObject &params) {
   QByteArray pathUtf8 = path.toUtf8();
   QByteArray methodUtf8 = method.toUtf8();

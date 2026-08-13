@@ -14,7 +14,6 @@ public:
   void setCover(const QByteArray &bytes);
 signals:
   void coverChanged(const QString &uri);
-
 };
 
 #endif

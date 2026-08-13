@@ -28,8 +28,7 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const {
   painter->save();
 
-  bool isHighlighted =
-      index.data(TrackListModel::HighlightedRole).toBool();
+  bool isHighlighted = index.data(TrackListModel::HighlightedRole).toBool();
 
   // Background
   if (option.state & QStyle::State_Selected || isHighlighted) {
@@ -50,13 +49,11 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     m_model->ensureCoverLoaded(index.row());
   }
 
-  QPixmap cover =
-      index.data(TrackListModel::CoverPixmapRole).value<QPixmap>();
+  QPixmap cover = index.data(TrackListModel::CoverPixmapRole).value<QPixmap>();
   bool hasCover = false;
   if (!cover.isNull()) {
-    painter->drawPixmap(coverRect,
-                        cover.scaled(coverSize, Qt::KeepAspectRatio,
-                                     Qt::SmoothTransformation));
+    painter->drawPixmap(coverRect, cover.scaled(coverSize, Qt::KeepAspectRatio,
+                                                Qt::SmoothTransformation));
     hasCover = true;
   }
   if (!hasCover) {

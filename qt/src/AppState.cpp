@@ -202,10 +202,10 @@ void AppState::queueShuffle() {
   // Keep the queue pointing at the currently playing track, if present.
   int newIndex = -1;
   for (int i = 0; i < tracks.size(); ++i) {
-    const bool idMatches = !m_currentTrack.id.isEmpty() &&
-                           tracks[i].id == m_currentTrack.id;
-    const bool pathMatches = !m_currentTrack.path.isEmpty() &&
-                             tracks[i].path == m_currentTrack.path;
+    const bool idMatches =
+        !m_currentTrack.id.isEmpty() && tracks[i].id == m_currentTrack.id;
+    const bool pathMatches =
+        !m_currentTrack.path.isEmpty() && tracks[i].path == m_currentTrack.path;
     if (idMatches || pathMatches) {
       newIndex = i;
       break;
