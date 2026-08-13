@@ -12,6 +12,7 @@
 #include <QToolBar>
 
 class ApiClient;
+class TrackDelegate;
 class TrackListModel;
 class QtAudioPlayer;
 class MusicPlayer;
@@ -59,6 +60,7 @@ private:
   QWidget *m_settingsTab = nullptr;
   QListView *m_trackListView = nullptr;
   TrackListModel *m_trackListModel = nullptr;
+  TrackDelegate *m_trackDelegate = nullptr;
   QFutureWatcher<QJsonDocument> *m_searchWatcher = nullptr;
   QFutureWatcher<QJsonDocument> *m_propsWatcher = nullptr;
 

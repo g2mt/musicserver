@@ -64,6 +64,8 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   connect(state, &AppState::currentTrackChanged, this,
           [this](const TrackData &track) {
             setWindowTitle(track.name.isEmpty() ? "Music Server" : track.name);
+            m_trackDelegate->highlightedRow = -1;
+            m_trackListView->viewport()->update();
           });
 
   connect(state, &AppState::leftTabChanged, this, [this](LeftTab tab) {
@@ -194,9 +196,9 @@ void AppMainWindow::setupLeftPanel() {
   m_trackListModel = new TrackListModel(this);
   m_trackListView->setModel(m_trackListModel);
 
-  auto *trackDelegate = new TrackDelegate(this);
-  trackDelegate->setModel(m_trackListModel);
-  m_trackListView->setItemDelegate(trackDelegate);
+  m_trackDelegate = new TrackDelegate(this);
+  m_trackDelegate->setModel(m_trackListModel);
+  m_trackListView->setItemDelegate(m_trackDelegate);
   m_trackListView->setUniformItemSizes(true);
   m_trackListView->setAlternatingRowColors(true);
   m_trackListView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -225,6 +227,8 @@ void AppMainWindow::setupLeftPanel() {
                 index.data(TrackListModel::TrackDataRole));
             AppState *state = AppState::instance();
             state->setCurrentTrack(track);
+            m_trackDelegate->highlightedRow = index.row();
+            m_trackListView->viewport()->update();
             state->setIsPlaying(true);
           });
 
@@ -238,9 +242,12 @@ void AppMainWindow::setupLeftPanel() {
             AppState *state = AppState::instance();
 
             QMenu menu;
+            int row = index.row();
             menu.addAction(QIcon::fromTheme("media-playback-start"), "Play",
-                           this, [state, track]() {
+                           this, [this, state, track, row]() {
                              state->setCurrentTrack(track);
+                             m_trackDelegate->highlightedRow = row;
+                             m_trackListView->viewport()->update();
                              state->setIsPlaying(true);
                            });
             menu.addAction(QIcon::fromTheme("list-add"), "Add to queue", this,
@@ -425,6 +432,8 @@ void AppMainWindow::onSearchResultFinished() {
   qDebug() << "onSearchResultFinished: loaded" << tracks.size() << "tracks";
 
   m_trackListModel->setTracks(tracks);
+  m_trackDelegate->highlightedRow = -1;
+  m_trackListView->viewport()->update();
   statusBar()->showMessage(QString("Loaded %1 tracks").arg(tracks.size()));
 
   AppState *state = AppState::instance();
