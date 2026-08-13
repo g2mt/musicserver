@@ -122,8 +122,10 @@ configure_file(
 
 install(PROGRAMS $<TARGET_FILE:musicserver_qt>
   DESTINATION ${CMAKE_INSTALL_BINDIR})
-install(FILES ${MS_DIR}/branding/circle/192x192.png
-  DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/192x192/apps
-  RENAME musicserver-qt.png)
+foreach(MS_ICON_SIZE 48 72 96 144 192)
+  install(FILES ${MS_DIR}/branding/circle/${MS_ICON_SIZE}x${MS_ICON_SIZE}.png
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/${MS_ICON_SIZE}x${MS_ICON_SIZE}/apps
+    RENAME musicserver-qt.png)
+endforeach()
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/musicserver-qt.desktop
   DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
