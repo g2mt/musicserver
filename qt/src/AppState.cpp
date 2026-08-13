@@ -4,6 +4,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRandomGenerator>
 #include <QSettings>
 
 AppState *AppState::s_instance = nullptr;
@@ -129,6 +130,16 @@ void AppState::setResultLimit(int limit) {
 QList<TrackData> AppState::queueTracks() const { return m_queueTracks; }
 int AppState::queueIndex() const { return m_queueIndex; }
 
+bool AppState::canNext() const {
+  if (m_repeat == RepeatMode::Track)
+    return !m_currentTrack.id.isEmpty() || !m_currentTrack.path.isEmpty();
+  const int nextIdx = m_queueIndex + 1;
+  return !m_queueTracks.isEmpty() &&
+         (nextIdx < m_queueTracks.size() || m_repeat == RepeatMode::Queue);
+}
+
+bool AppState::canPrev() const { return m_queueIndex > 0; }
+
 void AppState::setQueueTracks(const QList<TrackData> &tracks) {
   m_queueTracks = tracks;
   emit queueTracksChanged(tracks);
@@ -172,28 +183,92 @@ void AppState::queueClear() {
   emit queueIndexChanged(-1);
 }
 
+void AppState::queueShuffle() {
+  if (m_queueTracks.size() < 2)
+    return;
+
+  QList<TrackData> tracks = m_queueTracks;
+  for (int i = tracks.size() - 1; i > 0; --i) {
+    const int j = QRandomGenerator::global()->bounded(i + 1);
+    tracks.swapItemsAt(i, j);
+  }
+
+  // Keep the queue pointing at the currently playing track, if present.
+  int newIndex = -1;
+  for (int i = 0; i < tracks.size(); ++i) {
+    const bool idMatches = !m_currentTrack.id.isEmpty() &&
+                           tracks[i].id == m_currentTrack.id;
+    const bool pathMatches = !m_currentTrack.path.isEmpty() &&
+                             tracks[i].path == m_currentTrack.path;
+    if (idMatches || pathMatches) {
+      newIndex = i;
+      break;
+    }
+  }
+
+  m_queueTracks = tracks;
+  if (newIndex != m_queueIndex) {
+    m_queueIndex = newIndex;
+    emit queueIndexChanged(newIndex);
+  }
+  emit queueTracksChanged(m_queueTracks);
+}
+
+void AppState::queuePlayAll(const QList<TrackData> &tracks) {
+  if (tracks.isEmpty())
+    return;
+
+  QList<TrackData> toPlay = tracks;
+  if (m_shuffleBeforePlayingAll) {
+    for (int i = toPlay.size() - 1; i > 0; --i) {
+      const int j = QRandomGenerator::global()->bounded(i + 1);
+      toPlay.swapItemsAt(i, j);
+    }
+  }
+
+  m_queueTracks = toPlay;
+  emit queueTracksChanged(m_queueTracks);
+  m_queueIndex = 0;
+  emit queueIndexChanged(0);
+  setCurrentTrack(toPlay[0]);
+  setIsPlaying(true);
+}
+
 void AppState::queueNext() {
   if (m_repeat == RepeatMode::Track) {
+    if (!m_currentTrack.id.isEmpty() || !m_currentTrack.path.isEmpty()) {
+      setProgress(0.0);
+      setIsPlaying(true);
+    }
     return;
   }
+
   int nextIdx = m_queueIndex + 1;
-  if (m_repeat == RepeatMode::Queue && nextIdx >= m_queueTracks.size()) {
-    nextIdx = 0;
+  if (nextIdx >= m_queueTracks.size()) {
+    if (m_repeat == RepeatMode::Queue && !m_queueTracks.isEmpty()) {
+      nextIdx = 0;
+    } else {
+      if (m_queueIndex != -1) {
+        m_queueIndex = -1;
+        emit queueIndexChanged(-1);
+      }
+      setIsPlaying(false);
+      return;
+    }
   }
-  if (nextIdx < m_queueTracks.size()) {
-    m_queueIndex = nextIdx;
-    setCurrentTrack(m_queueTracks[nextIdx]);
-    emit queueIndexChanged(nextIdx);
-  }
+
+  m_queueIndex = nextIdx;
+  setCurrentTrack(m_queueTracks[nextIdx]);
+  emit queueIndexChanged(nextIdx);
 }
 
 void AppState::queuePrev() {
-  int prevIdx = m_queueIndex - 1;
-  if (prevIdx >= 0 && prevIdx < m_queueTracks.size()) {
-    m_queueIndex = prevIdx;
-    setCurrentTrack(m_queueTracks[prevIdx]);
-    emit queueIndexChanged(prevIdx);
-  }
+  const int prevIdx = m_queueIndex - 1;
+  if (prevIdx < 0 || prevIdx >= m_queueTracks.size())
+    return;
+  m_queueIndex = prevIdx;
+  setCurrentTrack(m_queueTracks[prevIdx]);
+  emit queueIndexChanged(prevIdx);
 }
 
 // --- UI ---

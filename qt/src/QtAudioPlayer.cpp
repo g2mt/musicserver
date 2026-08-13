@@ -22,10 +22,14 @@ QtAudioPlayer::QtAudioPlayer(QObject *parent) : QObject(parent) {
 void QtAudioPlayer::setSource(const QString &url) {
   if (m_currentSource == url)
     return;
+  const bool wasPlaying =
+      m_player->playbackState() == QMediaPlayer::PlayingState;
   m_currentSource = url;
   m_player->setSource(QUrl(url));
   m_player->setPosition(0);
   applyGain();
+  if (wasPlaying)
+    m_player->play();
 }
 
 void QtAudioPlayer::play() {

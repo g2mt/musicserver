@@ -1,13 +1,27 @@
 #include "TrackDelegate.h"
 #include "TrackListModel.h"
 
+#include <QAbstractItemModel>
 #include <QDebug>
+#include <QEvent>
+#include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
 
 TrackDelegate::TrackDelegate(QObject *parent) : QStyledItemDelegate(parent) {}
 
 void TrackDelegate::setModel(TrackListModel *model) { m_model = model; }
+
+void TrackDelegate::setAction(Action action) { m_action = action; }
+
+QRect TrackDelegate::actionButtonRect(
+    const QStyleOptionViewItem &option) const {
+  const int size = 22;
+  const int margin = 6;
+  return QRect(option.rect.right() - margin - size,
+               option.rect.top() + (option.rect.height() - size) / 2, size,
+               size);
+}
 
 void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const {
@@ -56,7 +70,8 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
   QFont subFont = option.font;
 
   int textX = coverRect.right() + 8;
-  int textWidth = option.rect.right() - textX - 8;
+  QRect buttonRect = actionButtonRect(option);
+  int textWidth = qMax(0, buttonRect.left() - 8 - textX);
 
   painter->setFont(nameFont);
   QString name = index.data(TrackListModel::NameRole).toString();
@@ -83,7 +98,28 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
       subRect, Qt::AlignLeft | Qt::AlignTop,
       painter->fontMetrics().elidedText(subText, Qt::ElideRight, textWidth));
 
+  // Enqueue (+) / unqueue (-) action button
+  painter->setPen(Qt::gray);
+  painter->setBrush(option.palette.button());
+  painter->drawRoundedRect(buttonRect, 4, 4);
+  painter->drawText(buttonRect, Qt::AlignCenter,
+                    m_action == Action::Enqueue ? "+" : "-");
+
   painter->restore();
+}
+
+bool TrackDelegate::editorEvent(QEvent *event, QAbstractItemModel *model,
+                                const QStyleOptionViewItem &option,
+                                const QModelIndex &index) {
+  if (event->type() == QEvent::MouseButtonRelease) {
+    auto *mouse = static_cast<QMouseEvent *>(event);
+    if (mouse->button() == Qt::LeftButton &&
+        actionButtonRect(option).contains(mouse->pos())) {
+      emit trackActionClicked(index.row());
+      return true;
+    }
+  }
+  return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
 QSize TrackDelegate::sizeHint(const QStyleOptionViewItem &option,

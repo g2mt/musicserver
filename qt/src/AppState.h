@@ -38,6 +38,8 @@ public:
   // Queue state
   QList<TrackData> queueTracks() const;
   int queueIndex() const;
+  bool canNext() const;
+  bool canPrev() const;
 
   // UI state
   LeftTab leftTab() const;
@@ -87,6 +89,8 @@ public slots:
   void queueAddAll(const QList<TrackData> &tracks);
   void queueRemove(int index);
   void queueClear();
+  void queueShuffle();
+  void queuePlayAll(const QList<TrackData> &tracks);
   void queueNext();
   void queuePrev();
 

@@ -17,6 +17,8 @@ class TrackListModel;
 class QtAudioPlayer;
 class MusicPlayer;
 
+enum class TrackFetchAction { None, PlayAll, AddAll };
+
 class AppMainWindow : public QMainWindow {
   Q_OBJECT
 public:
@@ -35,6 +37,10 @@ private slots:
   void refreshSearch();
   void onSearchResultFinished();
   void onPropsResultFinished();
+  void playAllTracks();
+  void addAllTracks();
+  void addVisibleTracks();
+  void onTrackFetchFinished();
 
 private:
   void setupToolbar();
@@ -43,6 +49,7 @@ private:
   void setupLayout();
   void setupShortcuts();
   void updateSplitterOrientation();
+  void fetchAllTracks(TrackFetchAction action);
 
   ApiClient *m_api;
   QSplitter *m_splitter = nullptr;
@@ -66,9 +73,12 @@ private:
 
   // Right panel (queue)
   QWidget *m_rightPanel = nullptr;
-  QTabBar *m_rightTabBar = nullptr;
+  QWidget *m_queueContent = nullptr;
   QListView *m_queueListView = nullptr;
   TrackListModel *m_queueListModel = nullptr;
+  TrackDelegate *m_queueDelegate = nullptr;
+  QFutureWatcher<QJsonDocument> *m_trackFetchWatcher = nullptr;
+  TrackFetchAction m_trackFetchAction = TrackFetchAction::None;
 
   // Audio
   QtAudioPlayer *m_audioPlayer = nullptr;

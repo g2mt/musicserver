@@ -44,6 +44,16 @@ MusicPlayer::MusicPlayer(QWidget *parent)
           &MusicPlayer::updateVolumeFromState);
   connect(state, &AppState::repeatChanged, this,
           &MusicPlayer::updateRepeatFromState);
+  connect(state, &AppState::queueTracksChanged, this,
+          &MusicPlayer::updateQueueNavigation);
+  connect(state, &AppState::queueIndexChanged, this,
+          &MusicPlayer::updateQueueNavigation);
+  connect(state, &AppState::repeatChanged, this,
+          &MusicPlayer::updateQueueNavigation);
+  connect(state, &AppState::currentTrackChanged, this,
+          &MusicPlayer::updateQueueNavigation);
+
+  updateQueueNavigation();
 }
 
 void MusicPlayer::setupUi() {
@@ -250,6 +260,12 @@ void MusicPlayer::updateRepeatFromState() {
   }
 }
 
+void MusicPlayer::updateQueueNavigation() {
+  AppState *state = AppState::instance();
+  m_prevBtn->setEnabled(state->canPrev());
+  m_nextBtn->setEnabled(state->canNext());
+}
+
 void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
   AppState *state = AppState::instance();
 
@@ -264,13 +280,11 @@ void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
 
   QAction *nextAction =
       menu.addAction(QIcon::fromTheme("media-skip-forward"), "Next");
-  nextAction->setEnabled(state->queueIndex() + 1 <
-                             state->queueTracks().size() ||
-                         state->repeat() != RepeatMode::None);
+  nextAction->setEnabled(state->canNext());
 
   QAction *prevAction =
       menu.addAction(QIcon::fromTheme("media-skip-backward"), "Previous");
-  prevAction->setEnabled(state->queueIndex() > 0);
+  prevAction->setEnabled(state->canPrev());
 
   menu.addSeparator()->setText("Repeat...");
 

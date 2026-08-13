@@ -29,6 +29,7 @@ private slots:
   void updatePlayingFromState(bool playing);
   void updateVolumeFromState();
   void updateRepeatFromState();
+  void updateQueueNavigation();
 
 private:
   void setupUi();
