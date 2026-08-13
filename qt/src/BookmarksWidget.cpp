@@ -18,8 +18,7 @@ BookmarksWidget::BookmarksWidget(QWidget *parent) : QWidget(parent) {
   setupUi();
 
   AppState *state = AppState::instance();
-  connect(state, &AppState::bookmarksChanged, this,
-          &BookmarksWidget::rebuild);
+  connect(state, &AppState::bookmarksChanged, this, &BookmarksWidget::rebuild);
   connect(state, &AppState::searchQueryChanged, this,
           [this](const QString &query, int) {
             m_addButton->setEnabled(!query.isEmpty());
@@ -47,16 +46,16 @@ void BookmarksWidget::setupUi() {
 
   addLayout->addWidget(m_nameInput, 1);
   addLayout->addWidget(m_addButton);
-  layout->addWidget(addRow);
+  layout->addWidget(addRow, 0);
 
   m_emptyLabel = new QLabel("No bookmarks", this);
   m_emptyLabel->setAlignment(Qt::AlignCenter);
-  layout->addWidget(m_emptyLabel);
+  layout->addWidget(m_emptyLabel, 1);
 
   m_list = new QListWidget(this);
   m_list->setSelectionMode(QAbstractItemView::NoSelection);
   m_list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-  layout->addWidget(m_list);
+  layout->addWidget(m_list, 1);
 }
 
 QWidget *BookmarksWidget::createBookmarkRow(const Bookmark &bm, int index) {
@@ -135,16 +134,17 @@ void BookmarksWidget::showRowContextMenu(const Bookmark &bm, int index,
   QMenu menu(this);
   menu.addAction(QIcon::fromTheme("document-edit"), "Rename", this,
                  [this, bm, index]() { renameBookmark(bm, index); });
-  menu.addAction(QIcon::fromTheme("edit-delete"), "Delete", this,
-                 [this, index]() { AppState::instance()->removeBookmark(index); });
+  menu.addAction(
+      QIcon::fromTheme("edit-delete"), "Delete", this,
+      [this, index]() { AppState::instance()->removeBookmark(index); });
   menu.exec(globalPos);
 }
 
 void BookmarksWidget::renameBookmark(const Bookmark &bm, int index) {
   bool ok = false;
-  const QString newName = QInputDialog::getText(
-      this, "Rename bookmark", "Bookmark name:", QLineEdit::Normal, bm.name,
-      &ok);
+  const QString newName =
+      QInputDialog::getText(this, "Rename bookmark",
+                            "Bookmark name:", QLineEdit::Normal, bm.name, &ok);
   if (!ok)
     return;
 
