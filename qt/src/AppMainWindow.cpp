@@ -18,6 +18,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QResizeEvent>
@@ -52,6 +53,11 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   m_trackFetchWatcher = new QFutureWatcher<QJsonDocument>(this);
   connect(m_trackFetchWatcher, &QFutureWatcher<QJsonDocument>::finished, this,
           &AppMainWindow::onTrackFetchFinished);
+
+  m_externalDownloadWatcher = new QFutureWatcher<QJsonDocument>(this);
+  connect(m_externalDownloadWatcher,
+          &QFutureWatcher<QJsonDocument>::finished, this,
+          &AppMainWindow::onExternalDownloadFinished);
 
   setupAudio();
   setupToolbar();
@@ -258,6 +264,15 @@ void AppMainWindow::setupToolbar() {
       m_toolbar->addAction(QIcon::fromTheme("system-search"), "Search");
   connect(searchAction, &QAction::triggered, this,
           &AppMainWindow::onSearchSubmit);
+
+  m_downloadAction =
+      m_toolbar->addAction(QIcon::fromTheme("download"), "Download");
+  m_downloadAction->setToolTip(
+      "Download tracks from an HTTP or HTTPS URL");
+  m_downloadAction->setVisible(false);
+  m_downloadAction->setEnabled(false);
+  connect(m_downloadAction, &QAction::triggered, this,
+          &AppMainWindow::startExternalDownload);
 }
 
 void AppMainWindow::setupLeftPanel() {
@@ -562,6 +577,12 @@ void AppMainWindow::onPropsResultFinished() {
   QJsonDocument doc = m_propsWatcher->result();
   if (doc.isObject()) {
     AppState::instance()->setServerProps(doc.object());
+    const QJsonObject config = doc.object()["config"].toObject();
+    const bool hasDownloader = !config["media_downloader"].toString().isEmpty();
+    if (m_downloadAction) {
+      m_downloadAction->setVisible(hasDownloader);
+      m_downloadAction->setEnabled(hasDownloader);
+    }
   }
 }
 
@@ -633,6 +654,81 @@ void AppMainWindow::fetchAllTracks(TrackFetchAction action) {
   params["q"] = AppState::instance()->searchQuery();
   params["limit"] = "-1";
   m_trackFetchWatcher->setFuture(m_api->get("/track", params));
+}
+
+void AppMainWindow::startExternalDownload() {
+  const QString url = m_searchInput->text().trimmed();
+  if (!(url.startsWith("http://") || url.startsWith("https://"))) {
+    statusBar()->showMessage("Enter an HTTP or HTTPS URL to download");
+    return;
+  }
+  if (m_externalDownloadWatcher->isRunning()) {
+    statusBar()->showMessage("A download operation is already running");
+    return;
+  }
+
+  m_externalDownloadUrl = url;
+  m_externalDownloadPath =
+      QString("/track/:external/%1").arg(QUrl::toPercentEncoding(url));
+  m_externalDownloadPost = false;
+  m_downloadAction->setEnabled(false);
+  statusBar()->showMessage("Looking up external tracks...");
+  m_externalDownloadWatcher->setFuture(m_api->get(m_externalDownloadPath));
+}
+
+void AppMainWindow::onExternalDownloadFinished() {
+  const QJsonDocument doc = m_externalDownloadWatcher->result();
+  m_downloadAction->setEnabled(true);
+
+  if (doc.isNull()) {
+    statusBar()->showMessage("Unable to get track data");
+    return;
+  }
+
+  if (!m_externalDownloadPost) {
+    const QJsonArray tracks = doc.isArray()
+                                  ? doc.array()
+                                  : doc.object()["tracks"].toArray();
+    if (tracks.isEmpty()) {
+      statusBar()->showMessage("No external tracks found");
+      return;
+    }
+
+    QStringList names;
+    for (const QJsonValue &value : tracks) {
+      const QString name = value.toObject()["name"].toString();
+      if (!name.isEmpty())
+        names.append(name);
+    }
+    const QString details = names.isEmpty()
+                                ? QString("Download tracks from %1?")
+                                      .arg(m_externalDownloadUrl)
+                                : QString("Download these tracks from %1?\n\n%2")
+                                      .arg(m_externalDownloadUrl,
+                                           names.join("\n"));
+    const auto answer = QMessageBox::question(
+        this, "Download Tracks", details, QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::Yes);
+    if (answer != QMessageBox::Yes) {
+      statusBar()->showMessage("Download cancelled");
+      return;
+    }
+
+    m_externalDownloadPost = true;
+    m_downloadAction->setEnabled(false);
+    statusBar()->showMessage("Download started");
+    m_externalDownloadWatcher->setFuture(m_api->post(m_externalDownloadPath));
+    return;
+  }
+
+  m_externalDownloadPost = false;
+  if (doc.isObject() && doc.object().contains("error")) {
+    statusBar()->showMessage(
+        "Download failed: " + doc.object()["error"].toString());
+    return;
+  }
+  statusBar()->showMessage("Download completed");
+  refreshSearch();
 }
 
 void AppMainWindow::onTrackFetchFinished() {

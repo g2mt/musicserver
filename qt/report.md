@@ -8,11 +8,7 @@ The most important gaps are summarized below:
 
 | Priority | Missing or incomplete feature | Frontend evidence | Qt evidence |
 | --- | --- | --- | --- |
-| High | Dark mode and blurred album-cover background | `App.tsx`, `SettingsTab.tsx`, `App.css` | No dark-mode/background state or rendering in `AppState`/`AppMainWindow` |
-| High | Queue/audio state restoration | `TrackQueue.tsx`, `AudioState.tsx`, `App.tsx` | No queue/audio serialization or suspend restoration in Qt |
-| High | URL/media downloading workflow | `SearchBar.tsx`, `/track/:external/...` | No external-track lookup, confirmation, or download action |
 | High | Loudness-based normalization | `audio/AudioState.tsx` | Qt has a normalize checkbox but never computes loudness or applies normalization |
-| Medium | Track-list actions and error feedback parity | `Track.tsx` | Qt forgets silently and does not provide equivalent toast/error handling |
 
 ## 1. Dark mode and blurred-cover background — high priority
 

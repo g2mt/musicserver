@@ -41,6 +41,7 @@ private slots:
   void addAllTracks();
   void addVisibleTracks();
   void onTrackFetchFinished();
+  void onExternalDownloadFinished();
   void setTrackSort(const QString &field);
 
 private:
@@ -53,6 +54,7 @@ private:
   void updateWindowTitle(const QString &musicTitle);
   void fetchAllTracks(TrackFetchAction action);
   void updateSearchHistory(const QString &query);
+  void startExternalDownload();
 
   ApiClient *m_api;
   QSplitter *m_splitter = nullptr;
@@ -61,6 +63,11 @@ private:
   QToolBar *m_toolbar = nullptr;
   QLineEdit *m_searchInput = nullptr;
   QCompleter *m_searchCompleter = nullptr;
+  QAction *m_downloadAction = nullptr;
+  QFutureWatcher<QJsonDocument> *m_externalDownloadWatcher = nullptr;
+  QString m_externalDownloadPath;
+  QString m_externalDownloadUrl;
+  bool m_externalDownloadPost = false;
 
   // Left panel
   QTabBar *m_leftTabBar = nullptr;
