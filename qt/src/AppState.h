@@ -46,10 +46,7 @@ public:
   bool tracksListCollapsed() const;
   bool queueCollapsed() const;
   bool darkMode() const;
-  bool showBlurredCover() const;
-  bool showOnlyQueueAfterEnqueue() const;
   bool shuffleBeforePlayingAll() const;
-  bool showTracksListOnTabChange() const;
   int searchHistoryLimit() const;
   QString highlightedTrackId() const;
 
@@ -100,10 +97,7 @@ public slots:
   void setTracksListCollapsed(bool collapsed);
   void setQueueCollapsed(bool collapsed);
   void setDarkMode(bool dark);
-  void setShowBlurredCover(bool show);
-  void setShowOnlyQueueAfterEnqueue(bool show);
   void setShuffleBeforePlayingAll(bool shuffle);
-  void setShowTracksListOnTabChange(bool show);
   void setSearchHistoryLimit(int limit);
   void setHighlightedTrackId(const QString &id);
 
@@ -152,10 +146,7 @@ signals:
   void tracksListCollapsedChanged(bool collapsed);
   void queueCollapsedChanged(bool collapsed);
   void darkModeChanged(bool dark);
-  void showBlurredCoverChanged(bool show);
-  void showOnlyQueueAfterEnqueueChanged(bool show);
   void shuffleBeforePlayingAllChanged(bool shuffle);
-  void showTracksListOnTabChangeChanged(bool show);
   void searchHistoryLimitChanged(int limit);
   void highlightedTrackIdChanged(const QString &id);
 
@@ -200,10 +191,7 @@ private:
   bool m_tracksListCollapsed = false;
   bool m_queueCollapsed = false;
   bool m_darkMode = false;
-  bool m_showBlurredCover = true;
-  bool m_showOnlyQueueAfterEnqueue = false;
   bool m_shuffleBeforePlayingAll = true;
-  bool m_showTracksListOnTabChange = false;
   int m_searchHistoryLimit = 10;
   QString m_highlightedTrackId;
 

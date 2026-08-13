@@ -283,15 +283,8 @@ LeftTab AppState::leftTab() const { return m_leftTab; }
 bool AppState::tracksListCollapsed() const { return m_tracksListCollapsed; }
 bool AppState::queueCollapsed() const { return m_queueCollapsed; }
 bool AppState::darkMode() const { return m_darkMode; }
-bool AppState::showBlurredCover() const { return m_showBlurredCover; }
-bool AppState::showOnlyQueueAfterEnqueue() const {
-  return m_showOnlyQueueAfterEnqueue;
-}
 bool AppState::shuffleBeforePlayingAll() const {
   return m_shuffleBeforePlayingAll;
-}
-bool AppState::showTracksListOnTabChange() const {
-  return m_showTracksListOnTabChange;
 }
 int AppState::searchHistoryLimit() const { return m_searchHistoryLimit; }
 QString AppState::highlightedTrackId() const { return m_highlightedTrackId; }
@@ -301,9 +294,6 @@ void AppState::setLeftTab(LeftTab tab) {
     return;
   m_leftTab = tab;
   emit leftTabChanged(tab);
-  if (m_showTracksListOnTabChange) {
-    setTracksListCollapsed(false);
-  }
 }
 
 void AppState::setTracksListCollapsed(bool collapsed) {
@@ -328,32 +318,11 @@ void AppState::setDarkMode(bool dark) {
   qDebug() << "darkMode set to" << dark;
 }
 
-void AppState::setShowBlurredCover(bool show) {
-  if (m_showBlurredCover == show)
-    return;
-  m_showBlurredCover = show;
-  emit showBlurredCoverChanged(show);
-}
-
-void AppState::setShowOnlyQueueAfterEnqueue(bool show) {
-  if (m_showOnlyQueueAfterEnqueue == show)
-    return;
-  m_showOnlyQueueAfterEnqueue = show;
-  emit showOnlyQueueAfterEnqueueChanged(show);
-}
-
 void AppState::setShuffleBeforePlayingAll(bool shuffle) {
   if (m_shuffleBeforePlayingAll == shuffle)
     return;
   m_shuffleBeforePlayingAll = shuffle;
   emit shuffleBeforePlayingAllChanged(shuffle);
-}
-
-void AppState::setShowTracksListOnTabChange(bool show) {
-  if (m_showTracksListOnTabChange == show)
-    return;
-  m_showTracksListOnTabChange = show;
-  emit showTracksListOnTabChangeChanged(show);
 }
 
 void AppState::setSearchHistoryLimit(int limit) {
@@ -439,13 +408,8 @@ void AppState::loadConfig() {
   setVolume(settings.value("volume", 1.0).toDouble());
   setMuted(settings.value("muted", false).toBool());
   setDarkMode(settings.value("darkMode", false).toBool());
-  setShowBlurredCover(settings.value("showBlurredCover", true).toBool());
-  setShowOnlyQueueAfterEnqueue(
-      settings.value("showOnlyQueueAfterEnqueue", false).toBool());
   setShuffleBeforePlayingAll(
       settings.value("shuffleBeforePlayingAll", true).toBool());
-  setShowTracksListOnTabChange(
-      settings.value("showTracksListOnTabChange", false).toBool());
   setSearchHistoryLimit(settings.value("searchHistoryLimit", 10).toInt());
   setTargetNormalizationDbs(
       settings.value("targetNormalizationDbs", 0.0).toDouble());
@@ -479,10 +443,7 @@ void AppState::saveConfig() {
   settings.setValue("volume", m_volume);
   settings.setValue("muted", m_muted);
   settings.setValue("darkMode", m_darkMode);
-  settings.setValue("showBlurredCover", m_showBlurredCover);
-  settings.setValue("showOnlyQueueAfterEnqueue", m_showOnlyQueueAfterEnqueue);
   settings.setValue("shuffleBeforePlayingAll", m_shuffleBeforePlayingAll);
-  settings.setValue("showTracksListOnTabChange", m_showTracksListOnTabChange);
   settings.setValue("searchHistoryLimit", m_searchHistoryLimit);
   settings.setValue("targetNormalizationDbs", m_targetNormalizationDbs);
   settings.setValue("maxNormalizationDbs", m_maxNormalizationDbs);

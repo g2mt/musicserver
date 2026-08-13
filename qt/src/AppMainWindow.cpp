@@ -539,10 +539,6 @@ void AppMainWindow::addVisibleTracks() {
   }
 
   AppState *state = AppState::instance();
-  if (state->showOnlyQueueAfterEnqueue()) {
-    state->setTracksListCollapsed(true);
-    state->setQueueCollapsed(false);
-  }
   state->queueAddAll(tracks);
 }
 
@@ -573,17 +569,9 @@ void AppMainWindow::onTrackFetchFinished() {
   AppState *state = AppState::instance();
   switch (m_trackFetchAction) {
   case TrackFetchAction::PlayAll:
-    if (state->showOnlyQueueAfterEnqueue()) {
-      state->setTracksListCollapsed(true);
-      state->setQueueCollapsed(false);
-    }
     state->queuePlayAll(tracks);
     break;
   case TrackFetchAction::AddAll:
-    if (state->showOnlyQueueAfterEnqueue()) {
-      state->setTracksListCollapsed(true);
-      state->setQueueCollapsed(false);
-    }
     state->queueAddAll(tracks);
     break;
   case TrackFetchAction::None:

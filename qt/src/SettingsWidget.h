@@ -47,10 +47,7 @@ private:
   QCheckBox *m_normalizeCheck = nullptr;
 
   // General settings
-  QCheckBox *m_showBlurredCoverCheck = nullptr;
-  QCheckBox *m_showOnlyQueueAfterEnqueueCheck = nullptr;
   QCheckBox *m_shuffleBeforePlayingAllCheck = nullptr;
-  QCheckBox *m_showTracksListOnTabChangeCheck = nullptr;
   QSlider *m_targetNormalizationSlider = nullptr;
   QLabel *m_targetNormalizationValue = nullptr;
   QSlider *m_maxNormalizationSlider = nullptr;

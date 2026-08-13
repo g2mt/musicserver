@@ -8,6 +8,7 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QIcon>
 #include <QLabel>
 #include <QLineEdit>
 #include <QList>
@@ -42,19 +43,9 @@ SettingsWidget::SettingsWidget(QWidget *parent)
   });
   connect(state, &AppState::normalizeChanged, this,
           [this](bool norm) { m_normalizeCheck->setChecked(norm); });
-  connect(state, &AppState::showBlurredCoverChanged, this,
-          [this](bool show) { m_showBlurredCoverCheck->setChecked(show); });
-  connect(state, &AppState::showOnlyQueueAfterEnqueueChanged, this,
-          [this](bool show) {
-            m_showOnlyQueueAfterEnqueueCheck->setChecked(show);
-          });
   connect(state, &AppState::shuffleBeforePlayingAllChanged, this,
           [this](bool shuffle) {
             m_shuffleBeforePlayingAllCheck->setChecked(shuffle);
-          });
-  connect(state, &AppState::showTracksListOnTabChangeChanged, this,
-          [this](bool show) {
-            m_showTracksListOnTabChangeCheck->setChecked(show);
           });
   connect(state, &AppState::targetNormalizationDbsChanged, this,
           [this](double db) {
@@ -112,22 +103,13 @@ void SettingsWidget::setupUi() {
 
   // General settings
   QWidget *generalBody = nullptr;
-  QGroupBox *generalSection = makeSection(tr("General settings"), &generalBody);
+  QGroupBox *generalSection = makeSection(tr("General Settings"), &generalBody);
   layout->addWidget(generalSection);
 
-  m_showBlurredCoverCheck = new QCheckBox(
-      tr("Show blurred album cover as background in dark mode"), generalBody);
-  m_showOnlyQueueAfterEnqueueCheck =
-      new QCheckBox(tr("Show only queue after adding tracks"), generalBody);
   m_shuffleBeforePlayingAllCheck =
       new QCheckBox(tr("Shuffle before playing all tracks"), generalBody);
-  m_showTracksListOnTabChangeCheck =
-      new QCheckBox(tr("Show tracks list when switching tabs"), generalBody);
 
-  generalBody->layout()->addWidget(m_showBlurredCoverCheck);
-  generalBody->layout()->addWidget(m_showOnlyQueueAfterEnqueueCheck);
   generalBody->layout()->addWidget(m_shuffleBeforePlayingAllCheck);
-  generalBody->layout()->addWidget(m_showTracksListOnTabChangeCheck);
 
   generalBody->layout()->addWidget(
       makeSliderRow(tr("Target Normalization (dB):"), -200, 200,
@@ -150,6 +132,7 @@ void SettingsWidget::setupUi() {
   auto *buttonsLayout = new QHBoxLayout(buttonsRow);
   buttonsLayout->setContentsMargins(0, 0, 0, 0);
   m_saveButton = new QPushButton(tr("Save"), buttonsRow);
+  m_saveButton->setIcon(QIcon::fromTheme("document-save"));
   m_darkModeCheck = new QCheckBox(tr("Dark Mode (placeholder)"), buttonsRow);
   buttonsLayout->addWidget(m_saveButton);
   buttonsLayout->addWidget(m_darkModeCheck);
@@ -160,28 +143,18 @@ void SettingsWidget::setupUi() {
   auto *rescanLayout = new QHBoxLayout(rescanRow);
   rescanLayout->setContentsMargins(0, 0, 0, 0);
   m_rescanButton = new QPushButton(tr("Rescan Music"), rescanRow);
+  m_rescanButton->setIcon(QIcon::fromTheme("view-refresh"));
   m_forceRescanButton =
-      new QPushButton(tr("Rescan Music (force update)"), rescanRow);
+      new QPushButton(tr("Rescan Music (Force Update)"), rescanRow);
+  m_forceRescanButton->setIcon(QIcon::fromTheme("view-refresh"));
   rescanLayout->addWidget(m_rescanButton);
   rescanLayout->addWidget(m_forceRescanButton);
   rescanLayout->addStretch();
   generalBody->layout()->addWidget(rescanRow);
 
-  connect(m_showBlurredCoverCheck, &QCheckBox::toggled, this,
-          [this](bool checked) {
-            AppState::instance()->setShowBlurredCover(checked);
-          });
-  connect(m_showOnlyQueueAfterEnqueueCheck, &QCheckBox::toggled, this,
-          [this](bool checked) {
-            AppState::instance()->setShowOnlyQueueAfterEnqueue(checked);
-          });
   connect(m_shuffleBeforePlayingAllCheck, &QCheckBox::toggled, this,
           [this](bool checked) {
             AppState::instance()->setShuffleBeforePlayingAll(checked);
-          });
-  connect(m_showTracksListOnTabChangeCheck, &QCheckBox::toggled, this,
-          [this](bool checked) {
-            AppState::instance()->setShowTracksListOnTabChange(checked);
           });
   connect(m_targetNormalizationSlider, &QSlider::valueChanged, this,
           [this](int value) {
@@ -208,7 +181,7 @@ void SettingsWidget::setupUi() {
 
   // Server properties
   QWidget *propsBody = nullptr;
-  QGroupBox *propsSection = makeSection(tr("Server properties"), &propsBody);
+  QGroupBox *propsSection = makeSection(tr("Server Properties"), &propsBody);
   layout->addWidget(propsSection);
 
   auto *form = new QWidget();
@@ -249,7 +222,7 @@ void SettingsWidget::setupUi() {
   // Ongoing processes
   QWidget *processBody = nullptr;
   QGroupBox *processSection =
-      makeSection(tr("Ongoing processes"), &processBody);
+      makeSection(tr("Ongoing Processes"), &processBody);
   layout->addWidget(processSection);
   m_progressWidget = new ProgressWidget(processBody);
   processBody->layout()->addWidget(m_progressWidget);
@@ -307,12 +280,7 @@ void SettingsWidget::updateFromState() {
       sliderValueText(m_amplificationSlider->value(), 1));
   m_normalizeCheck->setChecked(state->normalize());
 
-  m_showBlurredCoverCheck->setChecked(state->showBlurredCover());
-  m_showOnlyQueueAfterEnqueueCheck->setChecked(
-      state->showOnlyQueueAfterEnqueue());
   m_shuffleBeforePlayingAllCheck->setChecked(state->shuffleBeforePlayingAll());
-  m_showTracksListOnTabChangeCheck->setChecked(
-      state->showTracksListOnTabChange());
 
   m_targetNormalizationSlider->setValue(
       qRound(state->targetNormalizationDbs() * 10.0));
