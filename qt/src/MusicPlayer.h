@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QString>
+#include <QStringList>
 #include <QWidget>
 
 class ApiClient;
@@ -17,6 +18,10 @@ class MusicPlayer : public QWidget {
   Q_OBJECT
 public:
   explicit MusicPlayer(QWidget *parent = nullptr);
+
+signals:
+  void searchRequested(const QString &query);
+  void pathRequested(const QStringList &path);
 
 private slots:
   void onProgressSliderChanged(int value);

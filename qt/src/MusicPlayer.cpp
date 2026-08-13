@@ -159,6 +159,8 @@ void MusicPlayer::setupUi() {
 
   mainLayout->addLayout(controlsLayout);
 
+  updateTrackFromState(TrackData());
+
   // Connections
   connect(m_progressSlider, &QSlider::sliderPressed, this,
           [this]() { m_seeking = true; });
@@ -323,6 +325,29 @@ void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
       menu.addAction(QIcon::fromTheme("media-skip-backward"), "Previous");
   prevAction->setEnabled(state->canPrev());
 
+  const TrackData track = *state->currentTrack();
+  if (!track.name.isEmpty()) {
+    QMenu *goToMenu = menu.addMenu("Go to...");
+    if (!track.album.isEmpty()) {
+      goToMenu->addAction(
+          QIcon::fromTheme("media-optical"), "Album", this, [this, track]() {
+            emit searchRequested(QString("album:\"%1\"").arg(track.album));
+          });
+    }
+    if (!track.artist.isEmpty()) {
+      goToMenu->addAction(
+          QIcon::fromTheme("user-identity"), "Artist", this, [this, track]() {
+            emit searchRequested(QString("artist:\"%1\"").arg(track.artist));
+          });
+    }
+    goToMenu->addAction(QIcon::fromTheme("folder"), "Path", this,
+                        [this, track]() {
+                          QStringList parts = track.path.split("/");
+                          parts.removeLast();
+                          emit pathRequested(parts);
+                        });
+  }
+
   menu.addSeparator()->setText("Repeat...");
 
   QAction *repeatTrack =
@@ -335,7 +360,7 @@ void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
   repeatQueue->setCheckable(true);
   repeatQueue->setChecked(state->repeat() == RepeatMode::Queue);
 
-  QAction *repeatOff = menu.addAction("No repeat");
+  QAction *repeatOff = menu.addAction("No Repeat");
   repeatOff->setCheckable(true);
   repeatOff->setChecked(state->repeat() == RepeatMode::None);
 

@@ -30,6 +30,7 @@ signals:
   void unqueueRequested(int row);
   void removeAllRequested();
   void shuffleRequested();
+  void searchRequested(const QString &query);
 
 private:
   void setupUi();

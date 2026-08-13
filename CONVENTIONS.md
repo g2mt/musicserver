@@ -127,6 +127,6 @@ body {
 
 - An optional Qt frontend is provided, linked to the musicserver library.
 - Use two spaces for indent.
-- Menu actions, buttons have to be in title-case. Capitalize the first level of every content word.
+- Menu actions, buttons have to be in title-case. Capitalize the first level of every content word (i.e. `Go to Location`, `Copy Info`).
 - Use `QIcon::fromTheme` for every visible button and menu item.
 

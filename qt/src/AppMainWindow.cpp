@@ -56,6 +56,19 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   setupLeftPanel();
   setupRightPanel();
   m_musicPlayer = new MusicPlayer();
+  connect(m_musicPlayer, &MusicPlayer::searchRequested, this,
+          [this](const QString &query) {
+            AppState *state = AppState::instance();
+            state->setSearchQuery(query, 0);
+            state->setLeftTab(LeftTab::Tracks);
+            refreshSearch();
+          });
+  connect(m_musicPlayer, &MusicPlayer::pathRequested, this,
+          [](const QStringList &path) {
+            AppState *state = AppState::instance();
+            state->setFbPath(path);
+            state->setLeftTab(LeftTab::Files);
+          });
   setupLayout();
   setupShortcuts();
 
@@ -244,6 +257,14 @@ void AppMainWindow::setupLeftPanel() {
             AppState::instance()->queueAdd(track);
           });
 
+  connect(m_trackListView, &TrackListView::searchRequested, this,
+          [this](const QString &query) {
+            AppState *state = AppState::instance();
+            state->setSearchQuery(query, 0);
+            state->setLeftTab(LeftTab::Tracks);
+            refreshSearch();
+          });
+
   QToolBar *tracksControls = new QToolBar();
   tracksControls->setMovable(false);
   tracksControls->setFloatable(false);
@@ -338,10 +359,9 @@ void AppMainWindow::setupLeftPanel() {
   m_settingsTab = m_settingsWidget;
   m_leftStack->addWidget(m_settingsTab);
 
-  connect(m_settingsWidget, &SettingsWidget::statusMessage, this,
-          [this](const QString &message) {
-            statusBar()->showMessage(message);
-          });
+  connect(
+      m_settingsWidget, &SettingsWidget::statusMessage, this,
+      [this](const QString &message) { statusBar()->showMessage(message); });
   connect(m_settingsWidget, &SettingsWidget::rescanCompleted, this,
           [this]() { refreshSearch(); });
 }
@@ -372,6 +392,14 @@ void AppMainWindow::setupRightPanel() {
             state->setQueueIndex(row);
             state->setCurrentTrack(track);
             state->setIsPlaying(true);
+          });
+
+  connect(m_queueListView, &TrackListView::searchRequested, this,
+          [this](const QString &query) {
+            AppState *state = AppState::instance();
+            state->setSearchQuery(query, 0);
+            state->setLeftTab(LeftTab::Tracks);
+            refreshSearch();
           });
 
   connect(m_queueListView, &TrackListView::removeAllRequested, this,

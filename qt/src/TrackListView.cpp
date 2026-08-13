@@ -1,10 +1,13 @@
 #include "TrackListView.h"
 
 #include "ApiClient.h"
+#include "AppState.h"
 #include "TrackDelegate.h"
 #include "TrackListModel.h"
 
+#include <QApplication>
 #include <QByteArray>
+#include <QClipboard>
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QHBoxLayout>
@@ -78,28 +81,66 @@ void TrackListView::setupUi() {
             emit playRequested(track, index.row());
           });
 
-  connect(m_view, &QListView::customContextMenuRequested, this,
-          [this](const QPoint &pos) {
-            QModelIndex index = m_view->indexAt(pos);
-            if (!index.isValid())
-              return;
-            TrackData track = qvariant_cast<TrackData>(
-                index.data(TrackListModel::TrackDataRole));
-            const int row = index.row();
+  connect(
+      m_view, &QListView::customContextMenuRequested, this,
+      [this](const QPoint &pos) {
+        QModelIndex index = m_view->indexAt(pos);
+        if (!index.isValid())
+          return;
+        TrackData track =
+            qvariant_cast<TrackData>(index.data(TrackListModel::TrackDataRole));
+        const int row = index.row();
 
-            QMenu menu(this);
-            menu.addAction(
-                QIcon::fromTheme("media-playback-start"), "Play", this,
-                [this, track, row]() { emit playRequested(track, row); });
-            if (m_action == Action::Enqueue) {
-              menu.addAction(QIcon::fromTheme("list-add"), "Add to queue", this,
-                             [this, track]() { emit enqueueRequested(track); });
-            } else {
-              menu.addAction("Remove", this,
-                             [this, row]() { emit unqueueRequested(row); });
-            }
-            menu.exec(m_view->viewport()->mapToGlobal(pos));
-          });
+        QMenu menu(this);
+        menu.addAction(
+            QIcon::fromTheme("media-playback-start"), "Play", this,
+            [this, track, row]() { emit playRequested(track, row); });
+        if (m_action == Action::Enqueue) {
+          menu.addAction(QIcon::fromTheme("list-add"), "Add to Queue", this,
+                         [this, track]() { emit enqueueRequested(track); });
+        } else {
+          menu.addAction("Remove", this,
+                         [this, row]() { emit unqueueRequested(row); });
+        }
+        menu.addAction(QIcon::fromTheme("edit-copy"), "Copy Info", this,
+                       [track]() {
+                         QApplication::clipboard()->setText(
+                             QString("%1 - %2").arg(track.name, track.artist));
+                       });
+
+        QMenu *goToMenu = menu.addMenu("Go to...");
+        if (!track.album.isEmpty()) {
+          goToMenu->addAction(QIcon::fromTheme("media-optical"), "Album", this,
+                              [this, track]() {
+                                emit searchRequested(
+                                    QString("album:\"%1\"").arg(track.album));
+                              });
+        }
+        if (!track.artist.isEmpty()) {
+          goToMenu->addAction(QIcon::fromTheme("user-identity"), "Artist", this,
+                              [this, track]() {
+                                emit searchRequested(
+                                    QString("artist:\"%1\"").arg(track.artist));
+                              });
+        }
+        goToMenu->addAction(QIcon::fromTheme("folder"), "Path", this,
+                            [this, track]() {
+                              QStringList parts = track.path.split("/");
+                              parts.removeLast();
+                              AppState::instance()->setFbPath(parts);
+                              AppState::instance()->setLeftTab(LeftTab::Files);
+                            });
+        menu.addAction(QIcon::fromTheme("user-trash"), "Forget Track", this,
+                       [this, track]() {
+                         ApiClient::instance()
+                             ->del(QString("/track/%1").arg(track.id))
+                             .then([this, track](const QJsonDocument &) {
+                               emit searchRequested(
+                                   AppState::instance()->searchQuery());
+                             });
+                       });
+        menu.exec(m_view->viewport()->mapToGlobal(pos));
+      });
 
   connect(m_model, &TrackListModel::coverRequested, this,
           [this](int, const QString &trackId) { fetchCover(trackId); });
