@@ -2,6 +2,7 @@
 
 #include <QFutureWatcher>
 #include <QLabel>
+#include <QToolBar>
 #include <QTreeWidget>
 #include <QWidget>
 
@@ -36,6 +37,9 @@ private:
 
   ApiClient *m_api = nullptr;
   QLabel *m_breadcrumb = nullptr;
+  QToolBar *m_toolbar = nullptr;
+  QAction *m_showTracksAction = nullptr;
+  QAction *m_scanAction = nullptr;
   QTreeWidget *m_tree = nullptr;
   QFutureWatcher<QJsonDocument> *m_listingWatcher = nullptr;
   QFutureWatcher<TrackData> *m_trackWatcher = nullptr;

@@ -10,7 +10,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMenu>
+#include <QSize>
 #include <QTimer>
+#include <QToolBar>
 #include <QTreeWidgetItem>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -68,6 +70,25 @@ void FileBrowserWidget::setupUi() {
             }
           });
   layout->addWidget(m_breadcrumb);
+
+  m_toolbar = new QToolBar();
+  m_toolbar->setMovable(false);
+  m_toolbar->setFloatable(false);
+  m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+  m_showTracksAction =
+      m_toolbar->addAction(themeIcon("system-search", "edit-find"),
+                           "Show Tracks in This Path", this, [this]() {
+                             const QString relativePath =
+                                 AppState::instance()->fbPath().join("/");
+                             emit showTracksInPath(relativePath);
+                           });
+  m_scanAction = m_toolbar->addAction(
+      themeIcon("view-refresh", "view-refresh"), "Scan This Path", this,
+      [this]() {
+        const QString relativePath = AppState::instance()->fbPath().join("/");
+        m_scanWatcher->setFuture(m_api->scanTracks(relativePath, false));
+      });
+  layout->addWidget(m_toolbar);
 
   m_tree = new QTreeWidget();
   m_tree->setColumnCount(1);
@@ -178,8 +199,7 @@ void FileBrowserWidget::onListingFinished() {
   }
 }
 
-void FileBrowserWidget::handleItemActivated(QTreeWidgetItem *item,
-                                            int column) {
+void FileBrowserWidget::handleItemActivated(QTreeWidgetItem *item, int column) {
   Q_UNUSED(column);
   if (!item)
     return;
@@ -227,11 +247,10 @@ void FileBrowserWidget::showContextMenu(const QPoint &pos) {
 
   QMenu menu;
   if (type == "dir") {
-    menu.addAction(QIcon::fromTheme("system-search"), "Show tracks in this path",
-                   this, [this, relativePath]() {
-                     emit showTracksInPath(relativePath);
-                   });
-    menu.addAction(QIcon::fromTheme("view-refresh"), "Scan this path", this,
+    menu.addAction(
+        QIcon::fromTheme("system-search"), "Show Tracks in This Path", this,
+        [this, relativePath]() { emit showTracksInPath(relativePath); });
+    menu.addAction(QIcon::fromTheme("view-refresh"), "Scan This Path", this,
                    [this, relativePath]() {
                      m_scanWatcher->setFuture(
                          m_api->scanTracks(relativePath, false));
@@ -240,8 +259,7 @@ void FileBrowserWidget::showContextMenu(const QPoint &pos) {
     const QString encoded = encodedTrackPathForItem(item);
     menu.addAction(QIcon::fromTheme("media-playback-start"), "Play", this,
                    [this, encoded]() {
-                     m_trackWatcher->setFuture(
-                         m_api->loadTrackByPath(encoded));
+                     m_trackWatcher->setFuture(m_api->loadTrackByPath(encoded));
                    });
   }
 
