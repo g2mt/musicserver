@@ -111,7 +111,10 @@ void AppMainWindow::setupAudio() {
           return;
         QString dataPath =
             state->serverProps()["config"].toObject()["data_path"].toString();
-        QString filePath = dataPath + "/" + track.path;
+        QString filePath = dataPath;
+        if (!dataPath.endsWith("/"))
+          filePath += "/";
+        filePath += track.path;
         m_audioPlayer->setSource(QUrl::fromLocalFile(filePath).toString());
       });
 
