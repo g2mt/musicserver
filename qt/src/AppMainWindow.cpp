@@ -1,10 +1,10 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
+#include "NativeAudioPlayer.h"
 #include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
-#include "NativeAudioPlayer.h"
 #include "SettingsWidget.h"
 #include "TrackListView.h"
 
@@ -90,6 +90,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
 
   // Load config
   state->loadConfig();
+  m_searchInput->setText(state->searchQuery());
 
   // Initial search to load all tracks on startup
   refreshSearch();
