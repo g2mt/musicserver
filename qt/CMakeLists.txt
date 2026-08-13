@@ -93,3 +93,21 @@ target_link_libraries(musicserver_qt PRIVATE
   ebur128
 )
 add_dependencies(musicserver_qt backend)
+
+### Install — desktop entry and icon
+include(GNUInstallDirs)
+
+set(MS_QT_EXEC ${CMAKE_INSTALL_FULL_BINDIR}/${QT_APP_BINARY})
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/musicserver-qt.desktop.in
+  ${CMAKE_CURRENT_BINARY_DIR}/musicserver-qt.desktop
+  @ONLY
+)
+
+install(PROGRAMS $<TARGET_FILE:musicserver_qt>
+  DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES ${MS_DIR}/branding/circle/192x192.png
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/192x192/apps
+  RENAME musicserver-qt.png)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/musicserver-qt.desktop
+  DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
