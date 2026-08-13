@@ -9,8 +9,12 @@ set(MS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 set(MS_GOARCH "amd64" CACHE STRING "Go target architecture (amd64, arm64)")
 set(QT_APP_BINARY "musicserver-qt" CACHE STRING "Qt application binary output name")
 set(QT_MIN_VERSION "6.2" CACHE STRING "Minimum Qt version")
+option(MS_ENABLE_MPRIS "Enable MPRIS integration" ON)
 
 find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS Core Widgets Multimedia Concurrent)
+if(MS_ENABLE_MPRIS)
+  find_package(Qt6 ${QT_MIN_VERSION} REQUIRED COMPONENTS DBus)
+endif()
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(TAGLIB REQUIRED taglib)
@@ -72,7 +76,16 @@ set(QT_HEADERS
   src/Bookmark.h
 )
 
+if(MS_ENABLE_MPRIS)
+  list(APPEND QT_SOURCES src/Mpris.cpp)
+  list(APPEND QT_HEADERS src/Mpris.h)
+endif()
+
 add_executable(musicserver_qt ${QT_SOURCES} ${QT_HEADERS})
+
+if(MS_ENABLE_MPRIS)
+  target_compile_definitions(musicserver_qt PRIVATE MS_ENABLE_MPRIS)
+endif()
 
 set_target_properties(musicserver_qt PROPERTIES
   OUTPUT_NAME ${QT_APP_BINARY}
@@ -92,6 +105,9 @@ target_link_libraries(musicserver_qt PRIVATE
   ${TAGLIB_LIBRARIES}
   ebur128
 )
+if(MS_ENABLE_MPRIS)
+  target_link_libraries(musicserver_qt PRIVATE Qt6::DBus)
+endif()
 add_dependencies(musicserver_qt backend)
 
 ### Install — desktop entry and icon

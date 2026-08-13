@@ -2,6 +2,9 @@
 #include "ApiClient.h"
 #include "AppState.h"
 #include "TrackData.h"
+#ifdef MS_ENABLE_MPRIS
+#include "Mpris.h"
+#endif
 
 #include <QContextMenuEvent>
 #include <QHBoxLayout>
@@ -12,6 +15,10 @@
 
 MusicPlayer::MusicPlayer(QWidget *parent)
     : QWidget(parent), m_api(ApiClient::instance()) {
+#ifdef MS_ENABLE_MPRIS
+  new Mpris(this);
+#endif
+
   setupUi();
 
   m_coverWatcher = new QFutureWatcher<QByteArray>(this);
