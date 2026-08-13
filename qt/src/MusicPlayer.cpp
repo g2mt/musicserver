@@ -250,8 +250,12 @@ void MusicPlayer::updateTrackFromState(const TrackData &track) {
   } else {
     m_trackLabel->setText(track.name);
     titleFont.setBold(true);
-    m_artistLabel->setText(track.artist);
-    m_artistLabel->show();
+    if (track.artist.isEmpty()) {
+      m_artistLabel->hide();
+    } else {
+      m_artistLabel->setText(track.artist);
+      m_artistLabel->show();
+    }
   }
   m_trackLabel->setFont(titleFont);
   m_trackCover->clear();
