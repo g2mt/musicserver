@@ -1,6 +1,7 @@
 #include "AudioPlayer.h"
 
 #include <QtMath>
+#include <qdebug.h>
 
 AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent) {
   m_player = new QMediaPlayer(this);
@@ -22,6 +23,7 @@ AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent) {
 void AudioPlayer::setSource(const QString &url) {
   if (m_currentSource == url)
     return;
+  qDebug() << "setSource" << url;
   const bool wasPlaying =
       m_player->playbackState() == QMediaPlayer::PlayingState;
   m_currentSource = url;
@@ -61,7 +63,8 @@ bool AudioPlayer::isPlaying() const {
 }
 
 void AudioPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-  if (status == QMediaPlayer::EndOfMedia) {
+  if (status == QMediaPlayer::EndOfMedia ||
+      status == QMediaPlayer::InvalidMedia) {
     emit ended();
   }
 }
