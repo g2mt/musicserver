@@ -1,10 +1,10 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
-#include "NativeAudioPlayer.h"
 #include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
+#include "NativeAudioPlayer.h"
 #include "SettingsWidget.h"
 #include "TrackListView.h"
 
@@ -23,10 +23,10 @@
 #include <QRegularExpression>
 #include <QResizeEvent>
 #include <QSettings>
-#include <QStringListModel>
 #include <QShortcut>
 #include <QSizePolicy>
 #include <QStatusBar>
+#include <QStringListModel>
 #include <QToolBar>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -55,9 +55,8 @@ AppMainWindow::AppMainWindow(QWidget *parent)
           &AppMainWindow::onTrackFetchFinished);
 
   m_externalDownloadWatcher = new QFutureWatcher<QJsonDocument>(this);
-  connect(m_externalDownloadWatcher,
-          &QFutureWatcher<QJsonDocument>::finished, this,
-          &AppMainWindow::onExternalDownloadFinished);
+  connect(m_externalDownloadWatcher, &QFutureWatcher<QJsonDocument>::finished,
+          this, &AppMainWindow::onExternalDownloadFinished);
 
   m_loudnessWatcher = new QFutureWatcher<double>(this);
   connect(m_loudnessWatcher, &QFutureWatcher<double>::finished, this,
@@ -90,7 +89,9 @@ AppMainWindow::AppMainWindow(QWidget *parent)
 
   // Load config
   state->loadConfig();
-  m_searchInput->setText(state->searchQuery());
+  if (state->searchQuery() != "sort:id") {
+    m_searchInput->setText(state->searchQuery());
+  }
 
   // Initial search to load all tracks on startup
   refreshSearch();
@@ -282,8 +283,7 @@ void AppMainWindow::setupToolbar() {
 
   m_downloadAction =
       m_toolbar->addAction(QIcon::fromTheme("download"), "Download");
-  m_downloadAction->setToolTip(
-      "Download tracks from an HTTP or HTTPS URL");
+  m_downloadAction->setToolTip("Download tracks from an HTTP or HTTPS URL");
   m_downloadAction->setVisible(false);
   m_downloadAction->setEnabled(false);
   connect(m_downloadAction, &QAction::triggered, this,
@@ -308,8 +308,9 @@ void AppMainWindow::setupLeftPanel() {
   tracksLayout->setContentsMargins(0, 0, 0, 0);
 
   m_trackListView = new TrackListView(TrackListView::Action::Enqueue, this);
-  connect(m_trackListView, &TrackListView::statusMessage, this,
-          [this](const QString &message) { statusBar()->showMessage(message); });
+  connect(
+      m_trackListView, &TrackListView::statusMessage, this,
+      [this](const QString &message) { statusBar()->showMessage(message); });
 
   connect(m_trackListView, &TrackListView::playRequested, this,
           [this](const TrackData &track, int) {
@@ -450,8 +451,9 @@ void AppMainWindow::setupRightPanel() {
   rightLayout->addWidget(header);
 
   m_queueListView = new TrackListView(TrackListView::Action::Unqueue, this);
-  connect(m_queueListView, &TrackListView::statusMessage, this,
-          [this](const QString &message) { statusBar()->showMessage(message); });
+  connect(
+      m_queueListView, &TrackListView::statusMessage, this,
+      [this](const QString &message) { statusBar()->showMessage(message); });
   rightLayout->addWidget(m_queueListView);
 
   connect(m_queueListView, &TrackListView::unqueueRequested, this,
@@ -567,8 +569,8 @@ void AppMainWindow::updateSearchHistory(const QString &query) {
   history = history.mid(0, AppState::instance()->searchHistoryLimit());
   settings.setValue("searchSuggestions", history);
 
-  static_cast<QStringListModel *>(m_searchCompleter->model())->setStringList(
-      history);
+  static_cast<QStringListModel *>(m_searchCompleter->model())
+      ->setStringList(history);
 }
 
 void AppMainWindow::onTabClicked(int index) {
@@ -701,9 +703,8 @@ void AppMainWindow::onExternalDownloadFinished() {
   }
 
   if (!m_externalDownloadPost) {
-    const QJsonArray tracks = doc.isArray()
-                                  ? doc.array()
-                                  : doc.object()["tracks"].toArray();
+    const QJsonArray tracks =
+        doc.isArray() ? doc.array() : doc.object()["tracks"].toArray();
     if (tracks.isEmpty()) {
       statusBar()->showMessage("No external tracks found");
       return;
@@ -715,12 +716,11 @@ void AppMainWindow::onExternalDownloadFinished() {
       if (!name.isEmpty())
         names.append(name);
     }
-    const QString details = names.isEmpty()
-                                ? QString("Download tracks from %1?")
-                                      .arg(m_externalDownloadUrl)
-                                : QString("Download these tracks from %1?\n\n%2")
-                                      .arg(m_externalDownloadUrl,
-                                           names.join("\n"));
+    const QString details =
+        names.isEmpty()
+            ? QString("Download tracks from %1?").arg(m_externalDownloadUrl)
+            : QString("Download these tracks from %1?\n\n%2")
+                  .arg(m_externalDownloadUrl, names.join("\n"));
     const auto answer = QMessageBox::question(
         this, "Download Tracks", details, QMessageBox::Yes | QMessageBox::No,
         QMessageBox::Yes);
@@ -738,8 +738,8 @@ void AppMainWindow::onExternalDownloadFinished() {
 
   m_externalDownloadPost = false;
   if (doc.isObject() && doc.object().contains("error")) {
-    statusBar()->showMessage(
-        "Download failed: " + doc.object()["error"].toString());
+    statusBar()->showMessage("Download failed: " +
+                             doc.object()["error"].toString());
     return;
   }
   statusBar()->showMessage("Download completed");
@@ -753,14 +753,12 @@ void AppMainWindow::updateNormalization() {
     m_loudnessTrackId.clear();
     if (m_loudnessWatcher->isRunning())
       m_loudnessWatcher->cancel();
-    m_audioPlayer->setAmplification(
-        static_cast<float>(state->amplification()));
+    m_audioPlayer->setAmplification(static_cast<float>(state->amplification()));
     return;
   }
 
   m_loudnessTrackId = track->id;
-  m_loudnessWatcher->setFuture(
-      m_api->getLoudness(track->id));
+  m_loudnessWatcher->setFuture(m_api->getLoudness(track->id));
 }
 
 void AppMainWindow::onLoudnessFinished() {
@@ -773,8 +771,7 @@ void AppMainWindow::onLoudnessFinished() {
 
   if (!qIsFinite(loudness)) {
     statusBar()->showMessage("Failed to get track loudness");
-    m_audioPlayer->setAmplification(
-        static_cast<float>(state->amplification()));
+    m_audioPlayer->setAmplification(static_cast<float>(state->amplification()));
     return;
   }
   const double gain = qMin(state->targetNormalizationDbs() - loudness,
