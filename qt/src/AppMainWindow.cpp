@@ -1,10 +1,10 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
+#include "AudioPlayer.h"
 #include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
-#include "AudioPlayer.h"
 #include "TrackListView.h"
 
 #include <QAction>
@@ -19,7 +19,9 @@
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QShortcut>
+#include <QSizePolicy>
 #include <QStatusBar>
+#include <QToolBar>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QtMath>
@@ -104,14 +106,12 @@ AppMainWindow::AppMainWindow(QWidget *parent)
             m_rightPanel->setVisible(!state->queueTracks().isEmpty());
           });
 
-  connect(state, &AppState::queueIndexChanged, this,
-          [this, state](int index) {
-            const QList<TrackData> tracks = state->queueTracks();
-            const QString id = (index >= 0 && index < tracks.size())
-                                   ? tracks.at(index).id
-                                   : QString();
-            m_queueListView->setHighlightedTrackId(id);
-          });
+  connect(state, &AppState::queueIndexChanged, this, [this, state](int index) {
+    const QList<TrackData> tracks = state->queueTracks();
+    const QString id =
+        (index >= 0 && index < tracks.size()) ? tracks.at(index).id : QString();
+    m_queueListView->setHighlightedTrackId(id);
+  });
 
   // Progress timer (replace SSE polling)
   m_progressTimer = new QTimer(this);
@@ -240,27 +240,29 @@ void AppMainWindow::setupLeftPanel() {
             AppState::instance()->queueAdd(track);
           });
 
-  QWidget *tracksControls = new QWidget();
-  QHBoxLayout *controlsLayout = new QHBoxLayout(tracksControls);
-  controlsLayout->setContentsMargins(0, 0, 0, 0);
+  QToolBar *tracksControls = new QToolBar();
+  tracksControls->setMovable(false);
+  tracksControls->setFloatable(false);
+  tracksControls->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+  tracksControls->setContextMenuPolicy(Qt::CustomContextMenu);
 
-  QPushButton *playAllBtn =
-      new QPushButton(QIcon::fromTheme("media-playback-start"), "Play all");
-  playAllBtn->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(playAllBtn, &QPushButton::clicked, this,
+  QAction *playAllAction = tracksControls->addAction(
+      QIcon::fromTheme("media-playback-start"), "Play all");
+  connect(playAllAction, &QAction::triggered, this,
           &AppMainWindow::playAllTracks);
-  connect(playAllBtn, &QPushButton::customContextMenuRequested, this,
-          [this, playAllBtn](const QPoint &pos) {
+  connect(tracksControls, &QToolBar::customContextMenuRequested, this,
+          [this, tracksControls](const QPoint &pos) {
             QMenu menu;
             menu.addAction("Add visible to queue", this,
                            [this]() { addVisibleTracks(); });
             menu.addAction("Add all to queue", this,
                            [this]() { addAllTracks(); });
-            menu.exec(playAllBtn->mapToGlobal(pos));
+            menu.exec(tracksControls->mapToGlobal(pos));
           });
 
-  controlsLayout->addStretch();
-  controlsLayout->addWidget(playAllBtn);
+  QWidget *spacer = new QWidget();
+  spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+  tracksControls->addWidget(spacer);
   tracksLayout->addWidget(tracksControls);
   tracksLayout->addWidget(m_trackListView);
   m_leftStack->addWidget(m_tracksTab);
@@ -278,10 +280,9 @@ void AppMainWindow::setupLeftPanel() {
             state->setLeftTab(LeftTab::Tracks);
             refreshSearch();
           });
-  connect(m_bookmarksWidget, &BookmarksWidget::statusMessage, this,
-          [this](const QString &message) {
-            statusBar()->showMessage(message);
-          });
+  connect(
+      m_bookmarksWidget, &BookmarksWidget::statusMessage, this,
+      [this](const QString &message) { statusBar()->showMessage(message); });
 
   // Files tab
   m_fileBrowser = new FileBrowserWidget();
@@ -297,10 +298,9 @@ void AppMainWindow::setupLeftPanel() {
             state->setLeftTab(LeftTab::Tracks);
             refreshSearch();
           });
-  connect(m_fileBrowser, &FileBrowserWidget::statusMessage, this,
-          [this](const QString &message) {
-            statusBar()->showMessage(message);
-          });
+  connect(
+      m_fileBrowser, &FileBrowserWidget::statusMessage, this,
+      [this](const QString &message) { statusBar()->showMessage(message); });
 
   // Settings tab (placeholder)
   m_settingsTab = new QWidget();
@@ -331,8 +331,7 @@ void AppMainWindow::setupRightPanel() {
   headerLayout->addWidget(collapseBtn);
   rightLayout->addWidget(header);
 
-  m_queueListView =
-      new TrackListView(TrackListView::Action::Unqueue, this);
+  m_queueListView = new TrackListView(TrackListView::Action::Unqueue, this);
   rightLayout->addWidget(m_queueListView);
 
   connect(m_queueListView, &TrackListView::unqueueRequested, this,
@@ -504,9 +503,7 @@ void AppMainWindow::playAllTracks() {
   fetchAllTracks(TrackFetchAction::PlayAll);
 }
 
-void AppMainWindow::addAllTracks() {
-  fetchAllTracks(TrackFetchAction::AddAll);
-}
+void AppMainWindow::addAllTracks() { fetchAllTracks(TrackFetchAction::AddAll); }
 
 void AppMainWindow::addVisibleTracks() {
   const QList<TrackData> tracks = m_trackListView->tracks();

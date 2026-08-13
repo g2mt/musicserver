@@ -123,7 +123,10 @@ body {
 - For **Java code**: use tabs for indenting.
 - Use ONLY the native Java `android` library. Libraries like `androindex`, etc. are unavailable.
 
-### Qt
+### C++/Qt
 
 - An optional Qt frontend is provided, linked to the musicserver library.
-- Use two spaces for indent
+- Use two spaces for indent.
+- Menu actions, buttons have to be in title-case. Capitalize the first level of every content word.
+- Use `QIcon::fromTheme` for every visible button and menu item.
+

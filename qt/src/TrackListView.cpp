@@ -12,7 +12,8 @@
 #include <QListView>
 #include <QMenu>
 #include <QPixmap>
-#include <QPushButton>
+#include <QSizePolicy>
+#include <QToolBar>
 #include <QVBoxLayout>
 #include <QVariant>
 
@@ -26,20 +27,23 @@ void TrackListView::setupUi() {
   layout->setContentsMargins(0, 0, 0, 0);
 
   if (m_action == Action::Unqueue) {
-    QWidget *actions = new QWidget(this);
-    QHBoxLayout *actionsLayout = new QHBoxLayout(actions);
-    actionsLayout->setContentsMargins(0, 0, 0, 0);
+    QToolBar *actions = new QToolBar(this);
+    actions->setMovable(false);
+    actions->setFloatable(false);
+    actions->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-    QPushButton *removeAllBtn = new QPushButton("Remove all", actions);
-    QPushButton *shuffleBtn = new QPushButton("Shuffle", actions);
-    connect(removeAllBtn, &QPushButton::clicked, this,
+    QAction *removeAllAction =
+        actions->addAction(QIcon::fromTheme("edit-clear-all"), "Remove All");
+    QAction *shuffleAction = actions->addAction(
+        QIcon::fromTheme("media-playlist-shuffle"), "Shuffle");
+    connect(removeAllAction, &QAction::triggered, this,
             &TrackListView::removeAllRequested);
-    connect(shuffleBtn, &QPushButton::clicked, this,
+    connect(shuffleAction, &QAction::triggered, this,
             &TrackListView::shuffleRequested);
 
-    actionsLayout->addWidget(removeAllBtn);
-    actionsLayout->addWidget(shuffleBtn);
-    actionsLayout->addStretch();
+    QWidget *spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    actions->addWidget(spacer);
     layout->addWidget(actions);
   }
 
