@@ -82,7 +82,7 @@ private:
   NativeAudioPlayer *m_audioPlayer = nullptr;
 
   // Music player bar (placeholder until Phase 3)
-  QWidget *m_musicPlayer = nullptr;
+  MusicPlayer *m_musicPlayer = nullptr;
 
   // Progress polling
   QTimer *m_progressTimer = nullptr;
