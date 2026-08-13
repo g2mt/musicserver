@@ -67,10 +67,15 @@ AppMainWindow::AppMainWindow(QWidget *parent)
 
   // Connect state signals
   connect(state, &AppState::currentTrackChanged, this,
-          [this](const TrackData &track) {
+          [this, state](const TrackData &track) {
             setWindowTitle(track.name.isEmpty() ? "Music Server" : track.name);
-            m_trackDelegate->highlightedRow = -1;
-            m_trackListView->viewport()->update();
+            if (track.id != state->highlightedTrackId())
+              state->setHighlightedTrackId(QString());
+          });
+
+  connect(state, &AppState::highlightedTrackIdChanged, this,
+          [this](const QString &id) {
+            m_trackListModel->setHighlightedTrackId(id);
           });
 
   connect(state, &AppState::leftTabChanged, this, [this](LeftTab tab) {
@@ -89,10 +94,26 @@ AppMainWindow::AppMainWindow(QWidget *parent)
             m_rightPanel->setVisible(!tracks.isEmpty());
           });
 
-  connect(state, &AppState::queueIndexChanged, this, [this](int index) {
-    m_queueDelegate->highlightedRow = index;
-    m_queueListView->viewport()->update();
-  });
+  connect(state, &AppState::queueTracksAdded, this,
+          [this](const QList<TrackData> &tracks, int startIndex) {
+            m_queueListModel->insertTracks(tracks, startIndex);
+            m_rightPanel->setVisible(true);
+          });
+
+  connect(state, &AppState::queueTracksRemoved, this,
+          [this, state](int startIndex, int count) {
+            m_queueListModel->removeTracks(startIndex, count);
+            m_rightPanel->setVisible(!state->queueTracks().isEmpty());
+          });
+
+  connect(state, &AppState::queueIndexChanged, this,
+          [this, state](int index) {
+            const QList<TrackData> tracks = state->queueTracks();
+            const QString id = (index >= 0 && index < tracks.size())
+                                   ? tracks.at(index).id
+                                   : QString();
+            m_queueListModel->setHighlightedTrackId(id);
+          });
 
   // Progress timer (replace SSE polling)
   m_progressTimer = new QTimer(this);
@@ -248,9 +269,8 @@ void AppMainWindow::setupLeftPanel() {
             TrackData track = qvariant_cast<TrackData>(
                 index.data(TrackListModel::TrackDataRole));
             AppState *state = AppState::instance();
+            state->setHighlightedTrackId(track.id);
             state->setCurrentTrack(track);
-            m_trackDelegate->highlightedRow = index.row();
-            m_trackListView->viewport()->update();
             state->setIsPlaying(true);
           });
 
@@ -264,12 +284,10 @@ void AppMainWindow::setupLeftPanel() {
             AppState *state = AppState::instance();
 
             QMenu menu;
-            int row = index.row();
             menu.addAction(QIcon::fromTheme("media-playback-start"), "Play",
-                           this, [this, state, track, row]() {
+                           this, [state, track]() {
+                             state->setHighlightedTrackId(track.id);
                              state->setCurrentTrack(track);
-                             m_trackDelegate->highlightedRow = row;
-                             m_trackListView->viewport()->update();
                              state->setIsPlaying(true);
                            });
             menu.addAction(QIcon::fromTheme("list-add"), "Add to queue", this,
@@ -577,8 +595,7 @@ void AppMainWindow::onSearchResultFinished() {
   qDebug() << "onSearchResultFinished: loaded" << tracks.size() << "tracks";
 
   m_trackListModel->setTracks(tracks);
-  m_trackDelegate->highlightedRow = -1;
-  m_trackListView->viewport()->update();
+  AppState::instance()->setHighlightedTrackId(QString());
   statusBar()->showMessage(QString("Loaded %1 tracks").arg(tracks.size()));
 
   AppState *state = AppState::instance();

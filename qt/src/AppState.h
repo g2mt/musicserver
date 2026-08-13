@@ -51,6 +51,7 @@ public:
   bool shuffleBeforePlayingAll() const;
   bool showTracksListOnTabChange() const;
   int searchHistoryLimit() const;
+  QString highlightedTrackId() const;
 
   // File browser
   QStringList fbPath() const;
@@ -104,6 +105,7 @@ public slots:
   void setShuffleBeforePlayingAll(bool shuffle);
   void setShowTracksListOnTabChange(bool show);
   void setSearchHistoryLimit(int limit);
+  void setHighlightedTrackId(const QString &id);
 
   // File browser
   void setFbPath(const QStringList &path);
@@ -141,6 +143,8 @@ signals:
 
   // Queue
   void queueTracksChanged(const QList<TrackData> &tracks);
+  void queueTracksAdded(const QList<TrackData> &tracks, int startIndex);
+  void queueTracksRemoved(int startIndex, int count);
   void queueIndexChanged(int index);
 
   // UI
@@ -153,6 +157,7 @@ signals:
   void shuffleBeforePlayingAllChanged(bool shuffle);
   void showTracksListOnTabChangeChanged(bool show);
   void searchHistoryLimitChanged(int limit);
+  void highlightedTrackIdChanged(const QString &id);
 
   // File browser
   void fbPathChanged(const QStringList &path);
@@ -200,6 +205,7 @@ private:
   bool m_shuffleBeforePlayingAll = true;
   bool m_showTracksListOnTabChange = false;
   int m_searchHistoryLimit = 10;
+  QString m_highlightedTrackId;
 
   // File browser
   QStringList m_fbPath;

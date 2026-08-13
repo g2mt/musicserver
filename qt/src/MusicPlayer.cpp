@@ -46,6 +46,10 @@ MusicPlayer::MusicPlayer(QWidget *parent)
           &MusicPlayer::updateRepeatFromState);
   connect(state, &AppState::queueTracksChanged, this,
           &MusicPlayer::updateQueueNavigation);
+  connect(state, &AppState::queueTracksAdded, this,
+          &MusicPlayer::updateQueueNavigation);
+  connect(state, &AppState::queueTracksRemoved, this,
+          &MusicPlayer::updateQueueNavigation);
   connect(state, &AppState::queueIndexChanged, this,
           &MusicPlayer::updateQueueNavigation);
   connect(state, &AppState::repeatChanged, this,

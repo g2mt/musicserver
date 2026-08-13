@@ -153,19 +153,26 @@ void AppState::setQueueIndex(int index) {
 }
 
 void AppState::queueAdd(const TrackData &track) {
+  const int startIndex = m_queueTracks.size();
   m_queueTracks.append(track);
-  emit queueTracksChanged(m_queueTracks);
+  QList<TrackData> added;
+  added.append(track);
+  emit queueTracksAdded(added, startIndex);
 }
 
 void AppState::queueAddAll(const QList<TrackData> &tracks) {
+  if (tracks.isEmpty())
+    return;
+  const int startIndex = m_queueTracks.size();
   m_queueTracks.append(tracks);
-  emit queueTracksChanged(m_queueTracks);
+  emit queueTracksAdded(tracks, startIndex);
 }
 
 void AppState::queueRemove(int index) {
   if (index < 0 || index >= m_queueTracks.size())
     return;
   m_queueTracks.removeAt(index);
+  emit queueTracksRemoved(index, 1);
   if (m_queueIndex == index) {
     m_queueIndex = -1;
     emit queueIndexChanged(-1);
@@ -173,7 +180,6 @@ void AppState::queueRemove(int index) {
     m_queueIndex--;
     emit queueIndexChanged(m_queueIndex);
   }
-  emit queueTracksChanged(m_queueTracks);
 }
 
 void AppState::queueClear() {
@@ -288,6 +294,7 @@ bool AppState::showTracksListOnTabChange() const {
   return m_showTracksListOnTabChange;
 }
 int AppState::searchHistoryLimit() const { return m_searchHistoryLimit; }
+QString AppState::highlightedTrackId() const { return m_highlightedTrackId; }
 
 void AppState::setLeftTab(LeftTab tab) {
   if (m_leftTab == tab)
@@ -354,6 +361,13 @@ void AppState::setSearchHistoryLimit(int limit) {
     return;
   m_searchHistoryLimit = limit;
   emit searchHistoryLimitChanged(limit);
+}
+
+void AppState::setHighlightedTrackId(const QString &id) {
+  if (m_highlightedTrackId == id)
+    return;
+  m_highlightedTrackId = id;
+  emit highlightedTrackIdChanged(id);
 }
 
 // --- File browser ---

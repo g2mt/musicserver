@@ -28,7 +28,8 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const {
   painter->save();
 
-  bool isHighlighted = index.row() == highlightedRow;
+  bool isHighlighted =
+      index.data(TrackListModel::HighlightedRole).toBool();
 
   // Background
   if (option.state & QStyle::State_Selected || isHighlighted) {

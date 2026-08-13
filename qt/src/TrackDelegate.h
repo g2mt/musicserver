@@ -24,7 +24,6 @@ public:
   void setModel(TrackListModel *model);
   void setAction(Action action);
 
-  int highlightedRow = -1;
   QSize coverSize = QSize(48, 48);
 
 signals:
