@@ -59,6 +59,10 @@ AppMainWindow::AppMainWindow(QWidget *parent)
           &QFutureWatcher<QJsonDocument>::finished, this,
           &AppMainWindow::onExternalDownloadFinished);
 
+  m_loudnessWatcher = new QFutureWatcher<double>(this);
+  connect(m_loudnessWatcher, &QFutureWatcher<double>::finished, this,
+          &AppMainWindow::onLoudnessFinished);
+
   setupAudio();
   setupToolbar();
   setupLeftPanel();
@@ -217,8 +221,18 @@ void AppMainWindow::setupAudio() {
 
   // AppState → Player: amplification
   connect(state, &AppState::amplificationChanged, this, [this](double db) {
+    if (AppState::instance()->normalize())
+      return;
     m_audioPlayer->setAmplification(static_cast<float>(db));
   });
+  connect(state, &AppState::currentTrackChanged, this,
+          [this](const TrackData &) { updateNormalization(); });
+  connect(state, &AppState::normalizeChanged, this,
+          [this](bool) { updateNormalization(); });
+  connect(state, &AppState::targetNormalizationDbsChanged, this,
+          [this](double) { updateNormalization(); });
+  connect(state, &AppState::maxNormalizationDbsChanged, this,
+          [this](double) { updateNormalization(); });
 }
 
 void AppMainWindow::setupToolbar() {
@@ -729,6 +743,42 @@ void AppMainWindow::onExternalDownloadFinished() {
   }
   statusBar()->showMessage("Download completed");
   refreshSearch();
+}
+
+void AppMainWindow::updateNormalization() {
+  AppState *state = AppState::instance();
+  const TrackData *track = state->currentTrack();
+  if (!state->normalize() || track->id.isEmpty()) {
+    m_loudnessTrackId.clear();
+    if (m_loudnessWatcher->isRunning())
+      m_loudnessWatcher->cancel();
+    m_audioPlayer->setAmplification(
+        static_cast<float>(state->amplification()));
+    return;
+  }
+
+  m_loudnessTrackId = track->id;
+  m_loudnessWatcher->setFuture(
+      m_api->getLoudness(track->id));
+}
+
+void AppMainWindow::onLoudnessFinished() {
+  AppState *state = AppState::instance();
+  const double loudness = m_loudnessWatcher->result();
+  const QString trackId = m_loudnessTrackId;
+  if (trackId.isEmpty() || state->currentTrack()->id != trackId ||
+      !state->normalize())
+    return;
+
+  if (!qIsFinite(loudness)) {
+    statusBar()->showMessage("Failed to get track loudness");
+    m_audioPlayer->setAmplification(
+        static_cast<float>(state->amplification()));
+    return;
+  }
+  const double gain = qMin(state->targetNormalizationDbs() - loudness,
+                           state->maxNormalizationDbs());
+  m_audioPlayer->setAmplification(static_cast<float>(gain));
 }
 
 void AppMainWindow::onTrackFetchFinished() {

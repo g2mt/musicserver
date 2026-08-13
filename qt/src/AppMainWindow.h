@@ -42,6 +42,7 @@ private slots:
   void addVisibleTracks();
   void onTrackFetchFinished();
   void onExternalDownloadFinished();
+  void onLoudnessFinished();
   void setTrackSort(const QString &field);
 
 private:
@@ -55,6 +56,7 @@ private:
   void fetchAllTracks(TrackFetchAction action);
   void updateSearchHistory(const QString &query);
   void startExternalDownload();
+  void updateNormalization();
 
   ApiClient *m_api;
   QSplitter *m_splitter = nullptr;
@@ -65,6 +67,8 @@ private:
   QCompleter *m_searchCompleter = nullptr;
   QAction *m_downloadAction = nullptr;
   QFutureWatcher<QJsonDocument> *m_externalDownloadWatcher = nullptr;
+  QFutureWatcher<double> *m_loudnessWatcher = nullptr;
+  QString m_loudnessTrackId;
   QString m_externalDownloadPath;
   QString m_externalDownloadUrl;
   bool m_externalDownloadPost = false;

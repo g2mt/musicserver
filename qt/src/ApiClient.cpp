@@ -71,6 +71,13 @@ QFuture<QJsonDocument> ApiClient::del(const QString &path,
 
 QFuture<QJsonDocument> ApiClient::getProgress() { return get("/progress"); }
 
+QFuture<double> ApiClient::getLoudness(const QString &trackId) {
+  return get(QString("/track/%1/loudness").arg(trackId)).then(
+      [](const QJsonDocument &doc) {
+        return doc.toVariant().toDouble();
+      });
+}
+
 QFuture<TrackData> ApiClient::loadTrackByPath(const QString &encodedPath) {
   QString path = QString("/track/:by-path/%1").arg(encodedPath);
   return get(path).then([](const QJsonDocument &doc) -> TrackData {

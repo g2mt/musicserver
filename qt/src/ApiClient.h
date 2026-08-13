@@ -35,6 +35,7 @@ public:
   QFuture<QJsonDocument> del(const QString &path,
                              const QJsonObject &params = QJsonObject());
   QFuture<QJsonDocument> getProgress();
+  QFuture<double> getLoudness(const QString &trackId);
   QFuture<TrackData> loadTrackByPath(const QString &encodedPath);
   QFuture<void> scanTracks(const QString &path, bool force);
 
