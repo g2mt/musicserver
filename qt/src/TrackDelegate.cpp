@@ -4,6 +4,7 @@
 #include <QAbstractItemModel>
 #include <QDebug>
 #include <QEvent>
+#include <QIcon>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPixmap>
@@ -99,11 +100,18 @@ void TrackDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
       painter->fontMetrics().elidedText(subText, Qt::ElideRight, textWidth));
 
   // Enqueue (+) / unqueue (-) action button
+  QIcon actionIcon = m_action == Action::Enqueue
+                         ? QIcon::fromTheme("list-add")
+                         : QIcon::fromTheme("list-remove");
   painter->setPen(Qt::gray);
   painter->setBrush(option.palette.button());
   painter->drawRoundedRect(buttonRect, 4, 4);
-  painter->drawText(buttonRect, Qt::AlignCenter,
-                    m_action == Action::Enqueue ? "+" : "-");
+  if (actionIcon.isNull()) {
+    painter->drawText(buttonRect, Qt::AlignCenter,
+                      m_action == Action::Enqueue ? "+" : "-");
+  } else {
+    actionIcon.paint(painter, buttonRect.adjusted(3, 3, -3, -3));
+  }
 
   painter->restore();
 }
