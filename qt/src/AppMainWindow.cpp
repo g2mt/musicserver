@@ -273,6 +273,16 @@ void AppMainWindow::setupToolbar() {
 
   connect(m_searchInput, &QLineEdit::returnPressed, this,
           &AppMainWindow::onSearchSubmit);
+  connect(m_searchInput, &QLineEdit::textChanged, this, [this](const QString &text) {
+    const QJsonObject config = AppState::instance()->serverProps()["config"].toObject();
+    const bool hasDownloader = !config["media_downloader"].toString().isEmpty();
+    const QString value = text.trimmed();
+    const bool isUrl = value.startsWith("http://") || value.startsWith("https://");
+    if (m_downloadAction) {
+      m_downloadAction->setVisible(hasDownloader && isUrl);
+      m_downloadAction->setEnabled(hasDownloader && isUrl);
+    }
+  });
 
   m_toolbar->addWidget(m_searchInput);
 
@@ -596,9 +606,11 @@ void AppMainWindow::onPropsResultFinished() {
     AppState::instance()->setServerProps(doc.object());
     const QJsonObject config = doc.object()["config"].toObject();
     const bool hasDownloader = !config["media_downloader"].toString().isEmpty();
+    const QString value = m_searchInput->text().trimmed();
+    const bool isUrl = value.startsWith("http://") || value.startsWith("https://");
     if (m_downloadAction) {
-      m_downloadAction->setVisible(hasDownloader);
-      m_downloadAction->setEnabled(hasDownloader);
+      m_downloadAction->setVisible(hasDownloader && isUrl);
+      m_downloadAction->setEnabled(hasDownloader && isUrl);
     }
   }
 }
