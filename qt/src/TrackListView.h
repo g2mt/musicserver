@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QFutureWatcher>
+#include <QJsonDocument>
 #include <QList>
 #include <QString>
 #include <QWidget>
@@ -31,12 +33,16 @@ signals:
   void removeAllRequested();
   void shuffleRequested();
   void searchRequested(const QString &query);
+  void statusMessage(const QString &message);
 
 private:
   void setupUi();
   void fetchCover(const QString &trackId);
+  void onForgetFinished();
 
   Action m_action;
   QListView *m_view = nullptr;
   TrackListModel *m_model = nullptr;
+  QFutureWatcher<QJsonDocument> *m_forgetWatcher = nullptr;
+  TrackData m_forgetTrack;
 };

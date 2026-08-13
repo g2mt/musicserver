@@ -278,6 +278,8 @@ void AppMainWindow::setupLeftPanel() {
   tracksLayout->setContentsMargins(0, 0, 0, 0);
 
   m_trackListView = new TrackListView(TrackListView::Action::Enqueue, this);
+  connect(m_trackListView, &TrackListView::statusMessage, this,
+          [this](const QString &message) { statusBar()->showMessage(message); });
 
   connect(m_trackListView, &TrackListView::playRequested, this,
           [this](const TrackData &track, int) {
@@ -418,6 +420,8 @@ void AppMainWindow::setupRightPanel() {
   rightLayout->addWidget(header);
 
   m_queueListView = new TrackListView(TrackListView::Action::Unqueue, this);
+  connect(m_queueListView, &TrackListView::statusMessage, this,
+          [this](const QString &message) { statusBar()->showMessage(message); });
   rightLayout->addWidget(m_queueListView);
 
   connect(m_queueListView, &TrackListView::unqueueRequested, this,

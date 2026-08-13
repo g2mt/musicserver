@@ -10,6 +10,7 @@
 #include <QClipboard>
 #include <QFuture>
 #include <QFutureWatcher>
+#include <QJsonObject>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QListView>
@@ -23,6 +24,10 @@
 TrackListView::TrackListView(Action action, QWidget *parent)
     : QWidget(parent), m_action(action) {
   setupUi();
+
+  m_forgetWatcher = new QFutureWatcher<QJsonDocument>(this);
+  connect(m_forgetWatcher, &QFutureWatcher<QJsonDocument>::finished, this,
+          &TrackListView::onForgetFinished);
 }
 
 void TrackListView::setupUi() {
@@ -130,20 +135,39 @@ void TrackListView::setupUi() {
                               AppState::instance()->setFbPath(parts);
                               AppState::instance()->setLeftTab(LeftTab::Files);
                             });
-        menu.addAction(QIcon::fromTheme("user-trash"), "Forget Track", this,
-                       [this, track]() {
-                         ApiClient::instance()
-                             ->del(QString("/track/%1").arg(track.id))
-                             .then([this, track](const QJsonDocument &) {
-                               emit searchRequested(
-                                   AppState::instance()->searchQuery());
-                             });
-                       });
+        QAction *forgetAction =
+            menu.addAction(QIcon::fromTheme("user-trash"), "Forget Track");
+        connect(forgetAction, &QAction::triggered, this, [this, track]() {
+          if (m_forgetWatcher->isRunning()) {
+            emit statusMessage("A track operation is already running");
+            return;
+          }
+
+          m_forgetTrack = track;
+          m_forgetWatcher->setFuture(
+              ApiClient::instance()->del(QString("/track/%1").arg(track.id)));
+        });
         menu.exec(m_view->viewport()->mapToGlobal(pos));
       });
 
   connect(m_model, &TrackListModel::coverRequested, this,
           [this](int, const QString &trackId) { fetchCover(trackId); });
+}
+
+void TrackListView::onForgetFinished() {
+  const QJsonDocument doc = m_forgetWatcher->result();
+  if (doc.isNull() ||
+      (doc.isObject() && doc.object().contains("error"))) {
+    QString error = "Failed to forget track";
+    if (doc.isObject() && doc.object().contains("error"))
+      error += ": " + doc.object()["error"].toString();
+    emit statusMessage(error);
+    return;
+  }
+
+  emit statusMessage(QString("Track \"%1\" forgotten").arg(m_forgetTrack.name));
+  emit searchRequested(AppState::instance()->searchQuery());
+  m_forgetTrack = TrackData();
 }
 
 void TrackListView::fetchCover(const QString &trackId) {

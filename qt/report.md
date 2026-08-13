@@ -12,12 +12,7 @@ The most important gaps are summarized below:
 | High | Queue/audio state restoration | `TrackQueue.tsx`, `AudioState.tsx`, `App.tsx` | No queue/audio serialization or suspend restoration in Qt |
 | High | URL/media downloading workflow | `SearchBar.tsx`, `/track/:external/...` | No external-track lookup, confirmation, or download action |
 | High | Loudness-based normalization | `audio/AudioState.tsx` | Qt has a normalize checkbox but never computes loudness or applies normalization |
-| Medium | Search result pagination/limit control and before/after navigation | `MainTracksTab.tsx` | Qt always requests `limit=-1`; no limit selector or before/after controls |
-| Medium | Settings options: show queue, show tracks on tab change | `SettingsTab.tsx` | No Qt state, controls, or persistence |
-| Medium | Search suggestions UX and deletion | `SearchSuggestions.tsx` | Qt has a basic `QCompleter`, but no timestamps, per-entry deletion, keyboard popup behavior equivalent, or JSON-compatible history |
-| Medium | Touch swipe navigation | `MusicPlayer.tsx` | No Qt gesture handling |
 | Medium | Track-list actions and error feedback parity | `Track.tsx` | Qt forgets silently and does not provide equivalent toast/error handling |
-| Low | Native/browser media integration parity | `MusicPlayer.tsx`, `audio/*` | Qt has optional MPRIS, but not the browser Media Session or equivalent state restoration hooks |
 
 ## 1. Dark mode and blurred-cover background — high priority
 
