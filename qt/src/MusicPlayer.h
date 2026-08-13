@@ -47,6 +47,7 @@ private:
   QPushButton *m_repeatBtn;
   QLabel *m_trackCover;
   QLabel *m_trackLabel;
+  QLabel *m_artistLabel;
   QLabel *m_badgeLabel;
 
   ApiClient *m_api = nullptr;

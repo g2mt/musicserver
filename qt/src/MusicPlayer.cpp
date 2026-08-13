@@ -7,6 +7,7 @@
 #endif
 
 #include <QContextMenuEvent>
+#include <QFont>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QMenu>
@@ -27,8 +28,8 @@ MusicPlayer::MusicPlayer(QWidget *parent)
             QByteArray bytes = m_coverWatcher->result();
             QPixmap pix;
             if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
-              m_trackCover->setPixmap(pix.scaled(
-                  48, 48, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+              m_trackCover->setPixmap(pix.scaled(48, 48, Qt::KeepAspectRatio,
+                                                 Qt::SmoothTransformation));
             } else {
               m_trackCover->setPixmap(
                   QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
@@ -114,7 +115,16 @@ void MusicPlayer::setupUi() {
   m_trackCover->setStyleSheet("border: 1px solid gray;");
 
   m_trackLabel = new QLabel("No track playing");
-  m_trackLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+  m_artistLabel = new QLabel();
+  m_artistLabel->setStyleSheet("color: gray;");
+
+  QWidget *titleBox = new QWidget();
+  QVBoxLayout *titleLayout = new QVBoxLayout(titleBox);
+  titleLayout->setContentsMargins(0, 0, 0, 0);
+  titleLayout->setSpacing(0);
+  titleLayout->addWidget(m_trackLabel);
+  titleLayout->addWidget(m_artistLabel);
 
   m_badgeLabel = new QLabel();
   m_badgeLabel->setStyleSheet(
@@ -123,7 +133,7 @@ void MusicPlayer::setupUi() {
   m_badgeLabel->hide();
 
   trackLayout->addWidget(m_trackCover);
-  trackLayout->addWidget(m_trackLabel);
+  trackLayout->addWidget(titleBox);
   trackLayout->addWidget(m_badgeLabel);
 
   controlsLayout->addWidget(trackInfo);
@@ -230,10 +240,20 @@ void MusicPlayer::updateTrackFromState(const TrackData &track) {
 #ifdef MS_ENABLE_MPRIS
   m_mpris->setCover(QByteArray());
 #endif
-  m_trackLabel->setText(track.name);
+  QFont titleFont = m_trackLabel->font();
+  if (track.name.isEmpty()) {
+    m_trackLabel->setText("No track playing");
+    titleFont.setBold(false);
+    m_artistLabel->hide();
+  } else {
+    m_trackLabel->setText(track.name);
+    titleFont.setBold(true);
+    m_artistLabel->setText(track.artist);
+    m_artistLabel->show();
+  }
+  m_trackLabel->setFont(titleFont);
   m_trackCover->clear();
-  m_trackCover->setPixmap(
-      QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
+  m_trackCover->setPixmap(QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
   if (!m_api || track.id.isEmpty()) {
     return;
   }
@@ -242,8 +262,8 @@ void MusicPlayer::updateTrackFromState(const TrackData &track) {
 }
 
 void MusicPlayer::updatePlayingFromState(bool playing) {
-  m_playPauseBtn->setIcon(QIcon::fromTheme(
-      playing ? "media-playback-pause" : "media-playback-start"));
+  m_playPauseBtn->setIcon(QIcon::fromTheme(playing ? "media-playback-pause"
+                                                   : "media-playback-start"));
 }
 
 void MusicPlayer::updateVolumeFromState() {
