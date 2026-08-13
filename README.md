@@ -67,6 +67,16 @@ Then in the `android` directory, run the Makefile. You may be asked to enter inf
 
 Once complete, the final apk will be in `build/org.msxrv.musicserver.apk`
 
+### Qt
+
+For desktop only, currently only for Linux.
+
+```
+cmake -B build/ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$HOME/.local
+cmake --build build/ -j
+cd build && make install
+```
+
 ## License
 
 MIT License.
