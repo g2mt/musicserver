@@ -9,6 +9,7 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QCursor>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -17,6 +18,7 @@
 #include <QJsonObject>
 #include <QMenu>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QResizeEvent>
 #include <QShortcut>
 #include <QSizePolicy>
@@ -248,15 +250,15 @@ void AppMainWindow::setupLeftPanel() {
   tracksControls->setContextMenuPolicy(Qt::CustomContextMenu);
 
   QAction *playAllAction = tracksControls->addAction(
-      QIcon::fromTheme("media-playback-start"), "Play all");
+      QIcon::fromTheme("media-playback-start"), "Play All");
   connect(playAllAction, &QAction::triggered, this,
           &AppMainWindow::playAllTracks);
   connect(tracksControls, &QToolBar::customContextMenuRequested, this,
           [this, tracksControls](const QPoint &pos) {
             QMenu menu;
-            menu.addAction("Add visible to queue", this,
+            menu.addAction("Add Visible to Queue", this,
                            [this]() { addVisibleTracks(); });
-            menu.addAction("Add all to queue", this,
+            menu.addAction("Add All to Queue", this,
                            [this]() { addAllTracks(); });
             menu.exec(tracksControls->mapToGlobal(pos));
           });
@@ -264,6 +266,33 @@ void AppMainWindow::setupLeftPanel() {
   QWidget *spacer = new QWidget();
   spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   tracksControls->addWidget(spacer);
+
+  // Sort action: context menu mirroring the React frontend sort selector
+  QAction *sortAction =
+      tracksControls->addAction(QIcon::fromTheme("view-sort"), "Sort");
+  sortAction->setToolTip("Change sort order");
+  connect(sortAction, &QAction::triggered, this, [this]() {
+    AppState *state = AppState::instance();
+    QMenu menu;
+    const struct {
+      const char *label;
+      const char *field;
+    } options[] = {{"ID", "id"},
+                   {"Name", "name"},
+                   {"Path", "path"},
+                   {"Artist", "artist"},
+                   {"Album", "album"}};
+    for (const auto &opt : options) {
+      QAction *a = menu.addAction(opt.label);
+      a->setCheckable(true);
+      a->setChecked(state->resultSort() == opt.field);
+      const QString field = opt.field;
+      connect(a, &QAction::triggered, this,
+              [this, field]() { setTrackSort(field); });
+    }
+    menu.exec(QCursor::pos());
+  });
+
   tracksLayout->addWidget(tracksControls);
   tracksLayout->addWidget(m_trackListView);
   m_leftStack->addWidget(m_tracksTab);
@@ -473,6 +502,20 @@ void AppMainWindow::onSearchResultFinished() {
   state->setResultSort(filters["sort"].toString(),
                        filters["desc"].toString() == "1");
   state->setResultLimit(obj["limit"].toInt());
+}
+
+void AppMainWindow::setTrackSort(const QString &field) {
+  AppState *state = AppState::instance();
+  QString q = state->searchQuery();
+  static const QRegularExpression sortRe("\\bsort:[^ ]+");
+  if (sortRe.match(q).hasMatch())
+    q = q.replace(sortRe, QString("sort:%1").arg(field));
+  else
+    q = (q.trimmed() + " sort:" + field).trimmed();
+  state->setSearchQuery(q, 0);
+  refreshSearch();
+  if (m_leftStack && m_leftStack->currentWidget() == m_tracksTab)
+    m_trackListView->scrollToTop();
 }
 
 void AppMainWindow::playAllTracks() {

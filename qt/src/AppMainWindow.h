@@ -39,6 +39,7 @@ private slots:
   void addAllTracks();
   void addVisibleTracks();
   void onTrackFetchFinished();
+  void setTrackSort(const QString &field);
 
 private:
   void setupToolbar();
