@@ -79,13 +79,13 @@ void MusicPlayer::setupUi() {
   // Left: prev, play/pause, next
   m_prevBtn = new QPushButton();
   m_prevBtn->setIcon(QIcon::fromTheme("media-skip-backward"));
-  m_prevBtn->setFixedWidth(32);
+  m_prevBtn->setFlat(true);
   m_playPauseBtn = new QPushButton();
   m_playPauseBtn->setIcon(QIcon::fromTheme("media-playback-start"));
-  m_playPauseBtn->setFixedWidth(32);
+  m_playPauseBtn->setFlat(true);
   m_nextBtn = new QPushButton();
   m_nextBtn->setIcon(QIcon::fromTheme("media-skip-forward"));
-  m_nextBtn->setFixedWidth(32);
+  m_nextBtn->setFlat(true);
 
   controlsLayout->addWidget(m_prevBtn);
   controlsLayout->addWidget(m_playPauseBtn);
@@ -127,11 +127,11 @@ void MusicPlayer::setupUi() {
 
   m_muteBtn = new QPushButton();
   m_muteBtn->setIcon(QIcon::fromTheme("audio-volume-high"));
-  m_muteBtn->setFixedWidth(32);
+  m_muteBtn->setFlat(true);
 
   m_repeatBtn = new QPushButton();
   m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
-  m_repeatBtn->setFixedWidth(32);
+  m_repeatBtn->setFlat(true);
 
   controlsLayout->addWidget(m_volumeSlider);
   controlsLayout->addWidget(m_muteBtn);
