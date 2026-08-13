@@ -178,7 +178,11 @@ void AppMainWindow::setupAudio() {
   connect(m_audioPlayer, &NativeAudioPlayer::durationChanged, this,
           [state](qint64 ms) { state->setDuration(ms / 1000.0); });
   connect(m_audioPlayer, &NativeAudioPlayer::ended, this,
-          [state]() { state->queueNext(); });
+          [this, state]() {
+            state->queueNext();
+            if (state->isPlaying())
+              m_audioPlayer->play();
+          });
 
   // AppState → Player: track changes
   connect(
