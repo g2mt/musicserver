@@ -44,6 +44,7 @@ set(QT_SOURCES
   src/ApiClient.cpp
   src/AppState.cpp
   src/AppMainWindow.cpp
+  src/FileBrowserWidget.cpp
   src/MusicPlayer.cpp
   src/QtAudioPlayer.cpp
   src/TrackDelegate.cpp
@@ -54,6 +55,7 @@ set(QT_HEADERS
   src/ApiClient.h
   src/AppState.h
   src/AppMainWindow.h
+  src/FileBrowserWidget.h
   src/MusicPlayer.h
   src/QtAudioPlayer.h
   src/TrackDelegate.h
