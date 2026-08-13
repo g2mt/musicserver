@@ -297,7 +297,7 @@ All source files live flat under `qt/src/` to keep the structure simple.
    - ".." entry to go up one level
    - Search (show tracks in path) and scan (rescan only this path) icons
 
-6. **Phase 6 — Bookmarks tab** (UI Component Mapping §7):
+6. **Phase 6 — Bookmarks tab** (UI Component Mapping §7, done):
    - `Bookmark` struct + `QListWidget` of bookmark items
    - Add form: `QLineEdit` for name + "Add" `QPushButton`
    - Each bookmark row: name + query text, delete button

@@ -11,6 +11,7 @@
 #include <QToolBar>
 
 class ApiClient;
+class BookmarksWidget;
 class FileBrowserWidget;
 class TrackListView;
 class QtAudioPlayer;
@@ -62,6 +63,7 @@ private:
   QStackedWidget *m_leftStack = nullptr;
   QWidget *m_tracksTab = nullptr;
   QWidget *m_bookmarksTab = nullptr;
+  BookmarksWidget *m_bookmarksWidget = nullptr;
   QWidget *m_filesTab = nullptr;
   FileBrowserWidget *m_fileBrowser = nullptr;
   QWidget *m_settingsTab = nullptr;

@@ -1,6 +1,7 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
+#include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
 #include "QtAudioPlayer.h"
@@ -264,11 +265,23 @@ void AppMainWindow::setupLeftPanel() {
   tracksLayout->addWidget(m_trackListView);
   m_leftStack->addWidget(m_tracksTab);
 
-  // Bookmarks tab (placeholder)
-  m_bookmarksTab = new QWidget();
-  QVBoxLayout *bookmarksLayout = new QVBoxLayout(m_bookmarksTab);
-  bookmarksLayout->addWidget(new QLabel("Bookmarks"));
+  // Bookmarks tab
+  m_bookmarksWidget = new BookmarksWidget();
+  m_bookmarksTab = m_bookmarksWidget;
   m_leftStack->addWidget(m_bookmarksTab);
+
+  connect(m_bookmarksWidget, &BookmarksWidget::openBookmark, this,
+          [this](const QString &query) {
+            AppState *state = AppState::instance();
+            m_searchInput->setText(query);
+            state->setSearchQuery(query, 0);
+            state->setLeftTab(LeftTab::Tracks);
+            refreshSearch();
+          });
+  connect(m_bookmarksWidget, &BookmarksWidget::statusMessage, this,
+          [this](const QString &message) {
+            statusBar()->showMessage(message);
+          });
 
   // Files tab
   m_fileBrowser = new FileBrowserWidget();
