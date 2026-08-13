@@ -53,7 +53,7 @@ set(QT_SOURCES
   src/ProgressWidget.cpp
   src/SettingsWidget.cpp
   src/MusicPlayer.cpp
-  src/AudioPlayer.cpp
+  src/NativeAudioPlayer.cpp
   src/TrackDelegate.cpp
   src/TrackListModel.cpp
   src/TrackListView.cpp
@@ -68,7 +68,7 @@ set(QT_HEADERS
   src/ProgressWidget.h
   src/SettingsWidget.h
   src/MusicPlayer.h
-  src/AudioPlayer.h
+  src/NativeAudioPlayer.h
   src/TrackDelegate.h
   src/TrackListModel.h
   src/TrackListView.h

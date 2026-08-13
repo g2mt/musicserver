@@ -1,7 +1,7 @@
 #include "AppMainWindow.h"
 #include "ApiClient.h"
 #include "AppState.h"
-#include "AudioPlayer.h"
+#include "NativeAudioPlayer.h"
 #include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
@@ -140,14 +140,14 @@ AppMainWindow::~AppMainWindow() { AppState::instance()->saveConfig(); }
 
 void AppMainWindow::setupAudio() {
   AppState *state = AppState::instance();
-  m_audioPlayer = new AudioPlayer(this);
+  m_audioPlayer = new NativeAudioPlayer(this);
 
   // Player → AppState: sync time, duration, ended
-  connect(m_audioPlayer, &AudioPlayer::timeChanged, this,
+  connect(m_audioPlayer, &NativeAudioPlayer::timeChanged, this,
           [state](qint64 ms) { state->setProgress(ms / 1000.0); });
-  connect(m_audioPlayer, &AudioPlayer::durationChanged, this,
+  connect(m_audioPlayer, &NativeAudioPlayer::durationChanged, this,
           [state](qint64 ms) { state->setDuration(ms / 1000.0); });
-  connect(m_audioPlayer, &AudioPlayer::ended, this,
+  connect(m_audioPlayer, &NativeAudioPlayer::ended, this,
           [state]() { state->queueNext(); });
 
   // AppState → Player: track changes

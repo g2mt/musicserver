@@ -1,26 +1,26 @@
-#include "AudioPlayer.h"
+#include "NativeAudioPlayer.h"
 
 #include <QtMath>
 #include <qdebug.h>
 
-AudioPlayer::AudioPlayer(QObject *parent) : QObject(parent) {
+NativeAudioPlayer::NativeAudioPlayer(QObject *parent) : QObject(parent) {
   m_player = new QMediaPlayer(this);
   m_audioOutput = new QAudioOutput(this);
   m_player->setAudioOutput(m_audioOutput);
 
   connect(m_player, &QMediaPlayer::positionChanged, this,
-          &AudioPlayer::timeChanged);
+          &NativeAudioPlayer::timeChanged);
   connect(m_player, &QMediaPlayer::durationChanged, this,
-          &AudioPlayer::durationChanged);
+          &NativeAudioPlayer::durationChanged);
   connect(m_player, &QMediaPlayer::mediaStatusChanged, this,
-          &AudioPlayer::onMediaStatusChanged);
+          &NativeAudioPlayer::onMediaStatusChanged);
   connect(m_player, &QMediaPlayer::playbackStateChanged, this,
           [this](QMediaPlayer::PlaybackState state) {
             emit playingChanged(state == QMediaPlayer::PlayingState);
           });
 }
 
-void AudioPlayer::setSource(const QString &url) {
+void NativeAudioPlayer::setSource(const QString &url) {
   if (m_currentSource == url)
     return;
   qDebug() << "setSource" << url;
@@ -34,42 +34,42 @@ void AudioPlayer::setSource(const QString &url) {
     m_player->play();
 }
 
-void AudioPlayer::play() {
+void NativeAudioPlayer::play() {
   if (m_player->playbackState() != QMediaPlayer::PlayingState) {
     m_player->play();
   }
 }
 
-void AudioPlayer::pause() { m_player->pause(); }
+void NativeAudioPlayer::pause() { m_player->pause(); }
 
-void AudioPlayer::setVolume(float v) {
+void NativeAudioPlayer::setVolume(float v) {
   m_baseVolume = qBound(0.0f, v, 1.0f);
   applyGain();
 }
 
-void AudioPlayer::setAmplification(float dB) {
+void NativeAudioPlayer::setAmplification(float dB) {
   m_amplificationDb = dB;
   applyGain();
 }
 
-void AudioPlayer::seekTo(qint64 ms) { m_player->setPosition(ms); }
+void NativeAudioPlayer::seekTo(qint64 ms) { m_player->setPosition(ms); }
 
-qint64 AudioPlayer::currentTime() const { return m_player->position(); }
+qint64 NativeAudioPlayer::currentTime() const { return m_player->position(); }
 
-qint64 AudioPlayer::duration() const { return m_player->duration(); }
+qint64 NativeAudioPlayer::duration() const { return m_player->duration(); }
 
-bool AudioPlayer::isPlaying() const {
+bool NativeAudioPlayer::isPlaying() const {
   return m_player->playbackState() == QMediaPlayer::PlayingState;
 }
 
-void AudioPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+void NativeAudioPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
   if (status == QMediaPlayer::EndOfMedia ||
       status == QMediaPlayer::InvalidMedia) {
     emit ended();
   }
 }
 
-float AudioPlayer::computeGain() const {
+float NativeAudioPlayer::computeGain() const {
   float gain = m_baseVolume;
   if (m_amplificationDb != 0.0f) {
     gain *= qPow(10.0f, m_amplificationDb / 20.0f);
@@ -77,4 +77,4 @@ float AudioPlayer::computeGain() const {
   return gain;
 }
 
-void AudioPlayer::applyGain() { m_audioOutput->setVolume(computeGain()); }
+void NativeAudioPlayer::applyGain() { m_audioOutput->setVolume(computeGain()); }
