@@ -134,6 +134,7 @@ const QList<TrackData> &TrackListView::tracks() const {
 }
 
 void TrackListView::setHighlightedTrackId(const QString &id) {
+  m_view->selectionModel()->clear();
   m_model->setHighlightedTrackId(id);
 }
 
