@@ -394,7 +394,6 @@ void AppState::setServerProps(const QJsonObject &props) {
 
 void AppState::loadConfig() {
   QSettings settings;
-  settings.beginGroup("config");
 
   setVolume(settings.value("volume", 1.0).toDouble());
   setMuted(settings.value("muted", false).toBool());
@@ -422,13 +421,10 @@ void AppState::loadConfig() {
   settings.endArray();
   if (!bms.isEmpty())
     setBookmarks(bms);
-
-  settings.endGroup();
 }
 
 void AppState::saveConfig() {
   QSettings settings;
-  settings.beginGroup("config");
 
   settings.setValue("volume", m_volume);
   settings.setValue("muted", m_muted);
@@ -446,6 +442,4 @@ void AppState::saveConfig() {
     settings.setValue("query", m_bookmarks[i].query);
   }
   settings.endArray();
-
-  settings.endGroup();
 }

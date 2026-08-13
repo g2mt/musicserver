@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCompleter>
 #include <QFutureWatcher>
 #include <QLabel>
 #include <QLineEdit>
@@ -51,6 +52,7 @@ private:
   void updateSplitterOrientation();
   void updateWindowTitle(const QString &musicTitle);
   void fetchAllTracks(TrackFetchAction action);
+  void updateSearchHistory(const QString &query);
 
   ApiClient *m_api;
   QSplitter *m_splitter = nullptr;
@@ -58,6 +60,7 @@ private:
   // Toolbar
   QToolBar *m_toolbar = nullptr;
   QLineEdit *m_searchInput = nullptr;
+  QCompleter *m_searchCompleter = nullptr;
 
   // Left panel
   QTabBar *m_leftTabBar = nullptr;

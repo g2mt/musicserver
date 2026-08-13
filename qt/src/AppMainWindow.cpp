@@ -21,6 +21,8 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QResizeEvent>
+#include <QSettings>
+#include <QStringListModel>
 #include <QShortcut>
 #include <QSizePolicy>
 #include <QStatusBar>
@@ -87,6 +89,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
           [this](const QString &query, int) {
             if (m_searchInput->text() != query)
               m_searchInput->setText(query);
+            updateSearchHistory(query);
           });
 
   connect(state, &AppState::currentTrackChanged, this,
@@ -228,6 +231,23 @@ void AppMainWindow::setupToolbar() {
   m_searchInput->setPlaceholderText("Search tracks...");
   m_searchInput->setClearButtonEnabled(true);
   m_searchInput->setMinimumWidth(200);
+
+  m_searchCompleter = new QCompleter(this);
+  m_searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+  m_searchCompleter->setFilterMode(Qt::MatchContains);
+  m_searchCompleter->setCompletionMode(QCompleter::PopupCompletion);
+  auto *historyModel = new QStringListModel(this);
+  QSettings settings;
+  historyModel->setStringList(
+      settings.value("searchSuggestions").toStringList());
+  m_searchCompleter->setModel(historyModel);
+  m_searchInput->setCompleter(m_searchCompleter);
+  connect(m_searchCompleter,
+          QOverload<const QString &>::of(&QCompleter::activated), this,
+          [this](const QString &query) {
+            m_searchInput->setText(query);
+            onSearchSubmit();
+          });
 
   connect(m_searchInput, &QLineEdit::returnPressed, this,
           &AppMainWindow::onSearchSubmit);
@@ -498,7 +518,23 @@ void AppMainWindow::onSearchSubmit() {
   AppState *state = AppState::instance();
   QString query = m_searchInput->text();
   state->setSearchQuery(query, 0);
+  updateSearchHistory(query);
   refreshSearch();
+}
+
+void AppMainWindow::updateSearchHistory(const QString &query) {
+  if (query.isEmpty())
+    return;
+
+  QSettings settings;
+  QStringList history = settings.value("searchSuggestions").toStringList();
+  history.removeAll(query);
+  history.prepend(query);
+  history = history.mid(0, AppState::instance()->searchHistoryLimit());
+  settings.setValue("searchSuggestions", history);
+
+  static_cast<QStringListModel *>(m_searchCompleter->model())->setStringList(
+      history);
 }
 
 void AppMainWindow::onTabClicked(int index) {
