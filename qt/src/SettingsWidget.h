@@ -53,6 +53,7 @@ private:
   QSlider *m_maxNormalizationSlider = nullptr;
   QLabel *m_maxNormalizationValue = nullptr;
   QSpinBox *m_searchHistoryLimitSpin = nullptr;
+  QLineEdit *m_serverConfigEdit = nullptr;
   QPushButton *m_saveButton = nullptr;
   QPushButton *m_rescanButton = nullptr;
   QPushButton *m_forceRescanButton = nullptr;

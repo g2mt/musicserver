@@ -5,6 +5,8 @@
 #include "ProgressWidget.h"
 
 #include <QCheckBox>
+#include <QDir>
+#include <QFileDialog>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -14,6 +16,7 @@
 #include <QList>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QSettings>
 #include <QSlider>
 #include <QSpinBox>
 #include <QVBoxLayout>
@@ -116,15 +119,35 @@ void SettingsWidget::setupUi() {
       makeSliderRow(tr("Max Normalization (dB):"), -200, 200,
                     &m_maxNormalizationSlider, &m_maxNormalizationValue));
 
-  auto *historyRow = new QWidget(generalBody);
-  auto *historyLayout = new QHBoxLayout(historyRow);
-  historyLayout->setContentsMargins(0, 0, 0, 0);
-  historyLayout->addWidget(new QLabel(tr("Search history limit:")));
-  historyLayout->addStretch();
-  m_searchHistoryLimitSpin = new QSpinBox(historyRow);
+  auto *generalForm = new QWidget(generalBody);
+  auto *generalFormLayout = new QFormLayout(generalForm);
+  generalFormLayout->setContentsMargins(0, 0, 0, 0);
+
+  m_searchHistoryLimitSpin = new QSpinBox(generalForm);
   m_searchHistoryLimitSpin->setRange(0, 9999);
-  historyLayout->addWidget(m_searchHistoryLimitSpin);
-  generalBody->layout()->addWidget(historyRow);
+  generalFormLayout->addRow(tr("Search history limit:"),
+                            m_searchHistoryLimitSpin);
+
+  auto *serverConfigRow = new QWidget(generalForm);
+  auto *serverConfigLayout = new QHBoxLayout(serverConfigRow);
+  serverConfigLayout->setContentsMargins(0, 0, 0, 0);
+  m_serverConfigEdit = new QLineEdit(serverConfigRow);
+  auto *serverConfigButton = new QPushButton(serverConfigRow);
+  serverConfigButton->setIcon(QIcon::fromTheme("document-open"));
+  serverConfigButton->setToolTip(tr("Choose server config file"));
+  serverConfigButton->setIconSize(QSize(16, 16));
+  serverConfigLayout->addWidget(m_serverConfigEdit);
+  serverConfigLayout->addWidget(serverConfigButton);
+  generalFormLayout->addRow(tr("Server Config (yaml):"), serverConfigRow);
+  generalBody->layout()->addWidget(generalForm);
+
+  connect(serverConfigButton, &QPushButton::clicked, this, [this]() {
+    const QString path = QFileDialog::getOpenFileName(
+        this, tr("Choose Server Config"), m_serverConfigEdit->text(),
+        tr("YAML files (*.yaml *.yml);;All files (*)"));
+    if (!path.isEmpty())
+      m_serverConfigEdit->setText(path);
+  });
 
   auto *buttonsRow = new QWidget(generalBody);
   auto *buttonsLayout = new QHBoxLayout(buttonsRow);
@@ -286,6 +309,10 @@ void SettingsWidget::updateFromState() {
       sliderValueText(m_maxNormalizationSlider->value(), 1));
 
   m_searchHistoryLimitSpin->setValue(state->searchHistoryLimit());
+  QString serverConfigPath = QSettings().value("serverConfigPath").toString();
+  if (serverConfigPath.isEmpty())
+    serverConfigPath = QDir::homePath() + "/.config/musicserver.yaml";
+  m_serverConfigEdit->setText(serverConfigPath);
 }
 
 void SettingsWidget::updateServerProps(const QJsonObject &props) {
@@ -307,6 +334,8 @@ void SettingsWidget::updateServerProps(const QJsonObject &props) {
 }
 
 void SettingsWidget::onSaveClicked() {
+  QSettings settings;
+  settings.setValue("serverConfigPath", m_serverConfigEdit->text());
   AppState::instance()->saveConfig();
   emit statusMessage(tr("Settings saved"));
 }

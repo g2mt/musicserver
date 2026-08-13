@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDir>
+#include <QSettings>
 #include <QStandardPaths>
 
 #include "ApiClient.h"
@@ -20,6 +21,9 @@ int main(int argc, char *argv[]) {
   parser.process(app);
 
   QString configPath = parser.value("config");
+  if (configPath.isEmpty()) {
+    configPath = QSettings().value("serverConfigPath").toString();
+  }
   if (configPath.isEmpty()) {
     configPath = QDir::homePath() + "/.config/musicserver.yaml";
   }
