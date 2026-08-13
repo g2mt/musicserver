@@ -289,7 +289,7 @@ All source files live flat under `qt/src/` to keep the structure simple.
 4. **Phase 4 — Queue** (done): Enqueue, dequeue, next/prev navigation, repeat
    modes, shuffle. Right panel track list.
 
-5. **Phase 5 — File browser tab** (UI Component Mapping §6):
+5. **Phase 5 — File browser tab** (UI Component Mapping §6, done):
    - `FileListModel` + file browser widget using a `QTreeView` (or
      `QTableWidget`)
    - Breadcrumb location bar showing `root / path / to / dir`
