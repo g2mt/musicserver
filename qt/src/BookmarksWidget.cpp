@@ -81,8 +81,7 @@ QWidget *BookmarksWidget::createBookmarkRow(const Bookmark &bm, int index) {
             showRowContextMenu(bm, index, content->mapToGlobal(pos));
           });
 
-  auto *removeBtn = new QPushButton(row);
-  removeBtn->setText(QStringLiteral(u"\u00d7"));
+  auto *removeBtn = new QPushButton(QIcon::fromTheme("list-remove"), "", row);
   removeBtn->setToolTip("Remove bookmark");
   removeBtn->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(removeBtn, &QPushButton::clicked, this, [this, index]() {
