@@ -49,6 +49,7 @@ private:
   void setupLayout();
   void setupShortcuts();
   void updateSplitterOrientation();
+  void updateWindowTitle(const QString &musicTitle);
   void fetchAllTracks(TrackFetchAction action);
 
   ApiClient *m_api;

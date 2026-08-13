@@ -33,7 +33,7 @@ static const int COLLAPSE_AT_WIDTH = 800;
 
 AppMainWindow::AppMainWindow(QWidget *parent)
     : QMainWindow(parent), m_api(ApiClient::instance()) {
-  setWindowTitle("Music Server");
+  updateWindowTitle(QString());
 
   AppState *state = AppState::instance();
 
@@ -60,6 +60,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
           [this](const QString &query) {
             AppState *state = AppState::instance();
             state->setSearchQuery(query, 0);
+            m_searchInput->setText(query);
             state->setLeftTab(LeftTab::Tracks);
             refreshSearch();
           });
@@ -77,14 +78,21 @@ AppMainWindow::AppMainWindow(QWidget *parent)
 
   // Load config
   state->loadConfig();
+  m_searchInput->setText(state->searchQuery());
 
   // Initial search to load all tracks on startup
   refreshSearch();
 
   // Connect state signals
+  connect(state, &AppState::searchQueryChanged, this,
+          [this](const QString &query, int) {
+            if (m_searchInput->text() != query)
+              m_searchInput->setText(query);
+          });
+
   connect(state, &AppState::currentTrackChanged, this,
           [this, state](const TrackData &track) {
-            setWindowTitle(track.name.isEmpty() ? "Music Server" : track.name);
+            updateWindowTitle(track.name);
             if (track.id != state->highlightedTrackId())
               state->setHighlightedTrackId(QString());
           });
@@ -134,6 +142,14 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   m_progressTimer = new QTimer(this);
   m_progressTimer->setInterval(500);
   m_progressTimer->start();
+}
+
+void AppMainWindow::updateWindowTitle(const QString &musicTitle) {
+  const QString appTitle = QApplication::applicationName();
+  if (musicTitle.isEmpty())
+    setWindowTitle(appTitle);
+  else
+    setWindowTitle(QString("%1 — %2").arg(musicTitle, appTitle));
 }
 
 AppMainWindow::~AppMainWindow() { AppState::instance()->saveConfig(); }
@@ -261,6 +277,7 @@ void AppMainWindow::setupLeftPanel() {
           [this](const QString &query) {
             AppState *state = AppState::instance();
             state->setSearchQuery(query, 0);
+            m_searchInput->setText(query);
             state->setLeftTab(LeftTab::Tracks);
             refreshSearch();
           });
@@ -398,6 +415,7 @@ void AppMainWindow::setupRightPanel() {
           [this](const QString &query) {
             AppState *state = AppState::instance();
             state->setSearchQuery(query, 0);
+            m_searchInput->setText(query);
             state->setLeftTab(LeftTab::Tracks);
             refreshSearch();
           });
