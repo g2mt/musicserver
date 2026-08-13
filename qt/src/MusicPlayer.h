@@ -9,6 +9,9 @@
 #include <QWidget>
 
 class ApiClient;
+#ifdef MS_ENABLE_MPRIS
+class Mpris;
+#endif
 
 class MusicPlayer : public QWidget {
   Q_OBJECT
@@ -48,6 +51,9 @@ private:
 
   ApiClient *m_api = nullptr;
   QFutureWatcher<QByteArray> *m_coverWatcher = nullptr;
+#ifdef MS_ENABLE_MPRIS
+  Mpris *m_mpris = nullptr;
+#endif
 
   bool m_seeking = false;
 };

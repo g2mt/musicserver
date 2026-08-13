@@ -11,6 +11,8 @@
 #include <QDBusMessage>
 #include <QDBusObjectPath>
 #include <QDir>
+#include <QFile>
+#include <QStandardPaths>
 #include <QUrl>
 
 namespace {
@@ -114,14 +116,17 @@ public:
             [this](double) { propertyChanged("Volume", volume()); });
     connect(state, &AppState::mutedChanged, this,
             [this](bool) { propertyChanged("Volume", volume()); });
-    connect(state, &AppState::repeatChanged, this,
-            [this](RepeatMode) { propertyChanged("LoopStatus", loopStatus()); });
+    connect(state, &AppState::repeatChanged, this, [this](RepeatMode) {
+      propertyChanged("LoopStatus", loopStatus());
+    });
     connect(state, &AppState::shuffleBeforePlayingAllChanged, this,
             [this](bool) { propertyChanged("Shuffle", shuffle()); });
     connect(state, &AppState::queueTracksChanged, this,
             [this](const QList<TrackData> &) { updateNavigationProperties(); });
     connect(state, &AppState::queueTracksAdded, this,
-            [this](const QList<TrackData> &, int) { updateNavigationProperties(); });
+            [this](const QList<TrackData> &, int) {
+              updateNavigationProperties();
+            });
     connect(state, &AppState::queueTracksRemoved, this,
             [this](int, int) { updateNavigationProperties(); });
     connect(state, &AppState::queueIndexChanged, this,
@@ -168,19 +173,13 @@ public:
 
     const QJsonObject config = state->serverProps()["config"].toObject();
     const QString dataPath = config["data_path"].toString();
-    if (!dataPath.isEmpty()) {
-      if (!track.path.isEmpty()) {
-        result.insert("xesam:url",
-                      QUrl::fromLocalFile(QDir(dataPath).filePath(track.path))
-                          .toString());
-      }
-      if (!track.thumbnailPath.isEmpty()) {
-        result.insert(
-            "mpris:artUrl",
-            QUrl::fromLocalFile(QDir(dataPath).filePath(track.thumbnailPath))
-                .toString());
-      }
+    if (!dataPath.isEmpty() && !track.path.isEmpty()) {
+      result.insert(
+          "xesam:url",
+          QUrl::fromLocalFile(QDir(dataPath).filePath(track.path)).toString());
     }
+    if (!m_coverArtUri.isEmpty())
+      result.insert("mpris:artUrl", m_coverArtUri);
     return result;
   }
 
@@ -202,6 +201,11 @@ public:
   double volume() const {
     AppState *state = AppState::instance();
     return state->muted() ? 0.0 : state->volume();
+  }
+
+  void setCoverArtUri(const QString &uri) {
+    m_coverArtUri = uri;
+    updateMetadata();
   }
 
 public slots:
@@ -283,6 +287,11 @@ private:
     propertyChanged("CanGoNext", canGoNext());
     propertyChanged("CanGoPrevious", canGoPrevious());
   }
+
+  void updateMetadata() { propertyChanged("Metadata", metadata()); }
+
+private:
+  QString m_coverArtUri;
 };
 
 } // namespace
@@ -293,10 +302,30 @@ Mpris::Mpris(QObject *parent) : QObject(parent) {
     return;
 
   bus.registerService("org.mpris.MediaPlayer2.musicserver_qt");
+  auto *player = new MprisPlayerAdaptor(this);
+  connect(this, &Mpris::coverChanged, player,
+          [player](const QString &uri) { player->setCoverArtUri(uri); });
   new MprisRootAdaptor(this);
-  new MprisPlayerAdaptor(this);
   bus.registerObject("/org/mpris/MediaPlayer2", this,
                      QDBusConnection::ExportAdaptors);
+}
+
+void Mpris::setCover(const QByteArray &bytes) {
+  QString uri;
+  if (!bytes.isEmpty()) {
+    const QString dir =
+        QStandardPaths::writableLocation(QStandardPaths::CacheLocation) +
+        "/musicserver-qt";
+    QDir().mkpath(dir);
+    const QString path = dir + "/mpris-cover.jpg";
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate) &&
+        file.write(bytes) == bytes.size()) {
+      file.close();
+      uri = QUrl::fromLocalFile(path).toString();
+    }
+  }
+  emit coverChanged(uri);
 }
 
 #include "Mpris.moc"

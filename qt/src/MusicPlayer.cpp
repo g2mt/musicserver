@@ -16,7 +16,7 @@
 MusicPlayer::MusicPlayer(QWidget *parent)
     : QWidget(parent), m_api(ApiClient::instance()) {
 #ifdef MS_ENABLE_MPRIS
-  new Mpris(this);
+  m_mpris = new Mpris(this);
 #endif
 
   setupUi();
@@ -33,6 +33,9 @@ MusicPlayer::MusicPlayer(QWidget *parent)
               m_trackCover->setPixmap(
                   QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
             }
+#ifdef MS_ENABLE_MPRIS
+            m_mpris->setCover(bytes);
+#endif
           });
 
   AppState *state = AppState::instance();
@@ -224,6 +227,9 @@ void MusicPlayer::updateDurationFromState(double) {
 }
 
 void MusicPlayer::updateTrackFromState(const TrackData &track) {
+#ifdef MS_ENABLE_MPRIS
+  m_mpris->setCover(QByteArray());
+#endif
   m_trackLabel->setText(track.name);
   m_trackCover->clear();
   m_trackCover->setPixmap(
