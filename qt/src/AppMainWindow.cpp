@@ -211,10 +211,10 @@ void AppMainWindow::setupToolbar() {
 
 void AppMainWindow::setupLeftPanel() {
   m_leftTabBar = new QTabBar();
-  m_leftTabBar->addTab("Tracks");
-  m_leftTabBar->addTab("Bookmarks");
-  m_leftTabBar->addTab("Files");
-  m_leftTabBar->addTab("Settings");
+  m_leftTabBar->addTab(QIcon::fromTheme("audio-x-generic"), "Tracks");
+  m_leftTabBar->addTab(QIcon::fromTheme("bookmark-new"), "Bookmarks");
+  m_leftTabBar->addTab(QIcon::fromTheme("folder"), "Files");
+  m_leftTabBar->addTab(QIcon::fromTheme("preferences-system"), "Settings");
 
   connect(m_leftTabBar, &QTabBar::currentChanged, this,
           &AppMainWindow::onTabClicked);
