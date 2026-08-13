@@ -282,7 +282,6 @@ void AppState::queuePrev() {
 LeftTab AppState::leftTab() const { return m_leftTab; }
 bool AppState::tracksListCollapsed() const { return m_tracksListCollapsed; }
 bool AppState::queueCollapsed() const { return m_queueCollapsed; }
-bool AppState::darkMode() const { return m_darkMode; }
 bool AppState::shuffleBeforePlayingAll() const {
   return m_shuffleBeforePlayingAll;
 }
@@ -308,14 +307,6 @@ void AppState::setQueueCollapsed(bool collapsed) {
     return;
   m_queueCollapsed = collapsed;
   emit queueCollapsedChanged(collapsed);
-}
-
-void AppState::setDarkMode(bool dark) {
-  if (m_darkMode == dark)
-    return;
-  m_darkMode = dark;
-  emit darkModeChanged(dark);
-  qDebug() << "darkMode set to" << dark;
 }
 
 void AppState::setShuffleBeforePlayingAll(bool shuffle) {
@@ -407,7 +398,6 @@ void AppState::loadConfig() {
 
   setVolume(settings.value("volume", 1.0).toDouble());
   setMuted(settings.value("muted", false).toBool());
-  setDarkMode(settings.value("darkMode", false).toBool());
   setShuffleBeforePlayingAll(
       settings.value("shuffleBeforePlayingAll", true).toBool());
   setSearchHistoryLimit(settings.value("searchHistoryLimit", 10).toInt());
@@ -442,7 +432,6 @@ void AppState::saveConfig() {
 
   settings.setValue("volume", m_volume);
   settings.setValue("muted", m_muted);
-  settings.setValue("darkMode", m_darkMode);
   settings.setValue("shuffleBeforePlayingAll", m_shuffleBeforePlayingAll);
   settings.setValue("searchHistoryLimit", m_searchHistoryLimit);
   settings.setValue("targetNormalizationDbs", m_targetNormalizationDbs);

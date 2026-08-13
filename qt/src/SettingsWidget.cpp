@@ -61,8 +61,6 @@ SettingsWidget::SettingsWidget(QWidget *parent)
           });
   connect(state, &AppState::searchHistoryLimitChanged, this,
           [this](int limit) { m_searchHistoryLimitSpin->setValue(limit); });
-  connect(state, &AppState::darkModeChanged, this,
-          [this](bool dark) { m_darkModeCheck->setChecked(dark); });
   connect(state, &AppState::serverPropsChanged, this,
           &SettingsWidget::updateServerProps);
 
@@ -133,9 +131,7 @@ void SettingsWidget::setupUi() {
   buttonsLayout->setContentsMargins(0, 0, 0, 0);
   m_saveButton = new QPushButton(tr("Save"), buttonsRow);
   m_saveButton->setIcon(QIcon::fromTheme("document-save"));
-  m_darkModeCheck = new QCheckBox(tr("Dark Mode (placeholder)"), buttonsRow);
   buttonsLayout->addWidget(m_saveButton);
-  buttonsLayout->addWidget(m_darkModeCheck);
   buttonsLayout->addStretch();
   generalBody->layout()->addWidget(buttonsRow);
 
@@ -172,8 +168,6 @@ void SettingsWidget::setupUi() {
           });
   connect(m_saveButton, &QPushButton::clicked, this,
           &SettingsWidget::onSaveClicked);
-  connect(m_darkModeCheck, &QCheckBox::toggled, this,
-          [this](bool checked) { AppState::instance()->setDarkMode(checked); });
   connect(m_rescanButton, &QPushButton::clicked, this,
           [this]() { onRescanClicked(false); });
   connect(m_forceRescanButton, &QPushButton::clicked, this,
@@ -292,7 +286,6 @@ void SettingsWidget::updateFromState() {
       sliderValueText(m_maxNormalizationSlider->value(), 1));
 
   m_searchHistoryLimitSpin->setValue(state->searchHistoryLimit());
-  m_darkModeCheck->setChecked(state->darkMode());
 }
 
 void SettingsWidget::updateServerProps(const QJsonObject &props) {

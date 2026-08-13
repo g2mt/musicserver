@@ -45,7 +45,6 @@ public:
   LeftTab leftTab() const;
   bool tracksListCollapsed() const;
   bool queueCollapsed() const;
-  bool darkMode() const;
   bool shuffleBeforePlayingAll() const;
   int searchHistoryLimit() const;
   QString highlightedTrackId() const;
@@ -96,7 +95,6 @@ public slots:
   void setLeftTab(LeftTab tab);
   void setTracksListCollapsed(bool collapsed);
   void setQueueCollapsed(bool collapsed);
-  void setDarkMode(bool dark);
   void setShuffleBeforePlayingAll(bool shuffle);
   void setSearchHistoryLimit(int limit);
   void setHighlightedTrackId(const QString &id);
@@ -145,7 +143,6 @@ signals:
   void leftTabChanged(LeftTab tab);
   void tracksListCollapsedChanged(bool collapsed);
   void queueCollapsedChanged(bool collapsed);
-  void darkModeChanged(bool dark);
   void shuffleBeforePlayingAllChanged(bool shuffle);
   void searchHistoryLimitChanged(int limit);
   void highlightedTrackIdChanged(const QString &id);
@@ -190,7 +187,6 @@ private:
   LeftTab m_leftTab = LeftTab::Tracks;
   bool m_tracksListCollapsed = false;
   bool m_queueCollapsed = false;
-  bool m_darkMode = false;
   bool m_shuffleBeforePlayingAll = true;
   int m_searchHistoryLimit = 10;
   QString m_highlightedTrackId;
