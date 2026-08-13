@@ -4,12 +4,10 @@
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
 #include "QtAudioPlayer.h"
-#include "TrackDelegate.h"
-#include "TrackListModel.h"
+#include "TrackListView.h"
 
 #include <QAction>
 #include <QApplication>
-#include <QByteArray>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QIcon>
@@ -17,7 +15,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMenu>
-#include <QPixmap>
 #include <QPushButton>
 #include <QResizeEvent>
 #include <QShortcut>
@@ -75,7 +72,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
 
   connect(state, &AppState::highlightedTrackIdChanged, this,
           [this](const QString &id) {
-            m_trackListModel->setHighlightedTrackId(id);
+            m_trackListView->setHighlightedTrackId(id);
           });
 
   connect(state, &AppState::leftTabChanged, this, [this](LeftTab tab) {
@@ -86,23 +83,23 @@ AppMainWindow::AppMainWindow(QWidget *parent)
           [this](bool collapsed) { m_leftStack->setVisible(!collapsed); });
 
   connect(state, &AppState::queueCollapsedChanged, this,
-          [this](bool collapsed) { m_queueContent->setVisible(!collapsed); });
+          [this](bool collapsed) { m_queueListView->setVisible(!collapsed); });
 
   connect(state, &AppState::queueTracksChanged, this,
           [this](const QList<TrackData> &tracks) {
-            m_queueListModel->setTracks(tracks);
+            m_queueListView->setTracks(tracks);
             m_rightPanel->setVisible(!tracks.isEmpty());
           });
 
   connect(state, &AppState::queueTracksAdded, this,
           [this](const QList<TrackData> &tracks, int startIndex) {
-            m_queueListModel->insertTracks(tracks, startIndex);
+            m_queueListView->insertTracks(tracks, startIndex);
             m_rightPanel->setVisible(true);
           });
 
   connect(state, &AppState::queueTracksRemoved, this,
           [this, state](int startIndex, int count) {
-            m_queueListModel->removeTracks(startIndex, count);
+            m_queueListView->removeTracks(startIndex, count);
             m_rightPanel->setVisible(!state->queueTracks().isEmpty());
           });
 
@@ -112,7 +109,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
             const QString id = (index >= 0 && index < tracks.size())
                                    ? tracks.at(index).id
                                    : QString();
-            m_queueListModel->setHighlightedTrackId(id);
+            m_queueListView->setHighlightedTrackId(id);
           });
 
   // Progress timer (replace SSE polling)
@@ -227,72 +224,19 @@ void AppMainWindow::setupLeftPanel() {
   QVBoxLayout *tracksLayout = new QVBoxLayout(m_tracksTab);
   tracksLayout->setContentsMargins(0, 0, 0, 0);
 
-  m_trackListView = new QListView();
-  m_trackListModel = new TrackListModel(this);
-  m_trackListView->setModel(m_trackListModel);
+  m_trackListView = new TrackListView(TrackListView::Action::Enqueue, this);
 
-  m_trackDelegate = new TrackDelegate(this);
-  m_trackDelegate->setModel(m_trackListModel);
-  m_trackDelegate->setAction(TrackDelegate::Action::Enqueue);
-  m_trackListView->setItemDelegate(m_trackDelegate);
-  m_trackListView->setUniformItemSizes(true);
-  m_trackListView->setAlternatingRowColors(true);
-  m_trackListView->setContextMenuPolicy(Qt::CustomContextMenu);
-
-  connect(m_trackDelegate, &TrackDelegate::trackActionClicked, this,
-          [this](int row) {
-            if (row < 0 || row >= m_trackListModel->tracks().size())
-              return;
-            AppState::instance()->queueAdd(m_trackListModel->tracks().at(row));
-          });
-
-  connect(m_trackListModel, &TrackListModel::coverRequested, this,
-          [this](int row, const QString &trackId) {
-            Q_UNUSED(row);
-            QFuture<QByteArray> future =
-                m_api->getBytes(QString("/track/%1/cover").arg(trackId));
-            auto *watcher = new QFutureWatcher<QByteArray>(this);
-            connect(watcher, &QFutureWatcher<QByteArray>::finished, this,
-                    [this, watcher, trackId]() {
-                      QByteArray bytes = watcher->result();
-                      watcher->deleteLater();
-                      QPixmap pix;
-                      if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
-                        m_trackListModel->setCoverPixmap(trackId, pix);
-                      }
-                    });
-            watcher->setFuture(future);
-          });
-
-  connect(m_trackListView, &QListView::doubleClicked, this,
-          [this](const QModelIndex &index) {
-            TrackData track = qvariant_cast<TrackData>(
-                index.data(TrackListModel::TrackDataRole));
+  connect(m_trackListView, &TrackListView::playRequested, this,
+          [this](const TrackData &track, int) {
             AppState *state = AppState::instance();
             state->setHighlightedTrackId(track.id);
             state->setCurrentTrack(track);
             state->setIsPlaying(true);
           });
 
-  connect(m_trackListView, &QListView::customContextMenuRequested, this,
-          [this](const QPoint &pos) {
-            QModelIndex index = m_trackListView->indexAt(pos);
-            if (!index.isValid())
-              return;
-            TrackData track = qvariant_cast<TrackData>(
-                index.data(TrackListModel::TrackDataRole));
-            AppState *state = AppState::instance();
-
-            QMenu menu;
-            menu.addAction(QIcon::fromTheme("media-playback-start"), "Play",
-                           this, [state, track]() {
-                             state->setHighlightedTrackId(track.id);
-                             state->setCurrentTrack(track);
-                             state->setIsPlaying(true);
-                           });
-            menu.addAction(QIcon::fromTheme("list-add"), "Add to queue", this,
-                           [state, track]() { state->queueAdd(track); });
-            menu.exec(m_trackListView->viewport()->mapToGlobal(pos));
+  connect(m_trackListView, &TrackListView::enqueueRequested, this,
+          [this](const TrackData &track) {
+            AppState::instance()->queueAdd(track);
           });
 
   QWidget *tracksControls = new QWidget();
@@ -374,87 +318,25 @@ void AppMainWindow::setupRightPanel() {
   headerLayout->addWidget(collapseBtn);
   rightLayout->addWidget(header);
 
-  m_queueContent = new QWidget();
-  QVBoxLayout *queueLayout = new QVBoxLayout(m_queueContent);
-  queueLayout->setContentsMargins(0, 0, 0, 0);
+  m_queueListView =
+      new TrackListView(TrackListView::Action::Unqueue, this);
+  rightLayout->addWidget(m_queueListView);
 
-  QWidget *actions = new QWidget();
-  QHBoxLayout *actionsLayout = new QHBoxLayout(actions);
-  actionsLayout->setContentsMargins(0, 0, 0, 0);
-  QPushButton *removeAllBtn = new QPushButton("Remove all");
-  QPushButton *shuffleBtn = new QPushButton("Shuffle");
-  connect(removeAllBtn, &QPushButton::clicked, this,
-          [state]() { state->queueClear(); });
-  connect(shuffleBtn, &QPushButton::clicked, this,
-          [state]() { state->queueShuffle(); });
-  actionsLayout->addWidget(removeAllBtn);
-  actionsLayout->addWidget(shuffleBtn);
-  actionsLayout->addStretch();
-  queueLayout->addWidget(actions);
-
-  m_queueListView = new QListView();
-  m_queueListModel = new TrackListModel(this);
-  m_queueListView->setModel(m_queueListModel);
-
-  m_queueDelegate = new TrackDelegate(this);
-  m_queueDelegate->setModel(m_queueListModel);
-  m_queueDelegate->setAction(TrackDelegate::Action::Unqueue);
-  m_queueListView->setItemDelegate(m_queueDelegate);
-  m_queueListView->setUniformItemSizes(true);
-  m_queueListView->setAlternatingRowColors(true);
-  m_queueListView->setContextMenuPolicy(Qt::CustomContextMenu);
-  queueLayout->addWidget(m_queueListView);
-
-  rightLayout->addWidget(m_queueContent);
-
-  connect(m_queueDelegate, &TrackDelegate::trackActionClicked, this,
+  connect(m_queueListView, &TrackListView::unqueueRequested, this,
           [state](int row) { state->queueRemove(row); });
 
-  connect(m_queueListView, &QListView::doubleClicked, this,
-          [this, state](const QModelIndex &index) {
-            TrackData track = qvariant_cast<TrackData>(
-                index.data(TrackListModel::TrackDataRole));
-            state->setQueueIndex(index.row());
+  connect(m_queueListView, &TrackListView::playRequested, this,
+          [state](const TrackData &track, int row) {
+            state->setQueueIndex(row);
             state->setCurrentTrack(track);
             state->setIsPlaying(true);
           });
 
-  connect(m_queueListView, &QListView::customContextMenuRequested, this,
-          [this, state](const QPoint &pos) {
-            QModelIndex index = m_queueListView->indexAt(pos);
-            if (!index.isValid())
-              return;
-            TrackData track = qvariant_cast<TrackData>(
-                index.data(TrackListModel::TrackDataRole));
-            QMenu menu;
-            menu.addAction(QIcon::fromTheme("media-playback-start"), "Play",
-                           this, [state, index, track]() {
-                             state->setQueueIndex(index.row());
-                             state->setCurrentTrack(track);
-                             state->setIsPlaying(true);
-                           });
-            menu.addAction("Remove", this,
-                           [state, index]() { state->queueRemove(index.row()); });
-            menu.exec(m_queueListView->viewport()->mapToGlobal(pos));
-          });
+  connect(m_queueListView, &TrackListView::removeAllRequested, this,
+          [state]() { state->queueClear(); });
 
-  connect(m_queueListModel, &TrackListModel::coverRequested, this,
-          [this](int row, const QString &trackId) {
-            Q_UNUSED(row);
-            QFuture<QByteArray> future =
-                m_api->getBytes(QString("/track/%1/cover").arg(trackId));
-            auto *watcher = new QFutureWatcher<QByteArray>(this);
-            connect(watcher, &QFutureWatcher<QByteArray>::finished, this,
-                    [this, watcher, trackId]() {
-                      QByteArray bytes = watcher->result();
-                      watcher->deleteLater();
-                      QPixmap pix;
-                      if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
-                        m_queueListModel->setCoverPixmap(trackId, pix);
-                      }
-                    });
-            watcher->setFuture(future);
-          });
+  connect(m_queueListView, &TrackListView::shuffleRequested, this,
+          [state]() { state->queueShuffle(); });
 }
 
 void AppMainWindow::setupLayout() {
@@ -594,7 +476,7 @@ void AppMainWindow::onSearchResultFinished() {
 
   qDebug() << "onSearchResultFinished: loaded" << tracks.size() << "tracks";
 
-  m_trackListModel->setTracks(tracks);
+  m_trackListView->setTracks(tracks);
   AppState::instance()->setHighlightedTrackId(QString());
   statusBar()->showMessage(QString("Loaded %1 tracks").arg(tracks.size()));
 
@@ -614,7 +496,7 @@ void AppMainWindow::addAllTracks() {
 }
 
 void AppMainWindow::addVisibleTracks() {
-  const QList<TrackData> tracks = m_trackListModel->tracks();
+  const QList<TrackData> tracks = m_trackListView->tracks();
   if (tracks.isEmpty()) {
     statusBar()->showMessage("No tracks found");
     return;

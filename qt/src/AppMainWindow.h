@@ -3,7 +3,6 @@
 #include <QFutureWatcher>
 #include <QLabel>
 #include <QLineEdit>
-#include <QListView>
 #include <QMainWindow>
 #include <QSplitter>
 #include <QStackedWidget>
@@ -13,8 +12,7 @@
 
 class ApiClient;
 class FileBrowserWidget;
-class TrackDelegate;
-class TrackListModel;
+class TrackListView;
 class QtAudioPlayer;
 class MusicPlayer;
 
@@ -67,18 +65,13 @@ private:
   QWidget *m_filesTab = nullptr;
   FileBrowserWidget *m_fileBrowser = nullptr;
   QWidget *m_settingsTab = nullptr;
-  QListView *m_trackListView = nullptr;
-  TrackListModel *m_trackListModel = nullptr;
-  TrackDelegate *m_trackDelegate = nullptr;
+  TrackListView *m_trackListView = nullptr;
   QFutureWatcher<QJsonDocument> *m_searchWatcher = nullptr;
   QFutureWatcher<QJsonDocument> *m_propsWatcher = nullptr;
 
   // Right panel (queue)
   QWidget *m_rightPanel = nullptr;
-  QWidget *m_queueContent = nullptr;
-  QListView *m_queueListView = nullptr;
-  TrackListModel *m_queueListModel = nullptr;
-  TrackDelegate *m_queueDelegate = nullptr;
+  TrackListView *m_queueListView = nullptr;
   QFutureWatcher<QJsonDocument> *m_trackFetchWatcher = nullptr;
   TrackFetchAction m_trackFetchAction = TrackFetchAction::None;
 

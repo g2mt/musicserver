@@ -49,6 +49,7 @@ set(QT_SOURCES
   src/QtAudioPlayer.cpp
   src/TrackDelegate.cpp
   src/TrackListModel.cpp
+  src/TrackListView.cpp
 )
 
 set(QT_HEADERS
@@ -60,6 +61,7 @@ set(QT_HEADERS
   src/QtAudioPlayer.h
   src/TrackDelegate.h
   src/TrackListModel.h
+  src/TrackListView.h
   src/TrackData.h
   src/Bookmark.h
 )
