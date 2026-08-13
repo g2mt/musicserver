@@ -14,7 +14,7 @@ class ApiClient;
 class BookmarksWidget;
 class FileBrowserWidget;
 class TrackListView;
-class QtAudioPlayer;
+class AudioPlayer;
 class MusicPlayer;
 
 enum class TrackFetchAction { None, PlayAll, AddAll };
@@ -78,7 +78,7 @@ private:
   TrackFetchAction m_trackFetchAction = TrackFetchAction::None;
 
   // Audio
-  QtAudioPlayer *m_audioPlayer = nullptr;
+  AudioPlayer *m_audioPlayer = nullptr;
 
   // Music player bar (placeholder until Phase 3)
   QWidget *m_musicPlayer = nullptr;

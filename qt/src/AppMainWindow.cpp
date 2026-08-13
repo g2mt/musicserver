@@ -4,7 +4,7 @@
 #include "BookmarksWidget.h"
 #include "FileBrowserWidget.h"
 #include "MusicPlayer.h"
-#include "QtAudioPlayer.h"
+#include "AudioPlayer.h"
 #include "TrackListView.h"
 
 #include <QAction>
@@ -123,14 +123,14 @@ AppMainWindow::~AppMainWindow() { AppState::instance()->saveConfig(); }
 
 void AppMainWindow::setupAudio() {
   AppState *state = AppState::instance();
-  m_audioPlayer = new QtAudioPlayer(this);
+  m_audioPlayer = new AudioPlayer(this);
 
   // Player → AppState: sync time, duration, ended
-  connect(m_audioPlayer, &QtAudioPlayer::timeChanged, this,
+  connect(m_audioPlayer, &AudioPlayer::timeChanged, this,
           [state](qint64 ms) { state->setProgress(ms / 1000.0); });
-  connect(m_audioPlayer, &QtAudioPlayer::durationChanged, this,
+  connect(m_audioPlayer, &AudioPlayer::durationChanged, this,
           [state](qint64 ms) { state->setDuration(ms / 1000.0); });
-  connect(m_audioPlayer, &QtAudioPlayer::ended, this,
+  connect(m_audioPlayer, &AudioPlayer::ended, this,
           [state]() { state->queueNext(); });
 
   // AppState → Player: track changes

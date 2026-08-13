@@ -4,10 +4,10 @@
 #include <QMediaPlayer>
 #include <QObject>
 
-class QtAudioPlayer : public QObject {
+class AudioPlayer : public QObject {
   Q_OBJECT
 public:
-  explicit QtAudioPlayer(QObject *parent = nullptr);
+  explicit AudioPlayer(QObject *parent = nullptr);
 
   void setSource(const QString &url);
   void play();

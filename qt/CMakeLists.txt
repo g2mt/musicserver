@@ -47,7 +47,7 @@ set(QT_SOURCES
   src/BookmarksWidget.cpp
   src/FileBrowserWidget.cpp
   src/MusicPlayer.cpp
-  src/QtAudioPlayer.cpp
+  src/AudioPlayer.cpp
   src/TrackDelegate.cpp
   src/TrackListModel.cpp
   src/TrackListView.cpp
@@ -60,7 +60,7 @@ set(QT_HEADERS
   src/BookmarksWidget.h
   src/FileBrowserWidget.h
   src/MusicPlayer.h
-  src/QtAudioPlayer.h
+  src/AudioPlayer.h
   src/TrackDelegate.h
   src/TrackListModel.h
   src/TrackListView.h
