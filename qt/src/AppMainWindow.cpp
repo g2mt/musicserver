@@ -323,13 +323,6 @@ void AppMainWindow::setupRightPanel() {
   headerLayout->setContentsMargins(0, 0, 0, 0);
   headerLayout->addWidget(new QLabel("Queue"));
   headerLayout->addStretch();
-
-  QPushButton *collapseBtn = new QPushButton();
-  collapseBtn->setIcon(QIcon::fromTheme("go-down"));
-  collapseBtn->setFixedSize(24, 24);
-  connect(collapseBtn, &QPushButton::clicked, this,
-          &AppMainWindow::onCollapseQueue);
-  headerLayout->addWidget(collapseBtn);
   rightLayout->addWidget(header);
 
   m_queueListView = new TrackListView(TrackListView::Action::Unqueue, this);
@@ -355,24 +348,16 @@ void AppMainWindow::setupRightPanel() {
 void AppMainWindow::setupLayout() {
   m_splitter = new QSplitter(Qt::Horizontal);
 
-  // Left side: tab bar (+ collapse button) + stack
+  // Left side: tab bar + stack
   QWidget *leftPanel = new QWidget();
   QVBoxLayout *leftLayout = new QVBoxLayout(leftPanel);
   leftLayout->setContentsMargins(0, 0, 0, 0);
 
-  // Collapse button
-  QPushButton *collapseBtn = new QPushButton();
-  collapseBtn->setIcon(QIcon::fromTheme("go-down"));
-  collapseBtn->setFixedSize(24, 24);
-  connect(collapseBtn, &QPushButton::clicked, this,
-          &AppMainWindow::onCollapseTracksList);
-  // Place collapse button in tab bar area via a horizontal layout
   QWidget *leftTopBar = new QWidget();
   QHBoxLayout *leftTopLayout = new QHBoxLayout(leftTopBar);
   leftTopLayout->setContentsMargins(0, 0, 0, 0);
   leftTopLayout->addWidget(m_leftTabBar);
   leftTopLayout->addStretch();
-  leftTopLayout->addWidget(collapseBtn);
   leftLayout->addWidget(leftTopBar);
 
   leftLayout->addWidget(m_leftStack);
@@ -437,16 +422,6 @@ void AppMainWindow::onSearchSubmit() {
 
 void AppMainWindow::onTabClicked(int index) {
   AppState::instance()->setLeftTab(static_cast<LeftTab>(index));
-}
-
-void AppMainWindow::onCollapseTracksList() {
-  AppState *state = AppState::instance();
-  state->setTracksListCollapsed(!state->tracksListCollapsed());
-}
-
-void AppMainWindow::onCollapseQueue() {
-  AppState *state = AppState::instance();
-  state->setQueueCollapsed(!state->queueCollapsed());
 }
 
 void AppMainWindow::refreshSearch() {

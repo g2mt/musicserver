@@ -32,8 +32,6 @@ protected:
 private slots:
   void onSearchSubmit();
   void onTabClicked(int index);
-  void onCollapseTracksList();
-  void onCollapseQueue();
   void refreshSearch();
   void onSearchResultFinished();
   void onPropsResultFinished();
