@@ -80,6 +80,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
 
   connect(state, &AppState::leftTabChanged, this, [this](LeftTab tab) {
     m_leftStack->setCurrentIndex(static_cast<int>(tab));
+    m_leftTabBar->setCurrentIndex(static_cast<int>(tab));
   });
 
   connect(state, &AppState::tracksListCollapsedChanged, this,
