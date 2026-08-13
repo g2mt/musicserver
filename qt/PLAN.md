@@ -276,21 +276,45 @@ All source files live flat under `qt/src/` to keep the structure simple.
 
 ## Implementation Order
 
-1. **Phase 1 — Skeleton**: `AppMainWindow` with toolbar + `QSplitter` layout,
-   `AppState` singleton with signals, `ApiClient` wrapping `MsrvHandleRequest`,
-   `TrackData` struct + JSON parse.
+1. **Phase 1 — Skeleton** (done): `AppMainWindow` with toolbar + `QSplitter`
+   layout, `AppState` singleton with signals, `ApiClient` wrapping
+   `MsrvHandleRequest`, `TrackData` struct + JSON parse.
 
-2. **Phase 2 — Audio**: `QtAudioPlayer` with play/pause/seek/volume, wired to
-   `AppState`.
+2. **Phase 2 — Audio** (done): `QtAudioPlayer` with play/pause/seek/volume,
+   wired to `AppState`.
 
-3. **Phase 3 — Core UI**: Search toolbar + Track list (with model) + Music player.
-   End-to-end: search → display tracks → play a track.
+3. **Phase 3 — Core UI** (done): Search toolbar + Track list (with model) +
+   Music player. End-to-end: search → display tracks → play a track.
 
-4. **Phase 4 — Queue**: Enqueue, dequeue, next/prev navigation, repeat modes,
-   shuffle. Right panel track list.
+4. **Phase 4 — Queue** (done): Enqueue, dequeue, next/prev navigation, repeat
+   modes, shuffle. Right panel track list.
 
-5. **Phase 5 — Remaining tabs**: File browser, Bookmarks, Settings.
+5. **Phase 5 — File browser tab** (UI Component Mapping §6):
+   - `FileListModel` + file browser widget using a `QTreeView` (or
+     `QTableWidget`)
+   - Breadcrumb location bar showing `root / path / to / dir`
+   - Directories listed above files, each clickable
+   - ".." entry to go up one level
+   - Search (show tracks in path) and scan (rescan only this path) icons
 
-6. **Phase 6 — Polish**: Dark mode, config persistence, keyboard shortcuts,
-   context menus, toast notifications, confirm dialogs, progress table,
+6. **Phase 6 — Bookmarks tab** (UI Component Mapping §7):
+   - `Bookmark` struct + `QListWidget` of bookmark items
+   - Add form: `QLineEdit` for name + "Add" `QPushButton`
+   - Each bookmark row: name + query text, delete button
+   - Right-click: Rename, Delete
+   - Click navigates to the tracks tab with the bookmark's query
+
+7. **Phase 7 — Settings tab** (UI Component Mapping §8):
+   - `SettingsWidget` using a `QScrollArea` of collapsible `QGroupBox` sections
+   - Playback section: amplification slider, normalize checkbox
+   - General section: showBlurredCover / showOnlyQueueAfterEnqueue /
+     shuffleBeforePlayingAll / showTracksListOnTabChange checkboxes,
+     normalization dB slider, search history limit spin box, Save button,
+     Dark/Light mode toggle, Rescan buttons
+   - Server properties section: read-only form from `/props`
+   - Ongoing processes section: `ProgressWidget` with `QTableWidget` progress
+     bars, polled via `QTimer`
+
+8. **Phase 8 — Polish**: Dark mode, config persistence, keyboard shortcuts,
+   context menus, toast notifications, confirm dialogs,
    collapsed/responsive layout.
