@@ -424,10 +424,7 @@ void AppMainWindow::setupLeftPanel() {
 
   connect(m_bookmarksWidget, &BookmarksWidget::openBookmark, this,
           [this](const QString &query) {
-            AppState *state = AppState::instance();
-            m_searchInput->setText(query);
-            state->setSearchQuery(query, 0);
-            state->setLeftTab(LeftTab::Tracks);
+            AppState::instance()->setSearchQuery(query, 0);
           });
   connect(
       m_bookmarksWidget, &BookmarksWidget::statusMessage, this,
@@ -440,11 +437,8 @@ void AppMainWindow::setupLeftPanel() {
 
   connect(m_fileBrowser, &FileBrowserWidget::showTracksInPath, this,
           [this](const QString &relativePath) {
-            AppState *state = AppState::instance();
             const QString query = QString("path:\"%1\"").arg(relativePath);
-            m_searchInput->setText(query);
-            state->setSearchQuery(query, 0);
-            state->setLeftTab(LeftTab::Tracks);
+            AppState::instance()->setSearchQuery(query, 0);
           });
   connect(
       m_fileBrowser, &FileBrowserWidget::statusMessage, this,
@@ -584,7 +578,6 @@ void AppMainWindow::onSearchSubmit() {
   AppState *state = AppState::instance();
   QString query = m_searchInput->text();
   state->setSearchQuery(query, 0);
-  updateSearchHistory(query);
 }
 
 void AppMainWindow::updateSearchHistory(const QString &query) {
@@ -618,7 +611,6 @@ void AppMainWindow::navigateSearchHistory(int direction) {
 
   m_searchHistoryIndex = nextIndex;
   const QString query = m_searchHistory.at(nextIndex);
-  m_searchInput->setText(query);
   AppState::instance()->setSearchQuery(query, 0, true);
   updateSearchHistoryActions();
 }
@@ -635,7 +627,6 @@ void AppMainWindow::showSearchHistoryMenu() {
       if (index >= 0 && index < m_searchHistory.size()) {
         m_searchHistoryIndex = index;
         const QString query = m_searchHistory.at(index);
-        m_searchInput->setText(query);
         AppState::instance()->setSearchQuery(query, 0, true);
         updateSearchHistoryActions();
       }
