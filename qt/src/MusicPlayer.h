@@ -61,4 +61,5 @@ private:
 #endif
 
   bool m_seeking = false;
+  int m_iconSize = 0;
 };

@@ -19,6 +19,7 @@
 #include <QJsonObject>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPalette>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QResizeEvent>
@@ -522,6 +523,11 @@ void AppMainWindow::setupLayout() {
 
   // Main layout: splitter on top, music player at bottom
   QWidget *central = new QWidget();
+  central->setAutoFillBackground(true);
+  central->setBackgroundRole(QPalette::Base);
+  m_musicPlayer->setAutoFillBackground(true);
+  m_musicPlayer->setBackgroundRole(QPalette::Window);
+
   QVBoxLayout *centralLayout = new QVBoxLayout(central);
   centralLayout->setContentsMargins(0, 0, 0, 0);
   centralLayout->addWidget(m_splitter);

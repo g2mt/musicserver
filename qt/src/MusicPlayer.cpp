@@ -13,6 +13,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QPixmap>
+#include <QStyle>
 #include <QVBoxLayout>
 
 MusicPlayer::MusicPlayer(QWidget *parent)
@@ -29,11 +30,12 @@ MusicPlayer::MusicPlayer(QWidget *parent)
             QByteArray bytes = m_coverWatcher->result();
             QPixmap pix;
             if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
-              m_trackCover->setPixmap(pix.scaled(48, 48, Qt::KeepAspectRatio,
-                                                 Qt::SmoothTransformation));
-            } else {
               m_trackCover->setPixmap(
-                  QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
+                  pix.scaled(m_iconSize, m_iconSize, Qt::KeepAspectRatio,
+                             Qt::SmoothTransformation));
+            } else {
+              m_trackCover->setPixmap(QIcon::fromTheme("audio-x-generic")
+                                          .pixmap(m_iconSize, m_iconSize));
             }
 #ifdef MS_ENABLE_MPRIS
             m_mpris->setCover(bytes);
@@ -73,6 +75,7 @@ MusicPlayer::MusicPlayer(QWidget *parent)
 }
 
 void MusicPlayer::setupUi() {
+  m_iconSize = style()->pixelMetric(QStyle::PM_LargeIconSize);
   setFixedHeight(100);
 
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -111,7 +114,7 @@ void MusicPlayer::setupUi() {
   trackLayout->setContentsMargins(0, 0, 0, 0);
 
   m_trackCover = new QLabel();
-  m_trackCover->setFixedSize(48, 48);
+  m_trackCover->setFixedSize(m_iconSize, m_iconSize);
   m_trackCover->setAlignment(Qt::AlignCenter);
   m_trackCover->setStyleSheet("border: 1px solid gray;");
 
@@ -255,7 +258,8 @@ void MusicPlayer::updateTrackFromState(const TrackData &track) {
   }
   m_trackLabel->setFont(titleFont);
   m_trackCover->clear();
-  m_trackCover->setPixmap(QIcon::fromTheme("audio-x-generic").pixmap(48, 48));
+  m_trackCover->setPixmap(
+      QIcon::fromTheme("audio-x-generic").pixmap(m_iconSize, m_iconSize));
   if (!m_api || track.id.isEmpty()) {
     return;
   }
@@ -296,8 +300,8 @@ void MusicPlayer::updateRepeatFromState() {
   }
 
   QIcon baseIcon = QIcon::fromTheme("media-repeat-all");
-  QSize iconSize(48, 48);
-  const int badgeRadius = 24;
+  QSize iconSize(m_iconSize, m_iconSize);
+  const int badgeRadius = m_iconSize / 2;
   QPixmap icon = baseIcon.pixmap(iconSize);
   if (repeat != RepeatMode::None) {
     QPainter painter(&icon);
