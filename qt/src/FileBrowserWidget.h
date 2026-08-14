@@ -9,6 +9,7 @@
 #include "TrackData.h"
 
 class ApiClient;
+class FileBrowserLocationBar;
 class QTreeWidgetItem;
 
 class FileBrowserWidget : public QWidget {
@@ -36,7 +37,7 @@ private:
   QString encodedTrackPathForItem(QTreeWidgetItem *item) const;
 
   ApiClient *m_api = nullptr;
-  QLabel *m_breadcrumb = nullptr;
+  FileBrowserLocationBar *m_breadcrumb = nullptr;
   QToolBar *m_toolbar = nullptr;
   QAction *m_showTracksAction = nullptr;
   QAction *m_scanAction = nullptr;

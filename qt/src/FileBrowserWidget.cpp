@@ -5,6 +5,11 @@
 
 #include <QAbstractItemView>
 #include <QDebug>
+#include <QFrame>
+#include <QLayout>
+#include <QLayoutItem>
+#include <QPushButton>
+#include <functional>
 #include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -15,6 +20,7 @@
 #include <QToolBar>
 #include <QTreeWidgetItem>
 #include <QUrl>
+#include <utility>
 #include <QVBoxLayout>
 
 static QIcon themeIcon(const QString &name, const QString &fallback) {
@@ -23,6 +29,134 @@ static QIcon themeIcon(const QString &name, const QString &fallback) {
     return QIcon::fromTheme(fallback);
   return icon;
 }
+
+class FileBrowserLocationBarLayout : public QLayout {
+public:
+  explicit FileBrowserLocationBarLayout(QWidget *parent = nullptr) : QLayout(parent) {}
+
+  ~FileBrowserLocationBarLayout() override {
+    while (QLayoutItem *item = takeAt(0))
+      delete item;
+  }
+
+  void addItem(QLayoutItem *item) override { m_items.append(item); }
+  int count() const override { return m_items.size(); }
+  QLayoutItem *itemAt(int index) const override {
+    return index >= 0 && index < m_items.size() ? m_items.at(index) : nullptr;
+  }
+  QLayoutItem *takeAt(int index) override {
+    return index >= 0 && index < m_items.size() ? m_items.takeAt(index)
+                                                 : nullptr;
+  }
+  bool hasHeightForWidth() const override { return true; }
+  int heightForWidth(int width) const override { return doLayout(width, true); }
+  QSize sizeHint() const override { return minimumSize(); }
+  QSize minimumSize() const override {
+    QSize size;
+    for (QLayoutItem *item : m_items)
+      size = size.expandedTo(item->minimumSize());
+    const QMargins margins = contentsMargins();
+    return size + QSize(margins.left() + margins.right(),
+                        margins.top() + margins.bottom());
+  }
+
+  void setGeometry(const QRect &rect) override {
+    QLayout::setGeometry(rect);
+    doLayout(rect.width(), false, rect);
+  }
+
+private:
+  int doLayout(int width, bool testOnly, const QRect &rect = {}) const {
+    const QMargins margins = contentsMargins();
+    const int effectiveWidth = width - margins.left() - margins.right();
+    int x = 0;
+    int y = 0;
+    int lineHeight = 0;
+
+    for (QLayoutItem *item : m_items) {
+      const QSize itemSize = item->sizeHint();
+      const int spacing = x > 0 ? this->spacing() : 0;
+      if (x > 0 && x + spacing + itemSize.width() > effectiveWidth) {
+        x = 0;
+        y += lineHeight;
+        lineHeight = 0;
+      }
+      if (x > 0)
+        x += spacing;
+      if (!testOnly)
+        item->setGeometry(QRect(rect.x() + margins.left() + x,
+                                rect.y() + margins.top() + y, itemSize.width(),
+                                itemSize.height()));
+      x += itemSize.width();
+      lineHeight = qMax(lineHeight, itemSize.height());
+    }
+    return y + lineHeight + margins.top() + margins.bottom();
+  }
+
+  QList<QLayoutItem *> m_items;
+};
+
+class FileBrowserLocationBar : public QFrame {
+public:
+  explicit FileBrowserLocationBar(QWidget *parent = nullptr) : QFrame(parent) {
+    setStyleSheet(QStringLiteral(
+        "FileBrowserLocationBar {"
+        "  border: 1px solid palette(mid);"
+        "  background: palette(base);"
+        "}"
+        "QPushButton {"
+        "  padding: 2px 4px;"
+        "}"
+        "QPushButton:hover {"
+        "  background: palette(alternate-base);"
+        "}"));
+
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    m_layout = new FileBrowserLocationBarLayout(this);
+    m_layout->setContentsMargins(4, 1, 4, 1);
+    m_layout->setSpacing(4);
+  }
+
+  void setPath(const QStringList &path) {
+    while (QLayoutItem *item = m_layout->takeAt(0)) {
+      if (QWidget *widget = item->widget())
+        widget->deleteLater();
+      delete item;
+    }
+
+    addButton(QStringLiteral("root"), -1);
+    for (int i = 0; i < path.size(); ++i) {
+      addButton(path.at(i), i);
+    }
+    updateGeometry();
+  }
+
+  void setPathClickedCallback(std::function<void(int)> callback) {
+    m_pathClicked = std::move(callback);
+  }
+
+private:
+  void addButton(const QString &text, int index) {
+    constexpr int maxCharacters = 24;
+    const QString displayedText =
+        text.size() > maxCharacters
+            ? text.left(maxCharacters - 3) + QStringLiteral("...")
+            : text;
+    auto *button = new QPushButton(displayedText, this);
+    button->setToolTip(text);
+    button->setCursor(Qt::PointingHandCursor);
+    button->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+    connect(button, &QPushButton::clicked, this,
+            [this, index]() {
+              if (m_pathClicked)
+                m_pathClicked(index);
+            });
+    m_layout->addWidget(button);
+  }
+
+  FileBrowserLocationBarLayout *m_layout = nullptr;
+  std::function<void(int)> m_pathClicked;
+};
 
 FileBrowserWidget::FileBrowserWidget(QWidget *parent)
     : QWidget(parent), m_api(ApiClient::instance()) {
@@ -49,26 +183,19 @@ FileBrowserWidget::FileBrowserWidget(QWidget *parent)
 void FileBrowserWidget::setupUi() {
   auto *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(0);
 
-  m_breadcrumb = new QLabel();
-  m_breadcrumb->setTextFormat(Qt::RichText);
-  m_breadcrumb->setTextInteractionFlags(Qt::TextBrowserInteraction);
-  connect(m_breadcrumb, &QLabel::linkActivated, this,
-          [this](const QString &link) {
-            AppState *state = AppState::instance();
-            if (link == "root") {
-              state->setFbPath({});
-              return;
-            }
-            bool ok = false;
-            const int index = link.toInt(&ok);
-            if (!ok)
-              return;
-            const QStringList path = state->fbPath();
-            if (index >= 0 && index < path.size()) {
-              state->setFbPath(path.mid(0, index + 1));
-            }
-          });
+  m_breadcrumb = new FileBrowserLocationBar();
+  m_breadcrumb->setPathClickedCallback([](int index) {
+    AppState *state = AppState::instance();
+    if (index < 0) {
+      state->setFbPath({});
+      return;
+    }
+    const QStringList path = state->fbPath();
+    if (index < path.size())
+      state->setFbPath(path.mid(0, index + 1));
+  });
   layout->addWidget(m_breadcrumb);
 
   m_toolbar = new QToolBar();
@@ -104,7 +231,7 @@ void FileBrowserWidget::setupUi() {
   connect(m_tree, &QTreeWidget::customContextMenuRequested, this,
           &FileBrowserWidget::showContextMenu);
 
-  layout->addWidget(m_tree);
+  layout->addWidget(m_tree, 1);
 }
 
 QString FileBrowserWidget::dataPath() const {
@@ -133,15 +260,7 @@ void FileBrowserWidget::refresh() {
 }
 
 void FileBrowserWidget::updateBreadcrumb() {
-  const QStringList fbPath = AppState::instance()->fbPath();
-  QStringList parts;
-  parts.append(QStringLiteral("<a href=\"root\">root</a>"));
-  for (int i = 0; i < fbPath.size(); ++i) {
-    parts.append(QStringLiteral("<a href=\"%1\">%2</a>")
-                     .arg(i)
-                     .arg(fbPath.at(i).toHtmlEscaped()));
-  }
-  m_breadcrumb->setText(parts.join(" / "));
+  m_breadcrumb->setPath(AppState::instance()->fbPath());
 }
 
 QString FileBrowserWidget::relativePathForItem(QTreeWidgetItem *item) const {
