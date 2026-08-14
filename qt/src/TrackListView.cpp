@@ -5,6 +5,7 @@
 #include "TrackDelegate.h"
 #include "TrackListModel.h"
 
+#include <QAbstractItemView>
 #include <QApplication>
 #include <QByteArray>
 #include <QClipboard>
@@ -65,6 +66,8 @@ void TrackListView::setupUi() {
                           ? TrackDelegate::Action::Enqueue
                           : TrackDelegate::Action::Unqueue);
   m_view->setItemDelegate(delegate);
+  m_view->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  m_view->setSelectionBehavior(QAbstractItemView::SelectRows);
   m_view->setUniformItemSizes(true);
   m_view->setAlternatingRowColors(true);
   m_view->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -89,12 +92,13 @@ void TrackListView::setupUi() {
   connect(
       m_view, &QListView::customContextMenuRequested, this,
       [this](const QPoint &pos) {
-        QModelIndex index = m_view->indexAt(pos);
-        if (!index.isValid())
+        const QModelIndexList selected =
+            m_view->selectionModel()->selectedRows();
+        if (selected.isEmpty())
           return;
-        TrackData track =
-            qvariant_cast<TrackData>(index.data(TrackListModel::TrackDataRole));
-        const int row = index.row();
+
+        const int row = selected.first().row();
+        const TrackData track = m_model->tracks().at(row);
 
         QMenu menu(this);
         menu.addAction(
@@ -102,15 +106,25 @@ void TrackListView::setupUi() {
             [this, track, row]() { emit playRequested(track, row); });
         if (m_action == Action::Enqueue) {
           menu.addAction(QIcon::fromTheme("list-add"), "Add to Queue", this,
-                         [this, track]() { emit enqueueRequested(track); });
+                         [this, selected]() {
+                           for (const QModelIndex &index : selected)
+                             emit enqueueRequested(m_model->tracks().at(index.row()));
+                         });
         } else {
-          menu.addAction("Remove", this,
-                         [this, row]() { emit unqueueRequested(row); });
+          menu.addAction("Remove", this, [this, selected]() {
+            for (auto it = selected.crbegin(); it != selected.crend(); ++it)
+              emit unqueueRequested(it->row());
+          });
         }
         menu.addAction(QIcon::fromTheme("edit-copy"), "Copy Info", this,
-                       [track]() {
-                         QApplication::clipboard()->setText(
-                             QString("%1 - %2").arg(track.name, track.artist));
+                       [this, selected]() {
+                         QStringList info;
+                         for (const QModelIndex &index : selected) {
+                           const TrackData &track = m_model->tracks().at(index.row());
+                           info.append(QString("%1 - %2")
+                                           .arg(track.name, track.artist));
+                         }
+                         QApplication::clipboard()->setText(info.join("\n"));
                        });
 
         QMenu *goToMenu = menu.addMenu("Go to...");
@@ -137,6 +151,7 @@ void TrackListView::setupUi() {
                             });
         QAction *forgetAction =
             menu.addAction(QIcon::fromTheme("user-trash"), "Forget Track");
+        forgetAction->setEnabled(selected.size() == 1);
         connect(forgetAction, &QAction::triggered, this, [this, track]() {
           if (m_forgetWatcher->isRunning()) {
             emit statusMessage("A track operation is already running");
