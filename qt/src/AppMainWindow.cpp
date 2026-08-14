@@ -209,14 +209,10 @@ void AppMainWindow::setupAudio() {
   });
 
   // AppState → Player: volume
-  connect(state, &AppState::volumeChanged, this, [this, state]() {
-    m_audioPlayer->setVolume(
-        state->muted() ? 0.0f : static_cast<float>(state->volume()));
-  });
-  connect(state, &AppState::mutedChanged, this, [this, state]() {
-    m_audioPlayer->setVolume(
-        state->muted() ? 0.0f : static_cast<float>(state->volume()));
-  });
+  connect(state, &AppState::volumeChanged, this,
+          [this](double) { updateAudioVolume(); });
+  connect(state, &AppState::mutedChanged, this,
+          [this](bool) { updateAudioVolume(); });
 
   // AppState → Player: amplification
   connect(state, &AppState::amplificationChanged, this, [this](double db) {
@@ -294,19 +290,7 @@ void AppMainWindow::setupToolbar() {
   connect(m_searchInput, &QLineEdit::returnPressed, this,
           &AppMainWindow::onSearchSubmit);
   connect(m_searchInput, &QLineEdit::textChanged, this,
-          [this](const QString &text) {
-            const QJsonObject config =
-                AppState::instance()->serverProps()["config"].toObject();
-            const bool hasDownloader =
-                !config["media_downloader"].toString().isEmpty();
-            const QString value = text.trimmed();
-            const bool isUrl =
-                value.startsWith("http://") || value.startsWith("https://");
-            if (m_downloadAction) {
-              m_downloadAction->setVisible(hasDownloader && isUrl);
-              m_downloadAction->setEnabled(hasDownloader && isUrl);
-            }
-          });
+          [this](const QString &) { updateDownloadAction(); });
 
   m_toolbar->addWidget(m_searchInput);
 
@@ -605,10 +589,7 @@ void AppMainWindow::navigateSearchHistory(int direction) {
   if (nextIndex < 0 || nextIndex >= m_searchHistory.size())
     return;
 
-  m_searchHistoryIndex = nextIndex;
-  const QString query = m_searchHistory.at(nextIndex);
-  AppState::instance()->setSearchQuery(query, 0, true);
-  updateSearchHistoryActions();
+  navigateToSearchHistory(nextIndex);
 }
 
 void AppMainWindow::showSearchHistoryMenu() {
@@ -621,13 +602,18 @@ void AppMainWindow::showSearchHistoryMenu() {
     connect(action, &QAction::triggered, this, [this, action]() {
       const int index = action->data().toInt();
       if (index >= 0 && index < m_searchHistory.size()) {
-        m_searchHistoryIndex = index;
-        const QString query = m_searchHistory.at(index);
-        AppState::instance()->setSearchQuery(query, 0, true);
-        updateSearchHistoryActions();
+        navigateToSearchHistory(index);
       }
     });
   }
+}
+
+void AppMainWindow::navigateToSearchHistory(int index) {
+  if (index < 0 || index >= m_searchHistory.size())
+    return;
+  m_searchHistoryIndex = index;
+  AppState::instance()->setSearchQuery(m_searchHistory.at(index), 0, true);
+  updateSearchHistoryActions();
 }
 
 void AppMainWindow::updateSearchHistoryActions() {
@@ -656,19 +642,29 @@ void AppMainWindow::refreshSearch() {
   m_searchWatcher->setFuture(m_api->get("/track", params));
 }
 
+void AppMainWindow::updateDownloadAction() {
+  const QJsonObject config =
+      AppState::instance()->serverProps()["config"].toObject();
+  const bool hasDownloader = !config["media_downloader"].toString().isEmpty();
+  const QString value = m_searchInput->text().trimmed();
+  const bool isUrl = value.startsWith("http://") || value.startsWith("https://");
+  if (m_downloadAction) {
+    m_downloadAction->setVisible(hasDownloader && isUrl);
+    m_downloadAction->setEnabled(hasDownloader && isUrl);
+  }
+}
+
+void AppMainWindow::updateAudioVolume() {
+  AppState *state = AppState::instance();
+  m_audioPlayer->setVolume(
+      state->muted() ? 0.0f : static_cast<float>(state->volume()));
+}
+
 void AppMainWindow::onPropsResultFinished() {
   QJsonDocument doc = m_propsWatcher->result();
   if (doc.isObject()) {
     AppState::instance()->setServerProps(doc.object());
-    const QJsonObject config = doc.object()["config"].toObject();
-    const bool hasDownloader = !config["media_downloader"].toString().isEmpty();
-    const QString value = m_searchInput->text().trimmed();
-    const bool isUrl =
-        value.startsWith("http://") || value.startsWith("https://");
-    if (m_downloadAction) {
-      m_downloadAction->setVisible(hasDownloader && isUrl);
-      m_downloadAction->setEnabled(hasDownloader && isUrl);
-    }
+    updateDownloadAction();
   }
 }
 

@@ -57,6 +57,7 @@ set(QT_SOURCES
   src/TrackDelegate.cpp
   src/TrackListModel.cpp
   src/TrackListView.cpp
+  src/TrackNavigationMenu.cpp
 )
 
 set(QT_HEADERS
@@ -73,6 +74,7 @@ set(QT_HEADERS
   src/TrackListModel.h
   src/TrackListView.h
   src/TrackData.h
+  src/TrackNavigationMenu.h
   src/Bookmark.h
 )
 

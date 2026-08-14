@@ -244,8 +244,6 @@ void FileBrowserWidget::refresh() {
   if (root.isEmpty())
     return;
 
-  m_tree->clear();
-
   const QStringList fbPath = AppState::instance()->fbPath();
 
   QStringList segments;

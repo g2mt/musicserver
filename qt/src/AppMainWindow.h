@@ -58,6 +58,9 @@ private:
   void navigateSearchHistory(int direction);
   void showSearchHistoryMenu();
   void updateSearchHistoryActions();
+  void navigateToSearchHistory(int index);
+  void updateDownloadAction();
+  void updateAudioVolume();
   void startExternalDownload();
   void updateNormalization();
 

@@ -4,6 +4,7 @@
 #include "AppState.h"
 #include "TrackDelegate.h"
 #include "TrackListModel.h"
+#include "TrackNavigationMenu.h"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -127,28 +128,11 @@ void TrackListView::setupUi() {
                          QApplication::clipboard()->setText(info.join("\n"));
                        });
 
-        QMenu *goToMenu = menu.addMenu("Go to...");
-        if (!track.album.isEmpty()) {
-          goToMenu->addAction(QIcon::fromTheme("media-optical"), "Album", this,
-                              [this, track]() {
-                                AppState::instance()->setSearchQuery(
-                                    QString("album:\"%1\"").arg(track.album));
-                              });
-        }
-        if (!track.artist.isEmpty()) {
-          goToMenu->addAction(QIcon::fromTheme("user-identity"), "Artist", this,
-                              [this, track]() {
-                                AppState::instance()->setSearchQuery(
-                                    QString("artist:\"%1\"").arg(track.artist));
-                              });
-        }
-        goToMenu->addAction(QIcon::fromTheme("folder"), "Path", this,
-                            [this, track]() {
-                              QStringList parts = track.path.split("/");
-                              parts.removeLast();
-                              AppState::instance()->setFbPath(parts);
-                              AppState::instance()->setLeftTab(LeftTab::Files);
-                            });
+        addTrackNavigationActions(
+            menu, this, track, [](const QStringList &path) {
+              AppState::instance()->setFbPath(path);
+              AppState::instance()->setLeftTab(LeftTab::Files);
+            });
         QAction *forgetAction =
             menu.addAction(QIcon::fromTheme("user-trash"), "Forget Track");
         forgetAction->setEnabled(selected.size() == 1);

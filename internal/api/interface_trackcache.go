@@ -86,7 +86,6 @@ func (i *Interface) getTrackCoverCached(path string) ([]byte, string, error) {
 		WHERE c.path = ?
 	`, path).Scan(&cachedData, &mimeType)
 	if err != nil {
-		slog.Error("cannot find cache with checksum")
 		return nil, "", nil // skip not found errors
 	}
 

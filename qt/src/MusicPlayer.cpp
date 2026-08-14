@@ -2,6 +2,7 @@
 #include "ApiClient.h"
 #include "AppState.h"
 #include "TrackData.h"
+#include "TrackNavigationMenu.h"
 #ifdef MS_ENABLE_MPRIS
 #include "Mpris.h"
 #endif
@@ -242,7 +243,6 @@ void MusicPlayer::updateTrackFromState(const TrackData &track) {
     }
   }
   m_trackLabel->setFont(titleFont);
-  m_trackCover->clear();
   m_trackCover->setPixmap(
       QIcon::fromTheme("audio-x-generic").pixmap(m_iconSize, m_iconSize));
   if (!m_api || track.id.isEmpty()) {
@@ -328,27 +328,9 @@ void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
 
   const TrackData track = *state->currentTrack();
   if (!track.name.isEmpty()) {
-    QMenu *goToMenu = menu.addMenu("Go to...");
-    if (!track.album.isEmpty()) {
-      goToMenu->addAction(
-          QIcon::fromTheme("media-optical"), "Album", this, [this, track]() {
-            AppState::instance()->setSearchQuery(
-                QString("album:\"%1\"").arg(track.album));
-          });
-    }
-    if (!track.artist.isEmpty()) {
-      goToMenu->addAction(
-          QIcon::fromTheme("user-identity"), "Artist", this, [this, track]() {
-            AppState::instance()->setSearchQuery(
-                QString("artist:\"%1\"").arg(track.artist));
-          });
-    }
-    goToMenu->addAction(QIcon::fromTheme("folder"), "Path", this,
-                        [this, track]() {
-                          QStringList parts = track.path.split("/");
-                          parts.removeLast();
-                          emit pathRequested(parts);
-                        });
+    addTrackNavigationActions(
+        menu, this, track,
+        [this](const QStringList &path) { emit pathRequested(path); });
   }
 
   menu.addSeparator()->setText("Repeat...");
