@@ -14,10 +14,6 @@ NativeAudioPlayer::NativeAudioPlayer(QObject *parent) : QObject(parent) {
           &NativeAudioPlayer::durationChanged);
   connect(m_player, &QMediaPlayer::mediaStatusChanged, this,
           &NativeAudioPlayer::onMediaStatusChanged);
-  connect(m_player, &QMediaPlayer::playbackStateChanged, this,
-          [this](QMediaPlayer::PlaybackState state) {
-            emit playingChanged(state == QMediaPlayer::PlayingState);
-          });
 }
 
 void NativeAudioPlayer::setSource(const QString &url) {
@@ -55,12 +51,6 @@ void NativeAudioPlayer::setAmplification(float dB) {
 void NativeAudioPlayer::seekTo(qint64 ms) { m_player->setPosition(ms); }
 
 qint64 NativeAudioPlayer::currentTime() const { return m_player->position(); }
-
-qint64 NativeAudioPlayer::duration() const { return m_player->duration(); }
-
-bool NativeAudioPlayer::isPlaying() const {
-  return m_player->playbackState() == QMediaPlayer::PlayingState;
-}
 
 void NativeAudioPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
   if (status == QMediaPlayer::EndOfMedia ||

@@ -150,10 +150,6 @@ AppMainWindow::AppMainWindow(QWidget *parent)
     m_queueListView->setHighlightedTrackId(id);
   });
 
-  // Progress timer (replace SSE polling)
-  m_progressTimer = new QTimer(this);
-  m_progressTimer->setInterval(500);
-  m_progressTimer->start();
 }
 
 void AppMainWindow::updateWindowTitle(const QString &musicTitle) {

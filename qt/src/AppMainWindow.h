@@ -8,7 +8,6 @@
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QTabBar>
-#include <QTimer>
 #include <QToolBar>
 
 class ApiClient;
@@ -108,6 +107,4 @@ private:
   // Music player bar (placeholder until Phase 3)
   MusicPlayer *m_musicPlayer = nullptr;
 
-  // Progress polling
-  QTimer *m_progressTimer = nullptr;
 };

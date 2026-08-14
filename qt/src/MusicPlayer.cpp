@@ -46,8 +46,6 @@ MusicPlayer::MusicPlayer(QWidget *parent)
 
   connect(state, &AppState::progressChanged, this,
           &MusicPlayer::updateProgressFromState);
-  connect(state, &AppState::durationChanged, this,
-          &MusicPlayer::updateDurationFromState);
   connect(state, &AppState::currentTrackChanged, this,
           &MusicPlayer::updateTrackFromState);
   connect(state, &AppState::isPlayingChanged, this,
@@ -179,15 +177,6 @@ void MusicPlayer::setupUi() {
           &MusicPlayer::onRepeatClicked);
 }
 
-void MusicPlayer::onProgressSliderChanged(int value) {
-  if (!m_seeking)
-    return;
-  AppState *state = AppState::instance();
-  double dur = state->duration();
-  if (dur > 0)
-    state->setProgress(value / 1000.0 * dur);
-}
-
 void MusicPlayer::onVolumeSliderChanged(int value) {
   AppState *state = AppState::instance();
   state->setVolume(value / 100.0);
@@ -231,10 +220,6 @@ void MusicPlayer::updateProgressFromState(double secs) {
     m_progressSlider->setValue(
         static_cast<int>(secs / state->duration() * 1000));
   }
-}
-
-void MusicPlayer::updateDurationFromState(double) {
-  // Duration handled implicitly by progress-to-slider ratio
 }
 
 void MusicPlayer::updateTrackFromState(const TrackData &track) {

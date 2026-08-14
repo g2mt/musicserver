@@ -17,14 +17,11 @@ public:
   void seekTo(qint64 ms);
 
   qint64 currentTime() const;
-  qint64 duration() const;
-  bool isPlaying() const;
 
 signals:
   void timeChanged(qint64 ms);
   void durationChanged(qint64 ms);
   void ended();
-  void playingChanged(bool playing);
 
 private slots:
   void onMediaStatusChanged(QMediaPlayer::MediaStatus status);

@@ -23,7 +23,6 @@ signals:
   void pathRequested(const QStringList &path);
 
 private slots:
-  void onProgressSliderChanged(int value);
   void onVolumeSliderChanged(int value);
   void onPlayPauseClicked();
   void onPrevClicked();
@@ -31,7 +30,6 @@ private slots:
   void onMuteClicked();
   void onRepeatClicked();
   void updateProgressFromState(double secs);
-  void updateDurationFromState(double secs);
   void updateTrackFromState(const struct TrackData &track);
   void updatePlayingFromState(bool playing);
   void updateVolumeFromState();
