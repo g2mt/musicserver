@@ -87,7 +87,7 @@ func NewInterface(config *schema.Config) (*Interface, error) {
 	if config.CacheDbEnabled != nil && *config.CacheDbEnabled {
 		// Open cache database
 		ccacheDbDir := filepath.Join(config.DbDir, CoverCacheDbPath)
-		ccacheDb, err = sql.Open("sqlite3", ccacheDbDir)
+		ccacheDb, err = sql.Open("sqlite3", "file:"+ccacheDbDir+"?_journal_mode=WAL&_busy_timeout=3000&_synchronous=NORMAL&_txlock=immediate")
 		if err != nil {
 			return nil, err
 		}

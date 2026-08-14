@@ -641,8 +641,8 @@ void AppMainWindow::onSearchResultFinished() {
   QList<TrackData> tracks;
   for (const auto &v : tracksArr) {
     TrackData t = TrackData::fromJson(v.toObject());
-    qDebug() << "track:" << t.id << t.name << t.artist << t.album << t.path;
-    qDebug() << "track thumbnail_path:" << t.thumbnailPath;
+    // qDebug() << "track:" << t.id << t.name << t.artist << t.album << t.path;
+    // qDebug() << "track thumbnail_path:" << t.thumbnailPath;
     tracks.append(t);
   }
 
