@@ -503,6 +503,8 @@ void AppMainWindow::setupRightPanel() {
 
 void AppMainWindow::setupLayout() {
   m_splitter = new QSplitter(Qt::Horizontal);
+  m_splitter->setAutoFillBackground(true);
+  m_splitter->setBackgroundRole(QPalette::Base);
 
   // Left side: tab bar + stack
   QWidget *leftPanel = new QWidget();
@@ -515,20 +517,17 @@ void AppMainWindow::setupLayout() {
   leftTopLayout->addWidget(m_leftTabBar);
   leftLayout->addWidget(leftTopBar);
 
-  leftLayout->addWidget(m_leftStack);
+  leftLayout->addWidget(m_leftStack, 1);
 
   m_splitter->addWidget(leftPanel);
   m_splitter->addWidget(m_rightPanel);
 
   // Main layout: splitter on top, music player at bottom
   QWidget *central = new QWidget();
-  central->setAutoFillBackground(true);
-  central->setBackgroundRole(QPalette::Base);
-  m_musicPlayer->setAutoFillBackground(true);
-  m_musicPlayer->setBackgroundRole(QPalette::Window);
 
   QVBoxLayout *centralLayout = new QVBoxLayout(central);
   centralLayout->setContentsMargins(0, 0, 0, 0);
+  centralLayout->setSpacing(0);
   centralLayout->addWidget(m_splitter);
   centralLayout->addWidget(m_musicPlayer);
 
