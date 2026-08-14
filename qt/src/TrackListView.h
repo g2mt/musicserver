@@ -32,7 +32,6 @@ signals:
   void unqueueRequested(int row);
   void removeAllRequested();
   void shuffleRequested();
-  void searchRequested(const QString &query);
   void statusMessage(const QString &message);
 
 private:

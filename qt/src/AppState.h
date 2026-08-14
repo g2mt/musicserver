@@ -75,7 +75,8 @@ public slots:
   void setRepeat(RepeatMode mode);
 
   // Search
-  void setSearchQuery(const QString &query, int limit = 0);
+  void setSearchQuery(const QString &query, int limit = 0,
+                      bool historyNavigation = false);
   void setResultSort(const QString &sort, bool desc);
   void setResultLimit(int limit);
 
@@ -129,7 +130,7 @@ signals:
   void repeatChanged(RepeatMode mode);
 
   // Search
-  void searchQueryChanged(const QString &query, int limit);
+  void searchQueryChanged(const QString &query, bool historyNavigation);
   void resultSortChanged(const QString &sort, bool desc);
   void resultLimitChanged(int limit);
 

@@ -20,7 +20,6 @@ public:
   explicit MusicPlayer(QWidget *parent = nullptr);
 
 signals:
-  void searchRequested(const QString &query);
   void pathRequested(const QStringList &path);
 
 private slots:

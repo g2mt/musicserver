@@ -29,6 +29,7 @@
 #include <QStatusBar>
 #include <QStringListModel>
 #include <QToolBar>
+#include <QToolButton>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QtMath>
@@ -68,14 +69,6 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   setupLeftPanel();
   setupRightPanel();
   m_musicPlayer = new MusicPlayer();
-  connect(m_musicPlayer, &MusicPlayer::searchRequested, this,
-          [this](const QString &query) {
-            AppState *state = AppState::instance();
-            state->setSearchQuery(query, 0);
-            m_searchInput->setText(query);
-            state->setLeftTab(LeftTab::Tracks);
-            refreshSearch();
-          });
   connect(m_musicPlayer, &MusicPlayer::pathRequested, this,
           [](const QStringList &path) {
             AppState *state = AppState::instance();
@@ -93,16 +86,20 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   if (state->searchQuery() != "sort:id") {
     m_searchInput->setText(state->searchQuery());
   }
+  updateSearchHistory(state->searchQuery());
 
   // Initial search to load all tracks on startup
   refreshSearch();
 
   // Connect state signals
   connect(state, &AppState::searchQueryChanged, this,
-          [this](const QString &query, int) {
+          [this](const QString &query, bool historyNavigation) {
             if (m_searchInput->text() != query)
               m_searchInput->setText(query);
-            updateSearchHistory(query);
+            if (!historyNavigation)
+              updateSearchHistory(query);
+            AppState::instance()->setLeftTab(LeftTab::Tracks);
+            refreshSearch();
           });
 
   connect(state, &AppState::currentTrackChanged, this,
@@ -178,12 +175,11 @@ void AppMainWindow::setupAudio() {
           [state](qint64 ms) { state->setProgress(ms / 1000.0); });
   connect(m_audioPlayer, &NativeAudioPlayer::durationChanged, this,
           [state](qint64 ms) { state->setDuration(ms / 1000.0); });
-  connect(m_audioPlayer, &NativeAudioPlayer::ended, this,
-          [this, state]() {
-            state->queueNext();
-            if (state->isPlaying())
-              m_audioPlayer->play();
-          });
+  connect(m_audioPlayer, &NativeAudioPlayer::ended, this, [this, state]() {
+    state->queueNext();
+    if (state->isPlaying())
+      m_audioPlayer->play();
+  });
 
   // AppState → Player: track changes
   connect(
@@ -248,14 +244,37 @@ void AppMainWindow::setupToolbar() {
   m_toolbar->setFloatable(false);
   m_toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
+  m_backSearchAction =
+      m_toolbar->addAction(QIcon::fromTheme("go-previous"), QString());
+  m_backSearchAction->setToolTip("Back");
+  connect(m_backSearchAction, &QAction::triggered, this,
+          [this]() { navigateSearchHistory(-1); });
+
+  m_forwardSearchAction =
+      m_toolbar->addAction(QIcon::fromTheme("go-next"), QString());
+  m_forwardSearchAction->setToolTip("Forward");
+  connect(m_forwardSearchAction, &QAction::triggered, this,
+          [this]() { navigateSearchHistory(1); });
+
+  auto *backButton = qobject_cast<QToolButton *>(
+      m_toolbar->widgetForAction(m_backSearchAction));
+  m_searchHistoryMenu = new QMenu(this);
+  m_searchHistoryMenu->setTitle("Search History");
+  m_searchHistoryMenu->setSeparatorsCollapsible(false);
+  connect(m_searchHistoryMenu, &QMenu::aboutToShow, this,
+          &AppMainWindow::showSearchHistoryMenu);
+  backButton->setMenu(m_searchHistoryMenu);
+  backButton->setPopupMode(QToolButton::MenuButtonPopup);
+
   QAction *homeAction =
-      m_toolbar->addAction(QIcon::fromTheme("go-home"), "Home");
-  homeAction->setToolTip("Go to top");
+      m_toolbar->addAction(QIcon::fromTheme("go-home"), QString());
+  homeAction->setToolTip("Go to Top");
   connect(homeAction, &QAction::triggered, this,
           [this]() { m_trackListView->scrollToTop(); });
+  updateSearchHistoryActions();
 
   m_searchInput = new QLineEdit();
-  m_searchInput->setPlaceholderText("Search tracks...");
+  m_searchInput->setPlaceholderText("Search Tracks...");
   m_searchInput->setClearButtonEnabled(true);
   m_searchInput->setMinimumWidth(200);
 
@@ -344,15 +363,6 @@ void AppMainWindow::setupLeftPanel() {
             AppState::instance()->queueAdd(track);
           });
 
-  connect(m_trackListView, &TrackListView::searchRequested, this,
-          [this](const QString &query) {
-            AppState *state = AppState::instance();
-            state->setSearchQuery(query, 0);
-            m_searchInput->setText(query);
-            state->setLeftTab(LeftTab::Tracks);
-            refreshSearch();
-          });
-
   QToolBar *tracksControls = new QToolBar();
   tracksControls->setMovable(false);
   tracksControls->setFloatable(false);
@@ -418,7 +428,6 @@ void AppMainWindow::setupLeftPanel() {
             m_searchInput->setText(query);
             state->setSearchQuery(query, 0);
             state->setLeftTab(LeftTab::Tracks);
-            refreshSearch();
           });
   connect(
       m_bookmarksWidget, &BookmarksWidget::statusMessage, this,
@@ -436,7 +445,6 @@ void AppMainWindow::setupLeftPanel() {
             m_searchInput->setText(query);
             state->setSearchQuery(query, 0);
             state->setLeftTab(LeftTab::Tracks);
-            refreshSearch();
           });
   connect(
       m_fileBrowser, &FileBrowserWidget::statusMessage, this,
@@ -483,15 +491,6 @@ void AppMainWindow::setupRightPanel() {
             state->setQueueIndex(row);
             state->setCurrentTrack(track);
             state->setIsPlaying(true);
-          });
-
-  connect(m_queueListView, &TrackListView::searchRequested, this,
-          [this](const QString &query) {
-            AppState *state = AppState::instance();
-            state->setSearchQuery(query, 0);
-            m_searchInput->setText(query);
-            state->setLeftTab(LeftTab::Tracks);
-            refreshSearch();
           });
 
   connect(m_queueListView, &TrackListView::removeAllRequested, this,
@@ -557,6 +556,15 @@ void AppMainWindow::setupShortcuts() {
   auto *lShortcut = new QShortcut(QKeySequence(Qt::Key_L), this);
   connect(lShortcut, &QShortcut::activated, this,
           [state]() { state->setProgress(state->progress() + 10.0); });
+
+  auto *backShortcut = new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Left), this);
+  connect(backShortcut, &QShortcut::activated, this,
+          [this]() { navigateSearchHistory(-1); });
+
+  auto *forwardShortcut =
+      new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Right), this);
+  connect(forwardShortcut, &QShortcut::activated, this,
+          [this]() { navigateSearchHistory(1); });
 }
 
 void AppMainWindow::resizeEvent(QResizeEvent *event) {
@@ -577,22 +585,71 @@ void AppMainWindow::onSearchSubmit() {
   QString query = m_searchInput->text();
   state->setSearchQuery(query, 0);
   updateSearchHistory(query);
-  refreshSearch();
 }
 
 void AppMainWindow::updateSearchHistory(const QString &query) {
+  qDebug() << "updateSearchHistory" << query;
   if (query.isEmpty())
     return;
 
-  QSettings settings;
-  QStringList history = settings.value("searchSuggestions").toStringList();
-  history.removeAll(query);
-  history.prepend(query);
-  history = history.mid(0, AppState::instance()->searchHistoryLimit());
-  settings.setValue("searchSuggestions", history);
+  if (m_searchHistoryIndex + 1 < m_searchHistory.size())
+    m_searchHistory = m_searchHistory.mid(0, m_searchHistoryIndex + 1);
+  if (m_searchHistory.isEmpty() || m_searchHistory.last() != query)
+    m_searchHistory.append(query);
+  if (m_searchHistory.size() > 1000)
+    m_searchHistory.removeFirst();
+  m_searchHistoryIndex = m_searchHistory.size() - 1;
+  updateSearchHistoryActions();
 
+  QSettings settings;
+  QStringList suggestions = settings.value("searchSuggestions").toStringList();
+  suggestions.removeAll(query);
+  suggestions.prepend(query);
+  suggestions = suggestions.mid(0, AppState::instance()->searchHistoryLimit());
+  settings.setValue("searchSuggestions", suggestions);
   static_cast<QStringListModel *>(m_searchCompleter->model())
-      ->setStringList(history);
+      ->setStringList(suggestions);
+}
+
+void AppMainWindow::navigateSearchHistory(int direction) {
+  const int nextIndex = m_searchHistoryIndex + direction;
+  if (nextIndex < 0 || nextIndex >= m_searchHistory.size())
+    return;
+
+  m_searchHistoryIndex = nextIndex;
+  const QString query = m_searchHistory.at(nextIndex);
+  m_searchInput->setText(query);
+  AppState::instance()->setSearchQuery(query, 0, true);
+  updateSearchHistoryActions();
+}
+
+void AppMainWindow::showSearchHistoryMenu() {
+  m_searchHistoryMenu->clear();
+  for (int i = m_searchHistory.size() - 1; i >= 0; --i) {
+    QAction *action = m_searchHistoryMenu->addAction(m_searchHistory.at(i));
+    action->setData(i);
+    action->setCheckable(true);
+    action->setChecked(i == m_searchHistoryIndex);
+    connect(action, &QAction::triggered, this, [this, action]() {
+      const int index = action->data().toInt();
+      if (index >= 0 && index < m_searchHistory.size()) {
+        m_searchHistoryIndex = index;
+        const QString query = m_searchHistory.at(index);
+        m_searchInput->setText(query);
+        AppState::instance()->setSearchQuery(query, 0, true);
+        updateSearchHistoryActions();
+      }
+    });
+  }
+}
+
+void AppMainWindow::updateSearchHistoryActions() {
+  if (m_backSearchAction) {
+    m_backSearchAction->setEnabled(m_searchHistoryIndex > 0);
+    m_forwardSearchAction->setEnabled(
+        m_searchHistoryIndex >= 0 &&
+        m_searchHistoryIndex + 1 < m_searchHistory.size());
+  }
 }
 
 void AppMainWindow::onTabClicked(int index) {
@@ -668,7 +725,6 @@ void AppMainWindow::setTrackSort(const QString &field) {
   else
     q = (q.trimmed() + " sort:" + field).trimmed();
   state->setSearchQuery(q, 0);
-  refreshSearch();
   if (m_leftStack && m_leftStack->currentWidget() == m_tracksTab)
     m_trackListView->scrollToTop();
 }

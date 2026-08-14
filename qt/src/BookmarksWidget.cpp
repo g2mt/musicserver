@@ -20,7 +20,7 @@ BookmarksWidget::BookmarksWidget(QWidget *parent) : QWidget(parent) {
   AppState *state = AppState::instance();
   connect(state, &AppState::bookmarksChanged, this, &BookmarksWidget::rebuild);
   connect(state, &AppState::searchQueryChanged, this,
-          [this](const QString &query, int) {
+          [this](const QString &query, bool) {
             m_addButton->setEnabled(!query.isEmpty());
           });
 

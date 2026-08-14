@@ -18,6 +18,7 @@ class SettingsWidget;
 class TrackListView;
 class NativeAudioPlayer;
 class MusicPlayer;
+class QMenu;
 
 enum class TrackFetchAction { None, PlayAll, AddAll };
 
@@ -55,6 +56,9 @@ private:
   void updateWindowTitle(const QString &musicTitle);
   void fetchAllTracks(TrackFetchAction action);
   void updateSearchHistory(const QString &query);
+  void navigateSearchHistory(int direction);
+  void showSearchHistoryMenu();
+  void updateSearchHistoryActions();
   void startExternalDownload();
   void updateNormalization();
 
@@ -65,6 +69,11 @@ private:
   QToolBar *m_toolbar = nullptr;
   QLineEdit *m_searchInput = nullptr;
   QCompleter *m_searchCompleter = nullptr;
+  QAction *m_backSearchAction = nullptr;
+  QAction *m_forwardSearchAction = nullptr;
+  QMenu *m_searchHistoryMenu = nullptr;
+  QStringList m_searchHistory;
+  int m_searchHistoryIndex = -1;
   QAction *m_downloadAction = nullptr;
   QFutureWatcher<QJsonDocument> *m_externalDownloadWatcher = nullptr;
   QFutureWatcher<double> *m_loudnessWatcher = nullptr;

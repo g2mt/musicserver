@@ -131,14 +131,14 @@ void TrackListView::setupUi() {
         if (!track.album.isEmpty()) {
           goToMenu->addAction(QIcon::fromTheme("media-optical"), "Album", this,
                               [this, track]() {
-                                emit searchRequested(
+                                AppState::instance()->setSearchQuery(
                                     QString("album:\"%1\"").arg(track.album));
                               });
         }
         if (!track.artist.isEmpty()) {
           goToMenu->addAction(QIcon::fromTheme("user-identity"), "Artist", this,
                               [this, track]() {
-                                emit searchRequested(
+                                AppState::instance()->setSearchQuery(
                                     QString("artist:\"%1\"").arg(track.artist));
                               });
         }
@@ -180,7 +180,7 @@ void TrackListView::onForgetFinished() {
   }
 
   emit statusMessage(QString("Track \"%1\" forgotten").arg(m_forgetTrack.name));
-  emit searchRequested(AppState::instance()->searchQuery());
+  AppState::instance()->setSearchQuery(AppState::instance()->searchQuery());
   m_forgetTrack = TrackData();
 }
 

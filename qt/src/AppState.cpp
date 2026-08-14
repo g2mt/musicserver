@@ -102,12 +102,13 @@ QString AppState::resultSort() const { return m_resultSort; }
 bool AppState::resultDesc() const { return m_resultDesc; }
 int AppState::resultLimit() const { return m_resultLimit; }
 
-void AppState::setSearchQuery(const QString &query, int limit) {
+void AppState::setSearchQuery(const QString &query, int limit,
+                               bool historyNavigation) {
   if (m_searchQuery == query && m_resultLimit == limit)
     return;
   m_searchQuery = query;
   m_resultLimit = limit;
-  emit searchQueryChanged(query, limit);
+  emit searchQueryChanged(query, historyNavigation);
 }
 
 void AppState::setResultSort(const QString &sort, bool desc) {

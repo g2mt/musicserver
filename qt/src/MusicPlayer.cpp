@@ -347,13 +347,15 @@ void MusicPlayer::contextMenuEvent(QContextMenuEvent *event) {
     if (!track.album.isEmpty()) {
       goToMenu->addAction(
           QIcon::fromTheme("media-optical"), "Album", this, [this, track]() {
-            emit searchRequested(QString("album:\"%1\"").arg(track.album));
+            AppState::instance()->setSearchQuery(
+                QString("album:\"%1\"").arg(track.album));
           });
     }
     if (!track.artist.isEmpty()) {
       goToMenu->addAction(
           QIcon::fromTheme("user-identity"), "Artist", this, [this, track]() {
-            emit searchRequested(QString("artist:\"%1\"").arg(track.artist));
+            AppState::instance()->setSearchQuery(
+                QString("artist:\"%1\"").arg(track.artist));
           });
     }
     goToMenu->addAction(QIcon::fromTheme("folder"), "Path", this,
