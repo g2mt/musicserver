@@ -153,8 +153,6 @@ void AppState::setQueueIndex(int index) {
   emit queueIndexChanged(index);
 }
 
-void AppState::queueAdd(const TrackData &track) { queueAddAll({track}); }
-
 void AppState::queueAddAll(const QList<TrackData> &tracks) {
   if (tracks.isEmpty())
     return;

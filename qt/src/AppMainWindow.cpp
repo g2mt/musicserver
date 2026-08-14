@@ -339,8 +339,8 @@ void AppMainWindow::setupLeftPanel() {
           });
 
   connect(m_trackListView, &TrackListView::enqueueRequested, this,
-          [this](const TrackData &track) {
-            AppState::instance()->queueAdd(track);
+          [](const TrackData &track) {
+            AppState::instance()->queueAddAll({track});
           });
 
   QToolBar *tracksControls = new QToolBar();

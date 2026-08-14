@@ -83,7 +83,6 @@ public slots:
   // Queue
   void setQueueTracks(const QList<TrackData> &tracks);
   void setQueueIndex(int index);
-  void queueAdd(const TrackData &track);
   void queueAddAll(const QList<TrackData> &tracks);
   void queueRemove(int index);
   void queueClear();
