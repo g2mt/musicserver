@@ -25,6 +25,7 @@ public:
   void setHighlightedTrackId(const QString &id);
   QString highlightedTrackId() const;
   void scrollToTop();
+  void scrollToRow(int row);
 
 signals:
   void playRequested(const TrackData &track, int row);

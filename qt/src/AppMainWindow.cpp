@@ -148,6 +148,7 @@ AppMainWindow::AppMainWindow(QWidget *parent)
     const QString id =
         (index >= 0 && index < tracks.size()) ? tracks.at(index).id : QString();
     m_queueListView->setHighlightedTrackId(id);
+    m_queueListView->scrollToRow(index);
   });
 
 }

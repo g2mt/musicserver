@@ -210,3 +210,9 @@ QString TrackListView::highlightedTrackId() const {
 }
 
 void TrackListView::scrollToTop() { m_view->scrollToTop(); }
+
+void TrackListView::scrollToRow(int row) {
+  if (row < 0 || row >= m_model->rowCount())
+    return;
+  m_view->scrollTo(m_model->index(row), QAbstractItemView::EnsureVisible);
+}
