@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QMenu>
+#include <QPainter>
 #include <QPixmap>
 #include <QVBoxLayout>
 
@@ -126,15 +127,8 @@ void MusicPlayer::setupUi() {
   titleLayout->addWidget(m_trackLabel);
   titleLayout->addWidget(m_artistLabel);
 
-  m_badgeLabel = new QLabel();
-  m_badgeLabel->setStyleSheet(
-      "background: blue; color: white; border-radius: 4px; "
-      "padding: 1px 4px; font-size: xx-small;");
-  m_badgeLabel->hide();
-
   trackLayout->addWidget(m_trackCover);
   trackLayout->addWidget(titleBox);
-  trackLayout->addWidget(m_badgeLabel);
 
   controlsLayout->addWidget(trackInfo);
   controlsLayout->addStretch();
@@ -151,6 +145,7 @@ void MusicPlayer::setupUi() {
 
   m_repeatBtn = new QPushButton();
   m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
+  m_repeatBtn->setCheckable(true);
   m_repeatBtn->setFlat(true);
 
   controlsLayout->addWidget(m_volumeSlider);
@@ -160,6 +155,7 @@ void MusicPlayer::setupUi() {
   mainLayout->addLayout(controlsLayout);
 
   updateTrackFromState(TrackData());
+  updateRepeatFromState();
 
   // Connections
   connect(m_progressSlider, &QSlider::sliderPressed, this,
@@ -285,22 +281,34 @@ void MusicPlayer::updateVolumeFromState() {
 
 void MusicPlayer::updateRepeatFromState() {
   AppState *state = AppState::instance();
-  switch (state->repeat()) {
+  RepeatMode repeat = state->repeat();
+  QString tooltip;
+  switch (repeat) {
   case RepeatMode::None:
-    m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
-    m_badgeLabel->hide();
+    tooltip = "No Repeat";
     break;
   case RepeatMode::Track:
-    m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-single"));
-    m_badgeLabel->setText("Track");
-    m_badgeLabel->show();
+    tooltip = "Repeat Track";
     break;
   case RepeatMode::Queue:
-    m_repeatBtn->setIcon(QIcon::fromTheme("media-repeat-all"));
-    m_badgeLabel->setText("Queue");
-    m_badgeLabel->show();
+    tooltip = "Repeat Queue";
     break;
   }
+
+  QIcon baseIcon = QIcon::fromTheme("media-repeat-all");
+  QSize iconSize(48, 48);
+  const int badgeRadius = 24;
+  QPixmap icon = baseIcon.pixmap(iconSize);
+  if (repeat != RepeatMode::None) {
+    QPainter painter(&icon);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(QPen(Qt::white, 1));
+    painter.setBrush(QColor("#2196f3"));
+    painter.drawEllipse(iconSize.width() - badgeRadius, iconSize.height() - badgeRadius, badgeRadius, badgeRadius);
+  }
+  m_repeatBtn->setIcon(QIcon(icon));
+  m_repeatBtn->setChecked(repeat != RepeatMode::None);
+  m_repeatBtn->setToolTip(tooltip);
 }
 
 void MusicPlayer::updateQueueNavigation() {

@@ -53,7 +53,6 @@ private:
   QLabel *m_trackCover;
   QLabel *m_trackLabel;
   QLabel *m_artistLabel;
-  QLabel *m_badgeLabel;
 
   ApiClient *m_api = nullptr;
   QFutureWatcher<QByteArray> *m_coverWatcher = nullptr;
