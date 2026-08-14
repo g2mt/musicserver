@@ -513,7 +513,6 @@ void AppMainWindow::setupLayout() {
   QHBoxLayout *leftTopLayout = new QHBoxLayout(leftTopBar);
   leftTopLayout->setContentsMargins(0, 0, 0, 0);
   leftTopLayout->addWidget(m_leftTabBar);
-  leftTopLayout->addStretch();
   leftLayout->addWidget(leftTopBar);
 
   leftLayout->addWidget(m_leftStack);
