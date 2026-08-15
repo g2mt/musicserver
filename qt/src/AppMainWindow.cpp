@@ -78,6 +78,10 @@ AppMainWindow::AppMainWindow(QWidget *parent)
   setupLayout();
   setupShortcuts();
 
+  QSettings settings;
+  if (settings.contains("windowGeometry"))
+    restoreGeometry(settings.value("windowGeometry").toByteArray());
+
   // Status bar
   statusBar()->showMessage("Ready");
 
@@ -161,7 +165,11 @@ void AppMainWindow::updateWindowTitle(const QString &musicTitle) {
     setWindowTitle(QString("%1 — %2").arg(musicTitle, appTitle));
 }
 
-AppMainWindow::~AppMainWindow() { AppState::instance()->saveConfig(); }
+AppMainWindow::~AppMainWindow() {
+  QSettings settings;
+  settings.setValue("windowGeometry", saveGeometry());
+  AppState::instance()->saveConfig();
+}
 
 void AppMainWindow::setupAudio() {
   AppState *state = AppState::instance();
