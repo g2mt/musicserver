@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Version=1.0
-Name=Musicserver Qt
+Name=Music Server (Qt)
 Comment=Music server Qt client
 Exec=@MS_QT_EXEC@
 Icon=musicserver-qt
