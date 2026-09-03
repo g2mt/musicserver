@@ -154,7 +154,6 @@ AppMainWindow::AppMainWindow(QWidget *parent)
     m_queueListView->setHighlightedTrackId(id);
     m_queueListView->scrollToRow(index);
   });
-
 }
 
 void AppMainWindow::updateWindowTitle(const QString &musicTitle) {
@@ -540,7 +539,8 @@ void AppMainWindow::setupShortcuts() {
   connect(lShortcut, &QShortcut::activated, this,
           [state]() { state->setProgress(state->progress() + 10.0); });
 
-  auto *backShortcut = new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Left), this);
+  auto *backShortcut =
+      new QShortcut(QKeySequence(Qt::ALT | Qt::Key_Left), this);
   connect(backShortcut, &QShortcut::activated, this,
           [this]() { navigateSearchHistory(-1); });
 
@@ -571,8 +571,6 @@ void AppMainWindow::onSearchSubmit() {
 
 void AppMainWindow::updateSearchHistory(const QString &query) {
   qDebug() << "updateSearchHistory" << query;
-  if (query.isEmpty())
-    return;
 
   if (m_searchHistoryIndex + 1 < m_searchHistory.size())
     m_searchHistory = m_searchHistory.mid(0, m_searchHistoryIndex + 1);
@@ -628,9 +626,9 @@ void AppMainWindow::navigateToSearchHistory(int index) {
 void AppMainWindow::updateSearchHistoryActions() {
   if (m_backSearchAction) {
     m_backSearchAction->setEnabled(m_searchHistoryIndex > 0);
-    m_forwardSearchAction->setEnabled(
-        m_searchHistoryIndex >= 0 &&
-        m_searchHistoryIndex + 1 < m_searchHistory.size());
+    m_forwardSearchAction->setEnabled(m_searchHistoryIndex >= 0 &&
+                                      m_searchHistoryIndex + 1 <
+                                          m_searchHistory.size());
   }
 }
 
@@ -656,7 +654,8 @@ void AppMainWindow::updateDownloadAction() {
       AppState::instance()->serverProps()["config"].toObject();
   const bool hasDownloader = !config["media_downloader"].toString().isEmpty();
   const QString value = m_searchInput->text().trimmed();
-  const bool isUrl = value.startsWith("http://") || value.startsWith("https://");
+  const bool isUrl =
+      value.startsWith("http://") || value.startsWith("https://");
   if (m_downloadAction) {
     m_downloadAction->setVisible(hasDownloader && isUrl);
     m_downloadAction->setEnabled(hasDownloader && isUrl);
