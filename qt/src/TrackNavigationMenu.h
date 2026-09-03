@@ -1,7 +1,7 @@
 #pragma once
 
-#include <functional>
 #include <QStringList>
+#include <functional>
 
 class QMenu;
 class QObject;

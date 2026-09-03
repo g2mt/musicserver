@@ -109,5 +109,4 @@ private:
 
   // Music player bar (placeholder until Phase 3)
   MusicPlayer *m_musicPlayer = nullptr;
-
 };

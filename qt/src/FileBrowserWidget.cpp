@@ -6,22 +6,22 @@
 #include <QAbstractItemView>
 #include <QDebug>
 #include <QFrame>
-#include <QLayout>
-#include <QLayoutItem>
-#include <QPushButton>
-#include <functional>
 #include <QIcon>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLayout>
+#include <QLayoutItem>
 #include <QMenu>
+#include <QPushButton>
 #include <QSize>
 #include <QTimer>
 #include <QToolBar>
 #include <QTreeWidgetItem>
 #include <QUrl>
-#include <utility>
 #include <QVBoxLayout>
+#include <functional>
+#include <utility>
 
 static QIcon themeIcon(const QString &name, const QString &fallback) {
   QIcon icon = QIcon::fromTheme(name);
@@ -32,7 +32,8 @@ static QIcon themeIcon(const QString &name, const QString &fallback) {
 
 class FileBrowserLocationBarLayout : public QLayout {
 public:
-  explicit FileBrowserLocationBarLayout(QWidget *parent = nullptr) : QLayout(parent) {}
+  explicit FileBrowserLocationBarLayout(QWidget *parent = nullptr)
+      : QLayout(parent) {}
 
   ~FileBrowserLocationBarLayout() override {
     while (QLayoutItem *item = takeAt(0))
@@ -46,7 +47,7 @@ public:
   }
   QLayoutItem *takeAt(int index) override {
     return index >= 0 && index < m_items.size() ? m_items.takeAt(index)
-                                                 : nullptr;
+                                                : nullptr;
   }
   bool hasHeightForWidth() const override { return true; }
   int heightForWidth(int width) const override { return doLayout(width, true); }
@@ -99,17 +100,16 @@ private:
 class FileBrowserLocationBar : public QFrame {
 public:
   explicit FileBrowserLocationBar(QWidget *parent = nullptr) : QFrame(parent) {
-    setStyleSheet(QStringLiteral(
-        "FileBrowserLocationBar {"
-        "  border: 1px solid palette(mid);"
-        "  background: palette(base);"
-        "}"
-        "QPushButton {"
-        "  padding: 2px 4px;"
-        "}"
-        "QPushButton:hover {"
-        "  background: palette(alternate-base);"
-        "}"));
+    setStyleSheet(QStringLiteral("FileBrowserLocationBar {"
+                                 "  border: 1px solid palette(mid);"
+                                 "  background: palette(base);"
+                                 "}"
+                                 "QPushButton {"
+                                 "  padding: 2px 4px;"
+                                 "}"
+                                 "QPushButton:hover {"
+                                 "  background: palette(alternate-base);"
+                                 "}"));
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_layout = new FileBrowserLocationBarLayout(this);
@@ -146,11 +146,10 @@ private:
     button->setToolTip(text);
     button->setCursor(Qt::PointingHandCursor);
     button->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-    connect(button, &QPushButton::clicked, this,
-            [this, index]() {
-              if (m_pathClicked)
-                m_pathClicked(index);
-            });
+    connect(button, &QPushButton::clicked, this, [this, index]() {
+      if (m_pathClicked)
+        m_pathClicked(index);
+    });
     m_layout->addWidget(button);
   }
 

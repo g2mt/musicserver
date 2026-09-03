@@ -31,9 +31,9 @@ MusicPlayer::MusicPlayer(QWidget *parent)
             QByteArray bytes = m_coverWatcher->result();
             QPixmap pix;
             if (!bytes.isEmpty() && pix.loadFromData(bytes)) {
-              m_trackCover->setPixmap(
-                  pix.scaled(m_iconSize, m_iconSize, Qt::KeepAspectRatio,
-                             Qt::SmoothTransformation));
+              m_trackCover->setPixmap(pix.scaled(m_iconSize, m_iconSize,
+                                                 Qt::KeepAspectRatio,
+                                                 Qt::SmoothTransformation));
             } else {
               m_trackCover->setPixmap(QIcon::fromTheme("audio-x-generic")
                                           .pixmap(m_iconSize, m_iconSize));
@@ -293,7 +293,9 @@ void MusicPlayer::updateRepeatFromState() {
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(QPen(Qt::white, 1));
     painter.setBrush(QColor("#2196f3"));
-    painter.drawEllipse(iconSize.width() - badgeRadius, iconSize.height() - badgeRadius, badgeRadius, badgeRadius);
+    painter.drawEllipse(iconSize.width() - badgeRadius,
+                        iconSize.height() - badgeRadius, badgeRadius,
+                        badgeRadius);
   }
   m_repeatBtn->setIcon(QIcon(icon));
   m_repeatBtn->setChecked(repeat != RepeatMode::None);

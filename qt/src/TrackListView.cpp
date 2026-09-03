@@ -109,7 +109,8 @@ void TrackListView::setupUi() {
           menu.addAction(QIcon::fromTheme("list-add"), "Add to Queue", this,
                          [this, selected]() {
                            for (const QModelIndex &index : selected)
-                             emit enqueueRequested(m_model->tracks().at(index.row()));
+                             emit enqueueRequested(
+                                 m_model->tracks().at(index.row()));
                          });
         } else {
           menu.addAction("Remove", this, [this, selected]() {
@@ -117,16 +118,16 @@ void TrackListView::setupUi() {
               emit unqueueRequested(it->row());
           });
         }
-        menu.addAction(QIcon::fromTheme("edit-copy"), "Copy Info", this,
-                       [this, selected]() {
-                         QStringList info;
-                         for (const QModelIndex &index : selected) {
-                           const TrackData &track = m_model->tracks().at(index.row());
-                           info.append(QString("%1 - %2")
-                                           .arg(track.name, track.artist));
-                         }
-                         QApplication::clipboard()->setText(info.join("\n"));
-                       });
+        menu.addAction(
+            QIcon::fromTheme("edit-copy"), "Copy Info", this,
+            [this, selected]() {
+              QStringList info;
+              for (const QModelIndex &index : selected) {
+                const TrackData &track = m_model->tracks().at(index.row());
+                info.append(QString("%1 - %2").arg(track.name, track.artist));
+              }
+              QApplication::clipboard()->setText(info.join("\n"));
+            });
 
         addTrackNavigationActions(
             menu, this, track, [](const QStringList &path) {

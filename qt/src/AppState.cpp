@@ -103,7 +103,7 @@ bool AppState::resultDesc() const { return m_resultDesc; }
 int AppState::resultLimit() const { return m_resultLimit; }
 
 void AppState::setSearchQuery(const QString &query, int limit,
-                               bool historyNavigation) {
+                              bool historyNavigation) {
   if (m_searchQuery == query && m_resultLimit == limit)
     return;
   m_searchQuery = query;

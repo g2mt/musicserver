@@ -6,9 +6,9 @@
 #include <QIcon>
 #include <QMenu>
 
-void addTrackNavigationActions(QMenu &menu, QObject *receiver,
-                               const TrackData &track,
-                               std::function<void(const QStringList &)> onPath) {
+void addTrackNavigationActions(
+    QMenu &menu, QObject *receiver, const TrackData &track,
+    std::function<void(const QStringList &)> onPath) {
   QMenu *goToMenu = menu.addMenu("Go to...");
   if (!track.album.isEmpty()) {
     goToMenu->addAction(QIcon::fromTheme("media-optical"), "Album", receiver,
