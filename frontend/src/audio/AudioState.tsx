@@ -57,6 +57,7 @@ export function useAudio({
   const repeated = useRef(false);
 
   const audio = useMemo(() => new apiAudio(), []);
+  const restoredNativePath = useRef<string | null>(null);
 
   const url = useMemo(() => {
     if (!currentTrack) return null;
@@ -74,12 +75,19 @@ export function useAudio({
       setIsPlaying(false);
       return;
     }
-    console.log(`Playing ${url}`);
-    audio.src = url;
-    audio.currentTime = 0;
-    setProgress(0);
-    setDuration(audio.duration);
-    setIsPlaying(true);
+
+    const nativeTrackAlreadyLoaded =
+      usesAudioPath && restoredNativePath.current === currentTrack?.path;
+    if (nativeTrackAlreadyLoaded) {
+      restoredNativePath.current = null;
+    } else {
+      console.log(`Playing ${url}`);
+      audio.src = url;
+      audio.currentTime = 0;
+      setProgress(0);
+      setDuration(audio.duration);
+      setIsPlaying(true);
+    }
     ended.current = false;
     repeated.current = false;
   }, [url]);
@@ -179,10 +187,14 @@ export function useAudio({
     ended,
     repeated,
     loadSerializedState: async (state: SerializedAudioState) => {
+      restoredNativePath.current = null;
       if (state.path !== "") {
         const data = await fetchAPI(`/track/:by-path/${encodeURI(state.path)}`);
         if (data && !data.error) {
-          if (data.path !== currentTrack?.path) setCurrentTrack(data);
+          if (data.path !== currentTrack?.path) {
+            restoredNativePath.current = data.path;
+            setCurrentTrack(data);
+          }
         } else {
           console.error(`Invalid loadSerializedState: ${data}`);
           return;

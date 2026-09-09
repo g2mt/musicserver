@@ -112,6 +112,7 @@ public class NativeAudioBridge {
 
 			@Override
 			public void onSeekTo(long pos) {
+				Log.d(TAG, "onSeekTo: position=" + pos);
 				if (mediaPlayer != null) {
 					mediaPlayer.seekTo((int) pos);
 					updatePlaybackState();
@@ -343,16 +344,14 @@ public class NativeAudioBridge {
 		});
 
 		currentInstanceId++;
-
-		if (mediaPlayer != null) {
-			mediaPlayer.stop();
-			mediaPlayer.release();
-			mediaPlayer = null;
-		}
-
-		mediaPlayer = new MediaPlayer();
-
 		final int instanceId = currentInstanceId;
+
+		if (mediaPlayer == null) {
+			Log.d(TAG, "createInstance: creating player for instance=" + instanceId);
+			mediaPlayer = new MediaPlayer();
+		} else {
+			Log.d(TAG, "createInstance: preserving player for instance=" + instanceId);
+		}
 
 		mediaPlayer.setOnInfoListener((mp, what, extra) -> {
 			fireEvent(instanceId, "timeupdate");
@@ -407,6 +406,7 @@ public class NativeAudioBridge {
 	@JavascriptInterface
 	public void setCurrentTime(int instanceId, float time) {
 		if (!isActive(instanceId)) return;
+		Log.d(TAG, "setCurrentTime: instance=" + instanceId + ", time=" + time);
 		mediaPlayer.seekTo((int)(time * 1000));
 		updatePlaybackState();
 	}
@@ -594,7 +594,9 @@ public class NativeAudioBridge {
 			e.printStackTrace();
 		}
 
+		String serialized = result.toString();
+		Log.d(TAG, "loadAudioState: " + serialized);
 		queue = null; // Unload the queue since the function triggers when WebView is unsuspended
-		return result.toString();
+		return serialized;
 	}
 }
