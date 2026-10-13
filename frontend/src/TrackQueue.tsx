@@ -72,7 +72,7 @@ export function useTrackQueue(as: AudioState): TrackQueue {
     },
     remove: (toRemove?: number) => {
       if (typeof toRemove === "number") {
-        setTracks((prev) => prev.filter((_, i) => i !== index));
+        setTracks((prev) => prev.filter((_, i) => i !== toRemove));
         if (index !== null && index < toRemove) {
           setIndex((prev) => (prev ?? 1) - 1);
         } else if (index === toRemove) {
