@@ -87,9 +87,25 @@ export function SettingsTab() {
           />
           <label htmlFor="setting-normalize">Normalize audio</label>
         </div>
+        {import.meta.env.MS_ANDROID && (
+          <div>
+            <input
+              type="checkbox"
+              id="setting-stop-headphone-unplug"
+              checked={c.stopOnHeadphoneUnplug}
+              onChange={() => {
+                c.setStopOnHeadphoneUnplug(!c.stopOnHeadphoneUnplug);
+                setUnsaved(true);
+              }}
+            />
+            <label htmlFor="setting-stop-headphone-unplug">
+              Stop when headphone jack is unplugged
+            </label>
+          </div>
+        )}
       </Section>
     ),
-    [c.as.amplification, c.as.normalize],
+    [c.as.amplification, c.as.normalize, c.stopOnHeadphoneUnplug],
   );
 
   const settingsSection = useMemo(

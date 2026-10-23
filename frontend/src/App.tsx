@@ -123,6 +123,7 @@ export function App() {
   [c.fbPath, c.setFbPath] = useState<string[]>([]);
   [c.targetNormalizationDbs, c.setTargetNormalizationDbs] = useState<number>(0);
   [c.maxNormalizationDbs, c.setMaxNormalizationDbs] = useState<number>(0);
+  [c.stopOnHeadphoneUnplug, c.setStopOnHeadphoneUnplug] = useState(false);
   [c.bookmarks, c.setBookmarks] = useState<Bookmark[]>([]);
 
   useEffect(() => {
@@ -421,6 +422,14 @@ export function App() {
   useEffect(() => {
     mergeConfig(c);
   }, []);
+
+  // Keep the native side in sync with the "stop when headphone jack is
+  // unplugged" setting (Android only, no-op on the web version)
+  useEffect(() => {
+    window._native_audio_bridge?.setStopOnHeadphoneUnplug(
+      c.stopOnHeadphoneUnplug,
+    );
+  }, [c.stopOnHeadphoneUnplug]);
 
   useEffect(() => {
     function onBeforeUnload(e: BeforeUnloadEvent) {

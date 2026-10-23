@@ -18,6 +18,7 @@ export default defineConfig({
   define: {
     'import.meta.env.NO_PROGRESS_SUPPORT': true,
     'import.meta.env.USE_NATIVE_TOAST': true,
+    'import.meta.env.MS_ANDROID': true,
   },
   resolve: resolveOptions,
 });

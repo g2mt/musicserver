@@ -12,6 +12,7 @@ declare global {
     setVolume(instanceId: number, volume: number): void;
     setAmplification(instanceId: number, decibels: number): void;
     loudness(instanceId: number): number;
+    setStopOnHeadphoneUnplug(enabled: boolean): void;
   }
   interface Window {
     _native_audio_bridge?: NativeAudioBridge;

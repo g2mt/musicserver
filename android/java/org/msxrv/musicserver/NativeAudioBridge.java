@@ -3,9 +3,13 @@ package org.msxrv.musicserver;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.media.MediaCodec;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
@@ -46,6 +50,11 @@ public class NativeAudioBridge {
 	private MediaSession mediaSession;
 	private PlaybackState playbackState;
 	private String currentFilePath;
+
+	// "Stop when headphone jack is unplugged" setting, kept in sync with JS
+	private volatile boolean stopOnHeadphoneUnplug = false;
+	private BroadcastReceiver headphoneUnplugReceiver;
+	private Context appContext;
 
 	public MediaSession getMediaSession() {
 		return mediaSession;
@@ -126,9 +135,27 @@ public class NativeAudioBridge {
 				}
 			}
 		});
+
+		// Stop playback when the headphone jack is unplugged
+		// (gated by the "stop when headphone jack is unplugged" setting)
+		appContext = activity.getApplicationContext();
+		IntentFilter noisyFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+		headphoneUnplugReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if (!stopOnHeadphoneUnplug) return;
+				Log.d(TAG, "Headphone unplugged, pausing playback");
+				pauseForHeadphoneUnplug();
+			}
+		};
+		appContext.registerReceiver(headphoneUnplugReceiver, noisyFilter, Context.RECEIVER_NOT_EXPORTED);
 	}
 
 	public void terminate() {
+		if (headphoneUnplugReceiver != null) {
+			appContext.unregisterReceiver(headphoneUnplugReceiver);
+			headphoneUnplugReceiver = null;
+		}
 		if (loudnessEnhancer != null) {
 			loudnessEnhancer.release();
 			loudnessEnhancer = null;
@@ -246,6 +273,20 @@ public class NativeAudioBridge {
 		if (timeUpdateRunnable != null) {
 			mainHandler.removeCallbacks(timeUpdateRunnable);
 			timeUpdateRunnable = null;
+		}
+	}
+
+	// Pauses playback when the headphone jack is unplugged. While the webview is
+	// suspended (queue != null) the player is paused directly, otherwise the JS
+	// side is notified so its state stays in sync.
+	private void pauseForHeadphoneUnplug() {
+		if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+			cancelTimeUpdates();
+			mediaPlayer.pause();
+			updatePlaybackState();
+		}
+		if (queue == null && webView != null) {
+			webView.evaluateJavascript("window._setIsPlaying(false)", null);
 		}
 	}
 
@@ -427,6 +468,12 @@ public class NativeAudioBridge {
 	public void setVolume(int instanceId, float volume) {
 		if (!isActive(instanceId)) return;
 		mediaPlayer.setVolume(volume, volume);
+	}
+
+	@JavascriptInterface
+	public void setStopOnHeadphoneUnplug(boolean enabled) {
+		Log.d(TAG, "setStopOnHeadphoneUnplug: " + enabled);
+		stopOnHeadphoneUnplug = enabled;
 	}
 
 	private native long ebur128Init(int channels, int samplerate);

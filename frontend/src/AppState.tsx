@@ -51,6 +51,7 @@ export const AppStateSchema = z.object({
   showTracksListOnTabChange: z.boolean().default(false),
   targetNormalizationDbs: z.number().default(0),
   maxNormalizationDbs: z.number().default(8),
+  stopOnHeadphoneUnplug: z.boolean().default(false),
   bookmarks: z
     .array(
       z.object({
@@ -99,6 +100,7 @@ export interface AppState extends AppStateData {
   setShowBlurredCover: Dispatch<SetStateAction<boolean>>;
   setTargetNormalizationDbs: Dispatch<SetStateAction<number>>;
   setMaxNormalizationDbs: Dispatch<SetStateAction<number>>;
+  setStopOnHeadphoneUnplug: Dispatch<SetStateAction<boolean>>;
 
   // server props
   props: ServerConfig | null;
@@ -165,6 +167,8 @@ export function mergeConfig(dest: AppState) {
         dest.setTargetNormalizationDbs(config.targetNormalizationDbs);
       if (config.maxNormalizationDbs !== undefined)
         dest.setMaxNormalizationDbs(config.maxNormalizationDbs);
+      if (config.stopOnHeadphoneUnplug !== undefined)
+        dest.setStopOnHeadphoneUnplug(config.stopOnHeadphoneUnplug);
       if (config.bookmarks !== undefined) dest.setBookmarks(config.bookmarks);
     } catch (e: any) {
       toast.error(
@@ -189,6 +193,7 @@ export function saveConfig(state: AppState) {
     showTracksListOnTabChange: state.showTracksListOnTabChange,
     targetNormalizationDbs: state.targetNormalizationDbs,
     maxNormalizationDbs: state.maxNormalizationDbs,
+    stopOnHeadphoneUnplug: state.stopOnHeadphoneUnplug,
     bookmarks: state.bookmarks,
   };
   Settings.setItem(CONFIG_KEY, JSON.stringify(config));
