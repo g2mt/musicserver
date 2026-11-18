@@ -131,6 +131,8 @@ public:
             [this](int, int) { updateNavigationProperties(); });
     connect(state, &AppState::queueIndexChanged, this,
             [this](int) { updateNavigationProperties(); });
+    connect(state, &AppState::searchTracksChanged, this,
+            [this](const QList<TrackData> &) { updateNavigationProperties(); });
   }
 
   bool canControl() const { return true; }

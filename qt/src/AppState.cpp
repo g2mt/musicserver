@@ -1,4 +1,5 @@
 #include "AppState.h"
+#include "TrackListModel.h"
 
 #include <QDebug>
 #include <QJsonArray>
@@ -9,7 +10,20 @@
 
 AppState *AppState::s_instance = nullptr;
 
-AppState::AppState(QObject *parent) : QObject(parent) {}
+static int findTrackIndex(const QList<TrackData> &tracks,
+                          const TrackData &currentTrack) {
+  for (int i = 0; i < tracks.size(); ++i) {
+    const bool idMatches = !currentTrack.id.isEmpty() &&
+                           tracks[i].id == currentTrack.id;
+    if (idMatches)
+      return i;
+  }
+  return -1;
+}
+
+AppState::AppState(QObject *parent) : QObject(parent) {
+  m_searchTrackModel = new TrackListModel(this);
+}
 
 AppState *AppState::instance() {
   if (!s_instance)
@@ -101,6 +115,12 @@ QString AppState::searchQuery() const { return m_searchQuery; }
 QString AppState::resultSort() const { return m_resultSort; }
 bool AppState::resultDesc() const { return m_resultDesc; }
 int AppState::resultLimit() const { return m_resultLimit; }
+const QList<TrackData> &AppState::searchTracks() const {
+  return m_searchTrackModel->tracks();
+}
+TrackListModel *AppState::searchTrackModel() const {
+  return m_searchTrackModel;
+}
 
 void AppState::setSearchQuery(const QString &query, int limit,
                               bool historyNavigation) {
@@ -126,6 +146,11 @@ void AppState::setResultLimit(int limit) {
   emit resultLimitChanged(limit);
 }
 
+void AppState::setSearchTracks(const QList<TrackData> &tracks) {
+  m_searchTrackModel->setTracks(tracks);
+  emit searchTracksChanged(m_searchTrackModel->tracks());
+}
+
 // --- Queue ---
 
 QList<TrackData> AppState::queueTracks() const { return m_queueTracks; }
@@ -134,12 +159,20 @@ int AppState::queueIndex() const { return m_queueIndex; }
 bool AppState::canNext() const {
   if (m_repeat == RepeatMode::Track)
     return !m_currentTrack.id.isEmpty() || !m_currentTrack.path.isEmpty();
+  if (m_queueTracks.isEmpty()) {
+    const QList<TrackData> &tracks = m_searchTrackModel->tracks();
+    const int searchIndex = findTrackIndex(tracks, m_currentTrack);
+    return searchIndex >= 0 && searchIndex + 1 < tracks.size();
+  }
   const int nextIdx = m_queueIndex + 1;
-  return !m_queueTracks.isEmpty() &&
-         (nextIdx < m_queueTracks.size() || m_repeat == RepeatMode::Queue);
+  return nextIdx < m_queueTracks.size() || m_repeat == RepeatMode::Queue;
 }
 
-bool AppState::canPrev() const { return m_queueIndex > 0; }
+bool AppState::canPrev() const {
+  if (!m_queueTracks.isEmpty())
+    return m_queueIndex > 0;
+  return findTrackIndex(m_searchTrackModel->tracks(), m_currentTrack) > 0;
+}
 
 void AppState::setQueueTracks(const QList<TrackData> &tracks) {
   m_queueTracks = tracks;
@@ -242,6 +275,17 @@ void AppState::queueNext() {
     return;
   }
 
+  if (m_queueTracks.isEmpty()) {
+    const QList<TrackData> &tracks = m_searchTrackModel->tracks();
+    const int searchIndex = findTrackIndex(tracks, m_currentTrack);
+    const int nextSearchIndex = searchIndex + 1;
+    if (searchIndex >= 0 && nextSearchIndex < tracks.size())
+      setCurrentTrack(tracks[nextSearchIndex]);
+    else
+      setIsPlaying(false);
+    return;
+  }
+
   int nextIdx = m_queueIndex + 1;
   if (nextIdx >= m_queueTracks.size()) {
     if (m_repeat == RepeatMode::Queue && !m_queueTracks.isEmpty()) {
@@ -262,6 +306,14 @@ void AppState::queueNext() {
 }
 
 void AppState::queuePrev() {
+  if (m_queueTracks.isEmpty()) {
+    const QList<TrackData> &tracks = m_searchTrackModel->tracks();
+    const int searchIndex = findTrackIndex(tracks, m_currentTrack);
+    if (searchIndex > 0)
+      setCurrentTrack(tracks[searchIndex - 1]);
+    return;
+  }
+
   const int prevIdx = m_queueIndex - 1;
   if (prevIdx < 0 || prevIdx >= m_queueTracks.size())
     return;

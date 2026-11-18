@@ -16,7 +16,8 @@ class TrackListView : public QWidget {
 public:
   enum class Action { Enqueue, Unqueue };
 
-  explicit TrackListView(Action action, QWidget *parent = nullptr);
+  explicit TrackListView(Action action, QWidget *parent = nullptr,
+                         TrackListModel *model = nullptr);
 
   void setTracks(const QList<TrackData> &tracks);
   void insertTracks(const QList<TrackData> &tracks, int startIndex);

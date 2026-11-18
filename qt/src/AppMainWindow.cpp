@@ -333,7 +333,8 @@ void AppMainWindow::setupLeftPanel() {
   QVBoxLayout *tracksLayout = new QVBoxLayout(m_tracksTab);
   tracksLayout->setContentsMargins(0, 0, 0, 0);
 
-  m_trackListView = new TrackListView(TrackListView::Action::Enqueue, this);
+  m_trackListView = new TrackListView(TrackListView::Action::Enqueue, this,
+                                      AppState::instance()->searchTrackModel());
   connect(
       m_trackListView, &TrackListView::statusMessage, this,
       [this](const QString &message) { statusBar()->showMessage(message); });
@@ -696,7 +697,7 @@ void AppMainWindow::onSearchResultFinished() {
 
   qDebug() << "onSearchResultFinished: loaded" << tracks.size() << "tracks";
 
-  m_trackListView->setTracks(tracks);
+  AppState::instance()->setSearchTracks(tracks);
   AppState::instance()->setHighlightedTrackId(QString());
   statusBar()->showMessage(QString("Loaded %1 tracks").arg(tracks.size()));
 

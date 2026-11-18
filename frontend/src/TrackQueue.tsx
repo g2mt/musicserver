@@ -36,7 +36,15 @@ export interface TrackQueue {
   loadSerializedState: (state: SerializedTrackQueue) => void;
 }
 
-export function useTrackQueue(as: AudioState): TrackQueue {
+function findTrackIndex(tracks: TrackData[], currentTrack: TrackData | null) {
+  if (!currentTrack) return -1;
+  return tracks.findIndex(track => currentTrack.id !== "" && track.id === currentTrack.id);
+}
+
+export function useTrackQueue(
+  as: AudioState,
+  searchTracks: TrackData[],
+): TrackQueue {
   const [tracks, setTracks] = useState<TrackData[]>([]);
   const [index, setIndex] = useState<number | null>(null);
   const [trackNavigated, setTrackNavigated] = useState(false);
@@ -84,30 +92,46 @@ export function useTrackQueue(as: AudioState): TrackQueue {
       }
     },
     canPrev: () => {
-      const prevIndex = (index ?? 0) - 1;
-      return tracks.length > 0 && prevIndex >= 0;
+      if (tracks.length > 0) {
+        const prevIndex = (index ?? 0) - 1;
+        return prevIndex >= 0;
+      }
+      return findTrackIndex(searchTracks, as.currentTrack) > 0;
     },
     prev: () => {
-      const prevIndex = (index ?? 0) - 1;
-      if (tracks.length > 0 && prevIndex >= 0) {
-        setTrackNavigated(true);
-        setIndex(prevIndex);
-        as.setCurrentTrack(tracks[prevIndex]);
+      if (tracks.length > 0) {
+        const prevIndex = (index ?? 0) - 1;
+        if (prevIndex >= 0) {
+          setTrackNavigated(true);
+          setIndex(prevIndex);
+          as.setCurrentTrack(tracks[prevIndex]);
+        }
+      } else {
+        const searchIndex = findTrackIndex(searchTracks, as.currentTrack);
+        if (searchIndex > 0) {
+          as.setCurrentTrack(searchTracks[searchIndex - 1]);
+        }
       }
     },
     canNext: () => {
       if (repeat === "track") return as.currentTrack !== null;
       const nextIndex = (index ?? -1) + 1;
-      return (
-        tracks.length > 0 && (nextIndex < tracks.length || repeat === "queue")
-      );
+      if (tracks.length > 0) {
+        return nextIndex < tracks.length || repeat === "queue";
+      }
+      const searchIndex = findTrackIndex(searchTracks, as.currentTrack);
+      return searchIndex >= 0 && searchIndex + 1 < searchTracks.length;
     },
     next: () => {
       const nextIndex = (index ?? -1) + 1;
       if (repeat === "track") {
         setTrackNavigated(true);
         as.repeated.current = true;
-      } else if (repeat === "queue" && nextIndex >= tracks.length) {
+      } else if (
+        repeat === "queue" &&
+        tracks.length > 0 &&
+        nextIndex >= tracks.length
+      ) {
         setTrackNavigated(true);
         setIndex(0);
         as.setCurrentTrack(tracks[0]);
@@ -115,6 +139,13 @@ export function useTrackQueue(as: AudioState): TrackQueue {
         setTrackNavigated(true);
         setIndex(nextIndex);
         as.setCurrentTrack(tracks[nextIndex]);
+      } else if (tracks.length === 0) {
+        const searchIndex = findTrackIndex(searchTracks, as.currentTrack);
+        if (searchIndex >= 0 && searchIndex + 1 < searchTracks.length) {
+          as.setCurrentTrack(searchTracks[searchIndex + 1]);
+        } else if (index !== null) {
+          setIndex(null);
+        }
       } else {
         if (index !== null) {
           setIndex(null);

@@ -10,6 +10,8 @@
 #include "Bookmark.h"
 #include "TrackData.h"
 
+class TrackListModel;
+
 enum class LeftTab { Tracks, Bookmarks, Files, Settings };
 enum class RepeatMode { None, Track, Queue };
 
@@ -34,6 +36,8 @@ public:
   QString resultSort() const;
   bool resultDesc() const;
   int resultLimit() const;
+  const QList<TrackData> &searchTracks() const;
+  TrackListModel *searchTrackModel() const;
 
   // Queue state
   QList<TrackData> queueTracks() const;
@@ -79,6 +83,7 @@ public slots:
                       bool historyNavigation = false);
   void setResultSort(const QString &sort, bool desc);
   void setResultLimit(int limit);
+  void setSearchTracks(const QList<TrackData> &tracks);
 
   // Queue
   void setQueueTracks(const QList<TrackData> &tracks);
@@ -132,6 +137,7 @@ signals:
   void searchQueryChanged(const QString &query, bool historyNavigation);
   void resultSortChanged(const QString &sort, bool desc);
   void resultLimitChanged(int limit);
+  void searchTracksChanged(const QList<TrackData> &tracks);
 
   // Queue
   void queueTracksChanged(const QList<TrackData> &tracks);
@@ -178,6 +184,7 @@ private:
   QString m_resultSort;
   bool m_resultDesc = false;
   int m_resultLimit = -1;
+  TrackListModel *m_searchTrackModel = nullptr;
 
   // Queue
   QList<TrackData> m_queueTracks;

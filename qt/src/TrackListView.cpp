@@ -23,8 +23,9 @@
 #include <QVBoxLayout>
 #include <QVariant>
 
-TrackListView::TrackListView(Action action, QWidget *parent)
-    : QWidget(parent), m_action(action) {
+TrackListView::TrackListView(Action action, QWidget *parent,
+                             TrackListModel *model)
+    : QWidget(parent), m_action(action), m_model(model) {
   setupUi();
 
   m_forgetWatcher = new QFutureWatcher<QJsonDocument>(this);
@@ -58,7 +59,8 @@ void TrackListView::setupUi() {
   }
 
   m_view = new QListView(this);
-  m_model = new TrackListModel(this);
+  if (!m_model)
+    m_model = new TrackListModel(this);
   m_view->setModel(m_model);
 
   TrackDelegate *delegate = new TrackDelegate(this);

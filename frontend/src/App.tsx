@@ -248,7 +248,7 @@ export function App() {
   });
 
   // Track queue
-  c.queue = useTrackQueue(c.as);
+  c.queue = useTrackQueue(c.as, fullTracks);
 
   useEffect(() => {
     window._reloadFromSuspend = () => {
