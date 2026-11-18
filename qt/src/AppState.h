@@ -36,7 +36,6 @@ public:
   QString resultSort() const;
   bool resultDesc() const;
   int resultLimit() const;
-  const QList<TrackData> &searchTracks() const;
   TrackListModel *searchTrackModel() const;
 
   // Queue state

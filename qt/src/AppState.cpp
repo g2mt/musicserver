@@ -115,9 +115,6 @@ QString AppState::searchQuery() const { return m_searchQuery; }
 QString AppState::resultSort() const { return m_resultSort; }
 bool AppState::resultDesc() const { return m_resultDesc; }
 int AppState::resultLimit() const { return m_resultLimit; }
-const QList<TrackData> &AppState::searchTracks() const {
-  return m_searchTrackModel->tracks();
-}
 TrackListModel *AppState::searchTrackModel() const {
   return m_searchTrackModel;
 }
