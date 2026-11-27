@@ -29,6 +29,8 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 
 	var beforeId string
 	var afterId string
+	hasCoverFilter := false
+	coverFilterHasArt := false
 
 	// Sorting variables
 	sortColumn := "id"
@@ -81,6 +83,11 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 				if op.Value == "1" {
 					sortDesc = true
 				}
+			case "cover":
+				if op.Value == "0" || op.Value == "1" {
+					hasCoverFilter = true
+					coverFilterHasArt = op.Value == "1"
+				}
 			}
 		}
 	}
@@ -106,7 +113,7 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 	}
 
 	var limitClause string
-	if limit > 0 {
+	if limit > 0 && !hasCoverFilter {
 		limitClause = fmt.Sprintf("LIMIT %d", limit)
 	}
 
@@ -196,6 +203,33 @@ func (i *Interface) GetTracks(search *searchparser.Result, limit int) (TrackList
 			return TrackListResult{}, err
 		}
 		tracks = append(tracks, track)
+	}
+	if err := rows.Err(); err != nil {
+		return TrackListResult{}, err
+	}
+
+	if hasCoverFilter {
+		tracksWithCover := make([]schema.Track, 0, len(tracks))
+		for _, track := range tracks {
+			absPath := filepath.Join(i.config.DataPath, track.Path)
+			cover, _, err := i.getTrackCoverByPath(absPath)
+			if err != nil {
+				slog.Debug("Unable to check track cover", "track", track.LongID, "err", err)
+				continue
+			}
+			if (cover != nil) == coverFilterHasArt {
+				tracksWithCover = append(tracksWithCover, track)
+			}
+		}
+		tracks = tracksWithCover
+
+		if limit > 0 {
+			if beforeId != "" && len(tracks) > limit {
+				tracks = tracks[len(tracks)-limit:]
+			} else if beforeId == "" && len(tracks) > limit {
+				tracks = tracks[:limit]
+			}
+		}
 	}
 
 	// Prepare filters map for response
@@ -364,7 +398,10 @@ func (i *Interface) GetTrackCover(id string) ([]byte, string, error) {
 	}
 
 	absPath := filepath.Join(i.config.DataPath, relPath)
+	return i.getTrackCoverByPath(absPath)
+}
 
+func (i *Interface) getTrackCoverByPath(absPath string) ([]byte, string, error) {
 	// Check cache first
 	cachedData, mimeType, cErr := i.getTrackCoverCached(absPath)
 	if cachedData != nil {

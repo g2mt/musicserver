@@ -161,6 +161,7 @@ If the `q` parameter is provided, then the tracks will be filtered based on the 
   - `album`: album title contains the value specified
   - `artist`: artist name contains the value specified
   - `path`: path of track file starts with the specified directory
+  - `cover`: if set to `1`, then only tracks with cover art will be shown
 
 The query `q` supports sorting through the filters:
 
